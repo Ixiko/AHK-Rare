@@ -1,5 +1,5 @@
 ï»¿;-------------------------------------------------------------------------
-;    My collection rare and maybe very useful functions
+;    My collection rare and maybe very useful functions - last change: 23.03.2018
 ;-------------------------------------------------------------------------
 
 ;{Command - line interaction
@@ -796,20 +796,6 @@ SetAlpha(hwnd, alpha) {
     DllCall("UpdateLayeredWindow","uint",hwnd,"uint",0,"uint",0
         ,"uint",0,"uint",0,"uint",0,"uint",0,"uint*",alpha<<16|1<<24,"uint",2)
 }
-;Screenshot - functions maybe useful
-Screenshot(outfile, screen) {
-    pToken := Gdip_Startup()
-    raster := 0x40000000 + 0x00CC0020 ; get layered windows
-
-    pBitmap := Gdip_BitmapFromScreen(screen,raster)
-
-    Gdip_SetBitmapToClipboard(pBitmap)
-    Gdip_SaveBitmapToFile(pBitmap, outfile)
-    Gdip_DisposeImage(pBitmap)
-    Gdip_Shutdown(pToken)
-
-    PlaceTooltip("Screenshot copied and saved.")
-}
 
 DrawRectangle(startNewRectangle := false) {
 static lastX, lastY
@@ -836,6 +822,21 @@ h := Abs(currentY - yorigin)
 
 Gui, ScreenshotSelection:Show, % "NA X" x " Y" y " W" w " H" h
 Gui, ScreenshotSelection:+LastFound
+}
+
+;Screenshot - functions maybe useful
+Screenshot(outfile, screen) {
+    pToken := Gdip_Startup()
+    raster := 0x40000000 + 0x00CC0020 ; get layered windows
+
+    pBitmap := Gdip_BitmapFromScreen(screen,raster)
+
+    Gdip_SetBitmapToClipboard(pBitmap)
+    Gdip_SaveBitmapToFile(pBitmap, outfile)
+    Gdip_DisposeImage(pBitmap)
+    Gdip_Shutdown(pToken)
+
+    PlaceTooltip("Screenshot copied and saved.")
 }
 
 TakeScreenshot() {
@@ -1019,7 +1020,6 @@ Popup(title,action,close=true,image="",w=197,h=46) {
         SetTimer, ClosePopup, -2000
     return
 }
-
 ClosePopup: ;{
     WinGet,WinID,ID,Popup
     MouseGetPos,,,MouseWinID
@@ -1032,7 +1032,7 @@ ClosePopup: ;{
     return
 ;}
 
-GetTextSize(str, size, font,ByRef height,ByRef width) {         ;Funktion zur Berechnung von Breite und Höhe je nach Textlänge
+GetTextSize(str, size, font,ByRef height,ByRef width) {         ;Function for calculating width and height depending on the text length
         Gui temp: Font, s%size%, %font%
         Gui temp:Add, Text, , %str%
         GuiControlGet T, temp:Pos, Static1
@@ -1135,7 +1135,7 @@ AddGraphicButtonPlus(ImgPath, Options="", Text="") {
 
 hicon := DllCall("LoadImage", "uInt", 0, "Str", "Icon.ico", "uInt", 2, "Int", 16, "Int", 16, "uInt", 0x10)
 
-RemoveWindowFromTaskbar(WinTitle) {			;this two belongs together
+RemoveWindowFromTaskbar(WinTitle) {			;this two belongs together (RemoveWindowFromTaskbar and vtable)
     /*
       Example: Temporarily remove the active window from the taskbar by using COM.
       Methods in ITaskbarList's VTable:
@@ -1938,6 +1938,37 @@ GetClassName(hWnd) {
     Return Class
 }
 
+WinForms_GetClassNN(WinID, fromElement, ElementName) {	;Check which ClassNN an element has
+
+	; function by Ixiko 2018 last_change 28.01.2018
+	/* Funktionsinfo: Deutsch
+		;Achtung: da manchmal 2 verschiedene Elemente den gleichen Namen enthalten kÃ¶nnen hat die Funktion einen zusÃ¤tzlichen Parameter: "fromElement"
+		;die Funktion untersucht ob das hier angebene Element im ClassNN enthalten ist zb. Button in WindowsForms10.BUTTON.app.0.378734a2
+		;die GroÃŸ- und Kleinschreibung ist nicht zu beachten
+	*/
+
+	/* function info: english
+		;Caution: sometimes 2 and more different elements in a gui can contain the same name, therefore the function has an additional parameter: "fromElement"
+		;it examines whether the element specified here is contained in the ClassNN, eg. Button in WindowsForms10.BUTTON.app.0.378734a2
+		;this function is: case-insensitive
+	*/
+
+	WinGet, CtrlList, ControlList, ahk_id %WinID%
+
+	Loop, Parse, CtrlList, `n
+	{
+			classnn:= A_LoopField
+			ControlGetText, Name, %classnn% , ahk_id %WinID%
+			If Instr(Name, ElementName, false) and Instr(classnn, fromElement, false)
+																				break
+			;sleep, 2000
+		}
+
+
+return classNN
+}
+
+
 ;MENU--------------get
 GetMenu(hWnd) {
     Return DllCall("GetMenu", "Ptr", hWnd)
@@ -2128,6 +2159,44 @@ MinMaxInfo(W, L, M, H) {
 ;}
 
     ;{Gui - interacting
+SureControlClick(CName, WinTitle, WinText="") { ;Critical + Window Activation + ControlDelay to -1 + control of the click
+		;by Ixiko 2018
+		Critical
+		WinActivate, %WTitle%, %WinText%
+			WinWaitActive, %WTitle%, %WinText%, 3
+
+		SetControlDelay -1
+			ControlClick, %CName%, %WinTitle%, %WinText%,,, NA		;If the click does not work then he tries a little differently
+				If ErrorLevel
+					ControlClick, %CName%, %WinTitle%, %WinText%
+
+		SetControlDelay 20
+
+
+	return ErrorLevel
+}
+
+SureControlCheck(CName, WinTitle, WinText="") { ;Window Activation ControlDelay to -1 Check if the control is really checked now
+	;by Ixiko 2018
+	;BlockInput, On
+		Critical
+		WinActivate, %WTitle%, %WinText%
+			WinWaitActive, %WTitle%, %WinText%, 1
+
+		SetControlDelay -1
+			Loop {
+				Control, Check, , %CName%, %WinTitle%, %WinText%
+					sleep, 10
+				ControlGet, isornot, checked, ,  %CName%, %WinTitle%, %WinText%
+			} until (isornot = 1)
+
+		SetControlDelay 20
+
+	;BlockInput, Off
+
+	return ErrorLevel
+}
+
 WinWaitForMinimized(ByRef winID, timeOut = 1000) {
   ; Function:  WinWaitForMinimized
 ;              waits for the window winID to minimize or until timeout,
@@ -2456,7 +2525,7 @@ Function_Eject(Drive){
 	}
 }
 
-FileGetDetail(FilePath, Index) { ; Bestimmte Dateieigenschaft per Index abrufen
+FileGetDetail(FilePath, Index) { ; Get specific file property by index
    Static MaxDetails := 350
    SplitPath, FilePath, FileName , FileDir
    If (FileDir = "")
@@ -2467,7 +2536,7 @@ FileGetDetail(FilePath, Index) { ; Bestimmte Dateieigenschaft per Index abrufen
    Return Folder.GetDetailsOf(Item, Index)
 }
 
-FileGetDetails(FilePath) { ; Array der konkreten Dateieigenschaften erstellen
+FileGetDetails(FilePath) { ; Create an array of concrete file properties
    Static MaxDetails := 350
    Shell := ComObjCreate("Shell.Application")
    Details := []
@@ -2483,7 +2552,7 @@ FileGetDetails(FilePath) { ; Array der konkreten Dateieigenschaften erstellen
    Return Details
 }
 
-GetDetails() { ; Array der möglichen Dateieigenschaften erstellen
+GetDetails() { ; Create an array of possible file properties
    Static MaxDetails := 350
    Shell := ComObjCreate("Shell.Application")
    Details := []
@@ -2497,7 +2566,7 @@ GetDetails() { ; Array der möglichen Dateieigenschaften erstellen
    Return Details
 }
 
-Start(Target, Minimal = false, Title = "") { ; Programme oder Scripte einfacher starten
+Start(Target, Minimal = false, Title = "") { ; Start programs or scripts easier
    cPID = -1
    if Minimal
       Run %ComSpec% /c "%Target%", A_WorkingDir, Min UseErrorLevel, cPID
@@ -2975,6 +3044,14 @@ NewLinkMsg(VideoSite, VideoName = "") {
 		return, -1
 }
 
+TimeGap(ntp="de.pool.ntp.org")	{		;Determine by what amount the local system time differs to that of an ntp server
+		;Bobo's function
+		;https://autohotkey.com/boards/viewtopic.php?f=10&t=34806
+		RunWait,% ComSpec " /c w32tm /stripchart /computer:" ntp " /period:1 /dataonly /samples:1 | clip",, Hide ; Query is stored in the clipboard
+		array := StrSplit(ClipBoard,"`n")					;disassemble the returned answer after lines
+		Return % SubStr(array[4], 10)		                ; zeitdifferenz/gap ...
+}
+
 ;}
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3175,7 +3252,7 @@ GetXmlElement(xml, pathToElement) {
 }
 
 sXMLget( xml, node, attr = "" ) {
-;by infogulch - simple solution get information out of xml and html
+;  by infogulch - simple solution get information out of xml and html
 ;  supports getting the values from a nested nodes; does NOT support decendant/ancestor or sibling
 ;  for something more than a little complex, try Titan's xpath: http://www.autohotkey.com/forum/topic17549.html
    RegExMatch( xml
@@ -3204,12 +3281,14 @@ parseJSON(txt) {
 }
 
 AddTrailingBackslash(ptext) {
+
 	if (SubStr(ptext, 0, 1) <> "\")
 		return, ptext . "\"
 	return, ptext
 }
 
 CheckQuotes(Path) {
+
    if (InStr(Path, A_Space, false) <> 0)
    {
       Path = "%Path%"
@@ -3218,6 +3297,7 @@ CheckQuotes(Path) {
 }
 
 ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {
+
    S_OUT := ""
    Replace_RegEx := "im)[\/:*?""<>|]*"
 
@@ -3229,6 +3309,7 @@ ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {
 }
 
 cleanlines(ByRef txt) {
+
 	Loop, Parse, txt, `n, `r
 	{
 		i := A_LoopField
@@ -3242,6 +3323,7 @@ cleanlines(ByRef txt) {
 }
 
 cleancolon(txt) {
+
 	if substr(txt,1,1)=":" {
 		txt:=substr(txt,2)
 		txt = %txt%
@@ -3250,6 +3332,7 @@ cleancolon(txt) {
 }
 
 cleanspace(ByRef txt) {
+
 	StringReplace txt,txt,`n`n,%A_Space%, All
 	StringReplace txt,txt,%A_Space%.%A_Space%,.%A_Space%, All
 	loop
@@ -3379,7 +3462,7 @@ Unicode2Ansi(ByRef wString, ByRef sString, CP = 0) {
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ;{Keys - Hotkeys - Hotstring - Functions
-DelaySend(Key, Interval=200, SendMethod="Send") { ; Tastenanschläge verzögert absenden
+DelaySend(Key, Interval=200, SendMethod="Send") { ;Send keystrokes delayed
 
 	/*
 	Sends keystrokes with a specified delay. It will be useful for an application which does not accept key presses sent too quickly.
@@ -3429,7 +3512,7 @@ DelaySend(Key, Interval=200, SendMethod="Send") { ; Tastenanschläge verzögert ab
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Hinweise - Messages
+;{ToolTips - Messages
 ShowTrayBalloon(TipTitle = "", TipText = "", ShowTime = 5000, TipType = 1) {
    global cfg
 
@@ -3475,7 +3558,7 @@ CreateWindow(key) {       ;-Hotkey Window
         SetTimer, RemoveGui, 5000
         }
 
-GetTextSize(str, size, font,ByRef height,ByRef width) {         ;Funktion zur Berechnung von Breite und HÃ¶he je nach TextlÃ¤nge
+GetTextSize(str, size, font,ByRef height,ByRef width) {         ;Function for calculating width and height depending on the text length
         Gui temp: Font, s%size%, %font%
         Gui temp:Add, Text, , %str%
         GuiControlGet T, temp:Pos, Static1
@@ -3496,7 +3579,7 @@ return
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Systemfunktionen
+;{System functions
 CreateNamedPipe(Name, OpenMode=3, PipeMode=0, MaxInstances=255) {
     return DllCall("CreateNamedPipe","str","\\.\pipe\" Name,"uint",OpenMode
         ,"uint",PipeMode,"uint",MaxInstances,"uint",0,"uint",0,"uint",0,"uint",0)
@@ -3975,7 +4058,7 @@ DestroyIcon(hIcon) {
 
 ;}
 
-;{Systemfunktionen - dll
+;{System functions - dll
 GetDllBase(DllName, PID = 0) {
     TH32CS_SNAPMODULE := 0x00000008
     INVALID_HANDLE_VALUE = -1
@@ -4057,7 +4140,7 @@ getProcessBassAddressFromModules(process) {
 
 ;}
 
-;{Systemfunktionen - using COMObjecte
+;{System functions - using COMObjecte
 getURL(t) {     ;using shell.application
 	If	psh	:=	COM_CreateObject("Shell.Application") {
 		If	psw	:=	COM_Invoke(psh,	"Windows") {
@@ -4171,7 +4254,7 @@ getControlNameByHwnd(_, controlHwnd) {
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{ACC (MSAA) verschiedene Varianten
+;{ACC (MSAA) - different methods
 
 Acc_Get(Cmd, ChildPath="", ChildID=0, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {
 	static properties := {Action:"DefaultAction", DoAction:"DoDefaultAction", Keyboard:"KeyboardShortcut"}
@@ -4269,7 +4352,7 @@ getControlNameByHwnd(winHwnd,controlHwnd) { ;ACC Version wahrscheinlich
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Internet Explorer/Chrome/FireFox/HTML Funktionen
+;{Internet Explorer/Chrome/FireFox/HTML functions
 ; AutoHotkey_L: von jethrow
 IEGet(name="") {
    IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
@@ -4437,7 +4520,7 @@ VARIANTstruct() { ;so wahrscheinlich nicht funktionsfÃ¤hig
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Variablen Handling
+;{Variables - Handling
 ComVar(Type:=0xC) { ; open to learn how it works
     ;   ComVar: Creates an object which can be used to pass a value ByRef.
     ;   ComVar[] retrieves the value.
