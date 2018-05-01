@@ -1,6 +1,8 @@
 ï»¿;-------------------------------------------------------------------------
-;    My collection rare and maybe very useful functions - last change: 23.03.2018
+;    My collection rare and maybe very useful functions
+; collected by IXIKO =>		 last change: 01.05.2018
 ;-------------------------------------------------------------------------
+
 
 ;{Command - line interaction
 CMDret_RunReturn(CMDin, WorkingDir=0) {
@@ -118,6 +120,7 @@ CMDret_RunReturn(CMDin, WorkingDir=0) {
 
 
 ;}
+; CMDret_RunReturn
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -141,8 +144,14 @@ TimePlus(one, two) {
    return returned
 }
 
+FormatSeconds(Sekunden) {
+	Return SubStr("0" . Sekunden // 3600, -1) . ":"
+        . SubStr("0" . Mod(Sekunden, 3600) // 60, -1) . ":"
+        . SubStr("0" . Mod(Sekunden, 60), -1)
+}
 
 ;}
+;TimePlus(one, two)				|	PrettyTickCount()				|	FormatSeconds()					|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -188,8 +197,174 @@ GetProcesses() {
    return l
 }
 
+getProcesses(ignoreSelf := True, searchNames := "") { ; searchNames comma separated list. If these processes exist, then they will be retrieved in the array
+
+
+	s := 100096  ; 100 KB will surely be HEAPS
+
+	array := []
+	PID := DllCall("GetCurrentProcessId")
+	; Get the handle of this script with PROCESS_QUERY_INFORMATION (0x0400)
+	h := DllCall("OpenProcess", "UInt", 0x0400, "Int", false, "UInt", PID, "Ptr")
+	; Open an adjustable access token with this process (TOKEN_ADJUST_PRIVILEGES = 32)
+	DllCall("Advapi32.dll\OpenProcessToken", "Ptr", h, "UInt", 32, "PtrP", t)
+	VarSetCapacity(ti, 16, 0)  ; structure of privileges
+	NumPut(1, ti, 0, "UInt")  ; one entry in the privileges array...
+	; Retrieves the locally unique identifier of the debug privilege:
+	DllCall("Advapi32.dll\LookupPrivilegeValue", "Ptr", 0, "Str", "SeDebugPrivilege", "Int64P", luid)
+	NumPut(luid, ti, 4, "Int64")
+	NumPut(2, ti, 12, "UInt")  ; enable this privilege: SE_PRIVILEGE_ENABLED = 2
+	; Update the privileges of this process with the new access token:
+	r := DllCall("Advapi32.dll\AdjustTokenPrivileges", "Ptr", t, "Int", false, "Ptr", &ti, "UInt", 0, "Ptr", 0, "Ptr", 0)
+	DllCall("CloseHandle", "Ptr", t)  ; close this access token handle to save memory
+	DllCall("CloseHandle", "Ptr", h)  ; close this process handle to save memory
+
+	hModule := DllCall("LoadLibrary", "Str", "Psapi.dll")  ; increase performance by preloading the library
+	s := VarSetCapacity(a, s)  ; an array that receives the list of process identifiers:
+	DllCall("Psapi.dll\EnumProcesses", "Ptr", &a, "UInt", s, "UIntP", r)
+	Loop, % r // 4  ; parse array for identifiers as DWORDs (32 bits):
+	{
+	   currentPID := NumGet(a, A_Index * 4, "UInt")
+	   if (ignoreSelf && currentPID = PID)
+			continue ; this is own script
+	   ; Open process with: PROCESS_VM_READ (0x0010) | PROCESS_QUERY_INFORMATION (0x0400)
+	   h := DllCall("OpenProcess", "UInt", 0x0010 | 0x0400, "Int", false, "UInt", currentPID, "Ptr")
+	   if !h
+	      continue
+	   VarSetCapacity(n, s, 0)  ; a buffer that receives the base name of the module:
+	   e := DllCall("Psapi.dll\GetModuleBaseName", "Ptr", h, "Ptr", 0, "Str", n, "UInt", A_IsUnicode ? s//2 : s)
+	   if !e    ; fall-back method for 64-bit processes when in 32-bit mode:
+	      if e := DllCall("Psapi.dll\GetProcessImageFileName", "Ptr", h, "Str", n, "UInt", A_IsUnicode ? s//2 : s)
+	         SplitPath n, n
+	   DllCall("CloseHandle", "Ptr", h)  ; close process handle to save memory
+	  	if searchNames
+	  	{
+			  if n not in %searchNames%
+			  	continue
+	  	}
+	   if (n && e)  ; if image is not null add to list:
+	   		array.insert({"Name": n, "PID": currentPID})
+	}
+	DllCall("FreeLibrary", "Ptr", hModule)  ; unload the library to free memory
+	return array
+}
+
+GetProcessWorkingDir(PID) {
+  static PROCESS_ALL_ACCESS:=0x1F0FFF,MEM_COMMIT := 0x1000,MEM_RELEASE:=0x8000,PAGE_EXECUTE_READWRITE:=64
+        ,GetCurrentDirectoryW,init:=MCode(GetCurrentDirectoryW,"8BFF558BECFF75088B450803C050FF15A810807CD1E85DC20800")
+  nDirLength := VarSetCapacity(nDir, 512, 0)
+  hProcess := DllCall("OpenProcess", "UInt", PROCESS_ALL_ACCESS, "Int",0, "UInt", PID)
+  if !hProcess
+    return
+  pBufferRemote := DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", nDirLength + 1, "UInt", MEM_COMMIT, "UInt", PAGE_EXECUTE_READWRITE, "Ptr")
+
+  pThreadRemote := DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", 26, "UInt", MEM_COMMIT, "UInt", PAGE_EXECUTE_READWRITE, "Ptr")
+  DllCall("WriteProcessMemory", "Ptr", hProcess, "Ptr", pThreadRemote, "Ptr", &GetCurrentDirectoryW, "PTR", 26, "Ptr", 0)
+
+  If hThread := DllCall("CreateRemoteThread", "PTR", hProcess, "UInt", 0, "UInt", 0, "PTR", pThreadRemote, "PTR", pBufferRemote, "UInt", 0, "UInt", 0)
+  {
+    DllCall("WaitForSingleObject", "PTR", hThread, "UInt", 0xFFFFFFFF)
+    DllCall("GetExitCodeThread", "PTR", hThread, "UIntP", lpExitCode)
+    If lpExitCode {
+      DllCall("ReadProcessMemory", "PTR", hProcess, "PTR", pBufferRemote, "Str", nDir, "UInt", lpExitCode*2, "UInt", 0)
+      VarSetCapacity(nDir,-1)
+    }
+    DllCall("CloseHandle", "PTR", hThread)
+  }
+  DllCall("VirtualFreeEx","PTR",hProcess,"PTR",pBufferRemote,"PTR",nDirLength + 1,"UInt",MEM_RELEASE)
+  DllCall("VirtualFreeEx","PTR",hProcess,"PTR",pThreadRemote,"PTR",31,"UInt",MEM_RELEASE)
+  DllCall("CloseHandle", "PTR", hProcess)
+
+  return nDir
+}
+
+GetTextSize(pStr, pSize, pFont, pWeight = 400, pHeight = false) {
+  Gui, 55: Font, s%pSize% w%pWeight%, %pFont%
+  Gui, 55: Add, Text, R1, %pStr%
+  GuiControlGet T, 55: Pos, Static1
+  Gui, 55: Destroy
+  Return pHeight ? TW "," TH : TW
+  }
+
+GetTextSize(pStr, pFont="", pHeight=false) { ;different function to the above one
+   local height, weight, italic, underline, strikeout , nCharSet
+   local hdc := DllCall("GetDC", "Uint", 0)
+   local hFont, hOldFont
+
+  ;parse font
+   if (pFont != "") {
+      italic      := InStr(pFont, "italic")
+      underline   := InStr(pFont, "underline")
+      strikeout   := InStr(pFont, "strikeout")
+      weight      := InStr(pFont, "bold") ? 700 : 0
+
+      RegExMatch(pFont, "(?<=[S|s])(\d{1,2})(?=[ ,])", height)
+      if (height != "")
+         height := -DllCall("MulDiv", "int", height, "int", DllCall("GetDeviceCaps", "Uint", hDC, "int", 90), "int", 72)
+
+      RegExMatch(pFont, "(?<=,).+", fontFace)
+      fontFace := RegExReplace( fontFace, "(^\s+)|(\s+$)")      ;trim
+
+      ;   msgbox "%fontFace%" "%italic%" "%underline%" "%strikeout%" "%weight%" "%height%"
+   }
+
+
+ ;create font
+   hFont   := DllCall("CreateFont", "int", height, "int", 0, "int", 0, "int", 0
+                           ,"int", weight, "Uint", italic, "Uint", underline
+                           ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", fontFace)
+   hOldFont := DllCall("SelectObject", "Uint", hDC, "Uint", hFont)
+   DllCall("GetTextExtentPoint32", "Uint", hDC, "str", pStr, "int", StrLen(pStr), "int64P", nSize)
+;   DllCall("DrawTextA", "Uint", hDC, "str", pStr, "int", StrLen(pStr), "int64P", nSize, "uint", 0x400)
+
+
+ ;clean
+
+   DllCall("SelectObject", "Uint", hDC, "Uint", hOldFont)
+   DllCall("DeleteObject", "Uint", hFont)
+   DllCall("ReleaseDC", "Uint", 0, "Uint", hDC)
+
+   nWidth  := nSize & 0xFFFFFFFF
+   nHeight := nSize >> 32 & 0xFFFFFFFF
+
+
+   if (pHeight)
+      nWidth .= "," nHeight
+   return   nWidth
+}
+
+monitorInfo() {
+	sysget,monitorCount,monitorCount
+	arr:=[],sorted:=[]
+	loop % monitorCount {
+		sysget,mon,monitor,% a_index
+		arr.insert({l:monLeft,r:monRight,b:monBottom,t:monTop,w:monRight-monLeft+1,h:monBottom-monTop+1})
+		k:=a_index
+		while strlen(k)<3
+			k:="0" k
+		sorted[monLeft k]:=a_index
+	}
+	arr2:=[]
+	for k,v in sorted
+		arr2.insert(arr[v])
+	return arr2
+}
+
+whichMonitor(x="",y="",byref monitorInfo="") { ;return [current monitor, monitor count]
+	CoordMode,mouse,screen
+	if (x="" || y="")
+		mousegetpos,x,y
+	if !IsObject(monitorInfo)
+		monitorInfo:=monitorInfo()
+
+	for k,v in monitorInfo
+		if (x>=v.l&&x<=v.r&&y>=v.t&&y<=v.b)
+			return [k,monitorInfo.maxIndex()]
+}
 
 ;}
+;GetProcesses()getProcesses(ignoreSelf := True, searchNames := "")	|	GetProcessWorkingDir(PID)	|	GetTextSize(pStr, pSize, pFont, pWeight = 400, pHeight = false)
+;GetTextSize(pStr, pFont="", pHeight=false)									|	monitorInfo()					|	whichMonitor(x="",y="",byref monitorInfo="")
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -792,11 +967,6 @@ DrawRectangle(hdc, left, top, right, bottom) {
     DllCall("LineTo", Int, hdc, Int, left, Int, top-1)
 }
 
-SetAlpha(hwnd, alpha) {
-    DllCall("UpdateLayeredWindow","uint",hwnd,"uint",0,"uint",0
-        ,"uint",0,"uint",0,"uint",0,"uint",0,"uint*",alpha<<16|1<<24,"uint",2)
-}
-
 DrawRectangle(startNewRectangle := false) {
 static lastX, lastY
 static xorigin, yorigin
@@ -822,6 +992,177 @@ h := Abs(currentY - yorigin)
 
 Gui, ScreenshotSelection:Show, % "NA X" x " Y" y " W" w " H" h
 Gui, ScreenshotSelection:+LastFound
+}
+
+DrawFrameAroundControl(ControlID, WindowUniqueID, frame_t){
+    global h_brushC, h_brushW, ChkDrawRectCtrl, ChkDrawRectWin
+
+    ;get coordinates of Window and control again
+    ;(could have been past into the function but it seemed too much parameters)
+    WinGetPos, WindowX, WindowY, WindowWidth, WindowHeight, ahk_id %WindowUniqueID%
+    ControlGetPos, ControlX, ControlY, ControlWidth, ControlHeight, %ControlID%, ahk_id %WindowUniqueID%
+
+    ;find upper left corner relative to screen
+    StartX := WindowX + ControlX
+    StartY := WindowY + ControlY
+
+    ;show ID in upper left corner
+    CoordMode, ToolTip, Screen
+
+    ;show frame gui above AOT apps
+    Gui, 2: +AlwaysOnTop
+
+    If ChkDrawRectWin {
+        ;if windows upper left corner is outside the screen
+        ; it is assumed that the window is maximized and the frame is made smaller
+        If ( WindowX < 0 AND WindowY < 0 ){
+            WindowX += 4
+            WindowY += 4
+            WindowWidth -= 8
+            WindowHeight -= 8
+          }
+
+        ;remove old rectangle from screen and save/buffer screen below new rectangle
+        BufferAndRestoreRegion( WindowX, WindowY, WindowWidth, WindowHeight )
+
+        ;draw rectangle frame around window
+        DrawFrame( WindowX, WindowY, WindowWidth, WindowHeight, frame_t, h_brushW )
+
+        ;show tooltip above window frame when enough space
+        If ( WindowY > 22)
+            WindowY -= 22
+
+        ;Show tooltip with windows unique ID
+        ToolTip, %WindowUniqueID%, WindowX, WindowY, 3
+      }
+    Else
+        ;remove old rectangle from screen and save/buffer screen below new rectangle
+        BufferAndRestoreRegion( StartX, StartY, ControlWidth, ControlHeight )
+
+    If ChkDrawRectCtrl {
+        ;draw rectangle frame around control
+        DrawFrame( StartX, StartY, ControlWidth, ControlHeight, frame_t, h_brushC )
+
+        ;show tooltip above control frame when enough space, or below
+        If ( StartY > 22)
+            StartY -= 22
+        Else
+            StartY += ControlHeight
+
+        ;show control tooltip left of window tooltip if position identical (e.g. Windows Start Button on Taskbar)
+        If (StartY = WindowY
+            AND StartX < WindowX + 50)
+            StartX += 50
+
+        ;Show tooltip with controls unique ID
+        ToolTip, %ControlID%, StartX, StartY, 2
+      }
+    ;set back ToolTip position to default
+    CoordMode, ToolTip, Relative
+  }
+
+Highlight(reg, delay=1500) {
+
+    ;{-------------------------------------------------------------------------------
+    ;
+    ; Function: Highlight
+    ; Description:
+    ;		Show a red rectangle outline to highlight specified region, it's useful to debug
+    ; Syntax: Highlight(region [, delay = 1500])
+    ; Parameters:
+    ;		reg - The region for highlight
+    ;		delay - Show time (milliseconds)
+    ; Return Value:
+    ;		 Real string without variable(s) - "this string has real variable"
+    ; Related:
+    ;		SendSpiCall, SendWapiCall
+    ; Remarks:
+    ;		#Include, Gdip.ahk
+    ; Example:
+    ;		Highlight("100,200,300,400")
+    ;		Highlight("100,200,300,400", 1000)
+    ;
+    ;-------------------------------------------------------------------------------
+    ;}
+
+    global @reg_global
+; Start gdi+
+	If !pToken := Gdip_Startup()
+	{
+		MsgBox, 48, gdiplus error!, Gdiplus failed to start. Please ensure you have gdiplus on your system
+		ExitApp
+	}
+
+	StringSplit, g_coors, @reg_global, `,
+	; Set the width and height we want as our drawing area, to draw everything in. This will be the dimensions of our bitmap
+	Width := g_coors3
+	Height := g_coors4
+    ; Create a layered window (+E0x80000 : must be used for UpdateLayeredWindow to work!) that is always on top (+AlwaysOnTop), has no taskbar entry or caption
+	Gui, 1: -Caption +E0x80000 +LastFound +OwnDialogs +Owner +AlwaysOnTop
+
+	; Show the window
+	Gui, 1: Show, NA
+
+	; Get a handle to this window we have created in order to update it later
+	hwnd1 := WinExist()
+
+	; Create a gdi bitmap with width and height of what we are going to draw into it. This is the entire drawing area for everything
+	hbm := CreateDIBSection(Width, Height)
+
+	; Get a device context compatible with the screen
+	hdc := CreateCompatibleDC()
+
+	; Select the bitmap into the device context
+	obm := SelectObject(hdc, hbm)
+
+	; Get a pointer to the graphics of the bitmap, for use with drawing functions
+	G := Gdip_GraphicsFromHDC(hdc)
+
+	; Set the smoothing mode to antialias = 4 to make shapes appear smother (only used for vector drawing and filling)
+	Gdip_SetSmoothingMode(G, 4)
+
+
+	; Create a slightly transparent (66) blue pen (ARGB = Transparency, red, green, blue) to draw a rectangle
+	; This pen is wider than the last one, with a thickness of 10
+	pPen := Gdip_CreatePen(0xffff0000, 2)
+
+	; Draw a rectangle onto the graphics of the bitmap using the pen just created
+	; Draws the rectangle from coordinates (250,80) a rectangle of 300x200 and outline width of 10 (specified when creating the pen)
+
+	StringSplit, reg_coors, reg, `,
+	x := reg_coors1
+	y := reg_coors2
+	w := reg_coors3 - reg_coors1
+	h := reg_coors4 - reg_coors2
+
+	Gdip_DrawRectangle(G, pPen, x, y, w, h)
+
+	; Delete the brush as it is no longer needed and wastes memory
+	Gdip_DeletePen(pPen)
+
+	; Update the specified window we have created (hwnd1) with a handle to our bitmap (hdc), specifying the x,y,w,h we want it positioned on our screen
+	; So this will position our gui at (0,0) with the Width and Height specified earlier
+	UpdateLayeredWindow(hwnd1, hdc, 0, 0, Width, Height)
+
+	; Select the object back into the hdc
+	SelectObject(hdc, obm)
+
+	; Now the bitmap may be deleted
+	DeleteObject(hbm)
+
+	; Also the device context related to the bitmap may be deleted
+	DeleteDC(hdc)
+
+	; The graphics may now be deleted
+	Gdip_DeleteGraphics(G)
+	Sleep, %delay%
+	Gui, 1: Show, Hide
+	Gdip_Shutdown(pToken)
+}
+
+SetAlpha(hwnd, alpha) {
+    DllCall("UpdateLayeredWindow","uint",hwnd,"uint",0,"uint",0
+        ,"uint",0,"uint",0,"uint",0,"uint",0,"uint*",alpha<<16|1<<24,"uint",2)
 }
 
 ;Screenshot - functions maybe useful
@@ -897,11 +1238,17 @@ CaptureWindow(hwndOwner, hwnd) {
     Return True
 }
 
-
 ;}
+; LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="", aIconNumber:=0, aUseGDIPlusIfAvailable:=1)
+; GetImageDimensionProperty()	|	GetImageDimensions()	|	Gdip_FillRoundedRectangle()	|	Redraw(hwnd=0)				|	CreateSurface()		|		ShowSurface()
+; HideSurface()							|	WipeSurface()				|	StartDraw()							|	EndDraw() 						|	SetPen()				|		DrawLine()
+; SDrawRectangle()					|	SetAlpha()					|	DrawRectangle()					|	Highlight()						|
+; Screenshot()							|	TakeScreenshot()			|	CaptureWindow()					|	DrawFrameAroundControl()
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-;---------------------------------------------GUI FUNCTIONS SECTION----------------------------------------------------------------------------------------------------------------------------------------------------
-    ;{Gui - Customizable full gui functions
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+;{GUI FUNCTIONS SECTION
+    ;{Gui - Customizable full gui functions, custom gui elements
 HtmlBox(Html, Title="", Timeout=0, Permanent=False, GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="W400 H300", Margin=10, Hotkey=True) {
     ;AutoHotkey_L 1.1.04+
     ;Timeout : The seconds to make the HTML window disappear.
@@ -1071,10 +1418,47 @@ AddGraphicButtonPlus(ImgPath, Options="", Text="") {
     return hBM
 }
 
+PIC_GDI_GUI(GuiName, byref File, GDIx, GDIy , GDIw, GDIh) { ;a GDI-gui to show a picture
 
+				global GGhdc
+			If !pToken := Gdip_Startup() {
+			   MsgBox, 0x40048, gdiplus error!, Gdiplus failed to start. Please ensure you have gdiplus on your system
+			   ExitApp
+			}
+			; Create a layered window (+E0x80000 : must be used for UpdateLayeredWindow to work!) that is always on top (+AlwaysOnTop), has no taskbar entry or caption
+			Gui, %GuiName%:-Caption +E0x80000 +LastFound +AlwaysOnTop
+			Gui, %GuiName%:+Owner
+			Gui, %GuiName%: Show, Center ; x%GDIx% y%GDIy%
+
+			hwnd1 := WinExist()
+
+			pBitmap1 := Gdip_CreateBitmapFromFile(file)
+			; Check to ensure we actually got a bitmap from the file, in case the file was corrupt or some other error occured
+			If (!pBitmap1) {
+				MsgBox, 0x40048, File loading error!, Could not load '%file%'
+				ExitApp
+			}
+			;Load picture to pBitmap
+			IWidth := Gdip_GetImageWidth(pBitmap1), IHeight := Gdip_GetImageHeight(pBitmap1)
+			hbm := CreateDIBSection(GDIw, GDIh)
+			GGhdc := CreateCompatibleDC()
+			obm := SelectObject(GGhdc, hbm)
+			G1 := Gdip_GraphicsFromHDC(GGhdc)
+			Gdip_SetInterpolationMode(G, 7)
+			Gdip_DrawImage(G1, pBitmap1, 0, 0, GDIw, GDIh, 0, 0, GDIw, GDIh)
+			UpdateLayeredWindow(hwnd1, GGhdc, GDIx, GDIy, GDIw, GDIh)
+
+			SelectObject(hdc, obm)
+			DeleteObject(hbm)
+			DeleteDC(hdc)
+			Gdip_DeleteGraphics(G1)
+
+return [hwnd1, GGhdc]
+}
 ;}
 
     ;{Gui - changing functions
+
 FadeGui(guihwnd, fading_time, inout) {
 
 	AW_BLEND := 0x00080000
@@ -1213,7 +1597,282 @@ ToggleFakeFullscreen() {
     WinSet Redraw
 }
 
+ListView_HeaderFontSet(p_hwndlv="", p_fontstyle="", p_fontname="") {
+
+;//******************* Functions *******************
+;//Sun, Jul 13, 2008 --- 7/13/08, 7:19:19pm
+;//Function: ListView_HeaderFontSet
+;//Params...
+;//		p_hwndlv    = ListView hwnd
+;//		p_fontstyle = [b[old]] [i[talic]] [u[nderline]] [s[trike]]
+;//		p_fontname  = <any single valid font name = Arial, Tahoma, Trebuchet MS>
+
+
+	static hFont1stBkp
+	method:="CreateFont"
+	;//method="CreateFontIndirect"
+	WM_SETFONT:=0x0030
+	WM_GETFONT:=0x0031
+
+	LVM_FIRST:=0x1000
+	LVM_GETHEADER:=LVM_FIRST+31
+
+	;// /* Font Weights */
+	FW_DONTCARE:=0
+	FW_THIN:=100
+	FW_EXTRALIGHT:=200
+	FW_LIGHT:=300
+	FW_NORMAL:=400
+	FW_MEDIUM:=500
+	FW_SEMIBOLD:=600
+	FW_BOLD:=700
+	FW_EXTRABOLD:=800
+	FW_HEAVY:=900
+
+	FW_ULTRALIGHT:=FW_EXTRALIGHT
+	FW_REGULAR:=FW_NORMAL
+	FW_DEMIBOLD:=FW_SEMIBOLD
+	FW_ULTRABOLD:=FW_EXTRABOLD
+	FW_BLACK:=FW_HEAVY
+	/*
+	parse p_fontstyle for...
+		cBlue	color	*** Note *** OMG can't set ListView/SysHeader32 font/text color??? ***
+		s19		size
+		b		bold
+		w500	weight?
+	*/
+	;//*** Note *** yes I will allow mixed types later!...this was quick n dirty...
+	;//*** Note *** ...it now supports bold italic underline & strike-thru...all at once
+	style:=p_fontstyle
+	;//*** Note *** change RegExReplace to RegExMatch
+	style:=RegExReplace(style, "i)\s*\b(?:I|U|S)*B(?:old)?(?:I|U|S)*\b\s*", "", style_bold)
+	style:=RegExReplace(style, "i)\s*\b(?:B|U|S)*I(?:talic)?(?:B|U|S)*\b\s*", "", style_italic)
+	style:=RegExReplace(style, "i)\s*\b(?:B|I|S)*U(?:nderline)?(?:B|I|S)*\b\s*", "", style_underline)
+	style:=RegExReplace(style, "i)\s*\b(?:B|I|U)*S(?:trike)?(?:B|I|U)*\b\s*", "", style_strike)
+	;//style:=RegExReplace(style, "i)\s*\bW(?:eight)(\d+)\b\s*", "", style_weight)
+	if (style_bold)
+		fnWeight:=FW_BOLD
+	if (style_italic)
+		fdwItalic:=1
+	if (style_underline)
+		fdwUnderline:=1
+	if (style_strike)
+		fdwStrikeOut:=1
+	;//if (mweight)
+	;//	fnWeight:=mweight
+	lpszFace:=p_fontname
+
+	ret:=hHeader:=SendMessage(p_hwndlv, LVM_GETHEADER, 0, 0)
+	el:=Errorlevel
+	le:=A_LastError
+	;//msgbox, 64, , SendMessage LVM_GETHEADER: ret(%ret%) el(%el%) le(%le%)
+
+	ret:=hFontCurr:=SendMessage(hHeader, WM_GETFONT, 0, 0)
+	el:=Errorlevel
+	le:=A_LastError
+	;//msgbox, 64, , SendMessage WM_GETFONT: ret(%ret%) el(%el%) le(%le%)
+	if (!hFont1stBkp) {
+		hFont1stBkp:=hFontCurr
+	}
+
+	if (method="CreateFont") {
+		if (p_fontstyle!="" || p_fontname!="") {
+			ret:=hFontHeader:=CreateFont(nHeight, nWidth, nEscapement, nOrientation
+										, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut
+										, fdwCharSet, fdwOutputPrecision, fdwClipPrecision
+										, fdwQuality, fdwPitchAndFamily, lpszFace)
+			el:=Errorlevel
+			le:=A_LastError
+			;//msgbox, 64, , CreateFont: ret(%ret%) el(%el%) le(%le%)
+		} else hFontHeader:=hFont1stBkp
+		ret:=SendMessage(hHeader, WM_SETFONT, hFontHeader, 1)
+		;//ret:=SendMessage(hHeader, WM_SETFONT, hFontHeader, 0)
+		;//ret:=SendMessage(hHeader, WM_SETFONT, &0, 1)
+		el:=Errorlevel
+		le:=A_LastError
+		;//msgbox, 64, , SendMessage WM_SETFONT: ret(%ret%) el(%el%) le(%le%)
+	}
+}
+
+CreateFont(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace) {
+
+/*
+HFONT CreateFont(
+  int nHeight,               // height of font
+  int nWidth,                // average character width
+  int nEscapement,           // angle of escapement
+  int nOrientation,          // base-line orientation angle
+  int fnWeight,              // font weight
+  DWORD fdwItalic,           // italic attribute option
+  DWORD fdwUnderline,        // underline attribute option
+  DWORD fdwStrikeOut,        // strikeout attribute option
+  DWORD fdwCharSet,          // character set identifier
+  DWORD fdwOutputPrecision,  // output precision
+  DWORD fdwClipPrecision,    // clipping precision
+  DWORD fdwQuality,          // output quality
+  DWORD fdwPitchAndFamily,   // pitch and family
+  LPCTSTR lpszFace           // typeface name
+);
+*/
+
+	return DllCall("CreateFont"
+				, "Int" , nHeight           , "Int" , nWidth          , "Int" , nEscapement
+				, "Int" , nOrientation      , "Int" , fnWeight        , "UInt", fdwItalic
+				, "UInt", fdwUnderline      , "UInt", fdwStrikeOut    , "UInt", fdwCharSet
+				, "UInt", fdwOutputPrecision, "UInt", fdwClipPrecision, "UInt", fdwQuality
+				, "UInt", fdwPitchAndFamily , "Str" , lpszFace)
+}
+
+FullScreenToggleUnderMouse(WT) {
+
+		DetectHiddenWindows, On
+		MouseGetPos,,,WinUnderMouse
+		WinGetTitle, WTm, %WinUnderMouse%
+		WinSet, Style, ^0xC00000, ahk_id %WinUnderMouse%
+		WinSet, AlwaysOnTop, Toggle, ahk_id %WinUnderMouse%
+		PostMessage, 0x112, 0xF030,,, ahk_id %WinUnderMouse% ;WinMaximize
+		;PostMessage, 0x112, 0xF120,,, Fenstertitel, Fenstertext 	;WinRestore
+		WinGet, Style, Style, ahk_class Shell_TrayWnd
+			If (Style & 0x10000000) {
+				  WinShow ahk_class Shell_TrayWnd
+				  WinShow Start ahk_class Button
+
+			} Else {
+				WinHide ahk_class Shell_TrayWnd
+				  WinHide Start ahk_class Button
+			}
+
+}
+
+ControlCreateGradient(Handle, Colors*) {
+
+   GuiControlGet, C, Pos, %Handle%
+   ColorCnt := Colors.Length()
+   Size := ColorCnt * 2 * 4
+   VarSetCapacity(Bits, Size, 0)
+   Addr := &Bits
+   For Each, Color In Colors
+      Addr := Numput(Color, NumPut(Color, Addr + 0, "UInt"), "UInt")
+    HBMP := DllCall("CreateBitmap", "Int", 2, "Int", ColorCnt, "UInt", 1, "UInt", 32, "Ptr", 0, "Ptr")
+    HBMP := DllCall("CopyImage", "Ptr", HBMP, "UInt", 0, "Int", 0, "Int", 0, "UInt", 0x2008, "Ptr")
+    DllCall("SetBitmapBits", "Ptr", HBMP, "UInt", Size, "Ptr", &Bits)
+    HBMP := DllCall("CopyImage", "Ptr", HBMP, "UInt", 0, "Int", CW, "Int", CH, "UInt", 0x2008, "Ptr")
+    DllCall("SendMessage", "Ptr", Handle, "UInt", 0x0172, "Ptr", 0, "Ptr", HBMP, "Ptr")
+    Return True
+}
+
 ;}
+
+	;{Gui - control type functions
+
+		;{Edit control functions
+
+				;************************
+				; Edit Control Functions
+				;************************
+				;
+				; http://www.autohotkey.com/forum/topic22748.html
+				;
+				; Standard parameters:
+				;   Control, WinTitle   If WinTitle is not specified, 'Control' may be the
+				;                       unique ID (hwnd) of the control.  If "A" is specified
+				;                       in Control, the control with input focus is used.
+				;
+				; Standard/default return value:
+				;   true on success, otherwise false.
+
+				Edit_Standard_Params(ByRef Control, ByRef WinTitle) {  ; Helper function.
+					if (Control="A" && WinTitle="") { ; Control is "A", use focused control.
+						ControlGetFocus, Control, A
+						WinTitle = A
+					} else if (Control+0!="" && WinTitle="") {  ; Control is numeric, assume its a ahk_id.
+						WinTitle := "ahk_id " . Control
+						Control =
+					}
+				}
+
+				Edit_TextIsSelected(Control="", WinTitle="") {
+					; Returns true if text is selected, otherwise false.
+				;
+					Edit_Standard_Params(Control, WinTitle)
+					return Edit_GetSelection(start, end, Control, WinTitle) and (start!=end)
+				}
+
+				Edit_GetSelection(ByRef start, ByRef end, Control="", WinTitle="") {
+					; Gets the start and end offset of the current selection.
+				;
+					Edit_Standard_Params(Control, WinTitle)
+					VarSetCapacity(start, 4), VarSetCapacity(end, 4)
+					SendMessage, 0xB0, &start, &end, %Control%, %WinTitle%  ; EM_GETSEL
+					if (ErrorLevel="FAIL")
+						return false
+					start := NumGet(start), end := NumGet(end)
+					return true
+				}
+
+				Edit_Select(start=0, end=-1, Control="", WinTitle="") {
+					; Selects text in a text box, given absolute character positions (starting at 0.)
+					;
+					; start:    Starting character offset, or -1 to deselect.
+					; end:      Ending character offset, or -1 for "end of text."
+					;
+
+					Edit_Standard_Params(Control, WinTitle)
+					SendMessage, 0xB1, start, end, %Control%, %WinTitle%  ; EM_SETSEL
+					return (ErrorLevel != "FAIL")
+				}
+
+				Edit_SelectLine(line=0, include_newline=false, Control="", WinTitle="") {
+						; Selects a line of text.
+					;
+					; line:             One-based line number, or 0 to select the current line.
+					; include_newline:  Whether to also select the line terminator (`r`n).
+					;
+
+					Edit_Standard_Params(Control, WinTitle)
+
+					ControlGet, hwnd, Hwnd,, %Control%, %WinTitle%
+					if (!WinExist("ahk_id " hwnd))
+						return false
+
+					if (line<1)
+						ControlGet, line, CurrentLine
+
+					SendMessage, 0xBB, line-1, 0  ; EM_LINEINDEX
+					offset := ErrorLevel
+
+					SendMessage, 0xC1, offset, 0  ; EM_LINELENGTH
+					lineLen := ErrorLevel
+
+					if (include_newline) {
+						WinGetClass, class
+						lineLen += (class="Edit") ? 2 : 1 ; `r`n : `n
+					}
+
+					; Select the line.
+					SendMessage, 0xB1, offset, offset+lineLen  ; EM_SETSEL
+					return (ErrorLevel != "FAIL")
+				}
+
+				Edit_DeleteLine(line=0, Control="", WinTitle="") {
+						; Deletes a line of text.
+				;
+				; line:     One-based line number, or 0 to delete current line.
+				;
+
+					Edit_Standard_Params(Control, WinTitle)
+					; Select the line.
+					if (Edit_SelectLine(line, true, Control, WinTitle))
+					{   ; Delete it.
+						ControlSend, %Control%, {Delete}, %WinTitle%
+						return true
+					}
+					return false
+				}
+
+		;}
+
+	;}
 
     ;{Gui - retreaving informations functuions
 
@@ -1227,8 +1886,30 @@ screenDims() {
 	return {W:W, H:H, DPI:DPI, OR:Orient}
 }
 
+DPIFactor() {
+RegRead, DPI_value, HKEY_CURRENT_USER, Control Panel\Desktop\WindowMetrics, AppliedDPI
+; the reg key was not found - it means default settings
+; 96 is the default font size setting
+if (errorlevel=1) OR (DPI_value=96 )
+	return 1
+else
+	Return  DPI_Value/96
+}
 
-;CONTROLS---get
+
+;CONTROL type ---get
+ControlExists(class) {
+  WinGet, WinList, List  ;gets a list of all windows
+  Loop, % WinList
+  {
+    temp := "ahk_id " WinList%A_Index%
+    ControlGet, temp, Hwnd,, %class%, %temp%
+    if !ErrorLevel  ;errorlevel is set to 1 if control doesn't exist
+      return temp
+  }
+  return 0
+}
+
 GetFocusedControl()  {   ; This script retrieves the ahk_id (HWND) of the active window's focused control.
 
         ; This script requires Windows 98+ or NT 4.0 SP3+.
@@ -1362,7 +2043,7 @@ IsControlFocused(hwnd) {
     Return DllCall("GetGUIThreadInfo", uint, 0, str, GuiThreadInfo) ? (hwnd = NumGet(GuiThreadInfo, 12)) ? True : False : False
 }
 
-;GUI---------- get
+;GUI - Window ---------- get
 IsOverTitleBar(x, y, hWnd) { ; This function is from http://www.autohotkey.com/forum/topic22178.html
    SendMessage, 0x84,, (x & 0xFFFF) | (y & 0xFFFF) << 16,, ahk_id %hWnd%
    if ErrorLevel in 2,3,8,9,20,21
@@ -1921,6 +2602,60 @@ GetOwner(hWnd) {
     Return DllCall("GetWindow", "Ptr", hWnd, "UInt", 4) ; GW_OWNER
 }
 
+FindWindow(WinTitle, WinClass:="", WinText:="", ParentTitle:="", ParentClass:="", DetectHiddenWins:="off", DectectHiddenTexts:="off") { ; Finds the requested window,and return it's ID
+	; 0 if it wasn't found or chosen from a list
+	; originally from Evan Casey Copyright (c) under MIT License.
+	; changed for my purposes for Addendum for AlbisOnWindows by Ixiko on 04-06-2018
+	; this version searches for ParentWindows if there is no WinText to check changed on 04-27-2018
+
+	HWins:= A_DetectHiddenWindows
+	HText:= A_DetectHiddenText
+	DetectHiddenWindows, %DetectHiddenWins%
+	DetectHiddenText, %DetectHiddenTexts%
+
+		If Instr(WinClass, "Afx:") {
+				SetTitleMatchMode, RegEx
+		} else {
+				SetTitleMatchMode, RegEx
+		}
+
+	if (WinClass = "")
+		sSearchWindow := WinTitle
+	else
+		sSearchWindow := WinTitle . " ahk_class " . WinClass
+
+	WinGet, nWindowArray, List, %sSearchWindow%, %WinText%
+
+	;Loop for more windows - this is looks for ParentWindow
+	if (nWindowArray > 1) {
+
+		Loop %nWindowArray% {
+
+			prev := DllCall("GetWindow", "ptr", hwnd, "uint", GW_HWNDPREV:=3, "ptr")			;GetParentWindowID
+					if prev {
+									DetectHiddenWindows On
+									WinGetTitle title, ahk_id %prev%
+									WinGetClass class, ahk_id %prev%
+									If (titel == ParentTitle) AND (class == ParentClass) {
+										sSelectedWinID := % nWindowArray%A_Index%
+										break
+									}
+
+						}
+		}
+
+	} else if (nWindowArray == 1) {
+		sSelectedWinID := nWindowArray1
+	} else if (nWindowArray == 0) {
+		sSelectedWinID := 0
+	}
+
+	DetectHiddenWindows, %HWins%
+	DetectHiddenText, %HTexts%
+
+	return sSelectedWinID
+}
+
 ShowWindow(hWnd, nCmdShow := 1) {
     DllCall("ShowWindow", "Ptr", hWnd, "Int", nCmdShow)
 }
@@ -2001,6 +2736,298 @@ GetMenuString(hMenu, uIDItem) {
     Return lpString
 }
 
+MenuGetAll(hwnd) {
+    if !menu := DllCall("GetMenu", "ptr", hwnd, "ptr")
+        return ""
+    MenuGetAll_sub(menu, "", cmds)
+    return cmds
+}
+
+MenuGetAll_sub(menu, prefix, ByRef cmds) {
+
+    Loop % DllCall("GetMenuItemCount", "ptr", menu) {
+
+        VarSetCapacity(itemString, 2000)
+
+        if !DllCall("GetMenuString", "ptr", menu, "int", A_Index-1, "str", itemString, "int", 1000, "uint", 0x400)
+            continue
+
+        StringReplace itemString, itemString, &
+        itemID := DllCall("GetMenuItemID", "ptr", menu, "int", A_Index-1)
+        if (itemID = -1)
+        if subMenu := DllCall("GetSubMenu", "ptr", menu, "int", A_Index-1, "ptr") {
+
+            MenuGetAll_sub(subMenu, prefix itemString " > ", cmds)
+            continue
+
+        }
+        cmds .= itemID "`t" prefix RegExReplace(itemString, "`t.*") "`n"
+    }
+}
+
+; these 5 belongs together
+GetContextMenuState(hWnd, Position) {	;returns the state of a menu entry
+  WinGetClass, WindowClass, ahk_id %hWnd%
+  if WindowClass <> #32768
+  {
+   return -1
+  }
+  SendMessage, 0x01E1, , , , ahk_id %hWnd%
+  ;Errorlevel is set by SendMessage. It contains the handle to the menu
+  hMenu := errorlevel
+
+  ;We need to allocate a struct
+  VarSetCapacity(MenuItemInfo, 60, 0)
+  ;Set Size of Struct to the first member
+  InsertInteger(48, MenuItemInfo, 0, 4)
+  ;Get only Flags from dllcall GetMenuItemInfo MIIM_TYPE = 1
+  InsertInteger(1, MenuItemInfo, 4, 4)
+
+  ;GetMenuItemInfo: Handle to Menu, Index of Position, 0=Menu identifier / 1=Index
+  InfoRes := DllCall("user32.dll\GetMenuItemInfo",UInt,hMenu, Uint, Position, uint, 1, "int", &MenuItemInfo)
+
+  InfoResError := errorlevel
+  LastErrorRes := DllCall("GetLastError")
+  if InfoResError <> 0
+     return -1
+  if LastErrorRes != 0
+     return -1
+
+  ;Get Flag from struct
+  GetMenuItemInfoRes := ExtractInteger(MenuItemInfo, 12, false, 4)
+  /*
+  IsEnabled = 1
+  if GetMenuItemInfoRes > 0
+     IsEnabled = 0
+  return IsEnabled
+  */
+  return GetMenuItemInfoRes
+}
+
+GetContextMenuID(hWnd, Position) {	;returns the ID of a menu entry
+  WinGetClass, WindowClass, ahk_id %hWnd%
+  if WindowClass <> #32768
+  {
+   return -1
+  }
+  SendMessage, 0x01E1, , , , ahk_id %hWnd%
+  ;Errorlevel is set by SendMessage. It contains the handle to the menu
+  hMenu := errorlevel
+
+  ;UINT GetMenuItemID(          HMENU hMenu,    int nPos);
+  InfoRes := DllCall("user32.dll\GetMenuItemID",UInt,hMenu, Uint, Position)
+
+  InfoResError := errorlevel
+  LastErrorRes := DllCall("GetLastError")
+  if InfoResError <> 0
+     return -1
+  if LastErrorRes != 0
+     return -1
+
+  return InfoRes
+}
+
+GetContextMenuText(hWnd, Position) {	;returns the text of a menu entry (standard windows context menus only!!!)
+  WinGetClass, WindowClass, ahk_id %hWnd%
+  if WindowClass <> #32768
+  {
+   return -1
+  }
+  SendMessage, 0x01E1, , , , ahk_id %hWnd%
+  ;Errorlevel is set by SendMessage. It contains the handle to the menu
+  hMenu := errorlevel
+
+  ;We need to allocate a struct
+  VarSetCapacity(MenuItemInfo, 200, 0)
+  ;Set Size of Struct (48) to the first member
+  InsertInteger(48, MenuItemInfo, 0, 4)
+  ;Retrieve string MIIM_STRING = 0x40 = 64 (/ MIIM_TYPE = 0x10 = 16)
+  InsertInteger(64, MenuItemInfo, 4, 4)
+  ;Set type - Get only size of string we need to allocate
+  ;InsertInteger(0, MenuItemInfo, 8, 4)
+  ;GetMenuItemInfo: Handle to Menu, Index of Position, 0=Menu identifier / 1=Index
+  InfoRes := DllCall("user32.dll\GetMenuItemInfo",UInt,hMenu, Uint, Position, uint, 1, "int", &MenuItemInfo)
+  if InfoRes = 0
+     return -1
+
+  InfoResError := errorlevel
+  LastErrorRes := DllCall("GetLastError")
+  if InfoResError <> 0
+     return -1
+  if LastErrorRes <> 0
+     return -1
+
+  ;Get size of string from struct
+  GetMenuItemInfoRes := ExtractInteger(MenuItemInfo, 40, false, 4)
+  ;If menu is empty return
+  If GetMenuItemInfoRes = 0
+     return "{Empty String}"
+
+  ;+1 should be enough, we'll use 2
+  GetMenuItemInfoRes += 2
+  ;Set capacity of string that will be filled by windows
+  VarSetCapacity(PopupText, GetMenuItemInfoRes, 0)
+  ;Set Size plus 0 terminator + security ;-)
+  InsertInteger(GetMenuItemInfoRes, MenuItemInfo, 40, 4)
+  InsertInteger(&PopupText, MenuItemInfo, 36, 4)
+
+  InfoRes := DllCall("user32.dll\GetMenuItemInfo",UInt,hMenu, Uint, Position, uint, 1, "int", &MenuItemInfo)
+  if InfoRes = 0
+     return -1
+
+  InfoResError := errorlevel
+  LastErrorRes := DllCall("GetLastError")
+  if InfoResError <> 0
+     return -1
+  if LastErrorRes <> 0
+     return -1
+
+  return PopupText
+}
+
+ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) {
+
+; Original versions of ExtractInteger and InsertInteger provided by Chris
+; - from the AutoHotkey help file - Version 1.0.37.04
+
+; pSource is a string (buffer) whose memory area contains a raw/binary integer at pOffset.
+; The caller should pass true for pSigned to interpret the result as signed vs. unsigned.
+; pSize is the size of PSource's integer in bytes (e.g. 4 bytes for a DWORD or Int).
+; pSource must be ByRef to avoid corruption during the formal-to-actual copying process
+; (since pSource might contain valid data beyond its first binary zero).
+
+   SourceAddress := &pSource + pOffset  ; Get address and apply the caller's offset.
+   result := 0  ; Init prior to accumulation in the loop.
+   Loop %pSize%  ; For each byte in the integer:
+   {
+      result := result | (*SourceAddress << 8 * (A_Index - 1))  ; Build the integer from its bytes.
+      SourceAddress += 1  ; Move on to the next byte.
+   }
+   if (!pIsSigned OR pSize > 4 OR result < 0x80000000)
+      return result  ; Signed vs. unsigned doesn't matter in these cases.
+   ; Otherwise, convert the value (now known to be 32-bit) to its signed counterpart:
+   return -(0xFFFFFFFF - result + 1)
+}
+
+InsertInteger(pInteger, ByRef pDest, pOffset = 0, pSize = 4) {
+; To preserve any existing contents in pDest, only pSize number of bytes starting at pOffset
+; are altered in it. The caller must ensure that pDest has sufficient capacity.
+
+   mask := 0xFF  ; This serves to isolate each byte, one by one.
+   Loop %pSize%  ; Copy each byte in the integer into the structure as raw binary data.
+   {
+      DllCall("RtlFillMemory", UInt, &pDest + pOffset + A_Index - 1, UInt, 1  ; Write one byte.
+         , UChar, (pInteger & mask) >> 8 * (A_Index - 1))  ; This line is auto-merged with above at load-time.
+      mask := mask << 8  ; Set it up for isolation of the next byte.
+   }
+}
+; *********************************
+
+
+;ControlType
+GetListViewItemText(item_index, sub_index, ctrl_id, win_id) {
+        ;const
+        MAX_TEXT = 260
+
+        VarSetCapacity(szText, MAX_TEXT, 0)
+        VarSetCapacity(szClass, MAX_TEXT, 0)
+        ControlGet, hListView, Hwnd, , %ctrl_id%, ahk_id %win_id%
+        DllCall("GetClassName", UInt,hListView, Str,szClass, Int,MAX_TEXT)
+        if (DllCall("lstrcmpi", Str,szClass, Str,"SysListView32") == 0 || DllCall("lstrcmpi", Str,szClass, Str,"TListView") == 0)
+        {
+            GetListViewText(hListView, item_index, sub_index, szText, MAX_TEXT)
+        }
+
+        return %szText%
+    }
+
+GetListViewText(hListView, iItem, iSubItem, ByRef lpString, nMaxCount) {
+        ;const
+        NULL = 0
+        PROCESS_ALL_ACCESS = 0x001F0FFF
+        INVALID_HANDLE_VALUE = 0xFFFFFFFF
+        PAGE_READWRITE = 4
+        FILE_MAP_WRITE = 2
+        MEM_COMMIT = 0x1000
+        MEM_RELEASE = 0x8000
+        LV_ITEM_mask = 0
+        LV_ITEM_iItem = 4
+        LV_ITEM_iSubItem = 8
+        LV_ITEM_state = 12
+        LV_ITEM_stateMask = 16
+        LV_ITEM_pszText = 20
+        LV_ITEM_cchTextMax = 24
+        LVIF_TEXT = 1
+        LVM_GETITEM = 0x1005
+        SIZEOF_LV_ITEM = 0x28
+        SIZEOF_TEXT_BUF = 0x104
+        SIZEOF_BUF = 0x120
+        SIZEOF_INT = 4
+        SIZEOF_POINTER = 4
+
+        ;var
+        result := 0
+        hProcess := NULL
+        dwProcessId := 0
+
+        if lpString <> NULL && nMaxCount > 0
+        {
+            DllCall("lstrcpy", Str,lpString, Str,"")
+            DllCall("GetWindowThreadProcessId", UInt,hListView, UIntP,dwProcessId)
+            hProcess := DllCall("OpenProcess", UInt,PROCESS_ALL_ACCESS, Int,false, UInt,dwProcessId)
+            if hProcess <> NULL
+            {
+                ;var
+                lpProcessBuf := NULL
+                hMap := NULL
+                hKernel := DllCall("GetModuleHandle", Str,"kernel32.dll", UInt)
+                pVirtualAllocEx := DllCall("GetProcAddress", UInt,hKernel, Str,"VirtualAllocEx", UInt)
+
+                if pVirtualAllocEx == NULL
+                {
+                    hMap := DllCall("CreateFileMapping", UInt,INVALID_HANDLE_VALUE, Int,NULL, UInt,PAGE_READWRITE, UInt,0, UInt,SIZEOF_BUF, UInt)
+                    if hMap <> NULL
+                        lpProcessBuf := DllCall("MapViewOfFile", UInt,hMap, UInt,FILE_MAP_WRITE, UInt,0, UInt,0, UInt,0, UInt)
+                }
+                else
+                {
+                    lpProcessBuf := DllCall("VirtualAllocEx", UInt,hProcess, UInt,NULL, UInt,SIZEOF_BUF, UInt,MEM_COMMIT, UInt,PAGE_READWRITE)
+                }
+
+                if lpProcessBuf <> NULL
+                {
+                    ;var
+                    VarSetCapacity(buf, SIZEOF_BUF, 0)
+
+                    InsertIntegerSL(LVIF_TEXT, buf, LV_ITEM_mask, SIZEOF_INT)
+                    InsertIntegerSL(iItem, buf, LV_ITEM_iItem, SIZEOF_INT)
+                    InsertIntegerSL(iSubItem, buf, LV_ITEM_iSubItem, SIZEOF_INT)
+                    InsertIntegerSL(lpProcessBuf + SIZEOF_LV_ITEM, buf, LV_ITEM_pszText, SIZEOF_POINTER)
+                    InsertIntegerSL(SIZEOF_TEXT_BUF, buf, LV_ITEM_cchTextMax, SIZEOF_INT)
+
+                    if DllCall("WriteProcessMemory", UInt,hProcess, UInt,lpProcessBuf, UInt,&buf, UInt,SIZEOF_BUF, UInt,NULL) <> 0
+                        if DllCall("SendMessage", UInt,hListView, UInt,LVM_GETITEM, Int,0, Int,lpProcessBuf) <> 0
+                            if DllCall("ReadProcessMemory", UInt,hProcess, UInt,lpProcessBuf, UInt,&buf, UInt,SIZEOF_BUF, UInt,NULL) <> 0
+                            {
+                                DllCall("lstrcpyn", Str,lpString, UInt,&buf + SIZEOF_LV_ITEM, Int,nMaxCount)
+                                result := DllCall("lstrlen", Str,lpString)
+                            }
+                }
+
+                if lpProcessBuf <> NULL
+                    if pVirtualAllocEx <> NULL
+                        DllCall("VirtualFreeEx", UInt,hProcess, UInt,lpProcessBuf, UInt,0, UInt,MEM_RELEASE)
+                    else
+                        DllCall("UnmapViewOfFile", UInt,lpProcessBuf)
+
+                if hMap <> NULL
+                    DllCall("CloseHandle", UInt,hMap)
+
+                DllCall("CloseHandle", UInt,hProcess)
+            }
+        }
+        return result
+    }
 
 ;MISC
 ChooseColor(ByRef Color, hOwner := 0) {
@@ -2197,6 +3224,74 @@ SureControlCheck(CName, WinTitle, WinText="") { ;Window Activation ControlDelay 
 	return ErrorLevel
 }
 
+;{ControlClick Double Click Example
+ControlClick2(X, Y, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="")  {
+  hwnd:=ControlFromPoint(X, Y, WinTitle, WinText, cX, cY
+                             , ExcludeTitle, ExcludeText)
+  PostMessage, 0x201, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONDOWN
+  PostMessage, 0x202, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONUP
+  PostMessage, 0x203, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONDBLCLCK
+  PostMessage, 0x202, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONUP
+}
+
+ControlFromPoint(X, Y, WinTitle="", WinText="", ByRef cX="", ByRef cY="", ExcludeTitle="", ExcludeText="") {
+    static EnumChildFindPointProc=0
+    if !EnumChildFindPointProc
+        EnumChildFindPointProc := RegisterCallback("EnumChildFindPoint","Fast")
+
+    if !(target_window := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText))
+        return false
+
+    VarSetCapacity(rect, 16)
+    DllCall("GetWindowRect","uint",target_window,"uint",&rect)
+    VarSetCapacity(pah, 36, 0)
+    NumPut(X + NumGet(rect,0,"int"), pah,0,"int")
+    NumPut(Y + NumGet(rect,4,"int"), pah,4,"int")
+    DllCall("EnumChildWindows","uint",target_window,"uint",EnumChildFindPointProc,"uint",&pah)
+    control_window := NumGet(pah,24) ? NumGet(pah,24) : target_window
+    DllCall("ScreenToClient","uint",control_window,"uint",&pah)
+    cX:=NumGet(pah,0,"int"), cY:=NumGet(pah,4,"int")
+    return control_window
+}
+
+EnumChildFindPoint(aWnd, lParam) {
+    if !DllCall("IsWindowVisible","uint",aWnd)
+        return true
+    VarSetCapacity(rect, 16)
+    if !DllCall("GetWindowRect","uint",aWnd,"uint",&rect)
+        return true
+    pt_x:=NumGet(lParam+0,0,"int"), pt_y:=NumGet(lParam+0,4,"int")
+    rect_left:=NumGet(rect,0,"int"), rect_right:=NumGet(rect,8,"int")
+    rect_top:=NumGet(rect,4,"int"), rect_bottom:=NumGet(rect,12,"int")
+    if (pt_x >= rect_left && pt_x <= rect_right && pt_y >= rect_top && pt_y <= rect_bottom)
+    {
+        center_x := rect_left + (rect_right - rect_left) / 2
+        center_y := rect_top + (rect_bottom - rect_top) / 2
+        distance := Sqrt((pt_x-center_x)**2 + (pt_y-center_y)**2)
+        update_it := !NumGet(lParam+24)
+        if (!update_it)
+        {
+            rect_found_left:=NumGet(lParam+8,0,"int"), rect_found_right:=NumGet(lParam+8,8,"int")
+            rect_found_top:=NumGet(lParam+8,4,"int"), rect_found_bottom:=NumGet(lParam+8,12,"int")
+            if (rect_left >= rect_found_left && rect_right <= rect_found_right
+                && rect_top >= rect_found_top && rect_bottom <= rect_found_bottom)
+                update_it := true
+            else if (distance < NumGet(lParam+28,0,"double")
+                && (rect_found_left < rect_left || rect_found_right > rect_right
+                 || rect_found_top < rect_top || rect_found_bottom > rect_bottom))
+                 update_it := true
+        }
+        if (update_it)
+        {
+            NumPut(aWnd, lParam+24)
+            DllCall("RtlMoveMemory","uint",lParam+8,"uint",&rect,"uint",16)
+            NumPut(distance, lParam+28, 0, "double")
+        }
+    }
+    return true
+}
+;}
+
 WinWaitForMinimized(ByRef winID, timeOut = 1000) {
   ; Function:  WinWaitForMinimized
 ;              waits for the window winID to minimize or until timeout,
@@ -2232,6 +3327,87 @@ CenterWindow(aWidth,aHeight) {
 	pt.x := rect.left + (((rect.right - rect.left) - aWidth) / 2)
 	pt.y := rect.top + (((rect.bottom - rect.top) - aHeight) / 2)
 	return pt
+}
+
+GuiCenterButtons(strWindow, intInsideHorizontalMargin := 10, intInsideVerticalMargin := 0, intDistanceBetweenButtons := 20, arrControls*) {
+; This is a variadic function. See: http://ahkscript.org/docs/Functions.htm#Variadic
+;------------------------------------------------------------
+
+	DetectHiddenWindows, On
+	Gui, Show, Hide
+	WinGetPos, , , intWidth, , %strWindow%
+
+	intMaxControlWidth := 0
+	intMaxControlHeight := 0
+	for intIndex, strControl in arrControls
+	{
+		GuiControlGet, arrControlPos, Pos, %strControl%
+		if (arrControlPosW > intMaxControlWidth)
+			intMaxControlWidth := arrControlPosW
+		if (arrControlPosH > intMaxControlHeight)
+			intMaxControlHeight := arrControlPosH
+	}
+
+	intMaxControlWidth := intMaxControlWidth + intInsideHorizontalMargin
+	intButtonsWidth := (arrControls.MaxIndex() * intMaxControlWidth) + ((arrControls.MaxIndex()  - 1) * intDistanceBetweenButtons)
+	intLeftMargin := (intWidth - intButtonsWidth) // 2
+
+	for intIndex, strControl in arrControls
+		GuiControl, Move, %strControl%
+			, % "x" . intLeftMargin + ((intIndex - 1) * intMaxControlWidth) + ((intIndex - 1) * intDistanceBetweenButtons)
+			. " w" . intMaxControlWidth
+			. " h" . intMaxControlHeight + intInsideVerticalMargin
+}
+
+CenterControl(hWnd,hCtrl,X=1,Y=1) {
+;------------------------------------------------------------------------------------------------------------------------
+;Function:    CenterControl (by Banane: http://de.autohotkey.com/forum/viewtopic.php?p=67802#67802)
+;Parameters:  hWnd  = Handle of a Window (can be obtained using "WinExist()")
+;             hCtrl = Handle of a Control (can be obtained using the "Hwnd" option when creating the control)
+;             X     = Center the Control horizontally if X is 1
+;             Y     = Center the Control vertically if Y is 1
+;Description: Moves the specified control within the center of the specified window
+;Returnvalue: 0 - Invalid Window / Control Handle, or the Window / Control has a size of 0
+;------------------------------------------------------------------------------------------------------------------------
+
+ static Border,CaptionSmall,CaptionNormal
+
+  ;Retrieve Size of Border and Caption, if this is the first time this function is called
+  If (!CaptionNormal) {
+    SysGet, Border, 5        ;Border Width
+    SysGet, CaptionNormal, 4 ;Window Caption
+    SysGet, CaptionSmall, 51 ;Window Caption with Toolwindow Style
+  }
+
+  ;Only continue if valid handles passed
+  If (!hWnd || !hCtrl)
+    Return 0
+
+  ;Retrieve the size of the control and window
+  ControlGetPos,,, cW, cH,, % "ahk_id " hCtrl
+  WinGetPos,,, wW, wH, % "ahk_id " hWnd
+  ;Only continue if the control and window are visible (and don't have a size of 0)
+  If ((cW = "" || cH = "") || (wW = "" || wH = ""))
+    Return 0
+
+  ;Retrieve the window styles
+  WinGet, Styles, Style, % "ahk_id " hWnd
+  WinGet, ExStyles, ExStyle, % "ahk_id " hWnd
+
+  ;Calculate the offset
+  If (Styles & 0xC00000) ;If window has the "Caption" flag
+    If (ExStyles & 0x00000080) ;If window has the "Toolwindow" flag
+      Caption := CaptionSmall
+    Else Caption := CaptionNormal
+  Else Caption := 1
+
+  ;Calculate the new position and apply it to the control
+  ControlMove,, % (X = 1) ? Round((wW - cW + Border) / 2) : "", % (Y = 1) ? Round((wH - cH + Caption) / 2) : "",,, % "ahk_id " hCtrl
+
+  ;Redraw the windows content
+  WinSet, Redraw,, % "ahk_id " hWnd
+
+  Return 1
 }
 
 Result := DllCall("SetWindowPos", "UInt", Gui2, "UInt", Gui1, "Int", Gui1X + 300, "Int", Gui1Y, "Int", "", "Int", "", "Int", 0x01)
@@ -2460,9 +3636,62 @@ Return
 */
 }
 
+CatMull_ControlMove( px0, py0, px1, py1, px2, py2, px3, py3, Segments=8, Rel=0, Speed=2 ) {
+; Function by [evandevon]. Moves the mouse through 4 points (without control point "gaps"). Inspired by VXe's
+;cubic bezier curve function (with some borrowed code).
+   MouseGetPos, px0, py0
+   If Rel
+      px1 += px0, px2 += px0, px3 += px0, py1 += py0, py2 += py0, py3 += py0
+   Loop % Segments - 1
+   {
+	;CatMull Rom Spline - Working
+	  u := 1 - t := A_Index / Segments
+	  cmx := Round(0.5*((2*px1) + (-px0+px2)*t + (2*px0 - 5*px1 +4*px2 - px3)*t**2 + (-px0 + 3*px1 - 3*px2 + px3)*t**3) )
+	  cmy := Round(0.5*((2*py1) + (-py0+py2)*t + (2*py0 - 5*py1 +4*py2 - py3)*t**2 + (-py0 + 3*py1 - 3*py2 + py3)*t**3) )
+
+	  MouseMove, cmx, cmy, Speed,
+
+   }
+   MouseMove, px3, py3, Speed
+} ; CatMull_MouseMove( px1, py1, px2, py2, px3, py3, Segments=5, Rel=0, Speed=2 ) -------------------
+
+
 ;}
-;-----------------------------------------------END OF GUI SECTION--------------------------------------------------------------------------------------------------------------------------------------------------------
+;}
+; ------------------------------------------------------------------------------	  #Custom Gui Elements#		----------------------------------------------------------------------------------------
+; HtmlBox()						|	EditBox()							|	Popup()								|	GetTextSize()						|	AddGraphicButtonPlus()		|
+; PIC_GDI_GUI()				|
+; ------------------------------------------------------------------------------	 #Gui - changing functions#	----------------------------------------------------------------------------------------
+; FadeGui()						|	ShadowBorder()				|	FrameShadow()					|	RemoveWindowFromTaskbar()	|	ToggleTitleMenuBar()			|
+; ToggleFakeFullscreen()		|	ListView_HeaderFontSet()	|	CreateFont()						|	FullScreenToggleUnderMouse()	|	ControlCreateGradient()		|
+; ------------------------------------------------------------------------------	   #control type functions#		----------------------------------------------------------------------------------------
+; Edit_Standard_Params()	|	Edit_TextIsSelected()			|	Edit_GetSelection()				|	Edit_Select()							|	Edit_SelectLine()				|
+; Edit_DeleteLine())			|
+; ------------------------------------------------------------------------------ #Gui - retreaving informations#	----------------------------------------------------------------------------------------
+; screenDims()					|	DPIFactor()						|
+; ControlExists()				|	GetFocusedControl()			|	GetControls()						|	GetOtherControl()					|	ListControls()					|
+; Control_GetClassNN()		|	ControlGetClassNN()			|	Control_GetFont()					|	IsControlFocused()					|	IsOverTitleBar()					|
+; WinGetPosEx()				|	GetParent()						|	GetWindow()						|	GetForegroundWindow()			|	IsWindowVisible()				|
+; IsFullScreen()					|	IsClosed()						|	getProcessBaseAddress()			|	GetClassLong()						|	GetWindowLong()				|
+; GetClassStyles()				|	GetTabOrderIndex()			|	GetCursor()							|	GetExtraStyle()						|	GetToolbarItems()				|
+; ControlGetTabs()				|	GetHeaderInfo()				|	GetClientCoords()					|	GetWindowCoords()				|	GetWindowPos()				|
+; GetWindowPlacement()		|	GetWindowInfo()				|	GetParent()							|	GetOwner()							|	FindWindow()					|
+; ShowWindow()				|	IsWindow()						|	IsWindowVisible()					|	GetClassName()					|	WinForms_GetClassNN()		|
+; ------------------------------------------------------------------------------		  #Menu functions#			----------------------------------------------------------------------------------------
+; GetMenu()						|	GetSubMenu()					|	GetMenuItemCount()				|	GetMenuItemID()					|	GetMenuString()				|
+; MenuGetAll()					|	MenuGetAll_sub()				|
+; GetContextMenuState()		|	GetContextMenuID()			|	GetContextMenuText()			|	ExtractInteger()						|	InsertInteger()					|
+; ------------------------------------------------------------------------------	  #Control type functions#		----------------------------------------------------------------------------------------
+; GetListViewItemText()		|	GetListViewText()				|
+; ------------------------------------------------------------------------------	  #interacting functions#		----------------------------------------------------------------------------------------
+; ChooseColor()				|	GetWindowIcon()				|	GetImageType()					|	GetStatusBarText()					|	GetAncestor()					|
+; MinMaxInfo()					|	OnMessage( "MinMaxInfo")	|	SureControlClick()					|	SureControlCheck()				|	WinWaitForMinimized()		|
+; CenterWindow()				|	GuiCenterButtons()			|	CenterControl()						|	SetWindowIcon()					|	SetWindowPos()				|
+; TryKillWin()					|	Win32_SendMessage()		|	Win32_TaskKill()					|	Win32_Terminate()				|	TabActivate()					|
+; FocuslessScroll()				|	FocuslessScrollHorizontal()	|	Menu_Show()						|	CatMull_ControlMove()			|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 ;{Filesystem
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 InvokeVerb(path, menu, validate=True) {
@@ -2550,6 +3779,10 @@ FileGetDetails(FilePath) { ; Create an array of concrete file properties
          Details[A_Index - 1] := [Folder.GetDetailsOf(0, A_Index - 1), Value]
    }
    Return Details
+}
+
+DirExist(dirPath) {
+   return InStr(FileExist(dirPath), "D") ? 1 : 0
 }
 
 GetDetails() { ; Create an array of possible file properties
@@ -2754,9 +3987,37 @@ GetFileIcon(File, SmallIcon := 1) {
     }
 }
 
+ExtractAssociatedIcon(ByRef ipath, ByRef idx) {
+
+; http://msdn.microsoft.com/en-us/library/bb776414(VS.85).aspx
+; shell32.dll
+; Extracts the associated icon's index for the file specified in path
+; Requires path and icon index
+; Icon must be destroyed when no longer needed (see below)
+
+		hInst=0	; reserved, must be zero
+		hIcon := DllCall("ExtractAssociatedIcon", "UInt", hInst, "UInt", &ipath, "UShortP", idx)
+		return ErrorLevel
+}
+
+ExtractAssociatedIconEx(ByRef ipath, ByRef idx, ByRef iID) {
+
+; http://msdn.microsoft.com/en-us/library/bb776415(VS.85).aspx
+; shell32.dll
+; Extracts the associated icon's index and ID for the file specified in path
+; Requires path, icon index and ID
+; Icon must be destroyed when no longer needed (see below)
+
+			hInst=0	; reserved, must be zero
+			hIcon := DllCall("ExtractAssociatedIconEx", "UInt", hInst, "UInt", &ipath, "UShortP", idx, "UShortP", iID)
+			return ErrorLevel
+}
+
+DestroyIcon(hIcon) {
+	DllCall("DestroyIcon", UInt, hIcon)
+}
 
 ;}
-
 ;{Files - search inside
 listfunc(file){
 	fileread, z, % file
@@ -2774,6 +4035,10 @@ listfunc(file){
 }
 
 ;}
+; InvokeVerb()					|	Function_Eject()				|	FileGetDetail()						|	FileGetDetails()						|	DirExist()							|
+; GetDetails()					|	Start()	 -scripts					|	IsFileEqual()							|	WatchDirectory()					|	GetFileIcon()					|
+; ExtractAssociatedIcon()		|	ExtractAssociatedIconEx()	|	DestroyIcon()						|
+; listfunc()
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3002,11 +4267,53 @@ CallNextHookEx(nCode, wParam, lParam, hHook = 0) {
    Return DllCall("CallNextHookEx", "Uint", hHook, "int", nCode, "Uint", wParam, "Uint", lParam)
 }
 
+WM_DEVICECHANGE( wParam, lParam) { 							;erkennt ob ein einlegen einer CD statt gefunden hat und gibt auch das Laufwerk aus - global drv
+
+Global Drv
+ global DriveNotification
+ Static DBT_DEVICEARRIVAL := 0x8000 ; http://msdn2.microsoft.com/en-us/library/aa363205.aspx
+ Static DBT_DEVTYP_VOLUME := 0x2    ; http://msdn2.microsoft.com/en-us/library/aa363246.aspx
+
+ /*
+    When wParam is DBT_DEVICEARRIVAL lParam will be a pointer to a structure identifying the
+    device inserted. The structure consists of an event-independent header,followed by event
+    -dependent members that describe the device. To use this structure,  treat the structure
+    as a DEV_BROADCAST_HDR structure, then check its dbch_devicetype member to determine the
+    device type.
+ */
+
+ dbch_devicetype := NumGet(lParam+4) ; dbch_devicetype is member 2 of DEV_BROADCAST_HDR
+
+ If ( wParam = DBT_DEVICEARRIVAL AND dbch_devicetype = DBT_DEVTYP_VOLUME )
+ {
+
+ ; Confirmed lParam is a pointer to DEV_BROADCAST_VOLUME and should retrieve Member 4
+ ; which is dbcv_unitmask
+
+   dbcv_unitmask := NumGet(lParam+12 )
+
+ ; The logical unit mask identifying one or more logical units. Each bit in the mask corres
+ ; ponds to one logical drive.Bit 0 represents drive A, Bit 1 represents drive B, and so on
+
+   Loop 32                                           ; Scan Bits from LSB to MSB
+     If ( ( dbcv_unitmask >> (A_Index-1) & 1) = 1 )  ; If Bit is "ON"
+      {
+        Drv := Chr(64+A_Index)                       ; Set Drive letter
+        Break
+      }
+   DriveNotification:=DriveData(Drv)
+ }
+Return TRUE
+}
+
+
 ;}
+; OnMessageEx()				|	ReceiveData()					|	HDrop()								|	WM_MOVE()						|	WM_WINDOWPOSCHANGING()	|
+; CallNextHookEx()			|	WM_DEVICECHANGE()		|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Internet - Functions
+;{Internet / Network - Functions
 DownloadFile(url, file, info="") {
     static vt
     if !VarSetCapacity(vt)
@@ -3052,7 +4359,120 @@ TimeGap(ntp="de.pool.ntp.org")	{		;Determine by what amount the local system tim
 		Return % SubStr(array[4], 10)		                ; zeitdifferenz/gap ...
 }
 
+GetSourceURL( str ) {
+    FragIdent := RegExReplace( str, "i).*<b.*?>(.*?<!--s\w{11}t-->).*", "$1" )
+
+    For Each, Ident in ( StrSplit( FragIdent, " " ), IdentObj := {} )
+        if InStr( Ident, mStr := "SourceURL:" )
+            SourceURL := SubStr( Ident, StrLen( mStr )+1 )
+
+    Return SourceURL
+}
+
+DNS_QueryName(IP, ByRef NameArray := "") {
+
+   Static OffRR := (A_PtrSize * 2) + 16 ; offset of resource record (RR) within the DNS_RECORD structure
+   HDLL := DllCall("LoadLibrary", "Str", "Dnsapi.dll", "UPtr")
+   NameArray := []
+   IPArray := StrSplit(IP, ".")
+   RevIP := IPArray.4 . "." . IPArray.3 . "." . IPArray.2 . "." . IPArray.1 . ".IN-ADDR.ARPA"
+   If !DllCall("Dnsapi.dll\DnsQuery_", "Str", RevIP, "Short", 0x0C, "UInt", 0, "Ptr", 0, "PtrP", PDNSREC, "Ptr", 0, "Int") {
+      REC_TYPE := NumGet(PDNSREC + 0, A_PtrSize * 2, "UShort")
+      If (REC_TYPE = 0x0C) { ; DNS_TYPE_PTR = 0x0C
+         PDR := PDNSREC
+         While (PDR) {
+            Name := StrGet(NumGet(PDR + 0, OffRR, "UPtr"))
+            NameArray.Insert(Name)
+            PDR := NumGet(PDR + 0, "UPtr")
+         }
+      }
+      DllCall("Dnsapi.dll\DnsRecordListFree", "Ptr", PDNSREC, "Int", 1) ; DnsFreeRecordList = 1
+   }
+   DllCall("FreeLibrary", "Ptr", HDLL)
+   Return NameArray[1] ; returnes the first name from the NameArray on success, otherwise an empty string
+
+}
+
+	;this 4 belongs together
+GetHTMLFragment() {
+
+    FmtArr := EnumClipFormats(), NmeArr := GetClipFormatNames( FmtArr )
+
+    While ( a_index <= NmeArr.Length() && !ClpPtr )
+        if ( NmeArr[ a_index ] = "HTML Format" )
+            ClpPtr := DllCall( "GetClipboardData", uInt, FmtArr[ a_index ] )
+
+    DllCall( "CloseClipboard" )
+
+    if ( !ClpPtr )
+    {
+        MsgBox, 0x10, Whoops!, Please Copy Some HTML From a Browser Window!
+        Exit
+    }
+
+    Return ScrubFragmentIdents( StrGet( ClpPtr, "UTF-8" ) )
+
+}
+ScrubFragmentIdents( HTMFrag ) {
+
+    HTMObj := ComObjCreate( "HTMLFile" ), HTMObj.Write( HTMFrag )
+    MarkUp := HTMObj.getElementsByTagName( "HTML" )[ 0 ].OuterHtml
+
+    For Needle, Replace in { "(y>).*?(<\w)" : "$1$2", "<!--(s|e).*?-->" : "" }
+        MarkUp := RegExReplace( MarkUp, "si)" Needle, Replace )
+
+    Return MarkUp
+}
+EnumClipFormats() {
+    FmtArr := [], DllCall( "OpenClipboard" )
+
+    While ( DllCall( "CountClipboardFormats" ) >= a_index )
+        FmtArr.Push( fmt := DllCall( "EnumClipboardFormats", uint, a_index = 1 ? 0 : fmt ) )
+
+    Return FmtArr
+}
+GetClipFormatNames( FmtArr ) {
+    if ( FmtArr.Length() = False )
+    {
+        DllCall( "CloseClipboard" )
+        Throw "Empty Clipboard Format Array!"
+    }
+
+    For Each, Fmt in ( FmtArr, FmtNmArr := [], VarSetCapacity( Buf, 256 ) )
+    {
+        DllCall( "GetClipboardFormatName", uInt, Fmt, str, Buf, int, 128 )
+
+        if ( Asc( StrGet( &buf ) ) != False  )
+            FmtNmArr.Push( StrGet( &buf ) )
+    }
+
+    Return FmtNmArr
+}
+	;------------------------------
+
+GoogleTranslate(phrase,LangIn,LangOut) {
+
+		Critical
+		base := "https://translate.google.com.tw/?hl=en&tab=wT#"
+		path := base . LangIn . "/" . LangOut . "/" . phrase
+		IE := ComObjCreate("InternetExplorer.Application")
+		;~ IE.Visible := true
+		IE.Navigate(path)
+
+		While IE.readyState!=4 || IE.document.readyState!="complete" || IE.busy
+				Sleep 50
+
+		Result := IE.document.all.result_box.innertext
+		IE.Quit
+
+return Result
+
+}
+
+
 ;}
+; DownloadFile()				|	NewLinkMsg()					|	TimeGap()							|		GetSourceURL()				|	DNS_QueryName()	|
+; GetHTMLFragment()			|	ScrubFragmentIdents()		|	EnumClipFormats()				|	GetClipFormatNames()			|	GoogleTranslate()		|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3067,6 +4487,7 @@ Max(x, y) {
 
 
 ;}
+; Min()							|	Max()								|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3123,6 +4544,7 @@ StackShow(stack){
 
 
 ;}
+; ObjMerge()					|	evalRPN()						|	StackShow()							|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3261,6 +4683,38 @@ sXMLget( xml, node, attr = "" ) {
    return retvalMatch
 }
 
+ParseJsonStrToArr(json_data) {
+
+;-----------------------------
+;
+; Function: ParseJsonStrToArr(v1.2.1)
+; Description:
+;		Parse Json string to an array
+; Syntax: ParseJsonStrToArr(json_data)
+; Parameters:
+;       json_data - json string
+; Return Value:
+;		return an array
+; Remarks:
+;		Each item in the array still is string type
+; Related:
+;		N/A
+; Example:
+;		j := "[{'id':'a1','subject':'s1'},{'id':'a2','subject':'s2},{'id':'a3','subject':'s3'}]"
+;		arr = ParseJsonStrToArr(j)
+;
+;-------------------------------------------------------------------------------
+
+
+   arr := []
+   pos :=1
+   While pos:=RegExMatch(json_data,"((?:{)[\s\S][^{}]+(?:}))", j, pos+StrLen(j))
+   {
+	arr.Insert(j1)                      ; insert json string to array  arr=[{"id":"a1","subject":"s1"},{"id":"a2","subject":"s2"},{"id":"a3","subject":"s3"}]
+   }
+   return arr
+}
+
 parseJSON(txt) {
 	out := {}
 	Loop																		; Go until we say STOP
@@ -3359,20 +4813,6 @@ uriEncode(str) { ; A function to escape characters like & for use in URLs.
     Return, pr . str
 }
 
-ParseJsonStrToArr(json_data) { ;this one works fine , cutting all {} in different arrays but forgets the last data is'nt put in {...
-   ;i am changing the code a little bit for further programming, Insert changes to InsertAt
-
-   arr := []
-   pos :=1
-   i:= 0
-   While pos:=RegExMatch(json_data,"((?:{)[\s\S][^{}]+(?:}))", j, pos+StrLen(j))
-   {
-	i += 1
-    arr.InsertAt(i,j1)                      ; insert json string to array  arr=[{"id":"a1","subject":"s1"},{"id":"a2","subject":"s2"},{"id":"a3","subject":"s3"}]
-   }
-   return arr
-}
-
 EnsureEndsWith(string, char) {  ;Ensure that the string given ends with a given char
    if ( StringRight(string, strlen(char)) <> char )
       string .= char
@@ -3458,6 +4898,11 @@ Unicode2Ansi(ByRef wString, ByRef sString, CP = 0) {
 
 
 ;}
+; Sort2DArray()					|	SortArray()						|	GetNestedTag()					|	GetHTMLbyID()					|	GetHTMLbyTag()				|
+; GetXmlElement()				|	sXMLget()						|	ParseJsonStrToArr()				|	parseJSON()						|	AddTrailingBackslash()		|
+; CheckQuotes()				|	ReplaceForbiddenChars()	|	cleanlines()							|	cleancolon()							|	cleanspace()					|
+; uriEncode()					|	EnsureEndsWith()				|	EnsureStartsWith()					|	StrPutVar()							|
+; Ansi2Unicode()				|	Unicode2Ansi()					|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3508,7 +4953,13 @@ DelaySend(Key, Interval=200, SendMethod="Send") { ;Send keystrokes delayed
     Return
 }
 
+SetLayout(layout, winid) {		;keyboard layout
+    Result := (DllCall("LoadKeyboardLayout", "Str", layout, "UInt", "257"))
+    DllCall("SendMessage", "UInt", winid, "UInt", "80", "UInt", "1", "UInt", Result)
+}
+
 ;}
+; DelaySend()					|	SetLayout()						|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3538,7 +4989,7 @@ ShowTrayBalloon(TipTitle = "", TipText = "", ShowTime = 5000, TipType = 1) {
    return
 }
 
-CreateWindow(key) {       ;-Hotkey Window
+CreateHotkeyWindow(key) {       ;-Hotkey Window
         GetTextSize(key,35,Verdana,height,width)
         bgTopPadding = 40
         bgWidthPadding = 100
@@ -3576,10 +5027,11 @@ CreateWindow(Win + 7)
 return
 
 ;}
+; ShowTrayBalloon()			|	CreateHotkeyWindow()		|	GetTextSize()						|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{System functions
+;{System functions - binary handling in memory
 CreateNamedPipe(Name, OpenMode=3, PipeMode=0, MaxInstances=255) {
     return DllCall("CreateNamedPipe","str","\\.\pipe\" Name,"uint",OpenMode
         ,"uint",PipeMode,"uint",MaxInstances,"uint",0,"uint",0,"uint",0,"uint",0)
@@ -3776,87 +5228,6 @@ TaskDialogDirect(Instruction, Content := "", Title := "", CustomButtons := "", C
     }
 }
 
-getProcesses(ignoreSelf := True, searchNames := "") { ; searchNames comma separated list. If these processes exist, then they will be retrieved in the array
-
-
-	s := 100096  ; 100 KB will surely be HEAPS
-
-	array := []
-	PID := DllCall("GetCurrentProcessId")
-	; Get the handle of this script with PROCESS_QUERY_INFORMATION (0x0400)
-	h := DllCall("OpenProcess", "UInt", 0x0400, "Int", false, "UInt", PID, "Ptr")
-	; Open an adjustable access token with this process (TOKEN_ADJUST_PRIVILEGES = 32)
-	DllCall("Advapi32.dll\OpenProcessToken", "Ptr", h, "UInt", 32, "PtrP", t)
-	VarSetCapacity(ti, 16, 0)  ; structure of privileges
-	NumPut(1, ti, 0, "UInt")  ; one entry in the privileges array...
-	; Retrieves the locally unique identifier of the debug privilege:
-	DllCall("Advapi32.dll\LookupPrivilegeValue", "Ptr", 0, "Str", "SeDebugPrivilege", "Int64P", luid)
-	NumPut(luid, ti, 4, "Int64")
-	NumPut(2, ti, 12, "UInt")  ; enable this privilege: SE_PRIVILEGE_ENABLED = 2
-	; Update the privileges of this process with the new access token:
-	r := DllCall("Advapi32.dll\AdjustTokenPrivileges", "Ptr", t, "Int", false, "Ptr", &ti, "UInt", 0, "Ptr", 0, "Ptr", 0)
-	DllCall("CloseHandle", "Ptr", t)  ; close this access token handle to save memory
-	DllCall("CloseHandle", "Ptr", h)  ; close this process handle to save memory
-
-	hModule := DllCall("LoadLibrary", "Str", "Psapi.dll")  ; increase performance by preloading the library
-	s := VarSetCapacity(a, s)  ; an array that receives the list of process identifiers:
-	DllCall("Psapi.dll\EnumProcesses", "Ptr", &a, "UInt", s, "UIntP", r)
-	Loop, % r // 4  ; parse array for identifiers as DWORDs (32 bits):
-	{
-	   currentPID := NumGet(a, A_Index * 4, "UInt")
-	   if (ignoreSelf && currentPID = PID)
-			continue ; this is own script
-	   ; Open process with: PROCESS_VM_READ (0x0010) | PROCESS_QUERY_INFORMATION (0x0400)
-	   h := DllCall("OpenProcess", "UInt", 0x0010 | 0x0400, "Int", false, "UInt", currentPID, "Ptr")
-	   if !h
-	      continue
-	   VarSetCapacity(n, s, 0)  ; a buffer that receives the base name of the module:
-	   e := DllCall("Psapi.dll\GetModuleBaseName", "Ptr", h, "Ptr", 0, "Str", n, "UInt", A_IsUnicode ? s//2 : s)
-	   if !e    ; fall-back method for 64-bit processes when in 32-bit mode:
-	      if e := DllCall("Psapi.dll\GetProcessImageFileName", "Ptr", h, "Str", n, "UInt", A_IsUnicode ? s//2 : s)
-	         SplitPath n, n
-	   DllCall("CloseHandle", "Ptr", h)  ; close process handle to save memory
-	  	if searchNames
-	  	{
-			  if n not in %searchNames%
-			  	continue
-	  	}
-	   if (n && e)  ; if image is not null add to list:
-	   		array.insert({"Name": n, "PID": currentPID})
-	}
-	DllCall("FreeLibrary", "Ptr", hModule)  ; unload the library to free memory
-	return array
-}
-
-GetProcessWorkingDir(PID) {
-  static PROCESS_ALL_ACCESS:=0x1F0FFF,MEM_COMMIT := 0x1000,MEM_RELEASE:=0x8000,PAGE_EXECUTE_READWRITE:=64
-        ,GetCurrentDirectoryW,init:=MCode(GetCurrentDirectoryW,"8BFF558BECFF75088B450803C050FF15A810807CD1E85DC20800")
-  nDirLength := VarSetCapacity(nDir, 512, 0)
-  hProcess := DllCall("OpenProcess", "UInt", PROCESS_ALL_ACCESS, "Int",0, "UInt", PID)
-  if !hProcess
-    return
-  pBufferRemote := DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", nDirLength + 1, "UInt", MEM_COMMIT, "UInt", PAGE_EXECUTE_READWRITE, "Ptr")
-
-  pThreadRemote := DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", 26, "UInt", MEM_COMMIT, "UInt", PAGE_EXECUTE_READWRITE, "Ptr")
-  DllCall("WriteProcessMemory", "Ptr", hProcess, "Ptr", pThreadRemote, "Ptr", &GetCurrentDirectoryW, "PTR", 26, "Ptr", 0)
-
-  If hThread := DllCall("CreateRemoteThread", "PTR", hProcess, "UInt", 0, "UInt", 0, "PTR", pThreadRemote, "PTR", pBufferRemote, "UInt", 0, "UInt", 0)
-  {
-    DllCall("WaitForSingleObject", "PTR", hThread, "UInt", 0xFFFFFFFF)
-    DllCall("GetExitCodeThread", "PTR", hThread, "UIntP", lpExitCode)
-    If lpExitCode {
-      DllCall("ReadProcessMemory", "PTR", hProcess, "PTR", pBufferRemote, "Str", nDir, "UInt", lpExitCode*2, "UInt", 0)
-      VarSetCapacity(nDir,-1)
-    }
-    DllCall("CloseHandle", "PTR", hThread)
-  }
-  DllCall("VirtualFreeEx","PTR",hProcess,"PTR",pBufferRemote,"PTR",nDirLength + 1,"UInt",MEM_RELEASE)
-  DllCall("VirtualFreeEx","PTR",hProcess,"PTR",pThreadRemote,"PTR",31,"UInt",MEM_RELEASE)
-  DllCall("CloseHandle", "PTR", hProcess)
-
-  return nDir
-}
-
 GlobalVarsScript(var="",size=102400,ByRef object=0) {
   global
   static globalVarsScript
@@ -4026,37 +5397,6 @@ hexToBinaryBuffer(hexString, byRef buffer) {
 
 }
 
-ExtractAssociatedIcon(ByRef ipath, ByRef idx) {
-
-; http://msdn.microsoft.com/en-us/library/bb776414(VS.85).aspx
-; shell32.dll
-; Extracts the associated icon's index for the file specified in path
-; Requires path and icon index
-; Icon must be destroyed when no longer needed (see below)
-
-		hInst=0	; reserved, must be zero
-		hIcon := DllCall("ExtractAssociatedIcon", "UInt", hInst, "UInt", &ipath, "UShortP", idx)
-		return ErrorLevel
-}
-
-ExtractAssociatedIconEx(ByRef ipath, ByRef idx, ByRef iID) {
-
-; http://msdn.microsoft.com/en-us/library/bb776415(VS.85).aspx
-; shell32.dll
-; Extracts the associated icon's index and ID for the file specified in path
-; Requires path, icon index and ID
-; Icon must be destroyed when no longer needed (see below)
-
-			hInst=0	; reserved, must be zero
-			hIcon := DllCall("ExtractAssociatedIconEx", "UInt", hInst, "UInt", &ipath, "UShortP", idx, "UShortP", iID)
-			return ErrorLevel
-}
-
-DestroyIcon(hIcon) {
-	DllCall("DestroyIcon", UInt, hIcon)
-}
-
-;}
 
 ;{System functions - dll
 GetDllBase(DllName, PID = 0) {
@@ -4081,7 +5421,7 @@ GetDllBase(DllName, PID = 0) {
     Return 0
 }
 
-getProcessBassAddressFromModules(process) {
+getProcBaseFromModules(process) {
 
 /*
 	http://stackoverflow.com/questions/14467229/get-base-address-of-process
@@ -4156,11 +5496,16 @@ getURL(t) {     ;using shell.application
 
 
 ;}
+
+;}
+; CreateNamedPipe()			|	RestoreCursors()				|	SetSystemCursor()					|	SetTimerF()						|	TaskDialog()						|
+; ITaskDialogDirect()			|	IGlobalVarsScript()			|	patternScan()						|	scanInBuf()						|	hexToBinaryBuffer()				|
+; GetDllBase()					|	getProcBaseFromModules()	|	getURL()								|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ;{UI Automation
-CreatePropertyCondition(propertyId, ByRef var, type :="Variant") {     ;möge diese hier funktionieren
+CreatePropertyCondition(propertyId, ByRef var, type :="Variant") {     ;I hope this one works
 		If (A_PtrSize=8) {
 			if (type!="Variant")
 			UIA_Variant(var,type,var)
@@ -4176,7 +5521,7 @@ CreatePropertyCondition(propertyId, ByRef var, type :="Variant") {     ;möge die
 		}
 	}
 
-CreatePropertyCondition(propertyId, ByRef var, type := "Variant") {        ;oder diese besser sein
+CreatePropertyCondition(propertyId, ByRef var, type := "Variant") {        ;I hope this one is better
         ; CREDITS: Elgin, http://ahkscript.org/boards/viewtopic.php?f=5&t=6979&p=43985#p43985
         ; Parameters:
         ;   propertyId  - An ID number of the property to check.
@@ -4251,175 +5596,12 @@ getControlNameByHwnd(_, controlHwnd) {
 }
 
 ;}
+; CreatePropertyCondition()	|	CreatePropertyCondition()	|	CreatePropertyConditionEx()	|	getControlNameByHwnd()	|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ;{ACC (MSAA) - different methods
 
-Acc_Get(Cmd, ChildPath="", ChildID=0, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {
-	static properties := {Action:"DefaultAction", DoAction:"DoDefaultAction", Keyboard:"KeyboardShortcut"}
-	AccObj :=   IsObject(WinTitle)? WinTitle
-			:   Acc_ObjectFromWindow( WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText), 0 )
-	if ComObjType(AccObj, "Name") != "IAccessible"
-		ErrorLevel := "Could not access an IAccessible Object"
-	else {
-		StringReplace, ChildPath, ChildPath, _, %A_Space%, All
-		AccError:=Acc_Error(), Acc_Error(true)
-		Loop Parse, ChildPath, ., %A_Space%
-			try {
-				if A_LoopField is digit
-					Children:=Acc_Children(AccObj), m2:=A_LoopField ; mimic "m2" output in else-statement
-				else
-					RegExMatch(A_LoopField, "(\D*)(\d*)", m), Children:=Acc_ChildrenByRole(AccObj, m1), m2:=(m2?m2:1)
-				if Not Children.HasKey(m2)
-					throw
-				AccObj := Children[m2]
-			} catch {
-				ErrorLevel:="Cannot access ChildPath Item #" A_Index " -> " A_LoopField, Acc_Error(AccError)
-				if Acc_Error()
-					throw Exception("Cannot access ChildPath Item", -1, "Item #" A_Index " -> " A_LoopField)
-				return
-			}
-		Acc_Error(AccError)
-		StringReplace, Cmd, Cmd, %A_Space%, , All
-		properties.HasKey(Cmd)? Cmd:=properties[Cmd]:
-		try {
-			if (Cmd = "Location")
-				AccObj.accLocation(ComObj(0x4003,&x:=0), ComObj(0x4003,&y:=0), ComObj(0x4003,&w:=0), ComObj(0x4003,&h:=0), ChildId)
-			      , ret_val := "x" NumGet(x,0,"int") " y" NumGet(y,0,"int") " w" NumGet(w,0,"int") " h" NumGet(h,0,"int")
-			else if (Cmd = "Object")
-				ret_val := AccObj
-			else if Cmd in Role,State
-				ret_val := Acc_%Cmd%(AccObj, ChildID+0)
-			else if Cmd in ChildCount,Selection,Focus
-				ret_val := AccObj["acc" Cmd]
-			else
-				ret_val := AccObj["acc" Cmd](ChildID+0)
-		} catch {
-			ErrorLevel := """" Cmd """ Cmd Not Implemented"
-			if Acc_Error()
-				throw Exception("Cmd Not Implemented", -1, Cmd)
-			return
-		}
-		return ret_val, ErrorLevel:=0
-	}
-	if Acc_Error()
-		throw Exception(ErrorLevel,-1)
-}
-Acc_Error(p="") {
-   static setting:=0
-   return p=""?setting:setting:=p
-}
-Acc_ChildrenByRole(Acc, Role) {
-   if ComObjType(Acc,"Name")!="IAccessible"
-      ErrorLevel := "Invalid IAccessible Object"
-   else {
-      Acc_Init(), cChildren:=Acc.accChildCount, Children:=[]
-      if DllCall("oleacc\AccessibleChildren", "Ptr",ComObjValue(Acc), "Int",0, "Int",cChildren, "Ptr",VarSetCapacity(varChildren,cChildren*(8+2*A_PtrSize),0)*0+&varChildren, "Int*",cChildren)=0 {
-         Loop %cChildren% {
-            i:=(A_Index-1)*(A_PtrSize*2+8)+8, child:=NumGet(varChildren,i)
-            if NumGet(varChildren,i-8)=9
-               AccChild:=Acc_Query(child), ObjRelease(child), Acc_Role(AccChild)=Role?Children.Insert(AccChild):
-            else
-               Acc_Role(Acc, child)=Role?Children.Insert(child):
-         }
-         return Children.MaxIndex()?Children:, ErrorLevel:=0
-      } else
-         ErrorLevel := "AccessibleChildren DllCall Failed"
-   }
-   if Acc_Error()
-      throw Exception(ErrorLevel,-1)
-}
-
-getControlNameByHwnd(winHwnd,controlHwnd) { ;ACC Version wahrscheinlich
-	bufSize=1024
-	winget,processID,pid,ahk_id %winHwnd%
-	VarSetCapacity(var1,bufSize)
-	getName:=DllCall( "RegisterWindowMessage", "str", "WM_GETCONTROLNAME" )
-	dwResult:=DllCall("GetWindowThreadProcessId", "UInt", winHwnd)
-	hProcess:=DllCall("OpenProcess", "UInt", 0x8 | 0x10 | 0x20, "Uint", 0, "UInt", processID)
-	otherMem:=DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", bufSize, "UInt", 0x3000, "UInt", 0x0004, "Ptr")
-
-	SendMessage,%getName%,%bufSize%,%otherMem%,,ahk_id %controlHwnd%
-	DllCall("ReadProcessMemory","UInt",hProcess,"UInt",otherMem,"Str",var1,"UInt",bufSize,"UInt *",0)
-	DllCall("CloseHandle","Ptr",hProcess)
-	DllCall("VirtualFreeEx","Ptr", hProcess,"UInt",otherMem,"UInt", 0, "UInt", 0x8000)
-	return var1
-
-}
-
-;}
-;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-;{Internet Explorer/Chrome/FireFox/HTML functions
-; AutoHotkey_L: von jethrow
-IEGet(name="") {
-   IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
-   Name := (Name="New Tab - Windows Internet Explorer")? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
-   for WB in ComObjCreate("Shell.Application").Windows
-      if WB.LocationName=Name and InStr(WB.FullName, "iexplore.exe")
-         return WB
-}
-; AHK Basic:
-IEGet(name="") {
-   IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
-   Name := (Name="New Tab - Windows Internet Explorer") ? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
-   oShell := COM_CreateObject("Shell.Application") ; Contains reference to all explorer windows
-   Loop, % COM_Invoke(oShell, "Windows.Count") {
-      if pwb := COM_Invoke(oShell, "Windows", A_Index-1)
-         if COM_Invoke(pwb, "LocationName")=name and InStr(COM_Invoke(pwb, "FullName"), "iexplore.exe")
-            Break
-      COM_Release(pwb), pwb := ""
-   }
-   COM_Release(oShell)
-   return, pwb
-}
-; AutoHotkey_L:
-WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ; based on ComObjQuery docs
-	static	msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
-	,	IID := "{0002DF05-0000-0000-C000-000000000046}" ; IID_IWebBrowserApp
-;	,	IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IHTMLWindow2
-	SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
-	if (ErrorLevel != "FAIL") {
-		lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
-		if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
-			DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
-			return ComObj(9,ComObjQuery(pdoc,IID,IID),1), ObjRelease(pdoc)
-		}
-	}
-}
-; AHK Basic:
-WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ; based on Sean's GetWebBrowser function
-	static msg, IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IWebBrowserApp
-	if Not msg
-		msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
-	SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
-	if (ErrorLevel != "FAIL") {
-		lResult:=ErrorLevel, GUID:=COM_GUID4String(IID_IHTMLDocument2,"{332C4425-26CB-11D0-B483-00C04FD90119}")
-		DllCall("oleacc\ObjectFromLresult", "Uint",lResult, "Uint",GUID, "int",0, "UintP",pdoc)
-		return COM_QueryService(pdoc,IID,IID), COM_Release(pdoc)
-	}
-}
-;
-wb := WBGet()				;inner HTML
-MsgBox % wb.document.documentElement.innerHTML
-WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ; based on ComObjQuery docs
-   static   msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
-         ,  IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IWebBrowserApp
-   SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
-   if (ErrorLevel != "FAIL") {
-      lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
-      if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
-         DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
-         return ComObj(9,ComObjQuery(pdoc,IID,IID),1), ObjRelease(pdoc)
-      }
-   }
-}
-; Firefox
-SetTitleMatchMode 2
-MsgBox % Acc_Get("Value", "4.20.2.4.2", 0, "Firefox")
-MsgBox % Acc_Get("Value", "application1.property_page1.tool_bar2.combo_box1.editable_text1", 0, "Firefox")
 Acc_Get(Cmd, ChildPath="", ChildID=0, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {
 	static properties := {Action:"DefaultAction", DoAction:"DoDefaultAction", Keyboard:"KeyboardShortcut"}
 	AccObj :=   IsObject(WinTitle)? WinTitle
@@ -4516,7 +5698,99 @@ VARIANTstruct() { ;so wahrscheinlich nicht funktionsfÃ¤hig
 
 }
 
+getControlNameByHwnd(winHwnd,controlHwnd) { ;ACC Version wahrscheinlich
+	bufSize=1024
+	winget,processID,pid,ahk_id %winHwnd%
+	VarSetCapacity(var1,bufSize)
+	getName:=DllCall( "RegisterWindowMessage", "str", "WM_GETCONTROLNAME" )
+	dwResult:=DllCall("GetWindowThreadProcessId", "UInt", winHwnd)
+	hProcess:=DllCall("OpenProcess", "UInt", 0x8 | 0x10 | 0x20, "Uint", 0, "UInt", processID)
+	otherMem:=DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", bufSize, "UInt", 0x3000, "UInt", 0x0004, "Ptr")
+
+	SendMessage,%getName%,%bufSize%,%otherMem%,,ahk_id %controlHwnd%
+	DllCall("ReadProcessMemory","UInt",hProcess,"UInt",otherMem,"Str",var1,"UInt",bufSize,"UInt *",0)
+	DllCall("CloseHandle","Ptr",hProcess)
+	DllCall("VirtualFreeEx","Ptr", hProcess,"UInt",otherMem,"UInt", 0, "UInt", 0x8000)
+	return var1
+
+}
+
 ;}
+; Acc_Get()						|	Acc_Error()						|	Acc_ChildrenByRole()				|	getControlNameByHwnd()	|
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+;{Internet Explorer/Chrome/FireFox/HTML functions
+; AutoHotkey_L: von jethrow
+IEGet(name="") {
+   IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
+   Name := (Name="New Tab - Windows Internet Explorer")? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
+   for WB in ComObjCreate("Shell.Application").Windows
+      if WB.LocationName=Name and InStr(WB.FullName, "iexplore.exe")
+         return WB
+}
+; AHK Basic:
+IEGet(name="") {
+   IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
+   Name := (Name="New Tab - Windows Internet Explorer") ? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
+   oShell := COM_CreateObject("Shell.Application") ; Contains reference to all explorer windows
+   Loop, % COM_Invoke(oShell, "Windows.Count") {
+      if pwb := COM_Invoke(oShell, "Windows", A_Index-1)
+         if COM_Invoke(pwb, "LocationName")=name and InStr(COM_Invoke(pwb, "FullName"), "iexplore.exe")
+            Break
+      COM_Release(pwb), pwb := ""
+   }
+   COM_Release(oShell)
+   return, pwb
+}
+; AutoHotkey_L:
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ; based on ComObjQuery docs
+	static	msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+	,	IID := "{0002DF05-0000-0000-C000-000000000046}" ; IID_IWebBrowserApp
+;	,	IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IHTMLWindow2
+	SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
+	if (ErrorLevel != "FAIL") {
+		lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
+		if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
+			DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
+			return ComObj(9,ComObjQuery(pdoc,IID,IID),1), ObjRelease(pdoc)
+		}
+	}
+}
+; AHK Basic:
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ; based on Sean's GetWebBrowser function
+	static msg, IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IWebBrowserApp
+	if Not msg
+		msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+	SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
+	if (ErrorLevel != "FAIL") {
+		lResult:=ErrorLevel, GUID:=COM_GUID4String(IID_IHTMLDocument2,"{332C4425-26CB-11D0-B483-00C04FD90119}")
+		DllCall("oleacc\ObjectFromLresult", "Uint",lResult, "Uint",GUID, "int",0, "UintP",pdoc)
+		return COM_QueryService(pdoc,IID,IID), COM_Release(pdoc)
+	}
+}
+;
+wb := WBGet()				;inner HTML
+MsgBox % wb.document.documentElement.innerHTML
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ; based on ComObjQuery docs
+   static   msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+         ,  IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IWebBrowserApp
+   SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
+   if (ErrorLevel != "FAIL") {
+      lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
+      if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
+         DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
+         return ComObj(9,ComObjQuery(pdoc,IID,IID),1), ObjRelease(pdoc)
+      }
+   }
+}
+; Firefox
+SetTitleMatchMode 2
+MsgBox % Acc_Get("Value", "4.20.2.4.2", 0, "Firefox")
+MsgBox % Acc_Get("Value", "application1.property_page1.tool_bar2.combo_box1.editable_text1", 0, "Firefox")
+
+;}
+; IEGet()							|	WBGet()							|
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4548,142 +5822,15 @@ ComVarSet(cv, v, p*) { ; Called when script sets an unknown field.
 
 
 ;}
-
+; ComVar()						|	ComVarGet()					|	ComVarSet()						|
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;----- NOT SORTED FUNCTION OR FUNCTION I CANT IDENTIFY - but looks interesting
-Highlight(reg, delay=1500 {
-
-    ;{-------------------------------------------------------------------------------
-    ;
-    ; Function: Highlight
-    ; Description:
-    ;		Show a red rectangle outline to highlight specified region, it's useful to debug
-    ; Syntax: Highlight(region [, delay = 1500])
-    ; Parameters:
-    ;		reg - The region for highlight
-    ;		delay - Show time (milliseconds)
-    ; Return Value:
-    ;		 Real string without variable(s) - "this string has real variable"
-    ; Related:
-    ;		SendSpiCall, SendWapiCall
-    ; Remarks:
-    ;		#Include, Gdip.ahk
-    ; Example:
-    ;		Highlight("100,200,300,400")
-    ;		Highlight("100,200,300,400", 1000)
-    ;
-    ;-------------------------------------------------------------------------------
-    ;}
-
-    global @reg_global
-; Start gdi+
-	If !pToken := Gdip_Startup()
-	{
-		MsgBox, 48, gdiplus error!, Gdiplus failed to start. Please ensure you have gdiplus on your system
-		ExitApp
-	}
-
-	StringSplit, g_coors, @reg_global, `,
-	; Set the width and height we want as our drawing area, to draw everything in. This will be the dimensions of our bitmap
-	Width := g_coors3
-	Height := g_coors4
-    ; Create a layered window (+E0x80000 : must be used for UpdateLayeredWindow to work!) that is always on top (+AlwaysOnTop), has no taskbar entry or caption
-	Gui, 1: -Caption +E0x80000 +LastFound +OwnDialogs +Owner +AlwaysOnTop
-
-	; Show the window
-	Gui, 1: Show, NA
-
-	; Get a handle to this window we have created in order to update it later
-	hwnd1 := WinExist()
-
-	; Create a gdi bitmap with width and height of what we are going to draw into it. This is the entire drawing area for everything
-	hbm := CreateDIBSection(Width, Height)
-
-	; Get a device context compatible with the screen
-	hdc := CreateCompatibleDC()
-
-	; Select the bitmap into the device context
-	obm := SelectObject(hdc, hbm)
-
-	; Get a pointer to the graphics of the bitmap, for use with drawing functions
-	G := Gdip_GraphicsFromHDC(hdc)
-
-	; Set the smoothing mode to antialias = 4 to make shapes appear smother (only used for vector drawing and filling)
-	Gdip_SetSmoothingMode(G, 4)
 
 
-	; Create a slightly transparent (66) blue pen (ARGB = Transparency, red, green, blue) to draw a rectangle
-	; This pen is wider than the last one, with a thickness of 10
-	pPen := Gdip_CreatePen(0xffff0000, 2)
+;{Scite4AHK options
 
-	; Draw a rectangle onto the graphics of the bitmap using the pen just created
-	; Draws the rectangle from coordinates (250,80) a rectangle of 300x200 and outline width of 10 (specified when creating the pen)
-
-	StringSplit, reg_coors, reg, `,
-	x := reg_coors1
-	y := reg_coors2
-	w := reg_coors3 - reg_coors1
-	h := reg_coors4 - reg_coors2
-
-	Gdip_DrawRectangle(G, pPen, x, y, w, h)
-
-	; Delete the brush as it is no longer needed and wastes memory
-	Gdip_DeletePen(pPen)
-
-	; Update the specified window we have created (hwnd1) with a handle to our bitmap (hdc), specifying the x,y,w,h we want it positioned on our screen
-	; So this will position our gui at (0,0) with the Width and Height specified earlier
-	UpdateLayeredWindow(hwnd1, hdc, 0, 0, Width, Height)
-
-	; Select the object back into the hdc
-	SelectObject(hdc, obm)
-
-	; Now the bitmap may be deleted
-	DeleteObject(hbm)
-
-	; Also the device context related to the bitmap may be deleted
-	DeleteDC(hdc)
-
-	; The graphics may now be deleted
-	Gdip_DeleteGraphics(G)
-	Sleep, %delay%
-	Gui, 1: Show, Hide
-	Gdip_Shutdown(pToken)
-}
-SetLayout(layout, winid) {		;keyboard layout
-    Result := (DllCall("LoadKeyboardLayout", "Str", layout, "UInt", "257"))
-    DllCall("SendMessage", "UInt", winid, "UInt", "80", "UInt", "1", "UInt", Result)
-}
-monitorInfo(){
-	sysget,monitorCount,monitorCount
-	arr:=[],sorted:=[]
-	loop % monitorCount {
-		sysget,mon,monitor,% a_index
-		arr.insert({l:monLeft,r:monRight,b:monBottom,t:monTop,w:monRight-monLeft+1,h:monBottom-monTop+1})
-		k:=a_index
-		while strlen(k)<3
-			k:="0" k
-		sorted[monLeft k]:=a_index
-	}
-	arr2:=[]
-	for k,v in sorted
-		arr2.insert(arr[v])
-	return arr2
-}
-/*
-	return [current monitor, monitor count]
-*/
-whichMonitor(x="",y="",byref monitorInfo=""){
-	CoordMode,mouse,screen
-	if (x="" || y="")
-		mousegetpos,x,y
-	if !IsObject(monitorInfo)
-		monitorInfo:=monitorInfo()
-
-	for k,v in monitorInfo
-		if (x>=v.l&&x<=v.r&&y>=v.t&&y<=v.b)
-			return [k,monitorInfo.maxIndex()]
-}
-
+	;{ Toggle All Fold RightContextMenu
 # 23 Un/Fold #Region
 command.name.23.$(ahk)=Toggle Fold #Region
 command.23.*.ahk=dostring local text = editor:GetText() tReg = {} pos, iEnd = text:find('#[Rr][Ee][Gg][Ii][Oo][Nn]') \
@@ -4694,73 +5841,8 @@ for i=1, #tReg do editor:GotoPos(tReg[i]) editor.CurrentPos = tReg[i] \
 scite.MenuCommand(IDM_EXPAND) end end
 command.mode.23.*=subsystem:lua
 command.shortcut.23.*.ahk=Ctrl+Alt+F12
+		;}
 
-;{AutoHotKey ControlClick Double Click Example
-ControlClick2(X, Y, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="")  {
-  hwnd:=ControlFromPoint(X, Y, WinTitle, WinText, cX, cY
-                             , ExcludeTitle, ExcludeText)
-  PostMessage, 0x201, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONDOWN
-  PostMessage, 0x202, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONUP
-  PostMessage, 0x203, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONDBLCLCK
-  PostMessage, 0x202, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONUP
-}
-
-ControlFromPoint(X, Y, WinTitle="", WinText="", ByRef cX="", ByRef cY="", ExcludeTitle="", ExcludeText="") {
-    static EnumChildFindPointProc=0
-    if !EnumChildFindPointProc
-        EnumChildFindPointProc := RegisterCallback("EnumChildFindPoint","Fast")
-
-    if !(target_window := WinExist(WinTitle, WinText, ExcludeTitle, ExcludeText))
-        return false
-
-    VarSetCapacity(rect, 16)
-    DllCall("GetWindowRect","uint",target_window,"uint",&rect)
-    VarSetCapacity(pah, 36, 0)
-    NumPut(X + NumGet(rect,0,"int"), pah,0,"int")
-    NumPut(Y + NumGet(rect,4,"int"), pah,4,"int")
-    DllCall("EnumChildWindows","uint",target_window,"uint",EnumChildFindPointProc,"uint",&pah)
-    control_window := NumGet(pah,24) ? NumGet(pah,24) : target_window
-    DllCall("ScreenToClient","uint",control_window,"uint",&pah)
-    cX:=NumGet(pah,0,"int"), cY:=NumGet(pah,4,"int")
-    return control_window
-}
-
-EnumChildFindPoint(aWnd, lParam) {
-    if !DllCall("IsWindowVisible","uint",aWnd)
-        return true
-    VarSetCapacity(rect, 16)
-    if !DllCall("GetWindowRect","uint",aWnd,"uint",&rect)
-        return true
-    pt_x:=NumGet(lParam+0,0,"int"), pt_y:=NumGet(lParam+0,4,"int")
-    rect_left:=NumGet(rect,0,"int"), rect_right:=NumGet(rect,8,"int")
-    rect_top:=NumGet(rect,4,"int"), rect_bottom:=NumGet(rect,12,"int")
-    if (pt_x >= rect_left && pt_x <= rect_right && pt_y >= rect_top && pt_y <= rect_bottom)
-    {
-        center_x := rect_left + (rect_right - rect_left) / 2
-        center_y := rect_top + (rect_bottom - rect_top) / 2
-        distance := Sqrt((pt_x-center_x)**2 + (pt_y-center_y)**2)
-        update_it := !NumGet(lParam+24)
-        if (!update_it)
-        {
-            rect_found_left:=NumGet(lParam+8,0,"int"), rect_found_right:=NumGet(lParam+8,8,"int")
-            rect_found_top:=NumGet(lParam+8,4,"int"), rect_found_bottom:=NumGet(lParam+8,12,"int")
-            if (rect_left >= rect_found_left && rect_right <= rect_found_right
-                && rect_top >= rect_found_top && rect_bottom <= rect_found_bottom)
-                update_it := true
-            else if (distance < NumGet(lParam+28,0,"double")
-                && (rect_found_left < rect_left || rect_found_right > rect_right
-                 || rect_found_top < rect_top || rect_found_bottom > rect_bottom))
-                 update_it := true
-        }
-        if (update_it)
-        {
-            NumPut(aWnd, lParam+24)
-            DllCall("RtlMoveMemory","uint",lParam+8,"uint",&rect,"uint",16)
-            NumPut(distance, lParam+28, 0, "double")
-        }
-    }
-    return true
-}
 ;}
 
 /* EXAMPLES
@@ -5105,3 +6187,6 @@ Return
 
 
 */
+
+
+
