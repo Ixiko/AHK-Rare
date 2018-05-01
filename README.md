@@ -12,19 +12,19 @@
 
 +more functions added<br>
 
-- PIC_GDI_GUI() - a GDI Gui for showing pictures and more
+- **PIC_GDI_GUI()** - a GDI Gui for showing pictures and more
 
-- FullScreenToggleUnderMouse() - Window to pseudo fullscreen and back
-- ControlCreateGradient() - Paint a gradient over a control - i think over buttons is not working
-- Edit control type functions - 6 functions for reading and manipulating an Edit Control
-- DPIFactor() - get DPI Factor of system running this script
-- FindWindow() - easily find any window
-- GetContextMenuState(), GetContextMenuID(), GetContextMenuText() - self descripting
-- MenuGetAll(), MenuGetAll_sub() - self descripting
-- GetListViewItemText(), GetListViewText() - retreave info's from other Listview's
-- CatMull_ControlMove() - move a control on a Bezier-Spline
-- WM_DEVICECHANGE() - OnMessage Device Change function from Autohotkey-Forum
-- GetHTMLFragment() - exactly function unknown - found anywhere maybe useful
+- **FullScreenToggleUnderMouse()** - Window to pseudo fullscreen and back
+- **ControlCreateGradient()** - Paint a gradient over a control - i think over buttons is not working
+- **Edit control type functions** - 6 functions for reading and manipulating an Edit Control
+- **DPIFactor()** - get DPI Factor of system running this script
+- **FindWindow()** - easily find any window
+- **GetContextMenuState(), GetContextMenuID(), GetContextMenuText()** - self descripting
+- **MenuGetAll(), MenuGetAll_sub()** - self descripting
+- **GetListViewItemText(), GetListViewText()** - retreave info's from other Listview's
+- **CatMull_ControlMove()** - move a control on a Bezier-Spline
+- **WM_DEVICECHANGE()** - OnMessage Device Change function from Autohotkey-Forum
+- **GetHTMLFragment()** - exactly function unknown - found anywhere maybe useful
 
 
 
