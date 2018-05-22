@@ -3,6 +3,8 @@
 
 ------
 
+![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/Misc-Functions.ahk.png)
+
 changes below! At the end of this document you can find a complete list of all functions inside
 
 ------
@@ -18,7 +20,7 @@ changes below! At the end of this document you can find a complete list of all f
 + **QuickSort()** -  Sort dense arrays or matrices based on Quicksort algorithm
 + **FrameShadow(HGui)** - Drop Shadow On Borderless Window, (DWM STYLE)
 
-####[06-May-2018] count: 217 functions
+#### [06-May-2018] count: 217 functions
 
 - **getByControlName()**  - function uses DllCalls
 - **listAccChildProperty()** - uses COM functionality
@@ -26,7 +28,7 @@ changes below! At the end of this document you can find a complete list of all f
 - **TabCtrl_GetCurSel(), TabCtrl_GetItemText()** - the first returns the 1-based index of the currently selected tab, the second returns the tab name
 
 
-####[01-May-2018] count: 208 functions
+#### [01-May-2018] count: 208 functions
 
 +more functions added<br>
 
@@ -44,12 +46,6 @@ changes below! At the end of this document you can find a complete list of all f
 - **CatMull_ControlMove()** - move a control along a Bezier-Spline
 - **WM_DEVICECHANGE()** - OnMessage Device Change function from Autohotkey-Forum
 - **GetHTMLFragment()** - what exactly does this function is unknown - found anywhere, but maybe useful
-
-
-
-+changing the layout of this file (hope you can easily find your function)
-
-![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/Misc-Functions.ahk.png)
 
 <br>
 
