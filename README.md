@@ -14,7 +14,7 @@ Last modification date: ***28.05.2018***, *Changes are below!* At the end of thi
 
 <br>
 
-#### [28-May-2018] count: 280 functions
+### [28-May-2018] count: 280 functions
 
 *Organized layout, some functions moved to the right topic, delete duplicate functions, adding more info and examples*
 
@@ -80,7 +80,7 @@ Last modification date: ***28.05.2018***, *Changes are below!* At the end of thi
 
   <br>
 
-#### [22-May-2018] count: 240 functions
+### [22-May-2018] count: 240 functions
 
 + **FindChildWindow()** - a very good function to get handles from child windows like MDI childs
 
@@ -100,7 +100,7 @@ Last modification date: ***28.05.2018***, *Changes are below!* At the end of thi
 
   <br>
 
-####[06-May-2018] count: 230 functions
+### [06-May-2018] count: 230 functions
 
 - **getByControlName()**  - function uses DllCalls
 
@@ -112,7 +112,7 @@ Last modification date: ***28.05.2018***, *Changes are below!* At the end of thi
 
   <br>
 
-####[01-May-2018] count: 221 functions
+### [01-May-2018] count: 221 functions
 
 - **PIC_GDI_GUI()** - a GDI Gui for showing pictures and more
 
