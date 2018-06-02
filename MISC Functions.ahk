@@ -1,11 +1,11 @@
 ï»¿;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-;															    Collection of rare and maybe very useful functions
-; 															    collected by IXIKO =>    last change: 28.05.2018
+;															         	  Collection of rare or very useful functions
+; 															    collected by IXIKO =>    last change: 02.06.2018
 ;																	for description have a look at AHK-Rare.md
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-;{Command - line interaction (1)
+;{Command - line interaction (3)
 CMDret_RunReturn(CMDin, WorkingDir=0) {														;--
 
 /*
@@ -119,8 +119,208 @@ CMDret_RunReturn(CMDin, WorkingDir=0) {														;--
   Return, CMDout
 }
 
+ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {		;-- Sends text to a console's input stream
+
+	; Sends text to a console's input stream. WinTitle may specify any window in
+	; the target process. Since each process may be attached to only one console,
+	; ConsoleSend fails if the script is already attached to a console.
+
+    WinGet, pid, PID, %WinTitle%, %WinText%, %ExcludeTitle%, %ExcludeText%
+    if !pid
+        return false, ErrorLevel:="window"
+    ; Attach to the console belonging to %WinTitle%'s process.
+    if !DllCall("AttachConsole", "uint", pid)
+        return false, ErrorLevel:="AttachConsole"
+    hConIn := DllCall("CreateFile", "str", "CONIN$", "uint", 0xC0000000
+                , "uint", 0x3, "uint", 0, "uint", 0x3, "uint", 0, "uint", 0)
+    if hConIn = -1
+        return false, ErrorLevel:="CreateFile"
+
+    VarSetCapacity(ir, 24, 0)       ; ir := new INPUT_RECORD
+    NumPut(1, ir, 0, "UShort")      ; ir.EventType := KEY_EVENT
+    NumPut(1, ir, 8, "UShort")      ; ir.KeyEvent.wRepeatCount := 1
+    ; wVirtualKeyCode, wVirtualScanCode and dwControlKeyState are not needed,
+    ; so are left at the default value of zero.
+
+    Loop, Parse, text ; for each character in text
+    {
+        NumPut(Asc(A_LoopField), ir, 14, "UShort")
+
+        NumPut(true, ir, 4, "Int")  ; ir.KeyEvent.bKeyDown := true
+        gosub ConsoleSendWrite
+
+        NumPut(false, ir, 4, "Int") ; ir.KeyEvent.bKeyDown := false
+        gosub ConsoleSendWrite
+    }
+    gosub ConsoleSendCleanup
+    return true
+
+    ConsoleSendWrite:
+        if ! DllCall("WriteConsoleInput", "uint", hconin, "uint", &ir, "uint", 1, "uint*", 0)
+        {
+            gosub ConsoleSendCleanup
+            return false, ErrorLevel:="WriteConsoleInput"
+        }
+    return
+
+    ConsoleSendCleanup:
+        if (hConIn!="" && hConIn!=-1)
+            DllCall("CloseHandle", "uint", hConIn)
+        ; Detach from %WinTitle%'s console.
+        DllCall("FreeConsole")
+    return
+}
+;{ sub
+ScanCode( wParam, lParam ) {
+ Clipboard := "SC" SubStr((((lParam>>16) & 0xFF)+0xF000),-2)
+ GuiControl,, SC, %Clipboard%
+}
 ;}
-; CMDret_RunReturn()
+
+StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) { 		;-- Store command line output in autohotkey variable. Supports both x86 and x64.
+
+	; Modified  :  maz-1 https://gist.github.com/maz-1/768bf7938e533907d54bff276db80904
+  Static StrGet := "StrGet"           ; Modified  :  SKAN 31-Aug-2013 http://goo.gl/j8XJXY
+                                      ; Thanks to :  HotKeyIt         http://goo.gl/IsH1zs
+                                      ; Original  :  Sean 20-Feb-2007 http://goo.gl/mxCdn
+  tcWrk := WorkingDir=0 ? "Int" : "Str"
+  DllCall( "CreatePipe", UIntP,hPipeRead, UIntP,hPipeWrite, UInt,0, UInt,0 )
+  DllCall( "SetHandleInformation", UInt,hPipeWrite, UInt,1, UInt,1 )
+  If A_PtrSize = 8
+  {
+    VarSetCapacity( STARTUPINFO, 104, 0  )      ; STARTUPINFO          ;  http://goo.gl/fZf24
+    NumPut( 68,         STARTUPINFO,  0 )      ; cbSize
+    NumPut( 0x100,      STARTUPINFO, 60 )      ; dwFlags    =>  STARTF_USESTDHANDLES = 0x100
+    NumPut( hPipeWrite, STARTUPINFO, 88 )      ; hStdOutput
+    NumPut( hPipeWrite, STARTUPINFO, 96 )      ; hStdError
+    VarSetCapacity( PROCESS_INFORMATION, 24 )  ; PROCESS_INFORMATION  ;  http://goo.gl/b9BaI
+  }
+  Else
+  {
+    VarSetCapacity( STARTUPINFO, 68, 0  )
+    NumPut( 68,         STARTUPINFO,  0 )
+    NumPut( 0x100,      STARTUPINFO, 44 )
+    NumPut( hPipeWrite, STARTUPINFO, 60 )
+    NumPut( hPipeWrite, STARTUPINFO, 64 )
+    VarSetCapacity( PROCESS_INFORMATION, 16 )
+  }
+
+	/* Tip for struct calculation
+
+		  ; Any member should be aligned to multiples of its size
+		  ; Full size of structure should be multiples of the largest member size
+		  ;============================================================================
+		  ;
+		  ; x64
+		  ; STARTUPINFO
+		  ;                             offset    size                    comment
+		  ;DWORD  cb;                   0         4
+		  ;LPTSTR lpReserved;           8         8(A_PtrSize)            aligned to 8-byte boundary (4 + 4)
+		  ;LPTSTR lpDesktop;            16        8(A_PtrSize)
+		  ;LPTSTR lpTitle;              24        8(A_PtrSize)
+		  ;DWORD  dwX;                  32        4
+		  ;DWORD  dwY;                  36        4
+		  ;DWORD  dwXSize;              40        4
+		  ;DWORD  dwYSize;              44        4
+		  ;DWORD  dwXCountChars;        48        4
+		  ;DWORD  dwYCountChars;        52        4
+		  ;DWORD  dwFillAttribute;      56        4
+		  ;DWORD  dwFlags;              60        4
+		  ;WORD   wShowWindow;          64        2
+		  ;WORD   cbReserved2;          66        2
+		  ;LPBYTE lpReserved2;          72        8(A_PtrSize)           aligned to 8-byte boundary (2 + 4)
+		  ;HANDLE hStdInput;            80        8(A_PtrSize)
+		  ;HANDLE hStdOutput;           88        8(A_PtrSize)
+		  ;HANDLE hStdError;            96        8(A_PtrSize)
+		  ;
+		  ;ALL : 96+8=104=8*13
+		  ;
+		  ; PROCESS_INFORMATION
+		  ;
+		  ;HANDLE hProcess              0         8(A_PtrSize)
+		  ;HANDLE hThread               8         8(A_PtrSize)
+		  ;DWORD  dwProcessId           16        4
+		  ;DWORD  dwThreadId            20        4
+		  ;
+		  ;ALL : 20+4=24=8*3
+		  ;============================================================================
+		  ; x86
+		  ; STARTUPINFO
+		  ;                             offset     size
+		  ;DWORD  cb;                   0          4
+		  ;LPTSTR lpReserved;           4          4(A_PtrSize)
+		  ;LPTSTR lpDesktop;            8          4(A_PtrSize)
+		  ;LPTSTR lpTitle;              12         4(A_PtrSize)
+		  ;DWORD  dwX;                  16         4
+		  ;DWORD  dwY;                  20         4
+		  ;DWORD  dwXSize;              24         4
+		  ;DWORD  dwYSize;              28         4
+		  ;DWORD  dwXCountChars;        32         4
+		  ;DWORD  dwYCountChars;        36         4
+		  ;DWORD  dwFillAttribute;      40         4
+		  ;DWORD  dwFlags;              44         4
+		  ;WORD   wShowWindow;          48         2
+		  ;WORD   cbReserved2;          50         2
+		  ;LPBYTE lpReserved2;          52         4(A_PtrSize)
+		  ;HANDLE hStdInput;            56         4(A_PtrSize)
+		  ;HANDLE hStdOutput;           60         4(A_PtrSize)
+		  ;HANDLE hStdError;            64         4(A_PtrSize)
+		  ;
+		  ;ALL : 64+4=68=4*17
+		  ;
+		  ; PROCESS_INFORMATION
+		  ;
+		  ;HANDLE hProcess              0         4(A_PtrSize)
+		  ;HANDLE hThread               4         4(A_PtrSize)
+		  ;DWORD  dwProcessId           8         4
+		  ;DWORD  dwThreadId            12        4
+		  ;
+		  ;ALL : 12+4=16=4*4
+
+	*/
+
+  If ! DllCall( "CreateProcess", UInt,0, UInt,&sCmd, UInt,0, UInt,0 ;  http://goo.gl/USC5a
+              , UInt,1, UInt,0x08000000, UInt,0, tcWrk, WorkingDir
+              , UInt,&STARTUPINFO, UInt,&PROCESS_INFORMATION )
+   {
+    DllCall( "CloseHandle", UInt,hPipeWrite )
+    DllCall( "CloseHandle", UInt,hPipeRead )
+    DllCall( "SetLastError", Int,-1 )
+    Return ""
+   }
+
+  hProcess := NumGet( PROCESS_INFORMATION, 0 )
+  hThread  := NumGet( PROCESS_INFORMATION, A_PtrSize )
+  ProcessID:= NumGet( PROCESS_INFORMATION, A_PtrSize*2 )
+
+  DllCall( "CloseHandle", UInt,hPipeWrite )
+
+  AIC := ( SubStr( A_AhkVersion, 1, 3 ) = "1.0" ) ;  A_IsClassic
+  VarSetCapacity( Buffer, 4096, 0 ), nSz := 0
+
+  While DllCall( "ReadFile", UInt,hPipeRead, UInt,&Buffer, UInt,4094, UIntP,nSz, Int,0 ) {
+
+   tOutput := ( AIC && NumPut( 0, Buffer, nSz, "Char" ) && VarSetCapacity( Buffer,-1 ) )
+              ? Buffer : %StrGet%( &Buffer, nSz, "CP0" ) ; formerly CP850, but I guess CP0 is suitable for different locales
+
+   Isfunc( Callback ) ? %Callback%( tOutput, A_Index ) : sOutput .= tOutput
+
+  }
+
+  DllCall( "GetExitCodeProcess", UInt,hProcess, UIntP,ExitCode )
+  DllCall( "CloseHandle",  UInt,hProcess  )
+  DllCall( "CloseHandle",  UInt,hThread   )
+  DllCall( "CloseHandle",  UInt,hPipeRead )
+  DllCall( "SetLastError", UInt,ExitCode  )
+  VarSetCapacity(STARTUPINFO, 0)
+  VarSetCapacity(PROCESS_INFORMATION, 0)
+
+Return Isfunc( Callback ) ? %Callback%( "", 0 ) : sOutput
+}
+
+
+;}
+; CMDret_RunReturn()			|	ConsoleSend()					|	StdOutStream()				|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -170,7 +370,7 @@ TimeCode(MaT) {																								;-- TimCode can be used for protokoll or 
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Get - functions for retreaving informations - missing something - see Gui - retreaving ... (7)
+;{Get - functions for retreaving informations - missing something - see Gui - retreaving ... (9)
 
 GetProcesses() {																								;-- get the name of all running processes
 
@@ -450,14 +650,56 @@ IsOfficeFile(FileName, Extensions = "doc,docx,xls,xlsx,ppt,pptx") { 						;-- ch
 			Return A_LoopField
 }
 
+DeskIcons(coords="") {																						;-- i think its for showing all desktop icons
+
+   Critical
+   static MEM_COMMIT := 0x1000, PAGE_READWRITE := 0x04, MEM_RELEASE := 0x8000
+   static LVM_GETITEMPOSITION := 0x00001010, LVM_SETITEMPOSITION := 0x0000100F, WM_SETREDRAW := 0x000B
+
+   ControlGet, hwWindow, HWND,, SysListView321, ahk_class Progman
+   if !hwWindow ; #D mode
+      ControlGet, hwWindow, HWND,, SysListView321, A
+   IfWinExist ahk_id %hwWindow% ; last-found window set
+      WinGet, iProcessID, PID
+   hProcess := DllCall("OpenProcess"   , "UInt",   0x438 ; PROCESS-OPERATION|READ|WRITE|QUERY_INFORMATION
+                              , "Int",   FALSE         ; inherit = false
+                              , "UInt",   iProcessID)
+   if hwWindow and hProcess
+   {
+      ControlGet, list, list,Col1
+      if !coords
+      {
+         VarSetCapacity(iCoord, 8)
+         pItemCoord := DllCall("VirtualAllocEx", "UInt", hProcess, "UInt", 0, "UInt", 8, "UInt", MEM_COMMIT, "UInt", PAGE_READWRITE)
+         Loop, Parse, list, `n
+         {
+            SendMessage, %LVM_GETITEMPOSITION%, % A_Index-1, %pItemCoord%
+            DllCall("ReadProcessMemory", "UInt", hProcess, "UInt", pItemCoord, "UInt", &iCoord, "UInt", 8, "UIntP", cbReadWritten)
+            ret .= A_LoopField ":" (NumGet(iCoord) & 0xFFFF) | ((Numget(iCoord, 4) & 0xFFFF) << 16) "`n"
+         }
+         DllCall("VirtualFreeEx", "UInt", hProcess, "UInt", pItemCoord, "UInt", 0, "UInt", MEM_RELEASE)
+      }
+      else
+      {
+         SendMessage, %WM_SETREDRAW%,0,0
+         Loop, Parse, list, `n
+            If RegExMatch(coords,"\Q" A_LoopField "\E:\K.*",iCoord_new)
+               SendMessage, %LVM_SETITEMPOSITION%, % A_Index-1, %iCoord_new%
+         SendMessage, %WM_SETREDRAW%,1,0
+         ret := true
+      }
+   }
+   DllCall("CloseHandle", "UInt", hProcess)
+   return ret
+}
+
 ;}
-; GetProcesses()				|	GetProcessWorkingDir()		|	GetTextSize()						|
-; GetTextSize()					|	monitorInfo()					|	whichMonitor()						|
-; IsOfficeFile()					|
+; GetProcesses()				|	GetProcessWorkingDir()		|	GetTextSize() x 2					|	GetTextSize()					|	monitorInfo()					|
+; whichMonitor()				|	IsOfficeFile()					|	DeskIcons()							|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Graphic functions (27)
+;{Graphic functions (29)
 
 LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="", 				;--Loads a picture and returns an HBITMAP or HICON to the caller
 aIconNumber:=0, aUseGDIPlusIfAvailable:=1) {
@@ -1354,6 +1596,7 @@ RotateAroundCenter(G, Angle, Width, Height) {													;-- GDIP rotate around
 
 ;Screenshot - functions maybe useful
 Screenshot(outfile, screen) {																				;-- screenshot function 1
+
     pToken := Gdip_Startup()
     raster := 0x40000000 + 0x00CC0020 ; get layered windows
 
@@ -1395,10 +1638,12 @@ TakeScreenshot() {																								;-- screenshot function 2
     filename := UserProfile "\downloads\screenshot " CurrentDateTime ".png"
 
     Screenshot(filename,area)
+
 return
 }
 
 CaptureWindow(hwndOwner, hwnd) {																;-- screenshot function 3
+
     VarSetCapacity(RECT, 16, 0)
     DllCall("GetWindowRect", "Ptr", hwnd, "Ptr", &RECT)
     width  := NumGet(RECT, 8, "Int")  - NumGet(RECT, 0, "Int")
@@ -1424,6 +1669,7 @@ CaptureWindow(hwndOwner, hwnd) {																;-- screenshot function 3
     DllCall("ReleaseDC", "Ptr", 0, "Ptr", hdc)
 
     Return True
+
 }
 ;-----------------------------------------------
 
@@ -1604,6 +1850,91 @@ BGR(RGB) {																										;-- BGR() subfunction from CreateBMPGradient
 }
 ;}
 
+CreatePatternBrushFrom(hbm, x, y, w, h) {															;-- as it says
+
+	;found on https://autohotkey.com/board/topic/20588-adding-pictures-to-controls-eg-as-background/page-3
+
+    hbm1 := DllCall("CopyImage","uint",hbm,"uint",0,"int",0,"int",0,"uint",0x2000)
+
+    VarSetCapacity(dib,84,0)
+    DllCall("GetObject","uint",hbm1,"int",84,"uint",&dib)
+    NumPut(h,NumPut(w,dib,28))
+    hbm2 := DllCall("CreateDIBSection","uint",0,"uint",&dib+24,"uint",0,"uint*",0,"uint",0,"uint",0)
+
+    Loop, 2 {
+        hdc%A_Index% := DllCall("CreateCompatibleDC","uint",0)
+        obm%A_Index% := DllCall("SelectObject","uint",hdc%A_index%,"uint",hbm%A_Index%)
+    }
+
+    DllCall("BitBlt"
+        ,"uint",hdc2,"int",0,"int",0,"int",w,"int",h    ; destination
+        ,"uint",hdc1,"int",x,"int",y                    ; source
+        ,"uint",0xCC0020)                               ; operation = SRCCOPY
+
+    Loop, 2 {
+        DllCall("SelectObject","uint",hdc%A_Index%,"uint",obm%A_Index%)
+        DllCall("DeleteDC","uint",hdc%A_Index%)
+    }
+
+    hbr := DllCall("CreatePatternBrush","uint",hbm2)
+    DllCall("DeleteObject","uint",hbm2)
+    DllCall("DeleteObject","uint",hbm1)
+    return hbr
+}
+
+Convert(sFileFr = "", sFileTo = "", nQuality = "") {												;-- Converts ImageFiles
+
+	;written by Sean - this function is theft from Sean's Screen Capture
+
+	If	sFileTo  =
+		sFileTo := A_ScriptDir . "\screen.bmp"
+	SplitPath, sFileTo, , sDirTo, sExtTo, sNameTo
+
+	If Not	hGdiPlus := DllCall("LoadLibrary", "str", "gdiplus.dll")
+		Return	sFileFr+0 ? SaveHBITMAPToFile(sFileFr, sDirTo . "\" . sNameTo . ".bmp") : ""
+	VarSetCapacity(si, 16, 0), si := Chr(1)
+	DllCall("gdiplus\GdiplusStartup", "UintP", pToken, "Uint", &si, "Uint", 0)
+
+	If	!sFileFr
+	{
+		DllCall("OpenClipboard", "Uint", 0)
+		If	 DllCall("IsClipboardFormatAvailable", "Uint", 2) && (hBM:=DllCall("GetClipboardData", "Uint", 2))
+		DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Uint", hBM, "Uint", 0, "UintP", pImage)
+		DllCall("CloseClipboard")
+	}
+	Else If	sFileFr Is Integer
+		DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Uint", sFileFr, "Uint", 0, "UintP", pImage)
+	Else	DllCall("gdiplus\GdipLoadImageFromFile", "Uint", Unicode4Ansi(wFileFr,sFileFr), "UintP", pImage)
+
+	DllCall("gdiplus\GdipGetImageEncodersSize", "UintP", nCount, "UintP", nSize)
+	VarSetCapacity(ci,nSize,0)
+	DllCall("gdiplus\GdipGetImageEncoders", "Uint", nCount, "Uint", nSize, "Uint", &ci)
+	Loop, %	nCount
+		If	InStr(Ansi4Unicode(NumGet(ci,76*(A_Index-1)+44)), "." . sExtTo)
+		{
+			pCodec := &ci+76*(A_Index-1)
+			Break
+		}
+	If	InStr(".JPG.JPEG.JPE.JFIF", "." . sExtTo) && nQuality<>"" && pImage && pCodec
+	{
+	DllCall("gdiplus\GdipGetEncoderParameterListSize", "Uint", pImage, "Uint", pCodec, "UintP", nSize)
+	VarSetCapacity(pi,nSize,0)
+	DllCall("gdiplus\GdipGetEncoderParameterList", "Uint", pImage, "Uint", pCodec, "Uint", nSize, "Uint", &pi)
+	Loop, %	NumGet(pi)
+		If	NumGet(pi,28*(A_Index-1)+20)=1 && NumGet(pi,28*(A_Index-1)+24)=6
+		{
+			pParam := &pi+28*(A_Index-1)
+			NumPut(nQuality,NumGet(NumPut(4,NumPut(1,pParam+0)+20)))
+			Break
+		}
+	}
+
+	If	pImage
+		pCodec	? DllCall("gdiplus\GdipSaveImageToFile", "Uint", pImage, "Uint", Unicode4Ansi(wFileTo,sFileTo), "Uint", pCodec, "Uint", pParam) : DllCall("gdiplus\GdipCreateHBITMAPFromBitmap", "Uint", pImage, "UintP", hBitmap, "Uint", 0) . SetClipboardData(hBitmap), DllCall("gdiplus\GdipDisposeImage", "Uint", pImage)
+
+	DllCall("gdiplus\GdiplusShutdown" , "Uint", pToken)
+	DllCall("FreeLibrary", "Uint", hGdiPlus)
+}
 
 
 ;}
@@ -1612,13 +1943,13 @@ BGR(RGB) {																										;-- BGR() subfunction from CreateBMPGradient
 ; EndDraw()						|	SetPen()							|	DrawLine()							|	SDrawRectangle()					|	SetAlpha()						|
 ; DrawRectangle()				|	Highlight()						|	Screenshot()							|	TakeScreenshot()					|	CaptureWindow()				|
 ; DrawFrameAroundControl	|	CircularText()					|	RotateAroundCenter()				|	RGBRange()							|	getSelectionCoords()			|
-; FloodFill()						|	CreateBMPGradient()			|
+; FloodFill()						|	CreateBMPGradient()			| 	CreatePatternBushFrom()			|	Convert()								|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{GUI FUNCTIONS SECTION (120)
+;{GUI FUNCTIONS SECTION (138)
 
-    ;{Gui - Customizable full gui functions, custom gui elements
+    ;{Gui - Customizable full gui functions, custom gui elements (12)
 
 HtmlBox(Html, Title="", Timeout=0, Permanent=False,										;-- Gui with ActiveX - Internet Explorer - Control
 GUIOptions="Resize MaximizeBox Minsize420x320",
@@ -2290,7 +2621,7 @@ CreateHotkeyWindow(key) {      	 																		;-- Hotkey Window
 
 ;}
 
-    ;{Gui - changing functions
+    ;{Gui - changing functions (12)
 
 FadeGui(guihwnd, fading_time, inout) {																;-- used DllCall to Animate (Fade in/out) a window
 
@@ -2304,6 +2635,68 @@ FadeGui(guihwnd, fading_time, inout) {																;-- used DllCall to Animat
 
 return
 }
+
+WinFadeToggle(WinTitle, Duration := 1, Hide := false) {									;--
+
+	;attention: you need library print.ahk
+
+	/**
+	*  WinFadeTo( WinTitle, [, Duration] )
+	*   WinTitle
+	*      A window title identifying the name of the target window.
+	*   Duration (default 1 second)
+	*      A number (in seconds) defining how long the animation will take to complete.
+	*      NOTE: The duration cannot be set to lower than 1 second.
+	*   Hide (disabled by default)
+	*      Set the visible state of the target window after fade out.
+	*      NOTE: Enabled by default if "DetectHiddenWindows" is set to on, otherwise disabled.
+	*/
+
+	DetectHiddenWindows, On     ; Determines whether invisible windows are "seen" by the script.
+	; Declarations
+	LoopCount := 64 * Duration                      ; Calculated number of iterations for loop
+	WinGet, WinOpacity, Transparent, %WinTitle%     ; Get transparency level of target window
+
+	; Return error if target window does not exist or is not active
+	If !WinExist(WinTitle) && !WinActive(WinTitle) {
+		ErrorMessage := "Target window is not active or does not exist."
+	}
+
+	; Check "DetectHiddenWindows" state
+	If( A_DetectHiddenWindows = "On" ) {
+		Hide := true
+	}
+
+	; Check target window for transparency level
+	If ( WinOpacity = "" ) {
+		WinSet, Transparent, 255, %WinTitle% ; Set transparency of target window
+	}
+
+	; Set the direction of the fade (in/out)
+	If(WinOpacity = 255 || WinOpacity = "") {
+		start := -255
+		} else {
+			start := 0
+			WinShow, %WinTitle%
+			WinActivate, %WinTitle%     ; Activate target window on fade in
+		}
+
+		; Iterate through each change in opacity level
+		timer_start := A_TickCount ; Log time of fade start
+		Loop, % LoopCount {
+			opacity := Abs(255/LoopCount * A_Index + start) ; opacity value for the current iteration
+			WinSet, Transparent, %opacity%, %WinTitle%      ; Set opacity level for target window
+			Sleep, % duration                               ; Pause between each iteration
+		}
+		timer_stop := A_TickCount ; Log time of fade completion
+
+		; Hide target window after fade-out completes
+		If(start != 0 && Hide = true) {
+			WinHide, %WinTitle%
+		}
+
+		Return ErrorMessage
+	}
 
 ShadowBorder(handle) {																					;-- used DllCall to draw a shadow around a gui
 
@@ -2624,9 +3017,9 @@ IsWindow(hWnd*) {
 
 ;}
 
-	;{Gui - control type functions
+	;{Gui - control type functions (22)
 
-		;{Edit and HEdit control functions
+		;{Edit and HEdit control functions (7)
 
 				;************************
 				; Edit Control Functions
@@ -2763,7 +3156,7 @@ IsWindow(hWnd*) {
 
 		;}
 
-		;{ImageList control type functions
+		;{ImageList control type functions (2)
 
 IL_LoadIcon(FullFilePath, IconNumber := 1, LargeIcon := 1) {									;--
 	HIL := IL_Create(1, 1, !!LargeIcon)
@@ -2798,7 +3191,7 @@ IL_GuiButtonIcon(Handle, File, Index := 1, Options := "") {											;--
 
 		;}
 
-		;{Listview functions
+		;{Listview functions (8)
 
 LV_GetCount(hLV) {																									;-- get current count of notes in a listview
 
@@ -3160,9 +3553,76 @@ InsertInteger(pInteger, ByRef pDest, pOffset = 0, pSize = 4) {
    }
 }
 ;}
+
+LV_SetBackgroundURL(URL, ControlID) {																	;-- set a ListView's background image - please pay attention to the description
+
+	/*											Function: LV_SetBackgroundURL
+
+		Origin 	: https://autohotkey.com/board/topic/20588-adding-pictures-to-controls-eg-as-background/#entry135365
+		Author	: Lexikos
+
+		The function below tiles the background, since the only alternative is to attach it to the top-left of the very first item (in which
+		case it scrolls with the ListView's contents.)
+
+		Since LVM_SETBKIMAGE (internally) uses COM, CoInitialize() must be called when the script starts:
+
+		DllCall("ole32\CoInitialize", "uint", 0)
+
+		..and CoUninitialize() when the script exits:
+
+		DllCall("ole32\CoUninitialize")Important: The ListView/GUI should be destroyed before calling CoUninitialize(),
+		otherwise the script will crash on exit for some versions of Windows.
+
+		LVM_SETBKIMAGE can be made to accept a bitmap handle, so it would be possible to manually stretch an image to fit the
+		ListView rather than tiling it. (Search MSDN for LVM_SETBKIMAGE.)
+
+	*/
+
+	/*											Example
+
+		LV_SetBackgroundURL("http://www.autohotkey.com/docs/images/AutoHotkey_logo.gif", "SysListView321")
+
+		If the ListView has an associated variable, its name can be used in place of SysListView321.
+		Don't forget CoInitialize() and CoUninitialize().
+
+		Edit: Added line to set text background to transparent. Also added note about destroying GUI before CoUninitialize().
+
+	*/
+
+	; URL:          URL or file path (absolute, not relative)
+	; ControlID:    ClassNN or associated variable of a ListView on the default GUI.
+
+    GuiControlGet, hwnd, Hwnd, %ControlID%
+    VarSetCapacity(bki, 24, 0)
+    NumPut(0x2|0x10, bki, 0)  ; LVBKIF_SOURCE_URL | LVBKIF_STYLE_TILE
+    NumPut(&URL, bki, 8)
+    SendMessage, 0x1044, 0, &bki,, ahk_id %hwnd%  ; LVM_SETBKIMAGE
+    SendMessage, 0x1026, 0, -1,, ahk_id %ControlID%  ; LVM_SETTEXTBKCOLOR,, CLR_NONE
+}
+
+LV_MoveRow(up=true) {																							;-- moves a listview row up or down
+
+	if (up && LV_GetNext() == 1)
+	|| (!up && LV_GetNext() == LV_GetCount())
+	|| (LV_GetNext() == 0)
+		return
+
+	pos := LV_GetNext()
+	, xpos := up ? pos-1 : pos+1
+
+	Loop,% LV_GetCount("Col") {
+		LV_GetText(a, pos, A_Index)
+		LV_GetText(b, xpos, A_Index)
+		LV_Modify(pos, "Col" A_Index, b)
+		LV_Modify(xpos, "Col" A_Index, a)
+	}
+	LV_Modify(pos, "-Select -Focus")
+	, LV_Modify(xpos, "Select Focus")
+}
+
 ;}
 
-		;{TabControl functions
+		;{TabControl functions (2)
 
 TabCtrl_GetCurSel(HWND) { 																						;-- Indexnumber of active tab in a gui
 	; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
@@ -3215,7 +3675,7 @@ SetError(ErrorValue, ReturnValue) {
 
 		;}
 
-		;{Treeview functions
+		;{Treeview functions (2)
 
 TV_Find(VarText) {																										;-- returns the ID of an item based on the text of the item
 
@@ -3416,7 +3876,7 @@ TV_Load(src, p:=0, recurse:=false) {																			;-- loads TreeView items 
 
 		;}
 
-		;{GDI Control functions
+		;{GDI Control functions (2)
 
 ControlCreateGradient(Handle, Colors*) {																	;-- draws a gradient as background picture
 
@@ -3471,9 +3931,9 @@ AddGraphicButtonPlus(ImgPath, Options="", Text="") {												;-- GDI+ add a g
 
 	;}
 
-    ;{Gui - retreaving informations functions
+    ;{Gui - retreaving informations functions (68)
 
-;{ SCREEN-------get
+;{ SCREEN-------get (2)
 screenDims() {																											;-- returns informations of active screen (size, DPI and orientation)
 
 	W := A_ScreenWidth
@@ -3499,7 +3959,7 @@ DPIFactor() {																												;-- determines the Windows setting to t
 
 ;}
 
-;{ CONTROL type - get (not control specific functions)
+;{ CONTROL type - get (not control specific functions) (12)
 
 ControlExists(class) {																									;-- true/false for ControlClass
   WinGet, WinList, List  ;gets a list of all windows
@@ -3705,9 +4165,61 @@ getByControlName(winHwnd,name) {																		;-- search by control name ret
     return arr
 }
 
+getNextControl(winHwnd, controlName="", accName="", classNN="", accHelp="") {	;-- I'm not sure if this feature works could be an AHK code for the Control.GetNextControl method for System.Windows.Forms
+
+	winget, list, controllisthwnd, ahk_id %winHwnd%
+
+	bufSize=1024
+	winget, processID, pid, ahk_id %winHwnd%
+	VarSetCapacity(var1,bufSize)
+	getName:=DllCall( "RegisterWindowMessage", "str", "WM_GETCONTROLNAME" )
+	dwResult:=DllCall("GetWindowThreadProcessId", "UInt", winHwnd)
+	hProcess:=DllCall("OpenProcess", "UInt", 0x8 | 0x10 | 0x20, "Uint", 0, "UInt", processID)
+	otherMem:=DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", bufSize, "UInt", 0x3000, "UInt", 0x0004, "Ptr")
+
+	count=0
+	;~ static hModule := DllCall("LoadLibrary", "Str", "oleacc", "Ptr")
+	;~ static hModule2 := DllCall("LoadLibrary", "Str", "Kernel32", "Ptr")
+	;~ static AccessibleObjectFromWindowProc := DllCall("GetProcAddress", Ptr, DllCall("GetModuleHandle", Str, "oleacc", "Ptr"), AStr, "AccessibleObjectFromWindow", "Ptr")
+	;~ static ReadProcessMemoryProc:=DllCall("ReadProcessMemory", Ptr, DllCall("GetModuleHandle", Str, "Kernel32", "Ptr"), AStr, "AccessibleChildren", "Ptr")
+	;~ msgbox % AccessibleObjectFromWindowProc
+	;~ static idObject:=-4
+	loop,parse,list,`n
+	{
+		SendMessage,%getName%,%bufSize%,%otherMem%,,ahk_id %a_loopfield%
+        DllCall("ReadProcessMemory","UInt",hProcess,"UInt",otherMem,"Str",var1,"UInt",bufSize,"UInt *",0)
+
+		;~ acc:=acc_objectfromwindow2(a_loopfield)
+
+		;~ if !DllCall(AccessibleObjectFromWindowProc, "Ptr", a_loopfield, "UInt", idObject&=0xFFFFFFFF, "Ptr", -VarSetCapacity(IID,16)+NumPut(idObject==0xFFFFFFF0?0x46000000000000C0:0x719B3800AA000C81,NumPut(idObject==0xFFFFFFF0?0x0000000000020400:0x11CF3C3D618736E0,IID,"Int64"),"Int64"), "Ptr*", pacc)
+			;~ acc:=ComObjEnwrap(9,pacc,1)
+		;~ else
+			;~ acc:=""
+
+
+	;&&(accParentHwnd=""||acc_windowfromobject(acc.accParent)=accParentHwnd)
+		if ((var1&&var1=controlName)&&(accName=""||(acc:=Acc_ObjectFromWindow(a_loopfield)).accName=accName)){
+			WinGetClass,cl,ahk_id %a_loopfield%
+			if(instr(cl,classNN)=1&&(accHelp=""||acc.accHelp=accHelp)) {
+				ret:=a_loopfield
+				break
+			}
+		}
+
+		var1:=""
+	}
+
+    DllCall("VirtualFreeEx","Ptr", hProcess,"UInt",otherMem,"UInt", 0, "UInt", 0x8000)
+	DllCall("CloseHandle","Ptr",hProcess)
+	DllCall("FreeLibrary", "Ptr", hModule)
+	return ret
+
+}
+
+
 ;}
 
-;{ GUI / window - get
+;{ GUI / window - get (35)
 
 IsOverTitleBar(x, y, hWnd) { 																						;-- WM_NCHITTEST wrapping: what's under a screen point?
 
@@ -3722,86 +4234,84 @@ IsOverTitleBar(x, y, hWnd) { 																						;-- WM_NCHITTEST wrapping: wh
 WinGetPosEx(hWindow,ByRef X="",ByRef Y="",ByRef Width="", 									;-- gets the position, size, and offset of a window
 ByRef Height="", ByRef Offset_X="",ByRef Offset_Y="")  {
 
-/*
-;
-; Function: WinGetPosEx
-;
-; Description:
-;
-;   Gets the position, size, and offset of a window. See the *Remarks* section
-;   for more information.
-;
-; Parameters:
-;
-;   hWindow - Handle to the window.
-;
-;   X, Y, Width, Height - Output variables. [Optional] If defined, these
-;       variables contain the coordinates of the window relative to the
-;       upper-left corner of the screen (X and Y), and the Width and Height of
-;       the window.
-;
-;   Offset_X, Offset_Y - Output variables. [Optional] Offset, in pixels, of the
-;       actual position of the window versus the position of the window as
-;       reported by GetWindowRect.  If moving the window to specific
-;       coordinates, add these offset values to the appropriate coordinate
-;       (X and/or Y) to reflect the true size of the window.
-;
-; Returns:
-;
-;   If successful, the address of a RECTPlus structure is returned.  The first
-;   16 bytes contains a RECT structure that contains the dimensions of the
-;   bounding rectangle of the specified window.  The dimensions are given in
-;   screen coordinates that are relative to the upper-left corner of the screen.
-;   The next 8 bytes contain the X and Y offsets (4-byte integer for X and
-;   4-byte integer for Y).
-;
-;   Also if successful (and if defined), the output variables (X, Y, Width,
-;   Height, Offset_X, and Offset_Y) are updated.  See the *Parameters* section
-;   for more more information.
-;
-;   If not successful, FALSE is returned.
-;
-; Requirement:
-;
-;   Windows 2000+
-;
-; Remarks, Observations, and Changes:
-;
-; * Starting with Windows Vista, Microsoft includes the Desktop Window Manager
-;   (DWM) along with Aero-based themes that use DWM.  Aero themes provide new
-;   features like a translucent glass design with subtle window animations.
-;   Unfortunately, the DWM doesn't always conform to the OS rules for size and
-;   positioning of windows.  If using an Aero theme, many of the windows are
-;   actually larger than reported by Windows when using standard commands (Ex:
-;   WinGetPos, GetWindowRect, etc.) and because of that, are not positioned
-;   correctly when using standard commands (Ex: gui Show, WinMove, etc.).  This
-;   function was created to 1) identify the true position and size of all
-;   windows regardless of the window attributes, desktop theme, or version of
-;   Windows and to 2) identify the appropriate offset that is needed to position
-;   the window if the window is a different size than reported.
-;
-; * The true size, position, and offset of a window cannot be determined until
-;   the window has been rendered.  See the example script for an example of how
-;   to use this function to position a new window.
-;
-; * 20150906: The "dwmapi\DwmGetWindowAttribute" function can return odd errors
-;   if DWM is not enabled.  One error I've discovered is a return code of
-;   0x80070006 with a last error code of 6, i.e. ERROR_INVALID_HANDLE or "The
-;   handle is invalid."  To keep the function operational during this types of
-;   conditions, the function has been modified to assume that all unexpected
-;   return codes mean that DWM is not available and continue to process without
-;   it.  When DWM is a possibility (i.e. Vista+), a developer-friendly messsage
-;   will be dumped to the debugger when these errors occur.
-;
-; * 20160105 (Ben Allred): Adjust width and height for offset calculations if
-;   DPI is in play.
-;
-; Credit:
-;
-;   Idea and some code from *KaFu* (AutoIt forum)
-;
-;-------------------------------------------------------------------------------
-    */
+	/*								Function: WinGetPosEx
+	;
+	; Description:
+	;
+	;   Gets the position, size, and offset of a window. See the *Remarks* section
+	;   for more information.
+	;
+	; Parameters:
+	;
+	;   hWindow - Handle to the window.
+	;
+	;   X, Y, Width, Height - Output variables. [Optional] If defined, these
+	;       variables contain the coordinates of the window relative to the
+	;       upper-left corner of the screen (X and Y), and the Width and Height of
+	;       the window.
+	;
+	;   Offset_X, Offset_Y - Output variables. [Optional] Offset, in pixels, of the
+	;       actual position of the window versus the position of the window as
+	;       reported by GetWindowRect.  If moving the window to specific
+	;       coordinates, add these offset values to the appropriate coordinate
+	;       (X and/or Y) to reflect the true size of the window.
+	;
+	; Returns:
+	;
+	;   If successful, the address of a RECTPlus structure is returned.  The first
+	;   16 bytes contains a RECT structure that contains the dimensions of the
+	;   bounding rectangle of the specified window.  The dimensions are given in
+	;   screen coordinates that are relative to the upper-left corner of the screen.
+	;   The next 8 bytes contain the X and Y offsets (4-byte integer for X and
+	;   4-byte integer for Y).
+	;
+	;   Also if successful (and if defined), the output variables (X, Y, Width,
+	;   Height, Offset_X, and Offset_Y) are updated.  See the *Parameters* section
+	;   for more more information.
+	;
+	;   If not successful, FALSE is returned.
+	;
+	; Requirement:
+	;
+	;   Windows 2000+
+	;
+	; Remarks, Observations, and Changes:
+	;
+	; * Starting with Windows Vista, Microsoft includes the Desktop Window Manager
+	;   (DWM) along with Aero-based themes that use DWM.  Aero themes provide new
+	;   features like a translucent glass design with subtle window animations.
+	;   Unfortunately, the DWM doesn't always conform to the OS rules for size and
+	;   positioning of windows.  If using an Aero theme, many of the windows are
+	;   actually larger than reported by Windows when using standard commands (Ex:
+	;   WinGetPos, GetWindowRect, etc.) and because of that, are not positioned
+	;   correctly when using standard commands (Ex: gui Show, WinMove, etc.).  This
+	;   function was created to 1) identify the true position and size of all
+	;   windows regardless of the window attributes, desktop theme, or version of
+	;   Windows and to 2) identify the appropriate offset that is needed to position
+	;   the window if the window is a different size than reported.
+	;
+	; * The true size, position, and offset of a window cannot be determined until
+	;   the window has been rendered.  See the example script for an example of how
+	;   to use this function to position a new window.
+	;
+	; * 20150906: The "dwmapi\DwmGetWindowAttribute" function can return odd errors
+	;   if DWM is not enabled.  One error I've discovered is a return code of
+	;   0x80070006 with a last error code of 6, i.e. ERROR_INVALID_HANDLE or "The
+	;   handle is invalid."  To keep the function operational during this types of
+	;   conditions, the function has been modified to assume that all unexpected
+	;   return codes mean that DWM is not available and continue to process without
+	;   it.  When DWM is a possibility (i.e. Vista+), a developer-friendly messsage
+	;   will be dumped to the debugger when these errors occur.
+	;
+	; * 20160105 (Ben Allred): Adjust width and height for offset calculations if
+	;   DPI is in play.
+	;
+	; Credit:
+	;
+	;   Idea and some code from *KaFu* (AutoIt forum)
+	;
+	;-------------------------------------------------------------------------------
+		*/
 
     Static Dummy5693
           ,RECTPlus
@@ -4484,9 +4994,20 @@ WinGetMinMaxState(hwnd) {																						;-- get state if window ist maxim
 	return (zoomed>iconic) ? "z":"i"
 }
 
+GetBgBitMapHandle(hPic)	{																						;-- returns the handle of a background bitmap in a gui
+
+	;found at: https://autohotkey.com/boards/viewtopic.php?t=27128
+	SendMessage, 0x173, 0, 0,, ahk_id %hPic%
+	return ErrorLevel
+
+}
+
+GetLastActivePopup(hwnd) {																						;-- passes the handle of the last active pop-up window of a parent window
+	return DLLCall("GetLastActivePopup", "uint", AlbisWinID)
+}
 ;}
 
-;{ MENU - get
+;{ MENU - get (10)
 GetMenu(hWnd) {																										;-- returns hMenu handle
 	;; only wraps DllCall(GetMenu)
     Return DllCall("GetMenu", "Ptr", hWnd)
@@ -4673,7 +5194,7 @@ GetContextMenuText(hWnd, Position) {																		;-- returns the text of a 
 
 ;}
 
-;{ MISC
+;{ MISC (6)
 
 ChooseColor(ByRef Color, hOwner := 0) {																	;--
     rgbResult := ((Color & 0xFF) << 16) + (Color & 0xFF00) + ((Color >> 16) & 0xFF)
@@ -4834,7 +5355,7 @@ MinMaxInfo(W, L, M, H) {																							;--
 
 ;}
 
-    ;{Gui - interacting
+    ;{Gui - interacting (22)
 SureControlClick(CName, WinTitle, WinText="") { 														;--Window Activation + ControlDelay to -1 + checked if control received the click
 		;by Ixiko 2018
 		Critical
@@ -4873,8 +5394,8 @@ SureControlCheck(CName, WinTitle, WinText="") { 													;-- Window Activati
 	return ErrorLevel
 }
 
-;{ControlClick Double Click Example
-ControlClick2(X, Y, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="")  {			;--
+; ControlClick Double Click Example
+ControlClick2(X, Y, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="")  {			;-- ControlClick Double Click
   hwnd:=ControlFromPoint(X, Y, WinTitle, WinText, cX, cY
                              , ExcludeTitle, ExcludeText)
   PostMessage, 0x201, 0, cX&0xFFFF | cY<<16,, ahk_id %hwnd% ; WM_LBUTTONDOWN
@@ -4939,7 +5460,7 @@ EnumChildFindPoint(aWnd, lParam) {																		;--
     }
     return true
 }
-;}
+;
 
 WinWaitForMinimized(ByRef winID, timeOut = 1000) {												;--
   ; Function:  WinWaitForMinimized
@@ -5233,6 +5754,9 @@ WheelDown::FocuslessScroll(MinLinesPerNotch, MaxLinesPerNotch, AccelerationThres
 
 FocuslessScrollHorizontal(MinLinesPerNotch, MaxLinesPerNotch, 									;--
 AccelerationThreshold, AccelerationType, StutterThreshold) {
+
+	;https://autohotkey.com/board/topic/99405-hoverscroll-verticalhorizontal-scroll-without-focus-scrollwheel-acceleration/page-5
+
     SetBatchLines, -1 ;Run as fast as possible
     CoordMode, Mouse, Screen ;All coords relative to screen
 
@@ -5262,7 +5786,7 @@ AccelerationThreshold, AccelerationType, StutterThreshold) {
     }
 }
 
-Menu_Show( hMenu, hWnd=0, mX="", mY="", Flags=0x1 ) {										;--
+Menu_Show( hMenu, hWnd=0, mX="", mY="", Flags=0x1 ) {										;-- alternate to Menu, Show , which can display menu without blocking monitored messages...
  ; http://ahkscript.org/boards/viewtopic.php?p=7088#p7088
  ; Flags: TPM_RECURSE := 0x1, TPM_RETURNCMD := 0x100, TPM_NONOTIFY := 0x80
  VarSetCapacity( POINT, 8, 0 ), DllCall( "GetCursorPos", UInt,&Point )
@@ -5274,9 +5798,6 @@ Return DllCall( "TrackPopupMenu", UInt,hMenu, UInt,Flags ; TrackPopupMenu()  goo
 /*
 ..but the catch is: To get handle ( hMenu ) for a Menuname, it has to be attached to a MenuBar.
 There already is a function from lexikos, which does this: MI_GetMenuHandle(), and can be used as follows:
-
-
-Code: [Alles auswählen] [Download] (Script.ahk)GeSHi © Codebox Plus
 
 hViewmenu := MI_GetMenuHandle( "view" ) ; Get it from: http://www.autohotkey.net/~Lexikos/lib/MI.ahk
 ...
@@ -5307,27 +5828,389 @@ px3, py3, Segments=8, Rel=0, Speed=2 ) {
    MouseMove, px3, py3, Speed
 } ; CatMull_MouseMove( px1, py1, px2, py2, px3, py3, Segments=5, Rel=0, Speed=2 ) -------------------
 
+GUI_AutoHide(Hide_Direction, Gui_Num_To_Hide_Clone=1, 									;-- Autohide the GUI function
+Delay_Before_Hide=3000, Number_Of_Offset_Pixels=5, Enabled_Disabled_Flag=1) {
+
+
+	;                   Original Author: jpjazzy            Link: http://www.autohotkey.com/forum/viewtopic.php?p=485853#485853
+	; =====================================================================================================================================================
+	;   GUI_AutoHide(Hide direction, [Gui # to hide, Delay in milliseconds before hiding, Number of pixels to display while hidden (offset), Enabled/Disabled Flag])
+	; =====================================================================================================================================================
+	; Required parameters: Hide direction (LEFT="L", RIGHT="R", UP="U", DOWN="D")
+	; Defaults for optional parameters: GUI # = 1, Delay in ms = 3000 = 3 seconds, Number of pixels to display while hidden = 5, Enabled/Disabled Flag = 1 (Enabled=1 Disabled=0)
+	; =====================================================================================================================================================
+	; NOTES:
+	; * Functions work with expressions, so make sure you use quotes when inputting settings unless the setting is contained within a variable
+	; * Function must be placed directly after the GUI you are using it for
+	; * Function will make the GUI AlwaysOnTop so the user can activate it from the autohide
+	; * Specifying 0 for the Enabled/Disabled Flag will return the GUI to it's original position before deactivating autohide
+	; * The window must be hidden and docked to the side of the screen before the effects of the autohide take place
+	; * The titlebar sometimes gets in the way of reactivating the hidden GUI if there is one... To get around this either remove the caption/border or Set a higher pixel offset
+	; =====================================================================================================================================================
+	; LIMITATIONS:
+	; - Using this on multiple GUIs most likely will cause problems due to the hide overlapping
+	; =====================================================================================================================================================
+
+	; ========================================= (AUTOHIDE FUNCTIONS) ==========================================
+
+	SetBatchLines, -1
+
+   global ; Assume global
+   Gui_Num_To_Hide := Gui_Num_To_Hide_Clone
+   Gui, %Gui_Num_To_Hide%: +LastFound +AlwaysOnTop ; Set GUI settings so we can obtain it's settings and give it an alwaysontop attribute to make the user be able to unhide it
+
+   ; ** OBTAIN  AND SET VARIABLES **
+   StringUpper, Hide_Direction, Hide_Direction ; Capitalize it just in case the user didn't for the label
+   If ( Enabled_Disabled_Flag = 0 )
+   {
+   %Gui_Num_To_Hide%_Enabled_Disabled_Flag := 0
+    WinMove, % %Gui_Num_To_Hide%_Gui_Title,, % %Gui_Num_To_Hide%_GUIX, % %Gui_Num_To_Hide%_GUIY
+    return
+   }
+
+   WinGetPos, %Gui_Num_To_Hide%_GUIX, %Gui_Num_To_Hide%_GUIY, %Gui_Num_To_Hide%_GUIW, %Gui_Num_To_Hide%_GUIH, A
+   WinGetTitle, %Gui_Num_To_Hide%_Gui_Title, A
+   %Gui_Num_To_Hide%_TimeLapse := A_TickCount                           ; Set the specified variables with respect to which GUI the settings go to
+   %Gui_Num_To_Hide%_Enabled_Disabled_Flag := Enabled_Disabled_Flag
+   %Gui_Num_To_Hide%_Number_Of_Offset_Pixels := Number_Of_Offset_Pixels
+   %Gui_Num_To_Hide%_Delay_Before_Hide := Delay_Before_Hide
+   %Gui_Num_To_Hide%_Hide_Direction := Hide_Direction
+    ;MsgBox % %Gui_Num_To_Hide%_Gui_Title
+
+
+   ; ** Place message for GUI **
+   OnMessage(0x200,"WM_MOUSEMOVE") ; Message to send when the mouse is over the GUI
+   SetTimer, HideGUI%Hide_Direction%, 500 ; Set timer to hide the GUI in whatever direction you chose
+   return
+
+      ; ** HideGUI Settings **
+   HideGUIU:
+   ;~ ;MsgBox % "If (" A_TickCount - %Gui_Num_To_Hide%_TimeLapse " < " %Gui_Num_To_Hide%_Delay_Before_Hide ") "
+   If (%Gui_Num_To_Hide%_Enabled_Disabled_Flag != 1)
+      return
+   If (A_TickCount - %Gui_Num_To_Hide%_TimeLapse < %Gui_Num_To_Hide%_Delay_Before_Hide)         ; If the mouse was over the GUI within the last 3 seconds, don't hide it
+      return
+
+      WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title ; Get the position of the GUI
+      Loop
+      {
+         ; MsgBox % "If (" %Gui_Num_To_Hide%_GUIY+%Gui_Num_To_Hide%_GUIH " > " %Gui_Num_To_Hide%_Number_Of_Offset_Pixels ")"
+         If (GUIY + %Gui_Num_To_Hide%_GUIH > %Gui_Num_To_Hide%_Number_Of_Offset_Pixels)     ; If the GUI is not hidden hide it then break
+         {
+            ;~ ;MsgBox % "WinMove,"  %Gui_Num_To_Hide%_Gui_Title ",, " GUIX ", " GUIY-(A_Index)
+            WinMove, % %Gui_Num_To_Hide%_Gui_Title,, %GUIX%, % GUIY-(A_Index)
+            WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title
+            ;MsgBox % "WinGetPos,  " GUIX ", " GUIY ",,, "  %Gui_Num_To_Hide%_Gui_Title
+         }
+         else
+            break
+      }
+
+   If ((GUIY + %Gui_Num_To_Hide%_GUIH) < (%Gui_Num_To_Hide%_Number_Of_Offset_Pixels-1)) ; Failsafe if the GUI moves too far
+   {
+      WinMove, % %Gui_Num_To_Hide%_Gui_Title,, %GUIX%, % (-%Gui_Num_To_Hide%_GUIH+%Gui_Num_To_Hide%_Number_Of_Offset_Pixels)
+   }
+   SetTimer, HideGUIU, OFF
+   return
+
+      HideGUID:
+   ;~ ;MsgBox % "If (" A_TickCount - %Gui_Num_To_Hide%_TimeLapse " < " %Gui_Num_To_Hide%_Delay_Before_Hide ") "
+      If (%Gui_Num_To_Hide%_Enabled_Disabled_Flag != 1)
+      return
+   If (A_TickCount - %Gui_Num_To_Hide%_TimeLapse < %Gui_Num_To_Hide%_Delay_Before_Hide)         ; If the mouse was over the GUI within the last 3 seconds, don't hide it
+      return
+
+      WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title ; Get the position of the GUI
+      Loop
+      {
+         ; MsgBox % "If (" %Gui_Num_To_Hide%_GUIY+%Gui_Num_To_Hide%_GUIH " > " %Gui_Num_To_Hide%_Number_Of_Offset_Pixels ")"
+         If (GUIY < A_ScreenHeight-%Gui_Num_To_Hide%_Number_Of_Offset_Pixels)     ; If the GUI is not hidden hide it then break
+         {
+            ;~ ;MsgBox % "WinMove,"  %Gui_Num_To_Hide%_Gui_Title ",, " GUIX ", " GUIY-(A_Index)
+            WinMove, % %Gui_Num_To_Hide%_Gui_Title,, %GUIX%, % GUIY+(A_Index)
+            WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title
+            ;MsgBox % "WinGetPos,  " GUIX ", " GUIY ",,, "  %Gui_Num_To_Hide%_Gui_Title
+         }
+         else
+            break
+      }
+
+   If (GUIY > A_ScreenHeight-(%Gui_Num_To_Hide%_Number_Of_Offset_Pixels-1)) ; Failsafe if the GUI moves too far
+   {
+      WinMove, % %Gui_Num_To_Hide%_Gui_Title,, %GUIX%, % (A_ScreenHeight - %Gui_Num_To_Hide%_Number_Of_Offset_Pixels)
+   }
+   SetTimer, HideGUID, OFF
+   return
+
+   HideGUIR:
+      If (%Gui_Num_To_Hide%_Enabled_Disabled_Flag != 1)
+      return
+   ;~ ;MsgBox % "If (" A_TickCount - %Gui_Num_To_Hide%_TimeLapse " < " %Gui_Num_To_Hide%_Delay_Before_Hide ") "
+   If (A_TickCount - %Gui_Num_To_Hide%_TimeLapse < %Gui_Num_To_Hide%_Delay_Before_Hide)         ; If the mouse was over the GUI within the last 3 seconds, don't hide it
+      return
+
+      WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title ; Get the position of the GUI
+      Loop
+      {
+         ; MsgBox % "If (" %Gui_Num_To_Hide%_GUIY+%Gui_Num_To_Hide%_GUIH " > " %Gui_Num_To_Hide%_Number_Of_Offset_Pixels ")"
+         If (GUIX < A_ScreenWidth-%Gui_Num_To_Hide%_Number_Of_Offset_Pixels)     ; If the GUI is not hidden hide it then break
+         {
+            ;~ ;MsgBox % "WinMove,"  %Gui_Num_To_Hide%_Gui_Title ",, " GUIX ", " GUIY-(A_Index)
+            WinMove, % %Gui_Num_To_Hide%_Gui_Title,, % GUIX+A_Index, %GUIY%
+            WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title
+            ;MsgBox % "WinGetPos,  " GUIX ", " GUIY ",,, "  %Gui_Num_To_Hide%_Gui_Title
+         }
+         else
+            break
+      }
+
+   If (GUIX > A_ScreenWidth-%Gui_Num_To_Hide%_Number_Of_Offset_Pixels) ; Failsafe if the GUI moves too far
+   {
+      WinMove, % %Gui_Num_To_Hide%_Gui_Title,, % A_ScreenWidth-%Gui_Num_To_Hide%_Number_Of_Offset_Pixels, %GUIY%
+   }
+   SetTimer, HideGUIR, OFF
+   return
+
+      HideGUIL:
+   ;~ ;MsgBox % "If (" A_TickCount - %Gui_Num_To_Hide%_TimeLapse " < " %Gui_Num_To_Hide%_Delay_Before_Hide ") "
+      If (%Gui_Num_To_Hide%_Enabled_Disabled_Flag != 1)
+      return
+   If (A_TickCount - %Gui_Num_To_Hide%_TimeLapse < %Gui_Num_To_Hide%_Delay_Before_Hide)         ; If the mouse was over the GUI within the last 3 seconds, don't hide it
+      return
+
+      WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title ; Get the position of the GUI
+      Loop
+      {
+         ; MsgBox % "If (" %Gui_Num_To_Hide%_GUIY+%Gui_Num_To_Hide%_GUIH " > " %Gui_Num_To_Hide%_Number_Of_Offset_Pixels ")"
+         If (GUIX+%Gui_Num_To_Hide%_GUIW > %Gui_Num_To_Hide%_Number_Of_Offset_Pixels)     ; If the GUI is not hidden hide it then break
+         {
+            ;~ ;MsgBox % "WinMove,"  %Gui_Num_To_Hide%_Gui_Title ",, " GUIX ", " GUIY-(A_Index)
+            WinMove, % %Gui_Num_To_Hide%_Gui_Title,, % GUIX-A_Index, %GUIY%
+            WinGetPos,  GUIX, GUIY,,, % %Gui_Num_To_Hide%_Gui_Title
+            ;MsgBox % "WinGetPos,  " GUIX ", " GUIY ",,, "  %Gui_Num_To_Hide%_Gui_Title
+         }
+         else
+            break
+      }
+
+   If (GUIX+%Gui_Num_To_Hide%_GUIW < %Gui_Num_To_Hide%_Number_Of_Offset_Pixels) ; Failsafe if the GUI moves too far
+   {
+      WinMove, % %Gui_Num_To_Hide%_Gui_Title,, % -%Gui_Num_To_Hide%_GUIW+%Gui_Num_To_Hide%_Number_Of_Offset_Pixels, %GUIY%
+   }
+   SetTimer, HideGUIL, OFF
+   return
+
+}
+;{ sub
+WM_MOUSEMOVE(wParam,lParam) { ; Action to take if the mouse moves over the GUI
+
+   If (%A_Gui%_Enabled_Disabled_Flag = 1)
+   {
+      RestartGUIActivate:
+      LabelDir := %A_Gui%_Hide_Direction
+      SetTimer, HideGUI%LabelDir%, Off ; Turn off the label while the mouse is over the GUI
+      WinGetPos,  GUIX, GUIY,,, % %A_Gui%_Gui_Title ; Get the position of the GUI if your cursor is over it.
+
+      ; DO ACTION BASED ON WHAT DIRECTION THE GUI IS SET TO
+      If (%A_Gui%_Hide_Direction == "U")
+      {
+         Loop
+         {
+            If (GUIY+%A_Gui%_GUIH < %A_Gui%_GUIH) ; If the GUI is hidden, show it then break
+            {
+               WinMove, % %A_Gui%_Gui_Title,, %GUIX%, % GUIY+(A_Index)
+               WinGetPos,  GUIX, GUIY,,, % %A_Gui%_Gui_Title
+            }
+            else
+               break
+         }
+      }
+      Else If (%A_Gui%_Hide_Direction == "D")
+      {
+         Loop
+         {
+            If (GUIY > A_ScreenHeight-%A_Gui%_GUIH) ; If the GUI is hidden, show it then break
+            {
+               WinMove, % %A_Gui%_Gui_Title,, %GUIX%, % GUIY-(A_Index)
+               WinGetPos,  GUIX, GUIY,,, % %A_Gui%_Gui_Title
+            }
+            else
+               break
+         }
+      }
+      Else If (%A_Gui%_Hide_Direction == "R")
+      {
+         Loop
+         {
+            If (GUIX+%A_Gui%_GUIW > A_ScreenWidth+%A_Gui%_Number_Of_Offset_Pixels) ; If the GUI is hidden, show it then break
+            {
+               WinMove, % %A_Gui%_Gui_Title,, GUIX-A_Index, %GUIY%
+               WinGetPos,  GUIX, GUIY,,, % %A_Gui%_Gui_Title
+            }
+            else
+               break
+         }
+      }
+      Else If (%A_Gui%_Hide_Direction == "L")
+      {
+         Loop
+         {
+            If (GUIX+%A_Gui%_Number_Of_Offset_Pixels < 0) ; If the GUI is hidden, show it then break
+            {
+               WinMove, % %A_Gui%_Gui_Title,, GUIX+A_Index, %GUIY%
+               WinGetPos,  GUIX, GUIY,,, % %A_Gui%_Gui_Title
+            }
+            else
+               break
+         }
+      }
+
+      CoordMode, Mouse, Screen         ;get the mouse position in SCREEN MODE because your GUI is relative to the screen
+      MouseGetPos, MX, MY
+      CoordMode, Mouse, Relative
+      If (%A_Gui%_Hide_Direction == "U" && MX >= %A_Gui%_GUIX && MX <= %A_Gui%_GUIX+%A_Gui%_GUIW && MY >= 0 && MY <= %A_Gui%_GUIH) ; Check if your mouse is still over the GUI (U)
+      {
+       goto, RestartGUIActivate  ;Restart if it is
+      }
+      Else If (%A_Gui%_Hide_Direction == "D" && MX >= %A_Gui%_GUIX && MX <= %A_Gui%_GUIX+%A_Gui%_GUIW && MY >= A_ScreenHeight-%A_Gui%_GUIH && MY-%A_Gui%_GUIH <= A_ScreenHeight) ; Check if your mouse is still over the GUI (D)
+      {
+       goto, RestartGUIActivate  ;Restart if it is
+      }
+      Else If (%A_Gui%_Hide_Direction == "R" && MX >= A_ScreenWidth-%A_Gui%_GUIW && MX <= A_ScreenWidth && MY >= %A_Gui%_GUIY && MY <= %A_Gui%_GUIY+%A_Gui%_GUIH) ; Check if your mouse is still over the GUI (R)
+      {
+       goto, RestartGUIActivate  ;Restart if it is
+      }
+      Else If (%A_Gui%_Hide_Direction == "L" && MX >= 0 && MX <= %A_Gui%_GUIW && MY >= %A_Gui%_GUIY && MY <= %A_Gui%_GUIY+%A_Gui%_GUIH) ; Check if your mouse is still over the GUI (L)
+      {
+       goto, RestartGUIActivate  ;Restart if it is
+      }
+
+      else ; If your mouse is not over the GUI, prepare to hide it.
+      {
+      %A_Gui%_TimeLapse := A_TickCount
+      SetTimer, HideGUI%LabelDir%, 1000
+      }
+   }
+}
+
+;}
+
+SetButtonF(p*) {																											;-- Set a button control to call a function instead of a label subroutine
+
+	/*			FUNCTION: SetButtonF
+		_________________________________________________________________________________________
+
+		FUNCTION: SetButtonF
+		DESCRIPTION: Set a button control to call a function instead of a label subroutine
+		PARAMETER(s):
+			hButton := Button control's handle
+			FunctionName := Name of fucntion to associate with button
+		USAGE:
+			Setting a button:
+				SetButtonF(hButton, FunctionName)
+
+			Retrieving the function name associated with a particular button:
+				Func := SetButtonF(hButton) ; note: 2nd parameter omitted
+
+			Disabling a function for a particular button(similar to "GuiControl , -G" option):
+				SetButtonF(hButton, "") ; note: 2nd parameter not omitted but explicitly blank
+
+			Disabling all functions for all buttons:
+				SetButtonF() ; No parameters
+		NOTES:
+			The function/handler must have atleast two parameters, this function passes the
+			GUI's hwndas the 1st parameter and the button's hwnd as the 2nd.
+			Forum: http://www.autohotkey.com/board/topic/88553-setbuttonf-set-button-to-call-function/
+		_________________________________________________________________________________________
+
+	*/
+
+	static WM_COMMAND := 0x0111 , BN_CLICKED := 0x0000
+	static IsRegCB := false , oldNotify := {CBA: "", FN: ""} , B := [] , tmr := []
+	if(A_EventInfo == tmr.CBA) { ; Call from timer
+		DllCall("KillTimer", "UInt", 0, "UInt", tmr.tmr) ; Kill timer, one time only
+		, tmr.func.(tmr.params*) ; Call function
+		return DllCall("GlobalFree", "Ptr", tmr.CBA, "Ptr") , tmr := []
+	}
+	if (p.3 <> WM_COMMAND) { ; Not a Windows message ; call from user
+		if !ObjHasKey(p, 1) { ; No passed parameter ; Clear all button-function association
+			if IsRegCB {
+				if B.MinIndex()
+					B.Remove(B.MinIndex(), B.MaxIndex())
+				, IsRegCB := false
+				, OnMessage(WM_COMMAND, oldNotify.FN) ; reset to previous handler(if any)
+				, oldNotify.CBA := "" , oldNotify.FN := "" ; reset
+				return true
+			}
+		}
+		if !WinExist("ahk_id " p.1) ; or !DllCall("IsWindow", "Ptr", p.1) ; Check if handle is valid
+			return false ; Not a valid handle, control does not exist
+		WinGetClass, c, % "ahk_id " p.1 ; Check if it's a button control
+		if (c == "Button") {
+			if p.2 { ; function name/reference has been specified, store/associate it
+				if IsFunc(p.2) ; Function name is specified
+					B[p.1, "F"] := Func(p.2)
+				if (IsObject(p.2) && IsFunc(p.2.Name)) ; Function reference/object is specified
+					B[p.1, "F"] := p.2
+				if !IsRegCB { ; No button(s) has been set yet , callback has not been registered
+					fn := OnMessage(WM_COMMAND, A_ThisFunc)
+					if (fn <> A_ThisFunc) ; if there's another handler
+						oldNotify.CBA := RegisterCallback((oldNotify.FN := fn)) ; store it
+					IsRegCB := true
+				}
+			} else { ; if 2nd parameter(Function name) is explicitly blank or omitted
+				if ObjHasKey(B, p.1) { ; check if button is in the list
+					if !ObjHasKey(p, 2) ; Omitted
+						return B[p.1].F.Name ; return Funtion Name associated with button
+					else { ; Explicitly blank
+						B.Remove(p.1, "") ; Disassociate button with function, remove from internal array
+						if !B.MinIndex() ; if last button in array
+							SetButtonF() ; Reset everything
+					}
+				}
+			}
+			return true ; successful
+		} else
+			return false ; not a button control
+	} else { ; WM_COMMAND
+		if ObjHasKey(B, p.2) { ; Check if control is in internal array
+			lo := p.1 & 0xFFFF ; Control identifier
+			hi := p.1 >> 16 ; notification code
+			if (hi == BN_CLICKED) { ; Normal, left button
+				tmr := {func: B[p.2].F, params: [p.4, p.2]} ; store button's associated function ref and params
+				, tmr.CBA := RegisterCallback(A_ThisFunc, "F", 4) ; create callback address
+				; Create timer, this allows the function to finish processing the message immediately
+				, tmr.tmr := DllCall("SetTimer", "UInt", 0, "UInt", 0, "Uint", 120, "UInt", tmr.CBA)
+			}
+		} else { ; Other control(s)
+			if (oldNotify.CBA <> "") ; if there is a previous handler for WM_COMMAND, call it
+				DllCall(oldNotify.CBA, "UInt", p.1, "UInt", p.2, "UInt", p.3, "UInt", p.4)
+		}
+	}
+}
+
 
 ;}
 ;}
 ; ------------------------------------------------------------------------------	  #Custom Gui Elements#		----------------------------------------------------------------------------------------
-; HtmlBox()						|	EditBox()							|	Popup()								|	PIC_GDI_GUI()						|	SplitButton()						|
-; AddToolTip()					|	BetterBox()						|	BtnBox()								|	LoginBox()							|	MultiBox()						|
+; HtmlBox()						|	EditBox()							|	Popup()							|	PIC_GDI_GUI()						|	SplitButton()							|
+; AddToolTip()					|	BetterBox()						|	BtnBox()							|	LoginBox()							|	MultiBox()							|
 ; PassBox()						|	CreateHotkeyWindow()		|
 ;
 ; ------------------------------------------------------------------------------	 #Gui - changing functions#	----------------------------------------------------------------------------------------
-; FadeGui()						|	ShadowBorder()				|	FrameShadow() - 2 versions		|	RemoveWindowFromTaskbar()	|	ToggleTitleMenuBar()			|
-; ToggleFakeFullscreen()		|	ListView_HeaderFontSet()	|	CreateFont()						|	FullScreenToggleUnderMouse()	|	SetTaskbarProgress() x 2		|
-;
+; FadeGui()						|	WinFadeToggle()				|	ShadowBorder()				|	FrameShadow() - 2 versions		|	RemoveWindowFromTaskbar()	|
+; ToggleTitleMenuBar()		|	ToggleFakeFullscreen()		|	ListView_HeaderFontSet()	|	CreateFont()						|	FullScreenToggleUnderMouse()	|
+; SetTaskbarProgress() x 2	|
 ; ------------------------------------------------------------------------------	   #control type functions#		----------------------------------------------------------------------------------------
-; Edit_Standard_Params()	|	Edit_TextIsSelected()			|	Edit_GetSelection()				|	Edit_Select()							|	Edit_SelectLine()				|
+; Edit_Standard_Params()	|	Edit_TextIsSelected()			|	Edit_GetSelection()			|	Edit_Select()							|	Edit_SelectLine()					|
 ; Edit_DeleteLine()				|
 ;#---- GDI control functions ---#
 ; ControlCreateGradient()	|	AddGraphicButtonPlus()		|
 ;#---- IMAGELIST functions ----#
 ; IL_LoadIcon()					|	IL_GuiButtonIcon()				|
 ;#----- LISTVIEW functions -----#
-; LVGetCount()					|	LV_SetSelColors()				|	LV_Select()							|	LV_GetItemText()					|	LV_GetText()					|
+; LV_GetCount()				|	LV_SetSelColors()				|	LV_Select()						|	LV_GetItemText()					|	LV_GetText()						|
+; LV_SetBackgroundUrl()		|	LV_MoveRow()					|
 ;#---- TabControl functions ----#
 ; TabCtrl_GetCurSel()			|	TabCtrl_GetItemText()		|
 ;#----- TREEVIEW functions ----#
@@ -5335,28 +6218,29 @@ px3, py3, Segments=8, Rel=0, Speed=2 ) {
 ;
 ; ------------------------------------------------------------------------------ #Gui - retreaving informations#	----------------------------------------------------------------------------------------
 ; screenDims()					|	DPIFactor()						|
-; ControlExists()				|	GetFocusedControl()			|	GetControls()						|	GetOtherControl()					|	ListControls()					|
-; Control_GetClassNN()		|	ControlGetClassNN()			|	Control_GetFont()					|	IsControlFocused()					|	IsOverTitleBar()					|
-; WinGetPosEx()				|	GetParent()						|	GetWindow()						|	GetForegroundWindow()			|	IsWindowVisible()				|
-; IsFullScreen()					|	IsClosed()						|	getProcessBaseAddress()			|	GetClassLong()						|	GetWindowLong()				|
-; GetClassStyles()				|	GetTabOrderIndex()			|	GetCursor()							|	GetExtraStyle()						|	GetToolbarItems()				|
-; ControlGetTabs()				|	GetHeaderInfo()				|	GetClientCoords()					|	GetWindowCoords()				|	GetWindowPos()				|
-; GetWindowPlacement()		|	GetWindowInfo()				|	GetOwner()							|	FindWindow()						|	ShowWindow()					|
-; IsWindow()					|	IsWindowVisible()				|	GetClassName()					|	WinForms_GetClassNN()			|	FindChildWindow()			|
-; WinGetMinMaxState()		|
-; getControlNameByHwnd()	|	getByControlName()			|	TabCtrl_GetCurSel()				|	TabCtrl_GetItemText()			|
+; ControlExists()				|	GetFocusedControl()			|	GetControls()					|	GetOtherControl()					|	ListControls()						|
+; Control_GetClassNN()		|	ControlGetClassNN()			|	Control_GetFont()				|	IsControlFocused()					|	IsOverTitleBar()						|
+; WinGetPosEx()				|	GetParent()						|	GetWindow()					|	GetForegroundWindow()			|	IsWindowVisible()					|
+; IsFullScreen()					|	IsClosed()						|	getProcessBaseAddress()		|	GetClassLong()						|	GetWindowLong()					|
+; GetClassStyles()				|	GetTabOrderIndex()			|	GetCursor()						|	GetExtraStyle()						|	GetToolbarItems()					|
+; ControlGetTabs()				|	GetHeaderInfo()				|	GetClientCoords()				|	GetWindowCoords()				|	GetWindowPos()					|
+; GetWindowPlacement()		|	GetWindowInfo()				|	GetOwner()						|	FindWindow()						|	ShowWindow()						|
+; IsWindow()					|	IsWindowVisible()				|	GetClassName()				|	WinForms_GetClassNN()			|	FindChildWindow()				|
+; WinGetMinMaxState()		|	GetBgBitMapHandle()		|	GetLastActivePopup()
+; getControlNameByHwnd()	|	getByControlName()			|	getNextControl()				|	TabCtrl_GetCurSel()				|	TabCtrl_GetItemText()			|
 ;
 ; ------------------------------------------------------------------------------		  #Menu functions#			----------------------------------------------------------------------------------------
-; GetMenu()						|	GetSubMenu()					|	GetMenuItemCount()				|	GetMenuItemID()					|	GetMenuString()				|
+; GetMenu()						|	GetSubMenu()					|	GetMenuItemCount()			|	GetMenuItemID()					|	GetMenuString()					|
 ; MenuGetAll()					|	MenuGetAll_sub()				|
-; GetContextMenuState()		|	GetContextMenuID()			|	GetContextMenuText()			|	ExtractInteger()						|	InsertInteger()					|
+; GetContextMenuState()		|	GetContextMenuID()			|	GetContextMenuText()		|	ExtractInteger()						|	InsertInteger()						|
 ;
 ; ------------------------------------------------------------------------------	  #interacting functions#		----------------------------------------------------------------------------------------
-; ChooseColor()				|	GetWindowIcon()				|	GetImageType()					|	GetStatusBarText()					|	GetAncestor()					|
-; MinMaxInfo()					|	OnMessage( "MinMaxInfo")	|	SureControlClick()					|	SureControlCheck()				|	WinWaitForMinimized()		|
-; CenterWindow()				|	GuiCenterButtons()			|	CenterControl()						|	SetWindowIcon()					|	SetWindowPos()				|
-; TryKillWin()					|	Win32_SendMessage()		|	Win32_TaskKill()					|	Win32_Terminate()				|	TabActivate()					|
-; FocuslessScroll()				|	FocuslessScrollHorizontal()	|	Menu_Show()						|	CatMull_ControlMove()			|
+; ChooseColor()				|	GetWindowIcon()				|	GetImageType()				|	GetStatusBarText()					|	GetAncestor()						|
+; MinMaxInfo()					|	OnMessage( "MinMaxInfo")	|	SureControlClick()				|	SureControlCheck()				|	ControlClick2()						|
+; ControlFromPoint()			|	EnumChildFindPoint()			|	WinWaitForMinimized()		|	CenterWindow()					|	GuiCenterButtons()				|
+; CenterControl()				|	SetWindowIcon()				|	SetWindowPos()				|	TryKillWin()							|	Win32_SendMessage()			|
+; Win32_TaskKill()				|	Win32_Terminate()			|	TabActivate()					|	FocuslessScroll()					|	FocuslessScrollHorizontal()		|
+; Menu_Show()					|	CatMull_ControlMove()		|	Gui_AutoHide()					|	SetButtonF()							|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -7790,7 +8674,7 @@ ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Keys - Hotkeys - Hotstring - functions (2)
+;{Keys - Hotkeys - Hotstring - functions (3)
 DelaySend(Key, Interval=200, SendMethod="Send") { 					;-- Send keystrokes delayed
 
 	/*
@@ -7842,8 +8726,19 @@ SetLayout(layout, winid) {																;-- set a keyboard layout
     DllCall("SendMessage", "UInt", winid, "UInt", "80", "UInt", "1", "UInt", Result)
 }
 
+GetAllInputChars() {																		;-- Returns a string with input characters
+
+    Loop 256
+        ChrStr .= Chr( a_index ) " "
+
+    ChrStr .= "{down} {up} {right} {left} "
+
+    Return ChrStr
+}
+
+
 ;}
-; DelaySend()					|	SetLayout()						|
+; DelaySend()					|	SetLayout()						|	GetAllInputChars()					|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -7880,8 +8775,9 @@ ShowTrayBalloon(TipTitle = "", TipText = "", ShowTime = 5000, TipType = 1) {	;--
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{System functions - binary handling in memory (18)
+;{System functions - binary handling in memory (25)
 
+; (21)
 CreateNamedPipe(Name, OpenMode=3, PipeMode=0, MaxInstances=255) {		;--
     return DllCall("CreateNamedPipe","str","\\.\pipe\" Name,"uint",OpenMode
         ,"uint",PipeMode,"uint",MaxInstances,"uint",0,"uint",0,"uint",0,"uint",0)
@@ -8118,7 +9014,7 @@ TaskDialogDirect(Instruction, Content := "", Title := "", CustomButtons := "", C
     }
 }
 
-GlobalVarsScript(var="",size=102400,ByRef object=0) {	 ;--
+GlobalVarsScript(var="",size=102400,ByRef object=0) {	 									;--
 
   global
   static globalVarsScript
@@ -8142,7 +9038,7 @@ GlobalVarsScript(var="",size=102400,ByRef object=0) {	 ;--
   Return globalVarsScript
 }
 
-patternScan(pattern, haystackAddress, haystackSize) {		 ;--
+patternScan(pattern, haystackAddress, haystackSize) {		 										;--
 
 		; Parameters
 			; pattern
@@ -8266,7 +9162,7 @@ scanInBuf(haystackAddr, needleAddr, haystackSize, needleSize, StartOffset = 0) {
 		              , "uInt", haystackSize, "uInt", needleSize, "uInt", StartOffset)
 	}
 
-hexToBinaryBuffer(hexString, byRef buffer) {	;--
+hexToBinaryBuffer(hexString, byRef buffer) {															;--
 	StringReplace, hexString, hexString, 0x,, All
 	StringReplace, hexString, hexString, %A_Space%,, All
 	StringReplace, hexString, hexString, %A_Tab%,, All
@@ -8327,7 +9223,7 @@ TaskDialogMsgBox(Main, Extra, Title := "", Buttons := 0, Icon := 0, Parent := 0,
 
 }
 
-TaskDialogToUnicode(String, ByRef Var) {	;--
+TaskDialogToUnicode(String, ByRef Var) {																;--
 
 	VarSetCapacity(Var, StrPut(String, "UTF-16") * 2, 0)
 	StrPut(String, &Var, "UTF-16")
@@ -8335,7 +9231,7 @@ TaskDialogToUnicode(String, ByRef Var) {	;--
 
 }
 
-TaskDialogCallback(H, N, W, L, D) {	;--
+TaskDialogCallback(H, N, W, L, D) {																		;--
 
 	Static TDM_Click_BUTTON := 0x0466
 		, TDN_CREATED := 0
@@ -8355,7 +9251,7 @@ TaskDialogCallback(H, N, W, L, D) {	;--
 
 }
 
-RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {		;-- Provides RegRead64() and RegWrite64() functions that do not redirect to Wow6432Node on 64-bit machines
+RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {			;-- Provides RegRead64() function that do not redirect to Wow6432Node on 64-bit machines
 
 	; _reg64.ahk ver 0.1 by tomte
 	; Script for AutoHotkey   ( http://www.autohotkey.com/ )
@@ -8447,7 +9343,8 @@ RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {		;-- Provides
 	return sValue
 }
 
-RegWrite64(sValueType, sRootKey, sKeyName, sValueName = "", sValue = "") {	;--
+RegWrite64(sValueType, sRootKey, sKeyName, sValueName = "", sValue = "") {		;-- RegWrite64() function that do not redirect to Wow6432Node on 64-bit machines
+
 	HKEY_CLASSES_ROOT	:= 0x80000000	; http://msdn.microsoft.com/en-us/library/aa393286.aspx
 	HKEY_CURRENT_USER	:= 0x80000001
 	HKEY_LOCAL_MACHINE	:= 0x80000002
@@ -8501,8 +9398,8 @@ RegWrite64(sValueType, sRootKey, sKeyName, sValueName = "", sValue = "") {	;--
 	DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
 	return ErrorLevel
 }
-
-ExtractData(pointer) {	;--
+;{sub
+ExtractData(pointer) {
 
 	; Thanks Chris, Lexikos and SKAN
 	; http://www.autohotkey.com/forum/topic37710-15.html
@@ -8517,8 +9414,171 @@ ExtractData(pointer) {	;--
 		}
 	Return String
 }
+;}
 
-;{System functions - dll
+KillProcess(proc) {																									;-- uses DllCalls to end a process
+
+	; https://autohotkey.com/board/topic/119052-check-if-a-process-exists-if-it-does-kill-it/page-2
+
+    static SYNCHRONIZE                 := 0x00100000
+    static STANDARD_RIGHTS_REQUIRED    := 0x000F0000
+    static OSVERSION                   := (A_OSVersion = "WIN_XP" ? 0xFFF : 0xFFFF)
+    static PROCESS_ALL_ACCESS          := STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | OSVERSION
+
+    local tPtr := pPtr := nTTL := 0, PList := ""
+    if !(DllCall("wtsapi32.dll\WTSEnumerateProcesses", "Ptr", 0, "Int", 0, "Int", 1, "PtrP", pPtr, "PtrP", nTTL))
+        return "", DllCall("kernel32.dll\SetLastError", "UInt", -1)
+
+    tPtr := pPtr
+    loop % (nTTL)
+    {
+        if (InStr(PList := StrGet(NumGet(tPtr + 8)), proc))
+        {
+            PID := NumGet(tPtr + 4, "UInt")
+            if !(hProcess := DllCall("kernel32.dll\OpenProcess", "UInt", PROCESS_ALL_ACCESS, "UInt", FALSE, "UInt", PID, "Ptr"))
+                return DllCall("kernel32.dll\GetLastError")
+            if !(DllCall("kernel32.dll\TerminateProcess", "Ptr", hProcess, "UInt", 0))
+                return DllCall("kernel32.dll\GetLastError")
+            if !(DllCall("kernel32.dll\CloseHandle", "Ptr", hProcess))
+                return DllCall("kernel32.dll\GetLastError")
+        }
+        tPtr += (A_PtrSize = 4 ? 16 : 24)
+    }
+    DllCall("wtsapi32.dll\WTSFreeMemory", "Ptr", pPtr)
+
+    return "", DllCall("kernel32.dll\SetLastError", "UInt", nTTL)
+}
+
+LoadScriptResource(ByRef Data, Name, Type = 10) {												;-- loads a resource into memory (e.g. picture, scripts..)
+
+	;https://autohotkey.com/board/topic/77519-load-and-display-imagespng-jpg-with-loadscriptresource/
+
+	/*	 example script demonstrates showing an icon image from the resource. It requires sample.ico with the size 64x64 in the script folder.
+
+		#NoEnv
+		SetWorkingDir %A_ScriptDir%
+
+		if A_IsCompiled {
+			If size := LoadScriptResource(buf,".\sample.ico")
+				hIcon := HIconFromBuffer(buf, 64, 64)
+			else MsgBox Resource could not be loaded!
+		} else {
+			FileRead, buf, *c %A_ScriptDir%\sample.ico
+			hIcon := HIconFromBuffer(buf, 64, 64)
+		}
+
+		Gui, Margin, 20, 20
+		Gui, Add, Picture, w64 h64 0x3 hWndPic1      	;0x3 = SS_ICon
+		SendMessage, STM_SETICON := 0x0170, hIcon, 0,, ahk_id %Pic1%
+		Gui, Show
+
+		Return
+		GuiClose:
+		   Gui, Destroy
+		   hIcon := hIcon := ""
+		   ExitApp
+		Return
+
+
+	*/
+
+	; originally posted by Lexikos, modified by HotKeyIt
+	; http://www.autohotkey.com/forum/post-516086.html#516086
+
+    lib := DllCall("GetModuleHandle", "ptr", 0, "ptr")
+    res := DllCall("FindResource", "ptr", lib, "str", Name, "ptr", Type, "ptr")
+    DataSize := DllCall("SizeofResource", "ptr", lib, "ptr", res, "uint")
+    hresdata := DllCall("LoadResource", "ptr", lib, "ptr", res, "ptr")
+    VarSetCapacity(Data, DataSize)
+    DllCall("RtlMoveMemory", "PTR", &Data, "PTR", DllCall("LockResource", "ptr", hresdata, "ptr"), "UInt", DataSize)
+    return DataSize
+}
+
+HIconFromBuffer(ByRef Buffer, width, height) {														;-- Function provides a HICON handle e.g. from a resource previously loaded into memory (LoadScriptResource)
+
+	;Ptr := Ptr ? "Ptr" : "Uint"	; For AutoHotkey Basic Users
+	hIcon := DllCall( "CreateIconFromResourceEx"
+		, UInt, &Buffer+22
+		, UInt, NumGet(Buffer,14)
+		, Int,1
+		, UInt, 0x30000
+		, Int, width
+		, Int, height
+		, UInt, 0
+		, Ptr)
+	return hIcon
+}
+
+hBMPFromPNGBuffer(ByRef Buffer, width, height) {													;-- Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)
+
+	;modified SKAN's code ; http://www.autohotkey.com/forum/post-147052.html#147052
+
+	; for AutoHotkey Basic users
+	; Ptr := A_PtrSize ? "Ptr" : "Uint" , PtrP := A_PtrSize ? "PtrP" : "UIntP"
+
+	nSize := StrLen(Buffer) * 2 ;// 2 ; <-- I don't understand why it has to be multiplied by 2
+	hData := DllCall("GlobalAlloc", UInt, 2, UInt, nSize, Ptr)
+	pData := DllCall("GlobalLock", Ptr, hData , Ptr)
+	DllCall( "RtlMoveMemory", Ptr, pData, Ptr,&Buffer, UInt,nSize )
+	DllCall( "GlobalUnlock", Ptr, hData )
+	DllCall( "ole32\CreateStreamOnHGlobal", Ptr, hData, Int, True, PtrP, pStream )
+	DllCall( "LoadLibrary", Str,"gdiplus" )
+	VarSetCapacity(si, 16, 0), si := Chr(1)
+	DllCall( "gdiplus\GdiplusStartup", PtrP, pToken, Ptr, &si, UInt,0 )
+	DllCall( "gdiplus\GdipCreateBitmapFromStream", Ptr, pStream, PtrP, pBitmap )
+	DllCall( "gdiplus\GdipCreateHBITMAPFromBitmap", Ptr,pBitmap, PtrP, hBitmap, UInt,0)
+
+	hNewBitMap := DllCall("CopyImage"
+		  , Ptr, hBitmap
+		  , UInt, 0
+		  , Int, width
+		  , Int, height
+		  , UInt, 0x00000008      ;LR_COPYDELETEORG
+		  , Ptr)
+
+	DllCall( "gdiplus\GdipDisposeImage", Ptr, pBitmap )
+	DllCall( "gdiplus\GdiplusShutdown", Ptr, pToken )
+	DllCall( NumGet(NumGet(1*pStream)+8), Ptr, pStream )
+
+	Return hNewBitMap
+}
+
+SaveSetColours(set := False, liteSet := True) {														;-- Sys colours saving adapted from an approach found in Bertrand Deo's code
+
+	; https://gist.github.com/qwerty12/110b6e68faa60a0145198722c8b8c291
+	; The rest is from Michael Maltsev: https://github.com/RaMMicHaeL/Windows-10-Color-Control
+	static DWMCOLORIZATIONPARAMS, IMMERSIVE_COLOR_PREFERENCE
+		   ,DwmGetColorizationParameters := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "dwmapi.dll", "Ptr"), "Ptr", 127, "Ptr")
+		   ,DwmSetColorizationParameters := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "dwmapi.dll", "Ptr"), "Ptr", 131, "Ptr")
+		   ,GetUserColorPreference := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "uxtheme.dll", "Ptr"), "AStr", "GetUserColorPreference", "Ptr")
+		   ,SetUserColorPreference := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "uxtheme.dll", "Ptr"), "Ptr", 122, "Ptr")
+		   ,WM_SYSCOLORCHANGE := 0x0015, sys_colours, sav_colours, colourCount := 31, GetSysColor := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "user32.dll", "Ptr"), "AStr", "GetSysColor", "Ptr")
+	if (!set) {
+		if (!VarSetCapacity(DWMCOLORIZATIONPARAMS)) {
+			VarSetCapacity(sys_colours, 4 * colourCount)
+			,VarSetCapacity(sav_colours, 4 * colourCount)
+			VarSetCapacity(DWMCOLORIZATIONPARAMS, 28)
+			,VarSetCapacity(IMMERSIVE_COLOR_PREFERENCE, 8)
+			Loop % colourCount
+				NumPut(A_Index - 1, sys_colours, 4 * (A_Index - 1))
+		}
+		Loop % colourCount
+			NumPut(DllCall(GetSysColor, "Int", A_Index - 1, "UInt"), sav_colours, 4 * (A_Index - 1), "UInt")
+		DllCall(DwmGetColorizationParameters, "Ptr", &DWMCOLORIZATIONPARAMS)
+		DllCall(GetUserColorPreference, "Ptr", &IMMERSIVE_COLOR_PREFERENCE, "Int", False)
+	} else {
+		if (!liteSet)
+			DllCall("SetSysColors", "int", colourCount, "Ptr", &sys_colours, "Ptr", &sav_colours)
+		if (VarSetCapacity(DWMCOLORIZATIONPARAMS)) {
+			if (!liteSet)
+				DllCall(DwmSetColorizationParameters, "Ptr", &DWMCOLORIZATIONPARAMS, "UInt", 0)
+			DllCall(SetUserColorPreference, "Ptr", &IMMERSIVE_COLOR_PREFERENCE, "Int", True)
+		}
+	}
+}
+
+
+;{System functions - dll (2)
 GetDllBase(DllName, PID = 0) {		;--
     TH32CS_SNAPMODULE := 0x00000008
     INVALID_HANDLE_VALUE = -1
@@ -8600,7 +9660,7 @@ getProcBaseFromModules(process) {		;--
 
 ;}
 
-;{System functions - using COMObjecte
+;{System functions - using COMObjecte (2)
 getURL(t) {     ;-- using shell.application
 	If	psh	:=	COM_CreateObject("Shell.Application") {
 		If	psw	:=	COM_Invoke(psh,	"Windows") {
@@ -8710,9 +9770,11 @@ class LoadFile {
 ;}
 ; CreateNamedPipe()			|	RestoreCursors()				|	SetSystemCursor()					|	SystemCursor()					|	SetTimerF()						|
 ; TaskDialog()					|	ITaskDialogDirect()			|	IGlobalVarsScript()				|	patternScan()					|	scanInBuf()						|
-; hexToBinaryBuffer()			|GetDllBase()						|	getProcBaseFromModules()		|	TaskDialogMsgBox()			|	TaskDialogToUnicode()		|
-; TaskDialogCallback()		|	RegRead64()					|	RegWrite64()						|
-
+; hexToBinaryBuffer()			|	GetDllBase()					|	getProcBaseFromModules()		|	TaskDialogMsgBox()			|	TaskDialogToUnicode()		|
+; TaskDialogCallback()		|	RegRead64()					|	RegWrite64()						|	LoadScriptResource()			|	HIconFromBuffer()				|
+; hBMPFromPNGBuffer()		|	SaveSetColours()				|
+; ---------- using dll's ----------
+;GetDllBase()					|	getProcBaseFromModules()	|
 ; --- using COM Objects ---
 ; getURL()						|	LoadFile(()
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -8966,9 +10028,9 @@ listAccChildProperty(hwnd){	;--
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Internet Explorer/Chrome/FireFox/HTML functions (2)
+;{Internet Explorer/Chrome/FireFox/HTML functions (3)
 ; AutoHotkey_L: von jethrow
-IEGet(name="") {		;-- AutoHotkey_L
+IEGet(name="") {																										;-- AutoHotkey_L
    IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
    Name := (Name="New Tab - Windows Internet Explorer")? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
    for WB in ComObjCreate("Shell.Application").Windows
@@ -8976,7 +10038,7 @@ IEGet(name="") {		;-- AutoHotkey_L
          return WB
 }
 ; AHK Basic:
-IEGet(name="") {		;-- AutoHotkey_Basic
+IEGet(name="") {																										;-- AutoHotkey_Basic
    IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
    Name := (Name="New Tab - Windows Internet Explorer") ? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
    oShell := COM_CreateObject("Shell.Application") ; Contains reference to all explorer windows
@@ -8990,7 +10052,7 @@ IEGet(name="") {		;-- AutoHotkey_Basic
    return, pwb
 }
 ; AutoHotkey_L:
-WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ;-- AHK_L: based on ComObjQuery docs
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { 														;-- AHK_L: based on ComObjQuery docs
 	static	msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
 	,	IID := "{0002DF05-0000-0000-C000-000000000046}" ; IID_IWebBrowserApp
 ;	,	IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IHTMLWindow2
@@ -9004,7 +10066,7 @@ WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ;-- AHK_L: based on ComObjQuery do
 	}
 }
 ; AHK Basic:
-WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ;-- AHK_Basic: based on Sean's GetWebBrowser function
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { 														;-- AHK_Basic: based on Sean's GetWebBrowser function
 	static msg, IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IWebBrowserApp
 	if Not msg
 		msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
@@ -9018,7 +10080,7 @@ WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ;-- AHK_Basic: based on Sean's Get
 ;
 wb := WBGet()				;inner HTML
 MsgBox % wb.document.documentElement.innerHTML
-WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { ;-- based on ComObjQuery docs
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) { 														;-- based on ComObjQuery docs
    static   msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
          ,  IID := "{332C4427-26CB-11D0-B483-00C04FD90119}" ; IID_IWebBrowserApp
    SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
@@ -9035,15 +10097,24 @@ SetTitleMatchMode 2
 MsgBox % Acc_Get("Value", "4.20.2.4.2", 0, "Firefox")
 MsgBox % Acc_Get("Value", "application1.property_page1.tool_bar2.combo_box1.editable_text1", 0, "Firefox")
 
+TabActivate(TabName, WinTitle="") {																			;-- activate a TAB in InternetExplorer
 
+	;https://autohotkey.com/boards/viewtopic.php?t=542
+
+	ControlGet, hTabUI , hWnd,, DirectUIHWND5, % WinTitle=""? "ahk_class IEFrame":WinTitle
+	Tabs := Acc_ObjectFromWindow(hTabUI).accChild(1) ; access "Tabs" control
+	Loop, % Tabs.accChildCount
+		if (Tabs.accChild(A_Index).accName(0) = TabName)
+			return, Tabs.accChild(A_Index).accDoDefaultAction(0)
+}
 
 ;}
-; IEGet()							|	WBGet()							|
+; IEGet()							|	WBGet()							|	TabActivate()						|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-;{Variables - Handling (3)
-ComVar(Type:=0xC) { 														;-- Creates an object which can be used to pass a value ByRef.
+;{Variables - Handling (4)
+ComVar(Type:=0xC) { 																								;-- Creates an object which can be used to pass a value ByRef.
 
     ;   ComVar: Creates an object which can be used to pass a value ByRef.
     ;   ComVar[] retrieves the value.
@@ -9059,19 +10130,68 @@ ComVar(Type:=0xC) { 														;-- Creates an object which can be used to pas
     ; Store the array and an object which can be used to pass the VARIANT ByRef.
     return { ref: ComObject(0x4000|Type, arr_data), _: arr, base: base }
 }
-ComVarGet(cv, p*) { 															;-- Called when script accesses an unknown field.
+ComVarGet(cv, p*) { 																									;-- Called when script accesses an unknown field.
     if p.MaxIndex() = "" ; No name/parameters, i.e. cv[]
         return cv._[0]
 }
-ComVarSet(cv, v, p*) { 														;-- Called when script sets an unknown field.
+ComVarSet(cv, v, p*) { 																								;-- Called when script sets an unknown field.
     if p.MaxIndex() = "" ; No name/parameters, i.e. cv[]:=v
         return cv._[0] := v
 }
 
+GetScriptVARs() {																										;-- returns a key, value array with all script variables (e.g. for debugging purposes)
 
+		; http://www.autohotkey.com/board/topic/20925-listvars/#entry156570
+
+	global
+	static hEdit, pSFW, pSW, bkpSFW, bkpSW
+	local dhw, AStr, Ptr, hmod, text, v, i := 0, vars := []
+
+	if !hEdit {
+		dhw := A_DetectHiddenWindows
+		DetectHiddenWindows, On
+		ControlGet, hEdit, Hwnd,, Edit1, % "ahk_id " A_ScriptHwnd
+		DetectHiddenWindows, % dhw
+
+		AStr := A_IsUnicode ? "AStr" : "Str"
+		Ptr := A_PtrSize=8 ? "Ptr" : "UInt"
+		hmod := DllCall("GetModuleHandle", "Str", "user32.dll")
+		pSFW := DllCall("GetProcAddress", Ptr, hmod, AStr, "SetForegroundWindow")
+		pSW := DllCall("GetProcAddress", Ptr, hmod, AStr, "ShowWindow")
+		DllCall("VirtualProtect", Ptr, pSFW, Ptr, 8, "UInt", 0x40, "UInt*", 0)
+		DllCall("VirtualProtect", Ptr, pSW, Ptr, 8, "UInt", 0x40, "UInt*", 0)
+		bkpSFW := NumGet(pSFW+0, 0, "int64")
+		bkpSW := NumGet(pSW+0, 0, "int64")
+	}
+
+	if (A_PtrSize=8) {
+        NumPut(0x0000C300000001B8, pSFW+0, 0, "int64")  ; return TRUE
+        NumPut(0x0000C300000001B8, pSW+0, 0, "int64")   ; return TRUE
+    } else {
+        NumPut(0x0004C200000001B8, pSFW+0, 0, "int64")  ; return TRUE
+        NumPut(0x0008C200000001B8, pSW+0, 0, "int64")   ; return TRUE
+    }
+
+    ListVars
+
+    NumPut(bkpSFW, pSFW+0, 0, "int64")
+    NumPut(bkpSW, pSW+0, 0, "int64")
+
+    ControlGetText, text,, % "ahk_id " hEdit
+
+    RegExMatch(text, "sm)(?<=^Global Variables \(alphabetical\)`r`n-{50}`r`n).*", text)
+    Loop, Parse, text, `n, `r
+    {
+    	if (A_LoopField~="^\d+\[") || (A_LoopField = "")
+    		continue
+		v := SubStr(A_LoopField, 1, InStr(A_LoopField, "[")-1)
+    	vars[i+=1] := {name: v, value:%v%}
+    }
+    return vars
+}
 
 ;}
-; ComVar()						|	ComVarGet()					|	ComVarSet()						|
+; ComVar()						|	ComVarGet()					|	ComVarSet()						|	GetScriptVARs()			|
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -9110,177 +10230,46 @@ MCode_Bin2Hex(addr, len, ByRef hex) { 							;-- By Lexikos, http://goo.gl/LjP9Z
 
 ;----- NOT SORTED FUNCTION OR FUNCTION I CANT IDENTIFY - but looks interesting
 
-GetAllInputChars() {		;--
-    Loop 256
-        ChrStr .= Chr( a_index ) " "
-
-    ChrStr .= "{down} {up} {right} {left} "
-
-    Return ChrStr
-}
-
-CalcAddrHash(addr, length, algid, byref hash = 0, byref hashlength = 0) {		;--
-
-    static h := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "A", "B", "C", "D", "E", "F"]
-    static b := h.minIndex()
-    o := ""
-    if (DllCall("advapi32\CryptAcquireContext", "Ptr*", hProv, "Ptr", 0, "Ptr", 0, "UInt", 24, "UInt", 0xF0000000))
-    {
-        if (DllCall("advapi32\CryptCreateHash", "Ptr", hProv, "UInt", algid, "UInt", 0, "UInt", 0, "Ptr*", hHash))
-        {
-            if (DllCall("advapi32\CryptHashData", "Ptr", hHash, "Ptr", addr, "UInt", length, "UInt", 0))
-            {
-                if (DllCall("advapi32\CryptGetHashParam", "Ptr", hHash, "UInt", 2, "Ptr", 0, "UInt*", hashlength, "UInt", 0))
-                {
-                    VarSetCapacity(hash, hashlength, 0)
-                    if (DllCall("advapi32\CryptGetHashParam", "Ptr", hHash, "UInt", 2, "Ptr", &hash, "UInt*", hashlength, "UInt", 0))
-                    {
-                        loop, % hashlength
-                        {
-                            v := NumGet(hash, A_Index - 1, "UChar")
-                            o .= h[(v >> 4) + b] h[(v & 0xf) + b]
-                        }
-                    }
-                }
-            }
-            DllCall("advapi32\CryptDestroyHash", "Ptr", hHash)
-        }
-        DllCall("advapi32\CryPtreleaseContext", "Ptr", hProv, "UInt", 0)
-    }
-    return o
-}
-
-CalcStringHash(string, algid, encoding = "utf-8", byref hash = 0, byref hashlength = 0) {		;--
-    chrlength := (encoding = "cp1200" || encoding = "utf-16") ? 2 : 1
-    length := (StrPut(string, encoding) - 1) * chrlength
-    VarSetCapacity(data, length, 0)
-    StrPut(string, &data, floor(length / chrlength), encoding)
-    return CalcAddrHash(&data, length, algid, hash, hashlength)
-}
-
-getNetControl(winHwnd, controlName="", accName="", classNN="", accHelp="") {		;--
-
-	winget, list, controllisthwnd, ahk_id %winHwnd%
-
-	bufSize=1024
-	winget, processID, pid, ahk_id %winHwnd%
-	VarSetCapacity(var1,bufSize)
-	getName:=DllCall( "RegisterWindowMessage", "str", "WM_GETCONTROLNAME" )
-	dwResult:=DllCall("GetWindowThreadProcessId", "UInt", winHwnd)
-	hProcess:=DllCall("OpenProcess", "UInt", 0x8 | 0x10 | 0x20, "Uint", 0, "UInt", processID)
-	otherMem:=DllCall("VirtualAllocEx", "Ptr", hProcess, "Ptr", 0, "PTR", bufSize, "UInt", 0x3000, "UInt", 0x0004, "Ptr")
-
-	count=0
-	;~ static hModule := DllCall("LoadLibrary", "Str", "oleacc", "Ptr")
-	;~ static hModule2 := DllCall("LoadLibrary", "Str", "Kernel32", "Ptr")
-	;~ static AccessibleObjectFromWindowProc := DllCall("GetProcAddress", Ptr, DllCall("GetModuleHandle", Str, "oleacc", "Ptr"), AStr, "AccessibleObjectFromWindow", "Ptr")
-	;~ static ReadProcessMemoryProc:=DllCall("ReadProcessMemory", Ptr, DllCall("GetModuleHandle", Str, "Kernel32", "Ptr"), AStr, "AccessibleChildren", "Ptr")
-	;~ msgbox % AccessibleObjectFromWindowProc
-	;~ static idObject:=-4
-	loop,parse,list,`n
-	{
-		SendMessage,%getName%,%bufSize%,%otherMem%,,ahk_id %a_loopfield%
-        DllCall("ReadProcessMemory","UInt",hProcess,"UInt",otherMem,"Str",var1,"UInt",bufSize,"UInt *",0)
-
-		;~ acc:=acc_objectfromwindow2(a_loopfield)
-
-		;~ if !DllCall(AccessibleObjectFromWindowProc, "Ptr", a_loopfield, "UInt", idObject&=0xFFFFFFFF, "Ptr", -VarSetCapacity(IID,16)+NumPut(idObject==0xFFFFFFF0?0x46000000000000C0:0x719B3800AA000C81,NumPut(idObject==0xFFFFFFF0?0x0000000000020400:0x11CF3C3D618736E0,IID,"Int64"),"Int64"), "Ptr*", pacc)
-			;~ acc:=ComObjEnwrap(9,pacc,1)
-		;~ else
-			;~ acc:=""
 
 
-	;&&(accParentHwnd=""||acc_windowfromobject(acc.accParent)=accParentHwnd)
-		if ((var1&&var1=controlName)&&(accName=""||(acc:=Acc_ObjectFromWindow(a_loopfield)).accName=accName)){
-			WinGetClass,cl,ahk_id %a_loopfield%
-			if(instr(cl,classNN)=1&&(accHelp=""||acc.accHelp=accHelp)) {
-				ret:=a_loopfield
-				break
-			}
-		}
 
-		var1:=""
-	}
 
-    DllCall("VirtualFreeEx","Ptr", hProcess,"UInt",otherMem,"UInt", 0, "UInt", 0x8000)
-	DllCall("CloseHandle","Ptr",hProcess)
-	DllCall("FreeLibrary", "Ptr", hModule)
-	return ret
 
-}
 
-LoadScriptString(scriptResource) {		;--
 
-	;   Type: MAKEINTRESOURCE(10)   RT_RCDATA/Application-defined resource (raw data).
-	;https://autohotkey.com/board/topic/102445-how-to-modify-files-compiled-inside-exe-without-exporting-them/
-	; scriptResource = a text file stored in RCDATA
-	; if 0
-	;   FileInstall, script.ahk, Ignore
-	; LoadScriptString("script.ahk")
 
-    lib := DllCall("GetModuleHandle", "ptr", 0, "ptr")
-    res := DllCall("FindResource", "ptr", lib, "str", scriptResource, "ptr", Type := 10, "ptr")
-    DataSize := DllCall("SizeofResource", "ptr", lib, "ptr", res, "uint")
-    hresdata := DllCall("LoadResource", "ptr", lib, "ptr", res, "ptr")
-    if (data := DllCall("LockResource", "ptr", hresdata, "ptr"))
-        return StrGet(data, DataSize, "UTF-8")    ; Retrieve text, assuming UTF-8 encoding.
-    else return 0
 
-}
 
-LoadScriptResource(Name, ByRef DataSize = 0, Type = 10) {		;--
 
-	;Lexikos Original
-	lib := DllCall("GetModuleHandle", "ptr", 0, "ptr")
-    res := DllCall("FindResource", "ptr", lib, "str", Name, "ptr", Type, "ptr")
-    DataSize := DllCall("SizeofResource", "ptr", lib, "ptr", res, "uint")
-    hresdata := DllCall("LoadResource", "ptr", lib, "ptr", res, "ptr")
-    return DllCall("LockResource", "ptr", hresdata, "ptr")
 
-}
 
-ResourceHackerIcons(dotIcoFile) {		;--
+;{ Script by Rajat saves settings in .ahk file itselfs!
+/*
+[settings]
+like=0
 
-	;https://autohotkey.com/board/topic/102445-how-to-modify-files-compiled-inside-exe-without-exporting-them/
-	;Resource hacker needs to be executed with admin privileges as well.
+*/
 
-	if !A_IsCompiled
-		return
-	msgbox This will attempt to change the included icons inside the binary file.`n`nThis may not work!`n`nOnly .ico files are compatible.`n`nThe program will close and attempt the operation. This will take around 10 seconds.
-	FileCreateDir, %A_Temp%\Resource Hacker
-	FileInstall, Included Files\Resource Hacker\ResHacker.exe, %A_Temp%\Resource Hacker\ResHacker.exe, 1
+IniRead, like, %a_scriptfullpath%, settings, like
 
-	Rscript := "[FILENAMES]"
-			.	"`nExe= " A_ScriptFullPath
-			. "`nSaveAs= " A_ScriptFullPath
-			. "`n[COMMANDS]"
-		;	. "`n-addoverwrite " dotIcoFile ", ICONGROUP,MAINICON,0"
-			. "`n-addoverwrite " dotIcoFile ", icon, 159,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 160,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 206,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 207,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 208,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 228,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 229,"
-			. "`n-addoverwrite " dotIcoFile ", icon, 230,"
+Gui, Add, button, x16 y17 w90 h30 glike, I like this
+Gui, Add, button, x16 y57 w90 h30 gdontlike, I don't like this
+Gui, Add, Text, x26 y97 w70 h20, Previous = %like%
+Gui, Show, x158 y110 h120 w128, Generated using SmartGUI 2.6
+Return
 
-	FileDelete, %A_Temp%\Resource Hacker\Rscript.txt
-	FileAppend, %Rscript%, %A_Temp%\Resource Hacker\Rscript.txt
+GuiClose:
+        Gui, submit
+ExitApp
 
-	AhkScript := "#NoEnv"
-		. "`n#SingleInstance force"
-		. "`nSetWorkingDir %A_ScriptDir%"
-		. "`nsleep 4000" ;give time for macro trainer to close so can open in reshackers
-		. "`nRun,  %A_Temp%\Resource Hacker\ResHacker.exe -script Rscript.txt"
-		. "`nRun,  ResHacker.exe -script Rscript.txt, %A_Temp%\Resource Hacker\"
-		. "`nmsgbox I just tried to change the included icon files``nDon't know if it worked.``n``nPress ok to re-launch the macro-trainer to find out"
-		. "`nrun, " A_ScriptFullPath ;attempt to launch the original program
-		. "`nExitapp"
+like:
+        IniWrite, 1, %a_scriptfullpath%, settings, like
+Return
 
-		DynaRun(AhkScript, "ChangeIcon.AHK", A_Temp "\AHK.exe")
-		ExitApp
-}
-
+dontlike:
+        IniWrite, 0, %a_scriptfullpath%, settings, like
+Return
+;}
 
 ;{Scite4AHK options
 

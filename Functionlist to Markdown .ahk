@@ -2,7 +2,7 @@
 
 
 Directory1 = C:\Program Files\AutoHotkey\lib
-Directory2 = D:\Eigene Dateien\Eigene Dokumente\AutoIt Scripte\Addendum für AlbisOnWindows
+Directory2 = D:\Eigene Dateien\Eigene Dokumente\AutoIt Scripte\GitHub\AHK-Rare
 ;FileSelectFile, file,, %Directory1%
 ;FileDelete, files.txt
 ;Directory = file
