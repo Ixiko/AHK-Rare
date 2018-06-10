@@ -1,7 +1,5 @@
 ![AHK - Rare Logo](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK%20-%20rare.jpg)
 
-###	<center>Collection of rare or very useful single functions</Center>
-
 ------
 
 **AHK-Rare** - *collection of rare or very useful single functions* 
