@@ -4,7 +4,9 @@
 
 ------
 
-Last modification date: ***02.06.2018***, *Changes are below!* At the end of this document you will find a complete list of all functions. The functions are sorted by topic as shown in the picture.
+Last modification date: ***10.06.2018***, *Changes are below!* At the end of this document you will find a complete list of all functions. The functions are sorted by topic as shown in the picture.
+
+In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does not work". After trying it with [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey). 
 
 ------
 
@@ -14,9 +16,24 @@ Last modification date: ***02.06.2018***, *Changes are below!* At the end of thi
 
 <br>
 
+### [10-June-2018] count: 303 functions
+
+*minor layout improvement (so I hope, anyway). In the [AHK forum](https://autohotkey.com/boards/) I read that codefolding does not work. After trying with the [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with  [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey).*
+
+- **ChangeMacAdress()** - change MacAdress, it makes changes to the registry!
+- **ListAHKStats()** - Listvars with select desired section: ListLines, ListVars, ListHotkeys, KeyHistory
+- **LV_MoveRow() ** - the same like above, but slightly different. With integrated script example
+- **AddToolTip() ** - Add/Update tooltips to GUI controls
+- **ExtractTableData() ** - extracts tables from HTML files
+- **MouseExtras()** - Allows to use subroutines for Holding and Double Clicking a Mouse Button.
+- **CaptureScreen() ** - screenshot function 4 - orginally from CaptureScreen.ahk
+- **CaptureCursor() ** - this captures the cursor, depending function of CaptureScreen()
+- **Zoomer() ** - zooms a HBitmap, depending function of CaptureScreen()
+- **SaveHBITMAPToFile() ** - saves a HBitmap to a file, depending function of CaptureScreen()
+
 ### [02-June-2018] count: 293 functions
 
-***6 functions removed*** - depending functions not available or doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
+***6 functions removed*** - depending functions not available or the functions are doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
 
 - **LV_SetBackgroundURL()** - set a ListView's background image 
 
