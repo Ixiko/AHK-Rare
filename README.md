@@ -1,8 +1,10 @@
 ![AHK - Rare Logo](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK%20-%20rare.jpg)
 
-### My collection of rare or very useful single functions
+###	<center>Collection of rare or very useful single functions</Center>
 
 ------
+
+**AHK-Rare** - *collection of rare or very useful single functions* 
 
 Last modification date: ***10.06.2018***, *Changes are below!* At the end of this document you will find a complete list of all functions. The functions are sorted by topic as shown in the picture.
 
@@ -16,7 +18,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 <br>
 
-### [10-June-2018] count: 303 functions
+### <u>[10-June-2018] count: 303 functions</u>
 
 *minor layout improvement (so I hope, anyway). In the [AHK forum](https://autohotkey.com/boards/) I read that codefolding does not work. After trying with the [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with  [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey).*
 
@@ -31,11 +33,13 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 - **Zoomer()** - zooms a HBitmap, depending function of CaptureScreen()
 - **SaveHBITMAPToFile()** - saves a HBitmap to a file, depending function of CaptureScreen()
 
-### [02-June-2018] count: 293 functions
+
+
+### <u>[02-June-2018] count: 293 functions</u>
 
 ***6 functions removed*** - depending functions not available or the functions are doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
 
-- **LV_SetBackgroundURL()** - set a ListView's background image 
+- **LV_SetBackgroundURL()** - set a ListView's background image
 - **GetBgBitMapHandle()** - returns the handle of a background bitmap in a gui
 - **CreatePatternBrushFrom()** - can be used to repeat a pattern as background image in a gui
 - **GetLastActivePopUp()** - passes the handle of the last active pop-up window of a parent window
@@ -43,7 +47,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 - **GUI_AutoHide()** - Autohide the GUI function
 - **DeskIcons()** - i think its for showing all desktop icons
 - **WinFadeToggle()**
-- **KillProcess()** - uses DllCalls to end a process
+- **KilProcess()** - uses DllCalls to end a process
 - **ConsoleSend()** - Sends text to a console's input stream
 - **StdOutStream()** - Store command line output in autohotkey variable. Supports both x86 and x64.
 - **LV_MoveRow()** - moves a listview row up or down
@@ -55,9 +59,10 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 - **hBMPFromPNGBuffer()** - Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)
 - **getNextControl()** - I'm not sure if this function works could be an AHK code for the Control.GetNextControl method for System.Windows.Forms
 - **SaveSetColours()** - Sys colours saving adapted from an approach found in Bertrand Deo's code
- 
 
-### [28-May-2018] count: 280 functions
+
+
+### <u>[28-May-2018] count: 280 functions</u>
 
 ***Organized layout***, some functions moved to the right topic, delete duplicate functions, adding more info and examples*
 
@@ -95,7 +100,7 @@ IsWindow(hWnd*) {
 - **LVGetCount()** - get current count of notes in a Listbox
 - **LV_SetSelColors()** - Sets the colors for selected rows in a ListView.
 - **LV_Select()** - de- or select a row in a ListView
-- **![](https://raw.githubusercontent.com/Ixiko/AHK-Forum/master/images/SplitButton.png)SplitButton()** - drop down button 
+- **![splitbutton](https://raw.githubusercontent.com/Ixiko/AHK-Forum/master/images/SplitButton.png)SplitButton()** - drop down button 
 - **TV_Find()** -  return the ID of an item based on the text of the item
 - **FileCount(filter)** - count matching files in the working directory
 - **AddToolTip()** - adds a ToolTip to a gui button
@@ -125,7 +130,7 @@ IsWindow(hWnd*) {
 
   <br>
 
-### [22-May-2018] count: 240 functions
+### <u>[22-May-2018] count: 240 functions</u>
 
 + **FindChildWindow()** - a very good function to get handles from child windows like MDI childs
 + **WinGetMinMaxState()** - returns the state of a window if maximized or minimized
@@ -138,7 +143,7 @@ IsWindow(hWnd*) {
 
   <br>
 
-### [06-May-2018] count: 230 functions
+### <u>[06-May-2018] count: 230 functions</u>
 
 - **getByControlName()**  - function uses DllCalls
 - **listAccChildProperty()** - uses COM functionality
@@ -147,11 +152,9 @@ IsWindow(hWnd*) {
 
   <br>
 
-### [01-May-2018] count: 221 functions
+### <u>[01-May-2018] count: 221 functions</u>
 
 - **PIC_GDI_GUI()** - a GDI Gui for showing pictures and more
-
-
 - **FullScreenToggleUnderMouse()** - Window to pseudo fullscreen and back
 - **ControlCreateGradient()** - Paint a gradient over a control - i think over buttons is not working
 - **Edit control type functions** - 6 functions for reading and manipulating an Edit-Control
@@ -168,7 +171,7 @@ IsWindow(hWnd*) {
 
 -----
 
-## Complete List of functions
+## <u>Complete List of functions</u>
 
 *sometimes the function names are the same but they use different methods to get the same result*
 
