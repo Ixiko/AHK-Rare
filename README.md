@@ -36,46 +36,26 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 ***6 functions removed*** - depending functions not available or the functions are doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
 
 - **LV_SetBackgroundURL()** - set a ListView's background image 
-
 - **GetBgBitMapHandle()** - returns the handle of a background bitmap in a gui
-
 - **CreatePatternBrushFrom()** - can be used to repeat a pattern as background image in a gui
-
 - **GetLastActivePopUp()** - passes the handle of the last active pop-up window of a parent window
-
 - **Convert()** - converts ImageFiles
-
 - **GUI_AutoHide()** - Autohide the GUI function
-
 - **DeskIcons()** - i think its for showing all desktop icons
-
 - **WinFadeToggle()**
-
 - **KillProcess()** - uses DllCalls to end a process
-
 - **ConsoleSend()** - Sends text to a console's input stream
-
 - **StdOutStream()** - Store command line output in autohotkey variable. Supports both x86 and x64.
-
 - **LV_MoveRow()** - moves a listview row up or down
-
 - **SetButtonF()** - Set a button control to call a function instead of a label subroutine 
-
 - **GetScriptVARs()** - returns a key, value array with all script variables (e.g. for debugging purposes)
-
 - **GetAllInputChars()** - Returns a string with input characters
-
 - **LoadScriptResource()** - loads a resource into memory (e.g. picture, scripts..)
-
 - **HIconFromBuffer()** - function provides a HICON handle e.g. from a resource previously loaded into memory (LoadScriptResource)
-
 - **hBMPFromPNGBuffer()** - Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)
-
 - **getNextControl()** - I'm not sure if this function works could be an AHK code for the Control.GetNextControl method for System.Windows.Forms
-
 - **SaveSetColours()** - Sys colours saving adapted from an approach found in Bertrand Deo's code
-
-  
+ 
 
 ### [28-May-2018] count: 280 functions
 
@@ -113,63 +93,34 @@ IsWindow(hWnd*) {
 ***new functions:***
 
 - **LVGetCount()** - get current count of notes in a Listbox
-
 - **LV_SetSelColors()** - Sets the colors for selected rows in a ListView.
-
 - **LV_Select()** - de- or select a row in a ListView
-
 - **![](https://raw.githubusercontent.com/Ixiko/AHK-Forum/master/images/SplitButton.png)SplitButton()** - drop down button 
-
 - **TV_Find()** -  return the ID of an item based on the text of the item
-
 - **FileCount(filter)** - count matching files in the working directory
-
 - **AddToolTip()** - adds a ToolTip to a gui button
-
 - **SetTaskbarProgress()** - Accesses Windows 7's ability to display a progress bar behind a taskbar button
-
 - **RegExSplit()** -split a string by a regular expression pattern and receive an array as a result
-
 - **CreateGist()** - sends your script to your gist
-
 - **IsOfficeFile()** - checks if a file is an Office file
-
 - **GetAllResponseHeaders()** - Gets the values of all HTTP headers
-
 - **GetImageTypeW()** - Identify the image type (UniCode)
-
 - **Edit_VCenter()** - Vertically Align Text
-
 - **BetterBox()** - custom input box allows to choose the position of the text insertion point
-
 - **BtnBox()** - show a custom MsgBox with arbitrarily named buttons
-
 - **LoginBox()** - show a custom input box for credentials, return an object with Username and Password
-
 - **MultiBox()** - show a multi-line input box, return the entered text
-
 - **PassBox()** -show a custom input box for a password
-
 - **LoadFile()** - Loads a script file as a child process and returns an object
-
 - **RGBRange()** - returns an array for a color transition from x to y
-
 - **SystemCursor()** - hiding mouse cursor
-
 - **getSelectionCoords()** - creates a click-and-drag selection box to specify an area and returns the coordinates
-
 - **Mean()** - returns Average values in comma delimited list
-
 - **Median()** - returns Median in a set of numbers from a list
-
 - **Mode()** - returns the mode from a list of numbers
-
 - **FloodFill()** - filling an area using color banks
-
 - **CreateBMPGradient()** - Horizontal/Vertical gradient
-
 - **NetStat()** - passes information over network connections similar to the netstat -an CMD command.
-
 - **TV_Load()** - loads TreeView items from an XML string
 
   <br>
@@ -177,19 +128,12 @@ IsWindow(hWnd*) {
 ### [22-May-2018] count: 240 functions
 
 + **FindChildWindow()** - a very good function to get handles from child windows like MDI childs
-
 + **WinGetMinMaxState()** - returns the state of a window if maximized or minimized
-
 + **TimeCode()** - result is a date-time string or only time-string (13.05.2018, 11:35:01.241) - can be useful for any kind of logging
-
 + **RegRead64(), RegWrite64()** - This script provides **RegRead64()** and **RegWrite64()** functions that do not redirect to Wow6432Node on 64-bit machines. Registry calls from 32 bit applications running on 64 bit machines are normally intercepted by the system and redirected from HKLM\SOFTWARE to HKLM\SOFTWARE\Wow6432Node. 
-
 + **CreateOpenWithMenu()** - Creates an 'open with' menu for the passed file. a function by just me based on code from qwerty12
-
 + **CircularText(), RotateAroundCenter()** - Given a string it will generate a bitmap of the characters drawn with a given angle between each char, if the angle is 0 it will try to make the string fill the entire circle.
-
 + **QuickSort()** -  Sort dense arrays or matrices based on Quicksort algorithm
-
 + **FrameShadow(HGui)** - Drop Shadow On Borderless Window, (DWM STYLE)
 
   <br>
@@ -197,11 +141,8 @@ IsWindow(hWnd*) {
 ### [06-May-2018] count: 230 functions
 
 - **getByControlName()**  - function uses DllCalls
-
 - **listAccChildProperty()** - uses COM functionality
-
 - **getText(), getHtmlById(), getTextById(), getHtmlByTagName(), getTextByTagName()** -get text or html from a string
-
 - **TabCtrl_GetCurSel(), TabCtrl_GetItemText()** - the first returns the 1-based index of the currently selected tab, the second returns the tab name
 
   <br>
