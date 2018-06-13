@@ -18,24 +18,24 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ### <u>[13-June-2018] count: 323 functions</u>
 
--**TimedFunction() ** - SetTimer functionality for functions
--**ListGlobalVars() ** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
--**HelpToolTips() ** -  To show defined GUI control help tooltips on hover.
--**StringM() ** -  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
--**FileWriteLine() ** -  To write data at specified line in a file.
--**FileMD5() ** - File MD5 Hashing
--**StringMD5() ** - String MD5 Hashing
--**Dec2Base() ** - Base to Decimal and 
--**Base2Dec() ** - Decimal to Base conversion
--**InjectDll() ** - injects a dll to a running process (ahkdll??)
--**HexToFloat() ** - Hexadecimal to Float conversion
--**FloatToHex() ** - Float to Hexadecimal conversion
--**CalculateDistance() ** - calculates the distance between two points in a 2D-Space 
--**IsInRange() ** - shows if a second variable is in range
--**GetRange() ** - another good screen area selection function
--**GetComboBoxChoice()** - Combobox function
--**LB_AdjustItemHeight()** - Listbox function
--**LB_GetItemHeight()** - Listbox function
+- **TimedFunction()** - SetTimer functionality for functions
+- **ListGlobalVars()** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
+- **HelpToolTips()** -  To show defined GUI control help tooltips on hover.
+- **StringM()** -  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
+- **FileWriteLine()** -  To write data at specified line in a file.
+- **FileMD5()** - File MD5 Hashing
+- **StringMD5()** - String MD5 Hashing
+- **Dec2Base()** - Base to Decimal and 
+- **Base2Dec()** - Decimal to Base conversion
+- **InjectDll()** - injects a dll to a running process (ahkdll??)
+- **HexToFloat()** - Hexadecimal to Float conversion
+- **FloatToHex()** - Float to Hexadecimal conversion
+- **CalculateDistance()** - calculates the distance between two points in a 2D-Space 
+- **IsInRange()** - shows if a second variable is in range
+- **GetRange()** - another good screen area selection function
+- **GetComboBoxChoice()** - Combobox function
+- **LB_AdjustItemHeight()** - Listbox function
+- **LB_GetItemHeight()** - Listbox function
 -**LB_SetItemHeight()**- Listbox function
 -**GetClientSize()** - get size of window without border
 
