@@ -109,33 +109,21 @@ I’ve found a lot function this time. I checked the found functions that these 
 ### Listview
 
 - **LV_HeaderFontSet()** - sets a different font to a Listview header (it's need CreateFont() function) - formerly this function needs a function as a rewrite of SendMessage, I changed it to a DLLCall without an extra function, the depending function *CreateFont()* can be also found in this file
-
 - **LV_Find()** - I think it‘s usefull to find an item position a listview
-
 - **LV_GetSelectedText()** - returns text from selected rows in ListView (in a user friendly way IMO.)
-
 - **LV_Notification()** - easy function for showing notifications by hovering over a listview
-
 - **LV_IsChecked()** - alternate method to find out if a particular row number is checked
-
 - **LV_SetCheckState()** - check (add check mark to) or uncheck (remove the check mark from) an item in the ListView control
-
 - **LV_SetItemState()** - with this function you can set all avaible states to a listview item
 
 ### Controls
 
 - **ControlDoubleClick()** - simulates a double click on a control with left/middle or right mousebutton
-
 - **GetFocusedControl()** - get focused control from active window -multi Options[ClassNN \ Hwnd \ Text \ List \ All] available 
-
 - **ControlGetTextExt()** - 3 different variants are tried to determine the text of a control
-
 - **getControlInfo()** - get width and heights of controls
-
 - **ControlSetTextAndResize()** - set a new text to a control and resize depending on textwidth and -height
-
 - **GetCPA_file_name()** - retrieves Control Panel applet icon
-
 - **IsControlUnderCursor()** - Checks if a specific control is under the cursor and returns its ClassNN if it is
 
 ### Other
@@ -171,21 +159,21 @@ I’ve found a lot function this time. I checked the found functions that these 
 -----
 ### <u>[13-June-2018] count: 323 functions</u>
 
-- **TimedFunction() ** - SetTimer functionality for functions
-- **ListGlobalVars() ** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
-- **HelpToolTips() ** -  To show defined GUI control help tooltips on hover.
-- **StringM() ** -  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
-- **FileWriteLine() ** -  To write data at specified line in a file.
-- **FileMD5() ** - File MD5 Hashing
-- **StringMD5() ** - String MD5 Hashing
-- **Dec2Base() ** - Base to Decimal and 
-- **Base2Dec() ** - Decimal to Base conversion
-- **InjectDll() ** - injects a dll to a running process (ahkdll??)
-- **HexToFloat() ** - Hexadecimal to Float conversion
-- **FloatToHex() ** - Float to Hexadecimal conversion
-- **CalculateDistance() ** - calculates the distance between two points in a 2D-Space 
-- **IsInRange() ** - shows if a second variable is in range
-- **GetRange() ** - another good screen area selection function
+- **TimedFunction()** - SetTimer functionality for functions
+- **ListGlobalVars()** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
+- **HelpToolTips()** -  To show defined GUI control help tooltips on hover.
+- **StringM()** -  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
+- **FileWriteLine()** -  To write data at specified line in a file.
+- **FileMD5()** - File MD5 Hashing
+- **StringMD5()** - String MD5 Hashing
+- **Dec2Base()** - Base to Decimal and 
+- **Base2Dec()** - Decimal to Base conversion
+- **InjectDll()** - injects a dll to a running process (ahkdll??)
+- **HexToFloat()** - Hexadecimal to Float conversion
+- **FloatToHex()** - Float to Hexadecimal conversion
+- **CalculateDistance()** - calculates the distance between two points in a 2D-Space 
+- **IsInRange()** - shows if a second variable is in range
+- **GetRange()** - another good screen area selection function
 - **GetComboBoxChoice()** - Combobox function
 - **LB_AdjustItemHeight()** - Listbox function
 - **LB_GetItemHeight()** - Listbox function
