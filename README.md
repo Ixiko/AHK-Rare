@@ -31,29 +31,17 @@ I’ve found a lot function this time. I checked the found functions that these 
 ### Strings/Arrays/Objects/Text/Variables
 
 - **StrCount()** - a very handy function to count a needle in a Haystack
-
 - **SuperInstr()** - Returns min/max position for a | separated values of Needle(s)
-
 - **GetText()** - copies the selected text to a variable while preserving the clipboard.(Ctrl+C method)
-
 - **PutText()** - Pastes text from a variable while preserving the clipboard. (Ctrl+v method)
-
 - **GetFuncDefs()** - get function definitions from a script
-
 - **ExploreObj()** - returns a string containing the formatted object keys and values (very nice for debugging!)
-
 - **LineDelete()** - deletes lines of text from variables / no loop
-
 - **ExtractFuncTOuserAHK()** - extract user function and helps to write it to userAhk.api
-
 - **PdfToText()** - copies a selected PDF file to memory - it needs xpdf - pdftotext.exe
-
 - **PdfPageCounter()** - counts pages of a pdffile (works with 95% of pdf files)
-
 - **PasteWithIndent()** - paste string to an editor with your prefered indent key
-
 - **SplitLine()** - split string to key and value
-
 - **Ask_and_SetbackFocus()** - by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret
 
 - **Valueof()** - Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables
@@ -61,49 +49,27 @@ I’ve found a lot function this time. I checked the found functions that these 
 ### Windows/Gui
 
 - **WinSetPlacement()** - Sets window position using workspace coordinates (-> no taskbar)
-
 - **AttachToolWindow()** - Attaches a window as a tool window to another window from a different process. 
-
 - **DeAttachToolWindow()** - removes the attached ToolWindow
-
 - **GetFreeGuiNum()** - gets a free gui number
-
 - **DisableFadeEffect()** - disabling fade effect on gui animations
-
 - **RMApp_NCHITTEST()** - Determines what part of a window the mouse is currently over
-
 - **SetWindowTransistionDisable()** - disabling fade effect only for the window of choice 
-
 - **IsWindowUnderCursor()** - Checks if a specific window is under the cursor.
-
 - **GetCenterCoords()** - ?center a gui between 2 monitors?
-
 - **Menu_AssignBitmap()** - assign bitmap to any item in any AHk menu
-
 - **guiMsgBox()** - GUI Message Box to allow selection
-
 - **DisableMinimizeAnim()** - disables or restores original minimize anim setting
-
 - **GetTextSize()** - a corrected version of this function from majkinetor *(tested)*
-
 - **MeasureText()** - alternative to other functions which calculate the text size before display on the screen
-
 - **WinGetClientPos()** - gives back the coordinates of client area inside a gui/window - with DpiFactor correction
-
 - **winfade()** - another winfade function
-
 - **TT_Console()** - Use Tooltip as a User Interface it returns the key which has been pressed
-
 - **ToolTipEx()** - Display ToolTips with custom fonts and colors
-
 - **SafeInput()** - makes sure sure the same window stays active after showing the InputBox. Otherwise you might get the text pasted into another window unexpectedly.
-
 - **CreateFont()** - creates font in memory which can be used with any API function accepting font handles
-
 - **GetHFONT()** - gets a handle to a font used in a AHK gui for example
-
 - **MsgBoxFont()** - style your MsgBox with with your prefered font
-
 - **DisableCloseButton()** - to disable/grey out the close button
 
 ### Listview
