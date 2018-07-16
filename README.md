@@ -43,7 +43,6 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **PasteWithIndent()** - paste string to an editor with your prefered indent key
 - **SplitLine()** - split string to key and value
 - **Ask_and_SetbackFocus()** - by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret
-
 - **Valueof()** - Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables
 
 ### Windows/Gui
