@@ -24,11 +24,11 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 -------------
 
-####*+added new section:* RegEx - Strings - useful strings for RegExMatch or Replace
+#### *+added new section:* RegEx - Strings - useful strings for RegExMatch or Replace
 
 - **2 RegEx strings to find AHK-functions** - not tested yet
 
-  ###Strings/Arrays/Objects/Text/Variables
+### Strings/Arrays/Objects/Text/Variables
 
 - **StrCount()** - a very handy function to count a needle in a Haystack
 
@@ -58,7 +58,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **Valueof()** - Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables
 
-###Windows/Gui
+### Windows/Gui
 
 - **WinSetPlacement()** - Sets window position using workspace coordinates (-> no taskbar)
 
@@ -106,7 +106,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **DisableCloseButton()** - to disable/grey out the close button
 
-###Listview
+### Listview
 
 - **LV_HeaderFontSet()** - sets a different font to a Listview header (it's need CreateFont() function) - formerly this function needs a function as a rewrite of SendMessage, I changed it to a DLLCall without an extra function, the depending function *CreateFont()* can be also found in this file
 
@@ -122,7 +122,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **LV_SetItemState()** - with this function you can set all avaible states to a listview item
 
-###Controls
+### Controls
 
 - **ControlDoubleClick()** - simulates a double click on a control with left/middle or right mousebutton
 
@@ -138,7 +138,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **IsControlUnderCursor()** - Checks if a specific control is under the cursor and returns its ClassNN if it is
 
-###Other
+### Other
 
 - **TaskList()** - list all running tasks (no use of COM)
 - **ResConImg()** - Resize and convert images. png, bmp, jpg, tiff, or gif 
@@ -169,7 +169,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **PathInfo()** - splits a given path to return as object
 
 -----
-###<u>[13-June-2018] count: 323 functions</u>
+### <u>[13-June-2018] count: 323 functions</u>
 
 - **TimedFunction() ** - SetTimer functionality for functions
 - **ListGlobalVars() ** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
