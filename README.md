@@ -20,7 +20,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 ---------
 
-***** changing the signs to default code folding signs. I changed **;{** to **{ ;** and **;}** to **}**. I hope it will work in most cases and most code editors.  
+**#** I'am using now the default code folding signs . I changed **;{** to **{ ;** and **;}** to **}**. I hope it will work in most cases and most code editors.  
 
 -------------
 
