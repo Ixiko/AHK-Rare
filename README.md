@@ -22,7 +22,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ### <u>[30-September-2018] count: 140+402 = 542 functions</u>
 
-###**functions for controls** (10)
+### **functions for controls** (10)
 
 - **ControlGetClassNN()** - different method is used here in compare to the already existing functions in this collection
 
@@ -40,7 +40,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**networking and Internet** (9)
+### **networking and Internet** (9)
 
 - **HostToIp()** - gets the IP address for the given host directly using the WinSock 2.0 dll, without using temp files or third party utilities
 
@@ -62,7 +62,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**Strings search and handling** (5)
+### **Strings search and handling** (5)
 
 - **CleanLine()** - Return a line with leading and trailing spaces removed, and tabs converted to spaces
 
@@ -76,7 +76,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**more ListView functions** (19)
+### **more ListView functions** (19)
 
 - **LV_SubitemHitTest()** - get‘s clicked column in listview
 
@@ -118,7 +118,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**functions to deal with windows** (22)
+### **functions to deal with windows** (22)
 
 - **WinActivateEx()** - Activate a Window, with extra Error Checking and More Features
 
@@ -166,7 +166,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**File System** (6)
+### **File System** (6)
 
 - **GetFileAttributes()** - get attributes of a file or folder
 
@@ -182,7 +182,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**Graphic/GDI Functions** (6)
+### **Graphic/GDI Functions** (6)
 
 - **GDI_GrayscaleBitmap()** - Converts GDI bitmap to 256 color GreyScale
 
@@ -198,7 +198,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**ClipBoard Functions** (9)
+### **ClipBoard Functions** (9)
 
 - **ClipboardGetDropEffect()** - Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
 
@@ -220,7 +220,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**memory functions** (19)
+### **memory functions** (19)
 
 - **ReadProcessMemory()** - reads data from a memory area in a given process.
 
@@ -262,7 +262,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**Systeminformations** (7)
+### **Systeminformations** (7)
 
 - **GetPhysicallyInstalledSystemMemory()** - recovers the amount of RAM in physically installed KB from the SMBIOS (System Management BIOS) firmware tables, WIN_V SP1+
 
@@ -280,7 +280,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**Font handling** (3)
+### **Font handling** (3)
 
 - **FontEnum()** - enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure
 
@@ -290,7 +290,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**converting functions** (8)
+### **converting functions** (8)
 
 - **RadianToDegree()** - convert radian (rad) to degree 
 
@@ -310,7 +310,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-###**functions for different purposes** (17)
+### **functions for different purposes** (17)
 
 - **pauseSuspendScript()** - function to suspend/pause another script
 
@@ -358,7 +358,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **2 RegEx strings to find AHK-functions** - not tested yet
 
-  ###Strings/Arrays/Objects/Text/Variables
+  ### Strings/Arrays/Objects/Text/Variables
 
 - **StrCount()** - a very handy function to count a needle in a Haystack
 
@@ -388,7 +388,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **Valueof()** - Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables
 
-  ###Windows/Gui
+  ### Windows/Gui
 
 - **WinSetPlacement()** - Sets window position using workspace coordinates (-> no taskbar)
 
@@ -436,7 +436,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **DisableCloseButton()** - to disable/grey out the close button
 
-  ###Listview
+  ### Listview
 
 - **LV_HeaderFontSet()** - sets a different font to a Listview header (it's need CreateFont() function) - formerly this function needs a function as a rewrite of SendMessage, I changed it to a DLLCall without an extra function, the depending function *CreateFont()* can be also found in this file
 
@@ -452,7 +452,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **LV_SetItemState()** - with this function you can set all avaible states to a listview item
 
-  ###Controls
+  ### Controls
 
 - **ControlDoubleClick()** - simulates a double click on a control with left/middle or right mousebutton
 
@@ -468,7 +468,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 
 - **IsControlUnderCursor()** - Checks if a specific control is under the cursor and returns its ClassNN if it is
 
-  ###Other
+  ### Other
 
 - **TaskList()** - list all running tasks (no use of COM)
 - **ResConImg()** - Resize and convert images. png, bmp, jpg, tiff, or gif 
