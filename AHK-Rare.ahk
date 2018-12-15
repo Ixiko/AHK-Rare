@@ -1,17 +1,18 @@
 ﻿;---------------------------------------------------------------------------------------------------------------------------------------------------------
-;																	Collection of rare or very useful functions
-; 																collected by IXIKO =>    last change: 30.09.2018
-;										for description have a look at README.md (it can be found in the same folder)
+;                                                                	Collection of rare or very useful functions
+;                                                             	collected by IXIKO =>    last change: 15.12.2018
+;                                    	for description have a look at README.md (it can be found in the same folder)
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 { ;Clipboard (9)
-;1
-ClipboardGetDropEffect() {																																	;-- Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
+	
+;[000001]>
+ClipboardGetDropEffect() {																				;-- Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
 	
 	/*                              	DESCRIPTION
 	
-			; explorer copy = 5, explorer cut = 2
+			Parameter:		explorer copy = 5, explorer cut = 2
 			
 	*/
 	
@@ -28,9 +29,9 @@ ClipboardGetDropEffect() {																																	;-- Clipboard functio
       }
    }
    Return DropEffect
-}
+} ;<[000001]
 ;2
-ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {																							;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
    Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
    Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
    Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
@@ -76,11 +77,11 @@ ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {																							;-- 
    Return
 }
 ;3
-CopyFilesToClipboard(arrFilepath, bCopy) {																										;-- copy files to clipboard
+CopyFilesToClipboard(arrFilepath, bCopy) {													;-- copy files to clipboard
 	
 	/*                              	DESCRIPTION
 	
-			; this works under both ANSI/Unicode build of AHK
+			this works under both ANSI/Unicode build of AHK
 			
 	*/
 	
@@ -132,7 +133,7 @@ CopyFilesToClipboard(arrFilepath, bCopy) {																										;-- copy fil
 	DllCall("CloseClipboard")
 }
 ;4
-FileToClipboard(PathToCopy) {																															;-- copying the path to clipboard
+FileToClipboard(PathToCopy) {																		;-- copying the path to clipboard
 	
 	;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
     ; Expand to full path:
@@ -163,7 +164,7 @@ FileToClipboard(PathToCopy) {																															;-- copying the path
     DllCall("CloseClipboard")
 }
 ;5
-FileToClipboard(PathToCopy) {																															;-- a second way to copying the path to clipboard
+FileToClipboard(PathToCopy) {																		;-- a second way to copying the path to clipboard
     ; Expand to full paths:
     Loop, Parse, PathToCopy, `n, `r
         Loop, %A_LoopField%, 1
@@ -200,7 +201,7 @@ FileToClipboard(PathToCopy) {																															;-- a second way to 
     DllCall("CloseClipboard")
 }
 ;6
-ImageToClipboard(Filename) {																															;-- Copies image data from file to the clipboard. (first of three approaches)
+ImageToClipboard(Filename) {																		;-- Copies image data from file to the clipboard. (first of three approaches)
 	
 	;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
     hbm := DllCall("LoadImage","uint",0,"str",Filename,"uint",0,"int",0,"int",0,"uint",0x10)
@@ -214,7 +215,7 @@ ImageToClipboard(Filename) {																															;-- Copies image data
     DllCall("CloseClipboard")
 }
 ;7
-Gdip_ImageToClipboard(Filename) {																													;-- Copies image data from file to the clipboard. (second approach)
+Gdip_ImageToClipboard(Filename) {																;-- Copies image data from file to the clipboard. (second approach)
 	
 	;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
     pBitmap := Gdip_CreateBitmapFromFile(Filename)
@@ -235,7 +236,7 @@ Gdip_ImageToClipboard(Filename) {																													;-- Copies image d
     DllCall("CloseClipboard")
 }
 ;8
-Gdip_ImageToClipboard(Filename) {																													;-- Copies image data from file to the clipboard. (third approach)
+Gdip_ImageToClipboard(Filename) {																;-- Copies image data from file to the clipboard. (third approach)
 	
 	;by Lexikos
 	;;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
@@ -281,7 +282,7 @@ Gdip_ImageToClipboard(Filename) {																													;-- Copies image d
     }
 }
 ;9
-AppendToClipboard( files, cut=0) { 																													;-- Appends files to CF_HDROP structure in clipboard
+AppendToClipboard( files, cut=0) { 																;-- Appends files to CF_HDROP structure in clipboard
 	DllCall("OpenClipboard", "Ptr", 0)
 	if (DllCall("IsClipboardFormatAvailable", "Uint", 1)) ;If text is stored in clipboard, clear it and consider it empty (even though the clipboard may contain CF_HDROP due to text being copied to a temp file for pasting)
 		DllCall("EmptyClipboard")
@@ -291,18 +292,18 @@ AppendToClipboard( files, cut=0) { 																													;-- Appends file
 	CopyToClipboard(txt, true, cut)
 	return
 }
-
-
+;functions end
 }
-;|														|                                                       |														|														|
-;|  ClipboardGetDropEffect()         	|   ClipboardSetFiles()                     	|   CopyFilesToClipboard()            	|   FileToClipboard()                      	|
-;|	FileToClipboard()                      	|   1.ImageToClipboard()                 	|   2.Gdip_ImageToClipboard()        	|   3.Gdip_ImageToClipboard()        	|
-;|   AppendToClipboard()               	|
+;|                                                   	|                                                       |                                                   	|                                                   	|
+;|   ClipboardGetDropEffect()        	|   ClipboardSetFiles()                   	|   CopyFilesToClipboard()            	|   FileToClipboard()                     	|
+;|   FileToClipboard()                     	|   1.ImageToClipboard()              	|   2.Gdip_ImageToClipboard()     	|   3.Gdip_ImageToClipboard()     	|
+;|   AppendToClipboard()              	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Command - line interaction (3) , Commandline - Run a exe with parameters examples
-CMDret_RunReturn(CMDin, WorkingDir=0) {														;--
+{ ;Command line (5)
+;1
+CMDret_RunReturn(CMDin, WorkingDir=0) {                                                        		;--
 
 /*
 ; ******************************************************************
@@ -414,7 +415,7 @@ CMDret_RunReturn(CMDin, WorkingDir=0) {														;--
   StringTrimLeft, CMDout, CMDout, 1
   Return, CMDout
 }
-
+;2
 ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {		;-- Sends text to a console's input stream
 
 	; Sends text to a console's input stream. WinTitle may specify any window in
@@ -466,14 +467,14 @@ ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {		;
         DllCall("FreeConsole")
     return
 }
-{ ; sub
-ScanCode( wParam, lParam ) {
+{ ;sub for ConsoleSend
+ScanCode( wParam, lParam ) {                                                                                	;--  sub for ConsoleSend
  Clipboard := "SC" SubStr((((lParam>>16) & 0xFF)+0xF000),-2)
  GuiControl,, SC, %Clipboard%
 }
-} 
-
-StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) { 				;-- Store command line output in autohotkey variable. Supports both x86 and x64.
+} ;sub end
+;3
+StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {         		;-- Store command line output in autohotkey variable. Supports both x86 and x64.
 
 	; Modified  :  maz-1 https://gist.github.com/maz-1/768bf7938e533907d54bff276db80904
   Static StrGet := "StrGet"           ; Modified  :  SKAN 31-Aug-2013 http://goo.gl/j8XJXY
@@ -613,49 +614,128 @@ StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) { 				;--
 
 Return Isfunc( Callback ) ? %Callback%( "", 0 ) : sOutput
 }
-
+;functions end
 { ;Parameter examples 
 
 /*				DESCRIPTION FOR UTF-8 support of xpftotext.exe
 
-https://autohotkey.com/boards/viewtopic.php?f=5&t=25004&hilit=embedded+pdf
+				Link:							https://autohotkey.com/boards/viewtopic.php?f=5&t=25004&hilit=embedded+pdf
+				Description				I haven't studied your whole script, but I see that you have a variable called XpdfPath that is assigned the value pdftotext.exe in A_ScriptDir. 
+												That's a good approach (although I'd call the var XpdfEXE). Extend the idea as follows:
 
-I haven't studied your whole script, but I see that you have a variable called XpdfPath that is assigned the value pdftotext.exe in A_ScriptDir. That's a good approach (although I'd call the var XpdfEXE). Extend the idea as follows:
+												(1) Define another variable called xpdfrcFile in the same folder and assign it the value xpdfrc.ini.
+												(2) Create a plain text file called xpdfrc.ini with these lines in it:
 
-(1) Define another variable called xpdfrcFile in the same folder and assign it the value xpdfrc.ini.
+												unicodeMap Latin1fixed "D:\path\Latin1.unicodeMap"
+												textEncoding Latin1fixed
 
-(2) Create a plain text file called xpdfrc.ini with these lines in it:
+												where D:\path\ is the script folder. Of course, you may put xpdfrc.ini (and Latin1.unicodeMap) wherever you want, 
+												but I think the script folder is fine. My scripts always create xpdfrc.ini via FileAppend so I have programmatic control over 
+												its location and contents, but if you want to keep things simple, hard-code it.
 
-Code: [Alles auswählen] [Download] GeSHi © Codebox Plus
+												(3) Put the Latin1.unicodeMap file in the proper place, i.e., D:\path\, as discussed above.
+												(4) Call PDFtoText with this additional param:
 
-unicodeMap Latin1fixed "D:\path\Latin1.unicodeMap"
-textEncoding Latin1fixed
+												-cfg "%xpdfrcFile%"
 
-where D:\path\ is the script folder. Of course, you may put xpdfrc.ini (and Latin1.unicodeMap) wherever you want, but I think the script folder is fine. My scripts always create xpdfrc.ini via FileAppend so I have programmatic control over its location and contents, but if you want to keep things simple, hard-code it.
-
-(3) Put the Latin1.unicodeMap file in the proper place, i.e., D:\path\, as discussed above.
-
-(4) Call PDFtoText with this additional param:
-
--cfg "%xpdfrcFile%"
-
-That should do it. Works perfectly here in many scripts. Here's an actual call from one of my working scripts:
+												That should do it. Works perfectly here in many scripts. Here's an actual call from one of my working scripts:
 
 */
 xpdftotext.exe
 RunWait,%PDFtoTextEXE% -f 1 -l 1 %ConversionType% -cfg "%xpdfrcFile%" "%SourceFolder%%FileNameCurrent%" "%DestFolder%%FileNameCurrentTXT%",,Hide
 
 }
+;4
+StdoutToVar_CreateProcess(sCmd, sEncoding:="CP0", sDir:="", ByRef nExitCode:=0) {	;-- Runs a command line program and returns its output.
+	
+	; ----------------------------------------------------------------------------------------------------------------------
+	; Function .....: StdoutToVar_CreateProcess
+	; Description ..: Runs a command line program and returns its output.
+	; Parameters ...: sCmd      - Commandline to execute.
+	; ..............: sEncoding - Encoding used by the target process. Look at StrGet() for possible values.
+	; ..............: sDir      - Working directory.
+	; ..............: nExitCode - Process exit code, receive it as a byref parameter.
+	; Return .......: Command output as a string on success, empty string on error.
+	; AHK Version ..: AHK_L x32/64 Unicode/ANSI
+	; Link .............: https://autohotkey.com/boards/viewtopic.php?f=6&t=791
+	; Author .......: Sean (http://goo.gl/o3VCO8), modified by nfl and by Cyruz
+	; License ......: WTFPL - http://www.wtfpl.net/txt/copying/
+	; Changelog ....: Feb. 20, 2007 - Sean version.
+	; ..............: Sep. 21, 2011 - nfl version.
+	; ..............: Nov. 27, 2013 - Cyruz version (code refactored and exit code).
+	; ..............: Mar. 09, 2014 - Removed input, doesn't seem reliable. Some code improvements.
+	; ..............: Mar. 16, 2014 - Added encoding parameter as pointed out by lexikos.
+	; ..............: Jun. 02, 2014 - Corrected exit code error.
+	; ..............: Nov. 02, 2016 - Fixed blocking behavior due to ReadFile thanks to PeekNamedPipe.
+	; ----------------------------------------------------------------------------------------------------------------------
+	
+    DllCall( "CreatePipe",           PtrP,hStdOutRd, PtrP,hStdOutWr, Ptr,0, UInt,0 )
+    DllCall( "SetHandleInformation", Ptr,hStdOutWr, UInt,1, UInt,1                 )
+
+            VarSetCapacity( pi, (A_PtrSize == 4) ? 16 : 24,  0 )
+    siSz := VarSetCapacity( si, (A_PtrSize == 4) ? 68 : 104, 0 )
+    NumPut( siSz,      si,  0,                          "UInt" )
+    NumPut( 0x100,     si,  (A_PtrSize == 4) ? 44 : 60, "UInt" )
+    NumPut( hStdOutWr, si,  (A_PtrSize == 4) ? 60 : 88, "Ptr"  )
+    NumPut( hStdOutWr, si,  (A_PtrSize == 4) ? 64 : 96, "Ptr"  )
+
+    If ( !DllCall( "CreateProcess", Ptr,0, Ptr,&sCmd, Ptr,0, Ptr,0, Int,True, UInt,0x08000000
+                                  , Ptr,0, Ptr,sDir?&sDir:0, Ptr,&si, Ptr,&pi ) )
+        Return ""
+      , DllCall( "CloseHandle", Ptr,hStdOutWr )
+      , DllCall( "CloseHandle", Ptr,hStdOutRd )
+
+    DllCall( "CloseHandle", Ptr,hStdOutWr ) ; The write pipe must be closed before reading the stdout.
+    While ( 1 )
+    { ; Before reading, we check if the pipe has been written to, so we avoid freezings.
+        If ( !DllCall( "PeekNamedPipe", Ptr,hStdOutRd, Ptr,0, UInt,0, Ptr,0, UIntP,nTot, Ptr,0 ) )
+            Break
+        If ( !nTot )
+        { ; If the pipe buffer is empty, sleep and continue checking.
+            Sleep, 100
+            Continue
+        } ; Pipe buffer is not empty, so we can read it.
+        VarSetCapacity(sTemp, nTot+1)
+        DllCall( "ReadFile", Ptr,hStdOutRd, Ptr,&sTemp, UInt,nTot, PtrP,nSize, Ptr,0 )
+        sOutput .= StrGet(&sTemp, nSize, sEncoding)
+    }
+    
+    ; * SKAN has managed the exit code through SetLastError.
+    DllCall( "GetExitCodeProcess", Ptr,NumGet(pi,0), UIntP,nExitCode )
+    DllCall( "CloseHandle",        Ptr,NumGet(pi,0)                  )
+    DllCall( "CloseHandle",        Ptr,NumGet(pi,A_PtrSize)          )
+    DllCall( "CloseHandle",        Ptr,hStdOutRd                     )
+    Return sOutput
+}
+;5
+RunUTF8(target, workdir:=".") {                                                                               	;-- if a .exe file really requires its command line to be encoded as UTF-8, the following might work (a lexikos function)
+		
+    ; PROCESS_INFORMATION pi;
+    VarSetCapacity(pi, 24, 0)
+    ; STARTUPINFO si; si.cb = sizeof(si);
+    VarSetCapacity(si, si_size := 32+9*A_PtrSize, 0), NumPut(si_size, si)
+    ; Encode command line as UTF-8.
+    VarSetCapacity(utf8, StrPut(target, "utf-8"))
+    StrPut(target, &utf8, "utf-8")
+    ; Launch process.
+    if !DllCall("CreateProcessA", "ptr", 0, "ptr", &utf8, "ptr", 0
+        , "ptr", 0, "int", false, "uint", 0, "ptr", 0, "str", workdir
+        , "ptr", &si, "ptr", &pi)
+        throw Exception("CreateProcessA failed; error " A_LastError, -1)
+    ; Clean up.
+    DllCall("CloseHandle", "ptr", NumGet(pi, 0))
+    DllCall("CloseHandle", "ptr", NumGet(pi, A_PtrSize))
+}
 
 } 
-;|														|                                                       |														|														|
-;|	CMDret_RunReturn()					|	ConsoleSend()								|	StdOutStream()							|
+;|   CMDret_RunReturn(1)                	|   ConsoleSend(2)                          	|   StdOutStream(3)                        	|   StdoutToVar_CreateProcess(4)   	|
+;|   RunUTF8()                                 	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Date or Time functions (5)
+{ ;Date or Time (5)
 ;1
-PrettyTickCount(timeInMilliSeconds) { 																	;-- takes a time in milliseconds and displays it in a readable fashion
+PrettyTickCount(timeInMilliSeconds) {                                                                 	;-- takes a time in milliseconds and displays it in a readable fashion
    ElapsedHours := SubStr(0 Floor(timeInMilliSeconds / 3600000), -1)
    ElapsedMinutes := SubStr(0 Floor((timeInMilliSeconds - ElapsedHours * 3600000) / 60000), -1)
    ElapsedSeconds := SubStr(0 Floor((timeInMilliSeconds - ElapsedHours * 3600000 - ElapsedMinutes * 60000) / 1000), -1)
@@ -664,7 +744,7 @@ PrettyTickCount(timeInMilliSeconds) { 																	;-- takes a time in milli
    return returned
 }
 ;2
-TimePlus(one, two) {																								;--
+TimePlus(one, two) {                                                                                            	;--
 
    returned:=0
    returned+=Mod(one, 100) + Mod(two, 100)
@@ -674,7 +754,7 @@ TimePlus(one, two) {																								;--
    return returned
 }
 ;3
-FormatSeconds(Secs) {																							;-- formats seconds to hours,minutes and seconds -> 12:36:10
+FormatSeconds(Secs) {                                                                                        	;-- formats seconds to hours,minutes and seconds -> 12:36:10
 
 	Return SubStr("0" . Secs // 3600, -1) . ":"
         . SubStr("0" . Mod(Secs, 3600) // 60, -1) . ":"
@@ -682,7 +762,7 @@ FormatSeconds(Secs) {																							;-- formats seconds to hours,minutes
 
 }
 ;4
-TimeCode(MaT) {																										;-- TimCode can be used for protokoll or error logs
+TimeCode(MaT) {	                                                                                                	;-- TimCode can be used for protokoll or error logs
 
 	;Month & Time (MaT) = 1 - it's clear!
 
@@ -694,7 +774,7 @@ TimeCode(MaT) {																										;-- TimCode can be used for protokoll o
 return TC
 }
 ;5
-Time(to,from="",units="d",params="") {											;-- calculate with time, add minutes, hours, days - add or subtract time
+Time(to,from="",units="d",params="") {	                                                            	;-- calculate with time, add minutes, hours, days - add or subtract time
 	
 	/*                              	DESCRIPTION
 				Link: https://autohotkey.com/board/topic/42668-time-count-days-hours-minutes-seconds-between-dates/
@@ -839,17 +919,106 @@ Time(to,from="",units="d",params="") {											;-- calculate with time, add mi
 	tempvar:=%tempvar%
 	Return (r*tempvar)/units
 }
+;6
+DateDiff(fnTimeUnits,fnStartDate,fnEndDate) {                                                   	;-- returns the difference between two timestamps in the specified units
+	; MsgBox fnTimeUnits: %fnTimeUnits%`nfnStartDate: %fnStartDate%`nfnEndDate: %fnEndDate%
+	; declare local, global, static variables
+	
+		; set default return value
+		TimeDifference := 0
 
+
+		; validate parameters
+		If fnTimeUnits not in YY,MM,DD,HH,MI,SS
+			Throw, Exception("fnTimeUnits were not valid")
+		
+		If fnStartDate is not date
+			Throw, Exception("fnStartDate was not a date")
+		
+		If fnEndDate is not date
+			Throw, Exception("fnEndDate was not a date")
+
+
+		; initialise variables
+		DatePadding := "00000101000000"
+		StartDate := fnStartDate . SubStr(DatePadding,StrLen(fnStartDate)+1) ; normalise start date to 14 digits
+		EndDate   := fnEndDate   . SubStr(DatePadding,StrLen(fnEndDate  )+1) ; normalise end   date to 14 digits
+
+
+		; for day or time, use native function
+		If fnTimeUnits in DD,HH,MI,SS 
+		{
+		
+			TimeDifference := EndDate
+			TimeUnit := fnTimeUnits = "SS" ? "S"
+					 :  fnTimeUnits = "MI" ? "M"
+					 :  fnTimeUnits = "HH" ? "H"
+					 :  fnTimeUnits = "DD" ? "D"
+					 :                       ""
+
+			EnvSub, TimeDifference, %StartDate%, %TimeUnit%
+		}
+	
+		; for year or month
+		FormatTime, StartYear , %StartDate%, yyyy
+		FormatTime, StartMonth, %StartDate%, MM
+		FormatTime, StartDay  , %StartDate%, dd
+		FormatTime, StartTime , %StartDate%, HHmmss
+		
+		FormatTime, EndYear , %EndDate%, yyyy
+		FormatTime, EndMonth, %EndDate%, MM
+		FormatTime, EndDay  , %EndDate%, dd
+		FormatTime, EndTime , %EndDate%, HHmmss
+		
+		If fnTimeUnits in MM 	
+		{
+		
+			StartInMonths := (StartYear*12)+StartMonth
+			EndInMonths   := (EndYear  *12)+EndMonth
+			
+			TimeDifference := EndInMonths-StartInMonths
+			
+			If (StartDate < EndDate)
+				If (EndDay < StartDay)
+					TimeDifference--
+			
+			If (StartDate > EndDate)
+				If (EndDay > StartDay)
+					TimeDifference++
+		}
+		
+		If fnTimeUnits in YY 
+		{
+			TimeDifference := EndYear-StartYear
+			
+			If (StartDate < EndDate)
+				If (EndMonth <= StartMonth)
+					If (EndDay < StartDay)
+						TimeDifference--
+			
+			If (StartDate > EndDate)
+				If (EndMonth >= StartMonth)
+					If (EndDay > StartDay)
+						TimeDifference++
+		}
+
+	
+	; return
+	Return TimeDifference
+}
+
+
+
+;functions end
 } 
-;|														|														|														|														|
-;|	PrettyTickCount()							|	TimePlus()									|	FormatSeconds()							|	TimeCode()									|
-;|   Time()                                       	|
+;|   PrettyTickCount()                    	|   TimePlus()                                	|   FormatSeconds()                      	|   TimeCode()                              	|
+;|   Time()                                       	|   DateDiff()                                 	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Get - functions for retreaving informations - missing something - see Gui/Window - retreaving ... (18)
-
-GetProcesses() {																									;-- get the name of all running processes
+{ ;Varius get (20) -- functions for retreaving informations - missing something - see Gui/Window - retreaving
+;1
+GetProcesses() {                                                                                                	;-- get the name of all running processes
 
    d = `n  ; string separator
    s := 4096  ; size of buffers and arrays (4 KB)
@@ -889,8 +1058,8 @@ GetProcesses() {																									;-- get the name of all running process
    ;MsgBox, 0, %c% Processes, %l%
    return l
 }
-
-getProcesses(ignoreSelf := True, searchNames := "") { 										;-- get running processes with search using comma separated list
+;2
+getProcesses(ignoreSelf := True, searchNames := "") {                                 		;-- get running processes with search using comma separated list
 
 	s := 100096  ; 100 KB will surely be HEAPS
 
@@ -940,7 +1109,7 @@ getProcesses(ignoreSelf := True, searchNames := "") { 										;-- get running 
 	DllCall("FreeLibrary", "Ptr", hModule)  ; unload the library to free memory
 	return array
 }
-
+;3
 GetProcessWorkingDir(PID) {																				;-- like the name explains
 
 	static PROCESS_ALL_ACCESS:=0x1F0FFF,MEM_COMMIT := 0x1000,MEM_RELEASE:=0x8000,PAGE_EXECUTE_READWRITE:=64
@@ -971,7 +1140,7 @@ GetProcessWorkingDir(PID) {																				;-- like the name explains
 	return nDir
 
 }
-
+;4
 GetTextSize(pStr, pSize, pFont, pWeight = 400, pHeight = false) {						;-- precalcute the Textsize (Width & Height)
 
   Gui, 55: Font, s%pSize% w%pWeight%, %pFont%
@@ -981,32 +1150,24 @@ GetTextSize(pStr, pSize, pFont, pWeight = 400, pHeight = false) {						;-- preca
   Return pHeight ? TW "," TH : TW
 
 }
-
+;5
 GetTextSize(pStr, pFont="", pHeight=false, pAdd=0) {										;-- different function to the above one
 	
-	/*			DESCRIPTION
-	;-----------------------------------------------------------------------------------------------------------------------
-	; Function: GetTextSize
-	; Calculate widht and/or height of text.
-	; Font face, style and number of lines is taken into account
-	;:
-	; <By.majkinetor> https://autohotkey.com/board/topic/16625-function-gettextsize-calculate-text-dimension/
-	;
-	; Parameters:
-	;		pStr	- Text to be measured
-	;		pFont	- Font description in AHK syntax, default size is 10, default font is MS Sans Serif
-	;		pHeight	- Set to true to return height also. False is default.
-	;		pAdd	- Number to add on width and height.
-	;
-	; Returns:
-	;		Text width if pHeight=false. Otherwise, dimension is returned as "width,height"
-	;
-	; Dependencies:
-	;		<ExtractInteger>
-	;		
-	; Examples:
-	;		width := GetTextSize("string to be measured", "bold s22, Courier New" )
-	;	
+	/*			DESCRIPTION of GetTextSize
+	----------------------------------------------------------------------------------------------------------------------------------------
+		Function: 						GetTextSize
+		Description:					Calculate widht and/or height of text. Font face, style and number of lines is taken into account
+		Author: 	 					majkinetor
+		Date:							------
+		Link: 							https://autohotkey.com/board/topic/16625-function-gettextsize-calculate-text-dimension/
+		Parameters:					pStr			- Text to be measured
+											pFont		- Font description in AHK syntax, default size is 10, default font is MS Sans Serif
+											pHeight	- Set to true to return height also. False is default.
+											pAdd		- Number to add on width and height.
+		Returns:						Text width if pHeight=false. Otherwise, dimension is returned as "width,height"
+		Dependencies:				<ExtractInteger>
+		Examples:					width := GetTextSize("string to be measured", "bold s22, Courier New" )
+	----------------------------------------------------------------------------------------------------------------------------------------	
 	*/
 	
 	
@@ -1016,7 +1177,7 @@ GetTextSize(pStr, pFont="", pHeight=false, pAdd=0) {										;-- different func
 	local resW, resH, SIZE
 
  ;parse font
-	italic		:= InStr(pFont, "italic")	 ?  1	:  0
+	italic		:= InStr(pFont, "italic")	 ?  1	:  
 	underline	:= InStr(pFont, "underline") ?  1	:  0
 	strikeout	:= InStr(pFont, "strikeout") ?  1	:  0
 	weight		:= InStr(pFont, "bold")		 ? 700	: 400
@@ -1065,7 +1226,7 @@ GetTextSize(pStr, pFont="", pHeight=false, pAdd=0) {										;-- different func
 
 	return	%resW%
 }
-
+;6
 MeasureText(hwnd,text,Font,size, layout) {                                                     	;-- alternative to other functions which calculate the text size before display on the screen
     
 	; functionstatus: tested, working
@@ -1104,7 +1265,7 @@ MeasureText(hwnd,text,Font,size, layout) {                                      
    Gdip_Shutdown(pToken) 
    Return, Width 
 } 
-
+;7
 monitorInfo() {																										;-- shows infos about your monitors
 	sysget,monitorCount,monitorCount
 	arr:=[],sorted:=[]
@@ -1121,7 +1282,7 @@ monitorInfo() {																										;-- shows infos about your monitors
 		arr2.insert(arr[v])
 	return arr2
 }
-
+;8
 whichMonitor(x="",y="",byref monitorInfo="") { 												;-- return [current monitor, monitor count]
 	CoordMode,mouse,screen
 	if (x="" || y="")
@@ -1133,7 +1294,7 @@ whichMonitor(x="",y="",byref monitorInfo="") { 												;-- return [current m
 		if (x>=v.l&&x<=v.r&&y>=v.t&&y<=v.b)
 			return [k,monitorInfo.maxIndex()]
 }
-
+;9
 IsOfficeFile(FileName, Extensions = "doc,docx,xls,xlsx,ppt,pptx") { 					;-- checks if a file is an Office file
 
 	;  Last update: 2014-4-23
@@ -1201,7 +1362,7 @@ IsOfficeFile(FileName, Extensions = "doc,docx,xls,xlsx,ppt,pptx") { 					;-- che
 		If (  InStr(hex, %A_LoopField%)  )
 			Return A_LoopField
 }
-
+;10
 DeskIcons(coords="") {																						;-- i think its for showing all desktop icons
 
    Critical
@@ -1244,7 +1405,7 @@ DeskIcons(coords="") {																						;-- i think its for showing all desk
    DllCall("CloseHandle", "UInt", hProcess)
    return ret
 }
-
+;11
 GetFuncDefs(scriptPath) {                                                                                	;-- get function definitions from a script
 
 	; does not include those with a definition of "()" (no parameters)
@@ -1286,7 +1447,7 @@ GetFuncDefs(scriptPath) {                                                       
 	
 	return defs
 }
-
+;12
 IndexOfIconResource(Filename, ID) {                                                              	;-- function is used to convert an icon resource id (as those used in the registry) to icon index(as used by ahk)
 	
 	;By Lexikos http://www.autohotkey.com/community/viewtopic.php?p=168951
@@ -1308,8 +1469,9 @@ IndexOfIconResource(Filename, ID) {                                             
     
     return NumGet(param,8) ? NumGet(param,4) : 0
 }
-;{ sub for IndexOfIconResource()
-IndexOfIconResource_EnumIconResources(hModule, lpszType, lpszName, lParam) {
+{ ;sub of IndexOfIconResource()
+;13
+IndexOfIconResource_EnumIconResources(hModule, lpszType, lpszName, lParam) {  ;-- sub of IndexOfIconResource()
 	
 	;By Lexikos http://www.autohotkey.com/community/viewtopic.php?p=168951
     NumPut(NumGet(lParam+4)+1, lParam+4)
@@ -1321,8 +1483,8 @@ IndexOfIconResource_EnumIconResources(hModule, lpszType, lpszName, lParam) {
     }
     return true
 }
-;}
-
+} ;sub end
+;14
 GetIconforext(ext) {                                                                                         	;-- Gets default registered icon for an extension
 	
 	; source: https://github.com/aviaryan/autohotkey-scripts/blob/master/Functions/Miscellaneous-Functions.ahk
@@ -1344,7 +1506,7 @@ GetIconforext(ext) {                                                            
 	}
     Return DefaultIcon
 }
-
+;15
 GetImageType(PID) {																							;-- returns whether a process is 32bit or 64bit
 
 	; PROCESS_QUERY_INFORMATION
@@ -1364,13 +1526,13 @@ GetImageType(PID) {																							;-- returns whether a process is 32bit
 
     Return (Is32Bit) ? "32-bit" : "64-bit"
 }
-
+;16
 GetProcessName(hwnd) {																					;-- Gets the process name from a window handle.
 	
 	WinGet, ProcessName, processname, ahk_id %hwnd%
 	return ProcessName
 }
-
+;17
 GetDisplayOrientation() {																					;-- working function to get the orientation of screen
 	
 	DEVMODE_Size := 226
@@ -1386,7 +1548,7 @@ GetDisplayOrientation() {																					;-- working function to get the or
 	VarSetCapacity(DEVMODE, 0)
 	Return dmDisplayOrientation
 }
-
+;18
 GetSysErrorText(errNr) { 																						;-- method to get meaningful data out of the error codes
 
 	; http://www.autohotkey.com/forum/post-72230.html#72230 by PhiLho
@@ -1402,7 +1564,7 @@ GetSysErrorText(errNr) { 																						;-- method to get meaningful data
      , "UInt", 0)
   Return buffer
 }
-
+;19
 getSysLocale() { 																									;-- gets the system language 
 
 	; fork of http://stackoverflow.com/a/7759505/883015
@@ -1417,7 +1579,7 @@ getSysLocale() { 																									;-- gets the system language
 			,"Str",buf_b,"Int",9)
 	return buf_a "-" buf_b
 }
-
+;20
 GetThreadStartAddr(ProcessID) {                                                                     	;-- returns start adresses from all threads of a process
 	
 	/*                              	EXAMPLE(s)
@@ -1460,21 +1622,20 @@ GetThreadStartAddr(ProcessID) {                                                 
 
     return Addr, DllCall("CloseHandle", "ptr", hSnapshot) && DllCall("FreeLibrary", "ptr", hModule)
 }
-
+;functions end
 
 } 
-;|														|														|														|														|
-;|	 GetProcesses()								|	GetProcessWorkingDir()				|	GetTextSize()     							|	GetTextSize()								|
-;|   MeasureText()                           	|	monitorInfo()								|	whichMonitor()							|	IsOfficeFile()									|
-;|	 DeskIcons()									|   GetFuncDefs()                          	|   IndexOfIconResource()             	|   GetIconforext()                         	|
-;|   GetImageType()                         	|   GetProcessName()                   	|   GetDisplayOrientation()            	|   GetSysErrorText()                      	|
-;|   getSysLocale()                            	|   GetThreadStartAddr()               	|
+;|   GetProcesses()                         	|   GetProcessWorkingDir()           	|   GetTextSize()                            	|   GetTextSize()                            	|
+;|   MeasureText()                           	|   monitorInfo()                           	|   whichMonitor()                        	|   IsOfficeFile()                             	|
+;|   DeskIcons()                              	|   GetFuncDefs()                          	|   IndexOfIconResource()             	|   GetIconforext()                         	|
+;|   GetImageType()                       	|   GetProcessName()                   	|   GetDisplayOrientation()           	|   GetSysErrorText()                     	|
+;|   getSysLocale()                         	|   GetThreadStartAddr()               	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Graphic functions (34)
+{ ;Graphic (52)
 ;1
-LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="", 				;--Loads a picture and returns an HBITMAP or HICON to the caller
+LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="",         		;--Loads a picture and returns an HBITMAP or HICON to the caller
 aIconNumber:=0, aUseGDIPlusIfAvailable:=1) {
 
 	; Returns NULL on failure.
@@ -2063,23 +2224,24 @@ CreateSurface(monitor := 0, window := 0) {															;-- creates a drawing G
 
 	return DrawSurface_Hwnd
 }
-{ ; additional functions for CreateSurface
-ShowSurface() {
+{ ;sub for CreateSurface
+;7
+ShowSurface() {                                                                                                   	;-- sub for CreateSurface
 	WinGet, active_win, ID, A
 	Gui DrawSurface:Show
 	WinActivate, ahk_id %active_win%
 }
-
-HideSurface() {
+;8
+HideSurface() {                                                                                                     	;-- sub for CreateSurface
 	Gui DrawSurface:Submit
 }
-
-WipeSurface(hwnd) {
+;9
+WipeSurface(hwnd) {                                                                                              	;-- sub for CreateSurface
 	DllCall("InvalidateRect", UInt, hwnd, UInt, 0, Int, 1)
     DllCall("UpdateWindow", UInt, hwnd)
 }
-
-StartDraw(wipe := true) {
+;10
+StartDraw(wipe := true) {                                                                                        	;-- sub for CreateSurface
 
 	global DrawSurface_Hwnd
 
@@ -2090,13 +2252,13 @@ StartDraw(wipe := true) {
 
     return HDC
 }
-
-EndDraw(hdc) {
+;11
+EndDraw(hdc) {                                                                                                    	;-- sub for CreateSurface
 	global DrawSurface_Hwnd
 	DllCall("ReleaseDC", Int, DrawSurface_Hwnd, Int, hdc)
 }
-
-SetPen(color, thickness, hdc) {
+;12
+SetPen(color, thickness, hdc) {                                                                               	;-- sub for CreateSurface
 
 	global DrawSurface_Hwnd
 
@@ -2111,15 +2273,15 @@ SetPen(color, thickness, hdc) {
     DllCall("SelectObject", Int, hdc, Int, pen)
 
 }
-} 
-;7
+} ;sub end
+;13
 DrawLine(hdc, rX1, rY1, rX2, rY2) {																			;-- used DLLCall to draw a line
 
 	DllCall("MoveToEx", Int, hdc, Int, rX1, Int, rY1, UInt, 0)
 	DllCall("LineTo", Int, hdc, Int, rX2, Int, rY2)
 
 }
-;8
+;14
 DrawRectangle(hdc, left, top, right, bottom) {														;-- used DLLCall to draw a rectangle
 
 	DllCall("MoveToEx", Int, hdc, Int, left, Int, top, UInt, 0)
@@ -2129,7 +2291,7 @@ DrawRectangle(hdc, left, top, right, bottom) {														;-- used DLLCall to 
     DllCall("LineTo", Int, hdc, Int, left, Int, top-1)
 
 }
-;9
+;15
 DrawRectangle(startNewRectangle := false) {															;-- this is for screenshots
 
 	static lastX, lastY
@@ -2158,7 +2320,7 @@ DrawRectangle(startNewRectangle := false) {															;-- this is for screen
 	Gui, ScreenshotSelection:+LastFound
 
 }
-;10
+;16
 DrawFrameAroundControl(ControlID, WindowUniqueID, frame_t) {						;-- paints a rectangle around a specified control
 
     global h_brushC, h_brushW, ChkDrawRectCtrl, ChkDrawRectWin
@@ -2226,7 +2388,7 @@ DrawFrameAroundControl(ControlID, WindowUniqueID, frame_t) {						;-- paints a r
     ;set back ToolTip position to default
     CoordMode, ToolTip, Relative
   }
-;11
+;17
 Highlight(reg, delay=1500) {																					;-- Show a red rectangle outline to highlight specified region, it's useful to debug
 
     { ;-------------------------------------------------------------------------------
@@ -2325,14 +2487,14 @@ Highlight(reg, delay=1500) {																					;-- Show a red rectangle outlin
 	Gui, 1: Show, Hide
 	Gdip_Shutdown(pToken)
 }
-;12
+;18
 SetAlpha(hwnd, alpha) {																							;-- set alpha to a layered window
 
     DllCall("UpdateLayeredWindow","uint",hwnd,"uint",0,"uint",0
         ,"uint",0,"uint",0,"uint",0,"uint",0,"uint*",alpha<<16|1<<24,"uint",2)
 
 }
-;13
+;19
 CircularText(Angle, Str, Width, Height, Font, Options){											;-- given a string it will generate a bitmap of the characters drawn with a given angle between each char
 
 	;-- Given a string it will generate a bitmap of the characters drawn with a given angle between each char, if the angle is 0 it will try to make the string fill the entire circle.
@@ -2358,7 +2520,7 @@ CircularText(Angle, Str, Width, Height, Font, Options){											;-- given a st
 
 	Return pBitmap
 }
-;14
+;20
 RotateAroundCenter(G, Angle, Width, Height) {														;-- GDIP rotate around center
 
 	Gdip_TranslateWorldTransform(G, Width / 2, Height / 2)
@@ -2366,8 +2528,7 @@ RotateAroundCenter(G, Angle, Width, Height) {														;-- GDIP rotate aroun
 	Gdip_TranslateWorldTransform(G, - Width / 2, - Height / 2)
 
 }
-;Screenshot - functions maybe useful
-;15
+;21
 Screenshot(outfile, screen) {																					;-- screenshot function 1
 
     pToken := Gdip_Startup()
@@ -2382,7 +2543,7 @@ Screenshot(outfile, screen) {																					;-- screenshot function 1
 
     PlaceTooltip("Screenshot copied and saved.")
 }
-;16
+;22
 TakeScreenshot(dir) {																								;-- screenshot function 2
 
     CoordMode, Mouse, Screen
@@ -2410,7 +2571,7 @@ TakeScreenshot(dir) {																								;-- screenshot function 2
 
 return
 }
-;17
+;23
 CaptureWindow(hwndOwner, hwnd) {																	;-- screenshot function 3
 
     VarSetCapacity(RECT, 16, 0)
@@ -2440,7 +2601,7 @@ CaptureWindow(hwndOwner, hwnd) {																	;-- screenshot function 3
     Return True
 
 }
-;18
+;24
 CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "") {					;-- screenshot function 4 - orginally from CaptureScreen.ahk
 
 		; from: https://github.com/RaptorX/AHK-ToolKit/blob/master/lib/sc.ahk
@@ -2465,7 +2626,7 @@ CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "") {					;-- 
 	CaptureScreen("100, 100, 200, 200")
 	CaptureScreen("100, 100, 200, 200, 400, 400")   ; Zoomed
 
-	depending functions:			can be found in library
+	related functions:			can be found in library
 			   Unicode4Ansi	-			CoHelper.ahk
 	 		   Ansi4Unicode	-			CoHelper.ahk
 				    	Zoomer	-			this library or ScreenCapture.ahk
@@ -2526,8 +2687,9 @@ CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "") {					;-- 
 	Else Convert(hBM, sFile, nQuality), DllCall("DeleteObject", "Uint", hBM)
 
 }
-{ ;depending functions for CaptureScreen()
-CaptureCursor(hDC, nL, nT) {																					;-- this captures the cursor
+{ ;sub for CaptureScreen()
+;25
+CaptureCursor(hDC, nL, nT) {																					;-- sub for CaptureScreen() - this captures the cursor
 
 	VarSetCapacity(mi, 20, 0)
 	mi := Chr(20)
@@ -2552,7 +2714,8 @@ CaptureCursor(hDC, nL, nT) {																					;-- this captures the cursor
 		DllCall("DeleteObject", "Uint", hBMColor)
 
 }
-Zoomer(hBM, nW, nH, znW, znH) {																			;-- zooms a HBitmap, depending function of CaptureScreen()
+;26
+Zoomer(hBM, nW, nH, znW, znH) {																			;-- sub for CaptureScreen() - zooms a HBitmap, depending function of CaptureScreen()
 
 	mDC1 := DllCall("CreateCompatibleDC", "Uint", 0)
 	mDC2 := DllCall("CreateCompatibleDC", "Uint", 0)
@@ -2569,7 +2732,8 @@ Zoomer(hBM, nW, nH, znW, znH) {																			;-- zooms a HBitmap, depending
 	Return	zhBM
 
 }
-Convert(sFileFr = "", sFileTo = "", nQuality = "") {													;-- converts from one picture format to another one, depending on Gdip restriction only .bmp, .jpg, .png is possible
+;27
+Convert(sFileFr = "", sFileTo = "", nQuality = "") {													;-- sub for CaptureScreen() - converts from one picture format to another one, depending on Gdip restriction only .bmp, .jpg, .png is possible
 
 	/*			DESCRIPTION AND DEPENDING FUNCTIONS
 
@@ -2634,7 +2798,8 @@ Convert(sFileFr = "", sFileTo = "", nQuality = "") {													;-- converts fr
 	DllCall("gdiplus\GdiplusShutdown" , "Uint", pToken)
 	DllCall("FreeLibrary", "Uint", hGdiPlus)
 }
-SaveHBITMAPToFile(hBitmap, sFile) {																		;-- saves a HBitmap to a file
+;28
+SaveHBITMAPToFile(hBitmap, sFile) {																		;-- sub for CaptureScreen() - saves a HBitmap to a file
 
 	DllCall("GetObject", "Uint", hBitmap, "int", VarSetCapacity(oi,84,0), "Uint", &oi)
 	hFile:=	DllCall("CreateFile", "Uint", &sFile, "Uint", 0x40000000, "Uint", 0, "Uint", 0, "Uint", 2, "Uint", 0, "Uint", 0)
@@ -2644,9 +2809,8 @@ SaveHBITMAPToFile(hBitmap, sFile) {																		;-- saves a HBitmap to a fi
 	DllCall("WriteFile", "Uint", hFile, "Uint", NumGet(oi,20), "Uint", NumGet(oi,44), "UintP", 0, "Uint", 0)
 	DllCall("CloseHandle", "Uint", hFile)
 }
-} 
-;-----------------------------------------------
-;19
+} ;sub end
+;29
 RGBRange(x, y=0, c=0, delim=",") {																		;-- returns an array for a color transition from x to y
 
 	; RGBRange by [VxE]
@@ -2676,7 +2840,7 @@ RGBRange(x, y=0, c=0, delim=",") {																		;-- returns an array for a c
 	SetFormat, Integer, %oif%
 	return x
 }
-;20
+;30
 getSelectionCoords(ByRef x_start, ByRef x_end, ByRef y_start, ByRef y_end) {		;-- creates a click-and-drag selection box to specify an area
 
 	/*			EXAMPLE
@@ -2743,7 +2907,7 @@ getSelectionCoords(ByRef x_start, ByRef x_end, ByRef y_start, ByRef y_end) {		;-
 	}
 
 }
-;21
+;31
 GetRange(ByRef x="",ByRef y="",ByRef w="",ByRef h="") {										;-- another good screen area selection function
 
 	 ;Last edited by feiyue on 07 Jun 2018, 16:51, edited
@@ -2854,7 +3018,7 @@ GetRange(ByRef x="",ByRef y="",ByRef w="",ByRef h="") {										;-- another goo
 	  CoordMode, Mouse, %cmm%
 
 }
-;22
+;32
 FloodFill(x, y, target, replacement, mode=1, key="") {											;-- filling an area using color banks
 
 	;function is from https://rosettacode.org/wiki/Bitmap/Flood_fill#AutoHotkey
@@ -2903,7 +3067,7 @@ FloodFill(x, y, target, replacement, mode=1, key="") {											;-- filling an 
       FloodFill(x-1, y-1, target, replacement, key)
    }
 }
-;23
+;33
 CreateBMPGradient(File, RGB1, RGB2, Vertical=1) {												;-- Horizontal/Vertical gradient
 
 	; SKAN: http://www.autohotkey.com/forum/viewtopic.php?p=61081#61081
@@ -2926,15 +3090,16 @@ CreateBMPGradient(File, RGB1, RGB2, Vertical=1) {												;-- Horizontal/Vert
 	   DllCall("CloseHandle", "Uint", Handle)
 
 }
-{ ;depending function
-BGR(RGB) {																										;-- BGR() subfunction from CreateBMPGradient()
+{ ;sub for CreateBMPGradient()
+;34
+BGR(RGB) {																									        	;-- BGR() subfunction from CreateBMPGradient()
 
 	RGB = 00000%RGB%
 		Return SubStr(RGB,-1) . SubStr(RGB,-3,2) . SubStr(RGB,-5,2)
 
 }
-} 
-;24
+} ;sub end
+;35
 CreatePatternBrushFrom(hbm, x, y, w, h) {																;-- as it says
 
 	;found on https://autohotkey.com/board/topic/20588-adding-pictures-to-controls-eg-as-background/page-3
@@ -2966,7 +3131,7 @@ CreatePatternBrushFrom(hbm, x, y, w, h) {																;-- as it says
     DllCall("DeleteObject","uint",hbm1)
     return hbr
 }
-;25
+;36
 ResConImg(OriginalFile, NewWidth:="", NewHeight:="", NewName:="",				;-- Resize and convert images. png, bmp, jpg, tiff, or gif 
 NewExt:="", NewDir:="", PreserveAspectRatio:=true, BitDepth:=24) {
     
@@ -3018,7 +3183,7 @@ NewExt:="", NewDir:="", PreserveAspectRatio:=true, BitDepth:=24) {
     Gdip_DisposeImage(pBitmap)                                              ; Delete the new bitmap
     Gdip_DeleteGraphics(G)                                                  ; The graphics may now be deleted
 }
-;26
+;37
 CreateCircleProgress(diameter:=50,thickness:=5,color:=0x99009933,               	;-- very nice to see functions for a circle progress
 xPos:="center",yPos:="center",guiId:=1) {
 	
@@ -3127,25 +3292,27 @@ xPos:="center",yPos:="center",guiId:=1) {
     Gdip_SetCompositingMode(G, 1)
     Return {hwnd:hwnd, hdc:hdc, obm:obm, hbm:hbm, pen:pen, G:G, diameter: diameter, thickness:thickness, xPos:xPos, yPos:yPos, width:width, height:height}
 }
-{ ; sub CreateCircleProgress
-UpdateCircleProgress(circleObj,percent) {
+{ ; sub for CreateCircleProgress
+;38
+UpdateCircleProgress(circleObj,percent) {                                                          	;-- sub for CreateCircleProgress
     Gdip_Drawarc(circleObj.G, circleObj.pen, circleObj.thickness, circleObj.thickness, circleObj.diameter, circleObj.diameter, 270, 360/100*percent)
     UpdateLayeredWindow(circleObj.hwnd, circleObj.hdc, circleObj.xPos, circleObj.yPos, circleObj.width, circleObj.height)
 }
-DestroyCircleProgress(circleObj) {
+;39
+DestroyCircleProgress(circleObj) {                                                                       	;-- sub for CreateCircleProgress
     Gui % circleObj.hwnd ":Destroy"
     SelectObject(circleObj.hdc, circleObj.obm)
     DeleteObject(circleObj.hbm)
     DeleteDC(circleObj.hdc)
     Gdip_DeleteGraphics(circleObj.G)
 }
-} 
-;27
+} ;sub end
+;40
 RGBrightnessToHex(r := 0, g := 0, b := 0, brightness := 1) {                                  	;-- transform rbg (with brightness) values to hex 
 	;https://autohotkey.com/boards/viewtopic.php?f=6&p=191294
 	return (b * brightness << 16) + (g * brightness << 8) + (r * brightness)
 }
-;28
+;41
 GetHueColorFromFraction(hue, brightness := 1) {                                                 ;-- get hue color from fraction. example: h(0) is red, h(1/3) is green and h(2/3) is blue
 	
 	;https://autohotkey.com/boards/viewtopic.php?f=6&p=191294
@@ -3155,7 +3322,7 @@ GetHueColorFromFraction(hue, brightness := 1) {                                 
 		col+=max(min(-8*abs(mod(hue+A_Index/3-0.5,1)-0.5)+2.5,1),0)*255*brightness<<16-(A_Index-1)*8
 	return col
 }
-;29
+;42
 SaveHBITMAPToFile(hBitmap, sFile) {																		;-- saves the hBitmap to a file
 	DllCall("GetObject", "Uint", hBitmap, "int", VarSetCapacity(oi,84,0), "Uint", &oi)
 	hFile:=	DllCall("CreateFile", "Uint", &sFile, "Uint", 0x40000000, "Uint", 0, "Uint", 0, "Uint", 2, "Uint", 0, "Uint", 0)
@@ -3165,7 +3332,7 @@ SaveHBITMAPToFile(hBitmap, sFile) {																		;-- saves the hBitmap to a 
 	DllCall("WriteFile", "Uint", hFile, "Uint", NumGet(oi,20), "Uint", NumGet(oi,44), "UintP", 0, "Uint", 0)
 	DllCall("CloseHandle", "Uint", hFile)
 }
-;30
+;43
 DrawRotatePictureOnGraphics(G,pBitmap,x,y,size,angle)	{									;-- rotate a pBitmap
 	;X and Y describe the new center of the model  - https://autohotkey.com/board/topic/95329-tower-defense-game-in-ahk/
 dist:=(((size/2)**2)*2)**0.5
@@ -3182,14 +3349,14 @@ DllCall("gdiplus\GdipDrawImagePointsRect", "uint", G, "uint", pBitmap
 	, "float", size, "float", size
 	, "int", 2, "uint", 0, "uint", 0, "uint", 0)
 }
-;31
+;44
 CopyBitmapOnGraphic(pGraphics,pBitmap,w,h) {													;-- copy a pBitmap of a specific width and height to the Gdip graphics container (pGraphics)
 return DllCall("gdiplus\GdipDrawImageRectRect", "uint", pGraphics, "uint", pBitmap
 	, "float", 0, "float", 0, "float", w, "float", h
 	, "float", 0, "float", 0, "float", w, "float", h
 	, "int", 2, "uint", 0, "uint", 0, "uint", 0)
 }
-;32
+;45
 GDI_GrayscaleBitmap( hBM ) {               																	;-- Converts GDI bitmap to 256 color GreyScale
 
 	; www.autohotkey.com/community/viewtopic.php?t=88996    By SKAN,  Created : 19-Jul-2012
@@ -3226,7 +3393,7 @@ GDI_GrayscaleBitmap( hBM ) {               																	;-- Converts GDI bit
 
 Return dBM
 }
-;33
+;46
 Convert_BlackWhite(InputImage, OutputImage) {													;-- Convert exist imagefile to black&white , it uses machine code
 	
 	/*
@@ -3280,8 +3447,9 @@ Convert_BlackWhite(InputImage, OutputImage) {													;-- Convert exist imag
 
     return
 }
- ;{ sub from Convert_BlackWhite
- BlackWhite(pBitmap, ByRef pBitmapOut, Width, Height)       {
+{ ;sub from Convert_BlackWhite
+;47
+ BlackWhite(pBitmap, ByRef pBitmapOut, Width, Height)       {                           	;-- sub from Convert_BlackWhite
            global blackwhite
            E1 := Gdip_LockBits(pBitmap, 0, 0, Width, Height, Stride1, Scan01, BitmapData1)
            E2 := Gdip_LockBits(pBitmapOut, 0, 0, Width, Height, Stride2, Scan02, BitmapData2) 
@@ -3289,43 +3457,232 @@ Convert_BlackWhite(InputImage, OutputImage) {													;-- Convert exist imag
            Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmapOut, BitmapData2)
            return (R)
         }
-MCode(ByRef code, hex) ; allocate memory and write Machine Code there  { 
- 	  VarSetCapacity(code,StrLen(hex)//2)
- 	  Loop % StrLen(hex)//2
-          NumPut("0x" . SubStr(hex,2*A_Index-1,2), code, A_Index-1, "Char")
-        }
-;34
-getHBMinfo( hBM ) {
+} ;sub end
+;48
+getHBMinfo( hBM ) {                                                                                           	;--
 Local SzBITMAP := ( A_PtrSize = 8 ? 32 : 24 ),  BITMAP := VarSetCapacity( BITMAP, SzBITMAP )       
   If DllCall( "GetObject", "Ptr",hBM, "Int",SzBITMAP, "Ptr",&BITMAP )
     Return {  Width:      Numget( BITMAP, 4, "UInt"  ),  Height:     Numget( BITMAP, 8, "UInt"  ) 
            ,  WidthBytes: Numget( BITMAP,12, "UInt"  ),  Planes:     Numget( BITMAP,16, "UShort") 
            ,  BitsPixel:  Numget( BITMAP,18, "UShort"),  bmBits:     Numget( BITMAP,20, "UInt"  ) }
 }       
+;49
+CreateDIB( PixelData, W, H, ResizeW := 0, ResizeH := 0, Gradient := 1  ) {            	;-- a wonderfull function by SKAN to draw tiled backgrounds (like chess pattern) to a gui, it can also draw gradients
+		/*    	DESCRIPTION of function CreateDIB
+			 ==================================================================================================================================
+			 Function:					draw tiled backgrounds (like chess pattern) to a gui, it can also draw gradients
+			 Author:                	SKAN, CD: 01-Apr-2014 MD: 05-May-2014
+			 Parameters:			AddrOrName  -  host/domain name or IPv4 address (xxx.xxx.xxx.xxx).
+				                        	ResultArray -  optional array to retrieve multiple answers.
+				                        	CNAME       -  optional variable to retrieve the 'canonical name' (CNAME) returned from DNS for host/domain name queries.
+			 Return values:        	On success: First returned address or name.
+				                        	On failure: an empty string, ErrorLevel is set to the DNS error code.
+			 Link:    					http://ahkscript.org/boards/viewtopic.php?t=3203                  
+			 
+			 ==================================================================================================================================		
+	*/
+   
+	/*    	EXAMPLE(s)
+			
+			#SingleInstance, Force
 
+			PixelData=
+			( LTrim Join|
+			  FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000
+			  000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF
+			  FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000  
+			  000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF
+			  FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000  
+			  000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF
+			  FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000  
+			  000000|FFFFFF|000000|FFFFFF|000000|FFFFFF|000000|FFFFFF
+			)                   
+			hBM := CreateDIB( PixelData, 8, 8 )
+
+			Gui, Margin, 0, 0
+			Gui, Add, Picture, w640 h640 0x4E hwndcHwnd ; SS_REALSIZECONTROL = 0x40 | SS_BITMAP = 0xE
+			DllCall( "SendMessage", "Ptr",cHwnd, "UInt",0x172, "Ptr",0, "Ptr",hBM ) ; STM_SETIMAGE = 0x172
+			Gui, Show,, CreateDIB() Demo
+			
+	*/
+		
+		Static LR_Flag1 := 0x2008 ; LR_CREATEDIBSECTION := 0x2000 | LR_COPYDELETEORG := 8
+			,  LR_Flag2 := 0x200C ; LR_CREATEDIBSECTION := 0x2000 | LR_COPYDELETEORG := 8 | LR_COPYRETURNORG := 4
+			,  LR_Flag3 := 0x0008 ; LR_COPYDELETEORG := 8
+		WB := Ceil( ( W * 3 ) / 2 ) * 2,  VarSetCapacity( BMBITS, WB * H + 1, 0 ),  P := &BMBITS
+		Loop, Parse, PixelData, |
+		P := Numput( "0x" A_LoopField, P+0, 0, "UInt" ) - ( W & 1 and Mod( A_Index * 3, W * 3 ) = 0 ? 0 : 1 )
+		hBM := DllCall( "CreateBitmap", "Int",W, "Int",H, "UInt",1, "UInt",24, "Ptr",0, "Ptr" )
+		hBM := DllCall( "CopyImage", "Ptr",hBM, "UInt",0, "Int",0, "Int",0, "UInt",LR_Flag1, "Ptr" )
+		DllCall( "SetBitmapBits", "Ptr",hBM, "UInt",WB * H, "Ptr",&BMBITS )
+		If not ( Gradient + 0 )
+			hBM := DllCall( "CopyImage", "Ptr",hBM, "UInt",0, "Int",0, "Int",0, "UInt",LR_Flag3, "Ptr" )
+		Return DllCall( "CopyImage", "Ptr",hBM, "Int",0, "Int",ResizeW, "Int",ResizeH, "Int",LR_Flag2, "UPtr" )
+	}
+;50	
+GuiControlLoadImage(HCTRL, PicPath, Rotate = "") {                                         	;-- scale down a picture to fit the given width and height of a picture control
+	
+	/*    	DESCRIPTION of function GuiControlLoadImage()
+			
+			Link				:	https://autohotkey.com/board/topic/86978-rotate-gui-picture/
+			Author			:	just me
+			Date				:	Nov 14 2012
+			Description	:	scale down a picture to fit the given width and height of a picture control
+			Parameter	:	HCTRL     -  HWND or VarName of the picture control
+									PicPath   -  	Path of the image
+									Rotate    -  	Rotate the image:
+														1 :   90 degrees right
+														2 :   Flip vertically
+														3 :   90 degrees left
+														4 :   Flip horizontally
+														Default: "" : no rotation
+			Remark		:	You have to set the maximum width and height in the global variables PicW and PicH before calling it. 
+									Also you have to call Gdip_Startup() prior in your script. The control must have the style SS_BITMAP := 0x000E set
+			
+	*/
+	 
+  
+   Global PicW, PicH
+   Static STM_GETIMAGE := 0x0173
+   Static STM_SETIMAGE := 0x0172
+   Static Rotate90FlipNone  := 1
+   Static RotateNoneFlipY   := 2
+   Static Rotate270FlipNone := 3
+   Static RotateNoneFlipX   := 4
+   If !(HCTRL + 0)
+      GuiControlGet, HCTRL, HWND, %HCTRL%
+   If !(HCTRL)
+      Return
+   DllCall("Gdiplus.dll\GdipCreateBitmapFromFile", "WStr", PicPath, "PtrP", GDIPBitmap)
+   If Rotate Between 1 And 4
+      DllCall("Gdiplus.dll\GdipImageRotateFlip", "Ptr", GDIPBitmap, "Int", Rotate)
+   DllCall("Gdiplus.dll\GdipGetImageWidth", "Ptr", GDIPBitmap, "UIntP", PW)
+   DllCall("Gdiplus.dll\GdipGetImageHeight", "Ptr", GDIPBitmap, "UIntP", PH)
+   DllCall("Gdiplus.dll\GdipCreateHBITMAPFromBitmap", "Ptr", GDIPBitmap, "PtrP", HBITMAP, "UInt", 0xFFFFFFFF)
+   DllCall("Gdiplus.dll\GdipDisposeImage", "Ptr", GDIPBitmap)
+   W := PW
+   H := PH
+   If (H > PicH) {
+      W := Round(PW * PicH / H)
+      H := PicH
+   }
+   If (W > PicW) {
+      H := Round(H * PicW / W)
+      W := PicW
+   }
+   HBITMAP := DllCall("User32.dll\CopyImage", "Ptr", HBITMAP, "UInt", 0, "Int", W, "Int", H, "UInt", 0x08, "UPtr")
+   SendMessage, STM_SETIMAGE, 0, HBITMAP, , ahk_id %HCTRL%
+   If (ErrorLevel + 0)
+      DllCall("Gdi32.dll\DeleteObject", "Ptr", ErrorLevel)
+   SendMessage, STM_GETIMAGE, 0, 0, , ahk_id %HCTRL%
+   If (ErrorLevel <> HBITMAP)
+      DllCall("Gdi32.dll\DeleteObject", "Ptr", HBITMAP)
+   Return PW . "|" . PH
+}
+;51
+Gdip_ResizeBitmap(pBitmap, PercentOrWH, Dispose=1) {                                    	;-- returns resized bitmap
+	
+	/*    	DESCRIPTION of function ()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	returns resized bitmap
+			Link1            	:	https://autohotkey.com/board/topic/86978-rotate-gui-picture/
+			Link2            	:	http://www.autohotkey.com/community/viewtopic.php?p=477333#p477333
+			Author         	:	Learning one
+			Date	            	:	Nov 14 2012
+			AHK-Version	:	AHK_L
+			License        	:	unknown
+			Parameter(s)	:	see examples
+			Remark(s)    	:	none
+			Dependencies	:	GDIP.ahk
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+		
+			pResizedBitmap := Gdip_ResizeBitmap(pBitmap, 120) ; resizes to 120%. Disposes of pBitmap.
+			pResizedBitmap := Gdip_ResizeBitmap(pBitmap, 50, 0) ; resizes to 50%. Does not dispose pBitmap.
+			pResizedBitmap := Gdip_ResizeBitmap(pBitmap, "w180 h80") ; resizes to width: 180 height: 80 (does not maintain aspect ratio). Disposes of pBitmap.
+			pResizedBitmap := Gdip_ResizeBitmap(pBitmap, "w200") ; resizes to width: 200, automatically adjusts height (maintains aspect ratio). Disposes of pBitmap.
+			pResizedBitmap := Gdip_ResizeBitmap(pBitmap, "h50") ; resizes to height: 50, automatically adjusts width (maintains aspect ratio). Disposes of pBitmap.
+		
+	*/
+	
+		Gdip_GetImageDimensions(pBitmap, origW, origH)
+		if PercentOrWH contains w,h
+		{
+		RegExMatch(PercentOrWH, "i)w(\d*)", w), RegExMatch(PercentOrWH, "i)h(\d*)", h)
+		NewWidth := w1, NewHeight := h1
+		NewWidth := (NewWidth = "") ? origW/(origH/NewHeight) : NewWidth
+		NewHeight := (NewHeight = "") ? origH/(origW/NewWidth) : NewHeight
+		}
+		else
+		NewWidth := origW*PercentOrWH/100, NewHeight := origH*PercentOrWH/100
+		pBitmap2 := Gdip_CreateBitmap(NewWidth, NewHeight)
+		G2 := Gdip_GraphicsFromImage(pBitmap2), Gdip_SetSmoothingMode(G2, 4), Gdip_SetInterpolationMode(G2, 7)
+		Gdip_DrawImage(G2, pBitmap, 0, 0, NewWidth, NewHeight)
+		Gdip_DeleteGraphics(G2)
+		if Dispose
+		Gdip_DisposeImage(pBitmap)
+		return pBitmap2
+}
+;52
+Gdip_CropBitmap(pBitmap, left, right, up, down, Dispose=1) {                          	;-- returns cropped bitmap. Specify how many pixels you want to crop (omit) from each side of bitmap rectangle
+	
+	/*    	DESCRIPTION of function Gdip_CropBitmap()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	returns cropped bitmap. Specify how many pixels you want to crop (omit) from each side of bitmap rectangle
+			Link              	:	http://www.autohotkey.com/community/viewtopic.php?p=477333#p477333
+			Author         	:	Learning one
+			Date	            	:	Nov 14 2012
+			AHK-Version	:	AHK_L
+			License        	:	unknown
+			Parameter(s)	:	see examples
+			Remark(s)    	:	none
+			Dependencies	:	GDIP.ahk 
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	/*    	EXAMPLE(s)
+			
+			pCroppedBitmap := Gdip_CropBitmap(pBitmap, 10, 10, 10, 10) ; crops 10 pixels from each side of bitmap rectangle. Disposes of pBitmap.
+			pCroppedBitmap := Gdip_CropBitmap(pBitmap, 50, 50, 0, 0) ; crops 50 pixels from left and right side of bitmap rectangle. Disposes of pBitmap.
+			pCroppedBitmap := Gdip_CropBitmap(pBitmap, 0, 0, 77, 77, 0) ; crops 77 pixels from upper and lower side of bitmap rectangle. Does not dispose of pBitmap.
+	
+	*/
+	
+	
+		Gdip_GetImageDimensions(pBitmap, origW, origH)
+		NewWidth := origW-left-right, NewHeight := origH-up-down
+		pBitmap2 := Gdip_CreateBitmap(NewWidth, NewHeight)
+		G2 := Gdip_GraphicsFromImage(pBitmap2), Gdip_SetSmoothingMode(G2, 4), Gdip_SetInterpolationMode(G2, 7)
+		Gdip_DrawImage(G2, pBitmap, 0, 0, NewWidth, NewHeight, left, up, NewWidth, NewHeight)
+		Gdip_DeleteGraphics(G2)
+		if Dispose
+				Gdip_DisposeImage(pBitmap)
+				
+return pBitmap2
+}
+;functions end
 } 
-;|														|														|														|														|
-;|	LoadPicture()								|	GetImageDimensionProperty		|	GetImageDimensions()				|	Gdip_FillRoundedRectangle()		|
-;|	Redraw(hwnd=0)							|	CreateSurface()							|	ShowSurface()								|	HideSurface()								|
-;|	WipeSurface()								|	StartDraw()									|	EndDraw()									|	SetPen()										|
-;|	DrawLine()									|	SDrawRectangle()						|	SetAlpha()									|	DrawRectangle()							|
-;|	Highlight()									|	Screenshot()									|	TakeScreenshot()							|	CaptureWindow()							|
-;|	CaptureScreen()							|	CaptureCursor()							|	Zoomer()										|	Convert()										|
-;|	SaveHBITMAPToFile()					|	DrawFrameAroundControl			|	CircularText()								|	RotateAroundCenter()					|
-;|	RGBRange()									|	getSelectionCoords()					|	GetRange()									|	FloodFill()										|
-;|	CreateBMPGradient()					|	CreatePatternBushFrom()			|	ResConImg()								|   CreateCircleProgress()					|
-;|   RGBrightnessToHex()               	|   GetHueColorFromFraction()     	|   SaveHBITMAPToFile()                	|   DrawRotatePictureOnGraphics	|
-;|   CopyBitmapOnGraphic()          	|   GDI_GrayscaleBitmap()            	|  Convert_BlackWhite()                 	|   getHBMinfo()                            	|
+;|   LoadPicture()                           	|   GetImageDimensionProperty   	|   GetImageDimensions()            	|   Gdip_FillRoundedRectangle()   	|
+;|   Redraw(hwnd=0)                    	|   CreateSurface()                        	|   ShowSurface()                          	|   HideSurface()                           	|
+;|   WipeSurface()                          	|   StartDraw()                              	|   EndDraw()                                	|   SetPen()                                   	|
+;|   DrawLine()                              	|   SDrawRectangle()                    	|   SetAlpha()                                	|   DrawRectangle()                      	|
+;|   Highlight()                               	|   Screenshot()                             	|   TakeScreenshot()                      	|   CaptureWindow()                     	|
+;|   CaptureScreen()                      	|   CaptureCursor()                       	|   Zoomer()                                  	|   Convert()                                 		|
+;|   SaveHBITMAPToFile()              	|   DrawFrameAroundControl       	|   CircularText()                           	|   RotateAroundCenter()              	|
+;|   RGBRange()                             	|   getSelectionCoords()                	|   GetRange()                               	|   FloodFill()                                 	|
+;|   CreateBMPGradient()                	|   CreatePatternBushFrom()        	|   ResConImg()                            	|   CreateCircleProgress()              	|
+;|   RGBrightnessToHex()               	|   GetHueColorFromFraction()     	|   SaveHBITMAPToFile()               	|   DrawRotatePictureOnGraphics	|
+;|   CopyBitmapOnGraphic()          	|   GDI_GrayscaleBitmap()            	|   Convert_BlackWhite()               	|   getHBMinfo()                           	|
+;|   CreateDIB()                              	|   GuiControlLoadImage()            	|   Gdip_ResizeBitmap()                	|   Gdip_CropBitmap()                   	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;GUI/WINDOW FUNCTIONS SECTION (211)
-
-{ ;Gui - Customizable full gui functions, custom gui elements (22)
-
-HtmlBox(Html, Title="", Timeout=0, Permanent=False,											;-- Gui with ActiveX - Internet Explorer - Control
-GUIOptions="Resize MaximizeBox Minsize420x320",
-ControlOptions="W400 H300", Margin=10, Hotkey=True) {
+{ ;Gui customize (22) -- full gui functions, custom gui elements
+;1
+HtmlBox(Html, Title="", Timeout=0, Permanent=False,                            				;-- Gui with ActiveX - Internet Explorer - Control
+GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="W400 H300", Margin=10, Hotkey=True) {
 
     ;AutoHotkey_L 1.1.04+
     ;Timeout : The seconds to make the HTML window disappear.
@@ -3393,17 +3750,16 @@ Return HwndHtml
         HtmlBoxInfo[WinExist("A")].doc.ExecCommand(ExecCmd[SubStr(A_ThisHotkey, 2)])
     Return
 }
-
-EditBox(Text, Title="", Timeout=0, Permanent=False, 											;-- Displays an edit box with the given text, tile, and options
-GUIOptions="Resize MaximizeBox Minsize420x320",
-ControlOptions="VScroll W400 H300", Margin=10) {
+;2
+EditBox(Text, Title="", Timeout=0, Permanent=False,                             				;-- Displays an edit box with the given text, tile, and options
+GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="VScroll W400 H300", Margin=10) {
 
     ;AutoHotkey_L 1.1.04+
     ;Timeout : The seconds to make the edit window disappear.
     ;Permanent : if this is True, closing the GUI window does not destroy it but it is hidden.
     ;Return Value: the handle of the created window(Hwnd).
 
-	/*											Description
+	/*                            				Description
 
 		Displays an edit box with the given text, tile, and options.
 
@@ -3432,7 +3788,7 @@ ControlOptions="VScroll W400 H300", Margin=10) {
 
 	*/
 
-	/*												Example
+	/*                            					Example
 
 				Text =
 		(
@@ -3500,8 +3856,8 @@ Return HwndEdit
             Gui, %HwndEdit%:Hide
     Return
 }
-
-Popup(title, action, close=true, image="", w=197, h=46) {										;-- Splashtext Gui
+;3
+Popup(title, action, close=true, image="", w=197, h=46) {                            	    	;-- Splashtext Gui
 
     SysGet, Screen, MonitorWorkArea
     ScreenRight-=w+3
@@ -3511,8 +3867,8 @@ Popup(title, action, close=true, image="", w=197, h=46) {										;-- Splashtex
     if close
         SetTimer, ClosePopup, -2000
     return
-}
-ClosePopup: { ;
+	
+	ClosePopup:  
     WinGet,WinID,ID,Popup
     MouseGetPos,,,MouseWinID
     ifEqual,WinID,%MouseWinID%
@@ -3523,9 +3879,9 @@ ClosePopup: { ;
     }
     return
 
-} 
-
-PIC_GDI_GUI(GuiName, byref File, GDIx, GDIy , GDIw, GDIh) { 								;-- a GDI-gui to show a picture
+}
+;4
+PIC_GDI_GUI(GuiName, byref File, GDIx, GDIy , GDIw, GDIh) {                            	;-- a GDI-gui to show a picture
 
 				global GGhdc
 			If !pToken := Gdip_Startup() {
@@ -3562,8 +3918,8 @@ PIC_GDI_GUI(GuiName, byref File, GDIx, GDIy , GDIw, GDIh) { 								;-- a GDI-gu
 
 return [hwnd1, GGhdc]
 }
-
-SplitButton(hButton, GlyphSize=16, Menu="", hDontUse="") {								;--	drop down button
+;5
+SplitButton(hButton, GlyphSize=16, Menu="", hDontUse="") {                          	;--	drop down button
 
 	;https://autohotkey.com/boards/viewtopic.php?t=22830
 	/*						DESCRIPTION
@@ -3573,7 +3929,7 @@ SplitButton(hButton, GlyphSize=16, Menu="", hDontUse="") {								;--	drop down 
 		- GlyphSize = size of down arrow glyph (default: 16)
 		- MenuName = name of menu to call when clicked (default: SplitButton_Menu)
 
-		Issues/Requirements:
+		Requirements:
 		- statically saved hwnd of button from first call needs turned into array... for now only one button can be a SplitButton
 		- will conflict with other code using WM_Notify OnMessage()
 		- missing features from API for glyph size, imagelist, styles, etc...
@@ -3634,8 +3990,8 @@ SplitButton(hButton, GlyphSize=16, Menu="", hDontUse="") {								;--	drop down 
 	}
 
 }
-
-BetterBox(Title := "", Prompt := "", Default := "", Pos := -1) {									;--	custom input box allows to choose the position of the text insertion point
+;6
+BetterBox(Title := "", Prompt := "", Default := "", Pos := -1) {                              	;--	custom input box allows to choose the position of the text insertion point
 
 	;-------------------------------------------------------------------------------
     ; custom input box allows to choose the position of the text insertion point
@@ -3667,7 +4023,6 @@ BetterBox(Title := "", Prompt := "", Default := "", Pos := -1) {									;--	cus
     WinWaitClose
     Return, Result
 
-
     ;-----------------------------------
     ; event handlers
     ;-----------------------------------
@@ -3683,8 +4038,8 @@ BetterBox(Title := "", Prompt := "", Default := "", Pos := -1) {									;--	cus
         Gui, Destroy
     Return
 }
-
-BtnBox(Title := "", Prompt := "", List := "", Seconds := "") {										;--	show a custom MsgBox with arbitrarily named buttons
+;7
+BtnBox(Title := "", Prompt := "", List := "", Seconds := "") {                                 	;--	show a custom MsgBox with arbitrarily named buttons
 ;-------------------------------------------------------------------------------
     ; show a custom MsgBox with arbitrarily named buttons
     ; return the text of the button pressed
@@ -3731,8 +4086,8 @@ BtnBox(Title := "", Prompt := "", List := "", Seconds := "") {										;--	show
         Gui, Destroy
     Return
 }
-
-LoginBox(Title := "") {																								;-- show a custom input box for credentials, return an object with Username and Password
+;8
+LoginBox(Title := "") {                                                                                          	;-- show a custom input box for credentials, return an object with Username and Password
 	;-------------------------------------------------------------------------------
     ; show a custom input box for credentials
     ; return an object with Username and Password
@@ -3777,8 +4132,8 @@ LoginBox(Title := "") {																								;-- show a custom input box for c
         Gui, Destroy
     Return
 }
-
-MultiBox(Title := "", Prompt := "", Default := "") {													;-- show a multi-line input box, return the entered text
+;9
+MultiBox(Title := "", Prompt := "", Default := "") {                                               	;-- show a multi-line input box, return the entered text
 
 ;-------------------------------------------------------------------------------
     ; show a multi-line input box
@@ -3822,8 +4177,8 @@ MultiBox(Title := "", Prompt := "", Default := "") {													;-- show a mult
         Gui, Destroy
     Return
 }
-
-PassBox(Title := "", Prompt := "") {																			;-- show a custom input box for a password
+;10
+PassBox(Title := "", Prompt := "") {                                                                      	;-- show a custom input box for a password
 
 	;-------------------------------------------------------------------------------
     ; show a custom input box for a password
@@ -3867,10 +4222,10 @@ PassBox(Title := "", Prompt := "") {																			;-- show a custom input b
         Gui, Destroy
     Return
 }
+;11
+CreateHotkeyWindow(key) {      	                                                                         	;-- Hotkey Window
 
-CreateHotkeyWindow(key) {      	 																	  		;-- Hotkey Window
-
-	/*											Example
+	/*                            				Example
 
 		#7::
 		CreateWindow(Win + 7)
@@ -3903,8 +4258,8 @@ CreateHotkeyWindow(key) {      	 																	  		;-- Hotkey Window
 	return
 
 }
-
-GetUserInput(Default="",Text="",Options="",Control="") {									;-- allows you to create custom dialogs that can store different values (each value has a different set of controls)
+;12
+GetUserInput(Default="",Text="",Options="",Control="") {                                	;-- allows you to create custom dialogs that can store different values (each value has a different set of controls)
 
 	; http://ahkscript.org/germans/forums/viewtopic.php?t=7505 by Banane 2015
 
@@ -4095,8 +4450,8 @@ GetUserInput(Default="",Text="",Options="",Control="") {									;-- allows you 
     Gui, 99:Destroy
     Return
 }
-
-guiMsgBox(title, text, owner="", isEditable=0, wait=0, w="", h="") {                  	;-- GUI Message Box to allow selection
+;13
+guiMsgBox(title, text, owner="", isEditable=0, wait=0, w="", h="") {                 	;-- GUI Message Box to allow selection
 		
 	;dependings: function - getControlInfo()
 	
@@ -4127,8 +4482,8 @@ guiMsgBoxGuiEscape:
 	GuiEnds := 1
 	return
 }
-
-URLPrefGui(p_w, p_l, p_m, p_hw)   {                                                                        ;-- shimanov's workaround for displaying URLs in a gui	
+;14
+URLPrefGui(p_w, p_l, p_m, p_hw)   {                                                                    	;-- shimanov's workaround for displaying URLs in a gui	
 	/*                              	DESCRIPTION
 	
 			     Thanks to shimanov for this function
@@ -4235,9 +4590,8 @@ URLPrefGui(p_w, p_l, p_m, p_hw)   {                                             
           }
       }
   }
-
-;--- maybe these ones belongs together
-TaskDialog(Instruction, Content := "", Title := "", Buttons := 1,                              	;-- a Task Dialog is a new kind of dialogbox that has been added in Windows Vista and later. They are similar to message boxes, but with much more power.
+;15
+TaskDialog(Instruction, Content := "", Title := "", Buttons := 1,                          	;-- a Task Dialog is a new kind of dialogbox that has been added in Windows Vista and later. They are similar to message boxes, but with much more power.
 IconID := 0, IconRes := "", Owner := 0x10010) { 
     Local hModule, LoadLib, Ret
 
@@ -4266,9 +4620,9 @@ IconID := 0, IconRes := "", Owner := 0x10010) {
 
     Return {1: "OK", 2: "Cancel", 4: "Retry", 6: "Yes", 7: "No", 8: "Close"}[Ret]
 }
-
-TaskDialogDirect(Instruction, Content := "", Title := "", CustomButtons := "",   		;--  
-CommonButtons := 0, MainIcon := 0, Flags := 0, Owner := 0x10010, VerificationText := "", ExpandedText := "", FooterText := "", FooterIcon := 0, Width := 0) { ;--
+;16
+TaskDialogDirect(Instruction, Content := "", Title := "", CustomButtons := "",   		;-- part of TaskDialog ?
+CommonButtons := 0, MainIcon := 0, Flags := 0, Owner := 0x10010, VerificationText := "", ExpandedText := "", FooterText := "", FooterIcon := 0, Width := 0) {
     Static x64 := A_PtrSize == 8, Button := 0, Checked := 0
 
     If (CustomButtons != "") {
@@ -4307,8 +4661,8 @@ CommonButtons := 0, MainIcon := 0, Flags := 0, Owner := 0x10010, VerificationTex
         Return "ERROR"
     }
 }
-
-TaskDialogMsgBox(Main, Extra, Title := "", Buttons := 0, Icon := 0,                       	;--  
+;17
+TaskDialogMsgBox(Main, Extra, Title := "", Buttons := 0, Icon := 0,                    	;-- part of TaskDialog ? 
 Parent := 0, TimeOut := 0) {		
 
 	Static MBICON := {1: 0x30, 2: 0x10, 3: 0x40, WARN: 0x30, ERROR: 0x10, INFO: 0x40, QUESTION: 0x20}
@@ -4347,16 +4701,16 @@ Parent := 0, TimeOut := 0) {
 	return 0
 
 }
-
-TaskDialogToUnicode(String, ByRef Var) {													     		;-- 
+;18
+TaskDialogToUnicode(String, ByRef Var) {                            						     		;-- part of TaskDialog ?
 
 	VarSetCapacity(Var, StrPut(String, "UTF-16") * 2, 0)
 	StrPut(String, &Var, "UTF-16")
 	return &Var
 
 }
-
-TaskDialogCallback(H, N, W, L, D) {															     			;-- 
+;19
+TaskDialogCallback(H, N, W, L, D) {                                                        	     			;-- part of TaskDialog ?
 
 	Static TDM_Click_BUTTON := 0x0466
 		, TDN_CREATED := 0
@@ -4375,8 +4729,7 @@ TaskDialogCallback(H, N, W, L, D) {															     			;--
 	return 0
 
 }
-;-----
-
+;20
 TT_Console(msg, keys, x="", y="", fontops=""                                                    	;-- Use Tooltip as a User Interface it returns the key which has been pressed
 , fontname="", whichtooltip=1, followMouse=0) {		
 
@@ -4435,10 +4788,9 @@ TT_Console_Check:
 	is_TTkey_pressed := 1
 	return
 }
-
+;21
 ToolTipEx(Text:="", X:="", Y:="", WhichToolTip:=1                                             	;-- Display ToolTips with custom fonts and colors
-, HFONT:="", BgColor:="", TxColor:="",            	
-HICON:="", CoordMode:="W") {
+, HFONT:="", BgColor:="", TxColor:="", HICON:="", CoordMode:="W") {
 
 	;source: https://github.com/aviaryan/Clipjump/blob/master/lib/TooltipEx.ahk
 	;dependings: no
@@ -4646,20 +4998,27 @@ HICON:="", CoordMode:="W") {
 	TT[TTIX].HW := TTHW
 	Return TTHW
 }
-
-SafeInput(Title, Prompt, Default = "") {     ;-- makes sure sure the same window stays active after showing the InputBox. Otherwise you might get the text pasted into another window unexpectedly.
+;22
+SafeInput(Title, Prompt, Default = "") {     ;-- makes sure the same window stays active after showing the InputBox. Otherwise you might get the text pasted into another window unexpectedly.
 	
    ActiveWin := WinExist("A")
    InputBox OutPut, %Title%, %Prompt%,,, 120,,,,, %Default%
    WinActivate ahk_id %ActiveWin%
    Return OutPut
 }
-
+;functions end
 } 
+;|   HtmlBox()                                	|   EditBox()                                  	|   Popup()                                    	|   PIC_GDI_GUI()                          	|
+;|   SplitButton()                            	|   BetterBox()                               	|   BtnBox()                                   	|   LoginBox()                                	|
+;|   MultiBox()                                	|   PassBox()                                 	|   CreateHotkeyWindow()            	|   GetUserInput()                         	|
+;|   guiMsgBox()                             	|   URLPrefGui()                            	|   TaskDialog()                             	|   ITaskDialogDirect()                  	|
+;|   TaskDialogMsgBox()                	|   TaskDialogToUnicode()            	|   TaskDialogCallback()               	|   TT_Console()                             	|
+;|   ToolTipEx()                                	|   SafeInput()                                 	|   DisableCloseButton()               	|
+;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Gui - changing functions (17)
-
-FadeGui(guihwnd, fading_time, inout) {															        	;-- used DllCall to Animate (Fade in/out) a window
+{ ;Gui - to change (19) -- change position, fading, remove
+;1
+FadeGui(guihwnd, fading_time, inout) {                                                                    	;-- used DllCall to Animate (Fade in/out) a window
 
 	AW_BLEND := 0x00080000
 	AW_HIDE  := 0x00010000
@@ -4671,8 +5030,8 @@ FadeGui(guihwnd, fading_time, inout) {															        	;-- used DllCall t
 
 return
 }
-
-WinFadeToggle(WinTitle, Duration := 1, Hide := false) {								            	;--
+;2
+WinFadeToggle(WinTitle, Duration := 1, Hide := false) {	                                        	;-- smooth fading in out a window
 
 	;attention: you need library print.ahk
 
@@ -4733,8 +5092,8 @@ WinFadeToggle(WinTitle, Duration := 1, Hide := false) {								            	;--
 
 		Return ErrorMessage
 	}
-
-winfade(w:="",t:=128,i:=1,d:=10) {                                                                             	;-- another winfade function
+;3
+winfade(w:="",t:=128,i:=1,d:=10) {                                                                           	;-- another winfade function
 	
 	; https://github.com/joedf/AEI.ahk/blob/master/AEI.ahk
 	w:=(w="")?("ahk_id " WinActive("A")):w
@@ -4750,13 +5109,13 @@ winfade(w:="",t:=128,i:=1,d:=10) {                                              
 		sleep %d%
 	}
 }
-
-ShadowBorder(handle) {																				             	;-- used DllCall to draw a shadow around a gui
+;4
+ShadowBorder(handle) {                                                                                          	;-- used DllCall to draw a shadow around a gui
 
     DllCall("user32.dll\SetClassLongPtr", "ptr", handle, "int", -26, "ptr", DllCall("user32.dll\GetClassLongPtr", "ptr", handle, "int", -26, "uptr") | 0x20000)
 
 }
-
+;5
 FrameShadow(handle) {																				            	;-- FrameShadow1
     DllCall("dwmapi.dll\DwmIsCompositionEnabled", "int*", DwmEnabled)
     if !(DwmEnabled)
@@ -4767,7 +5126,7 @@ FrameShadow(handle) {																				            	;-- FrameShadow1
         DllCall("dwmapi.dll\DwmExtendFrameIntoClientArea", "ptr", handle, "ptr", &MARGINS)
     }
 }
-
+;6
 FrameShadow(HGui) {																					            	;-- FrameShadow(): Drop Shadow On Borderless Window, (DWM STYLE)
 
 	;--https://autohotkey.com/boards/viewtopic.php?t=29117
@@ -4795,7 +5154,7 @@ FrameShadow(HGui) {																					            	;-- FrameShadow(): Drop Sha
 		DllCall("dwmapi\DwmExtendFrameIntoClientArea", "Ptr", HGui, "Ptr", &_MARGINS)
 	}
 }
-
+;7
 RemoveWindowFromTaskbar(WinTitle) {															    	;-- remove the active window from the taskbar by using COM
 
 /*
@@ -4830,15 +5189,16 @@ RemoveWindowFromTaskbar(WinTitle) {															    	;-- remove the active win
     return
 
 }
-{ ; sub
-vtable(ptr, n) {
+{ ; sub of RemoveWindowFromTaskbar()
+;8	
+vtable(ptr, n) {																												;-- sub of RemoveWindowFromTaskbar(), ; NumGet(ptr+0) returns the address of the object's virtual function
     ; NumGet(ptr+0) returns the address of the object's virtual function
     ; table (vtable for short). The remainder of the expression retrieves
     ; the address of the nth function's address from the vtable.
     return NumGet(NumGet(ptr+0), n*A_PtrSize)
 }
-} 
-
+} ; end sub
+;9
 ToggleTitleMenuBar(ahkid:=0, bHideTitle:=1, bHideMenuBar:=0) {				         	;-- show or hide Titlemenubar
 
     if ( ahkid = 0 ) ; must with () wrap
@@ -4852,7 +5212,7 @@ ToggleTitleMenuBar(ahkid:=0, bHideTitle:=1, bHideMenuBar:=0) {				         	;-- 
     }
 
 }
-
+;10
 ToggleFakeFullscreen() {																				            	;-- sets styles to a window to look like a fullscreen
 
     CoordMode Screen, Window
@@ -4882,38 +5242,7 @@ ToggleFakeFullscreen() {																				            	;-- sets styles to a wi
     WinSet Redraw
 
 }
-
-CreateFont(nHeight, nWidth, nEscapement, nOrientation, fnWeight,                    	;-- creates HFont for use with GDI
-fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision,
-fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace) {
-
-/*
-HFONT CreateFont(
-  int nHeight,               // height of font
-  int nWidth,                // average character width
-  int nEscapement,           // angle of escapement
-  int nOrientation,          // base-line orientation angle
-  int fnWeight,              // font weight
-  DWORD fdwItalic,           // italic attribute option
-  DWORD fdwUnderline,        // underline attribute option
-  DWORD fdwStrikeOut,        // strikeout attribute option
-  DWORD fdwCharSet,          // character set identifier
-  DWORD fdwOutputPrecision,  // output precision
-  DWORD fdwClipPrecision,    // clipping precision
-  DWORD fdwQuality,          // output quality
-  DWORD fdwPitchAndFamily,   // pitch and family
-  LPCTSTR lpszFace           // typeface name
-);
-*/
-
-	return DllCall("CreateFont"
-				, "Int" , nHeight           , "Int" , nWidth          , "Int" , nEscapement
-				, "Int" , nOrientation      , "Int" , fnWeight        , "UInt", fdwItalic
-				, "UInt", fdwUnderline      , "UInt", fdwStrikeOut    , "UInt", fdwCharSet
-				, "UInt", fdwOutputPrecision, "UInt", fdwClipPrecision, "UInt", fdwQuality
-				, "UInt", fdwPitchAndFamily , "Str" , lpszFace)
-}
-
+;11
 FullScreenToggleUnderMouse(WT) {                                                                      	;-- toggles a window under the mouse to look like fullscreen
 
 		DetectHiddenWindows, On
@@ -4934,7 +5263,7 @@ FullScreenToggleUnderMouse(WT) {                                                
 			}
 
 }
-
+;12
 SetTaskbarProgress(pct, state="", hwnd="") { 													    	;-- accesses Windows 7's ability to display a progress bar behind a taskbar button.
 
 	; https://autohotkey.com/board/topic/46860-windows-7-settaskbarprogress/ - from Lexikos
@@ -5000,13 +5329,20 @@ SetTaskbarProgress(pct, state="", hwnd="") { 													    	;-- accesses Wind
 	Return 1
 
 }
-
+;13
 SetTaskbarProgress(State, hWnd := "") { 														        	;-- modified function
 
-	;http://ahkscript.org/boards/viewtopic.php?p=48299#p48299 from Flipeador
-	;SetTaskbarProgress( [0~100 | Normal, Paused, Indeterminate, Error], [Win ID] )
+	/*		DESCRIPTION
+	
+			Link: 					http://ahkscript.org/boards/viewtopic.php?p=48299#p48299 
+			Author:				Flipeador
+			Date:
+			Parameter: 			SetTaskbarProgress( [0~100 | Normal, Paused, Indeterminate, Error], [Win ID] )
+						
+	*/
 
-	/*					EXAMPLE
+
+	/*		EXAMPLE
 
 		Gui, Font, s15
 		Gui, Add, Text,, % "------------------------------------------------------"
@@ -5051,23 +5387,23 @@ SetTaskbarProgress(State, hWnd := "") { 														        	;-- modified func
 		return DllCall(NumGet(NumGet(ppv+0)+10*A_PtrSize), "Ptr", ppv, "Ptr", hWnd, "UInt", s%State%)
 	return DllCall(NumGet(NumGet(ppv+0)+9*A_PtrSize), "Ptr", ppv, "Ptr", hWnd, "Int64", State * 10, "Int64", 1000)
 }
-{ ; sub
-;If [var] in [ .. ]
-InVar(Haystack, Needle, Delimiter := ",", OmitChars := "") {
+{ ; sub of SetTaskbarProgress
+;14
+InVar(Haystack, Needle, Delimiter := ",", OmitChars := "") {										;-- sub of SetTaskbarProgress, parsing list search
 	Loop, Parse, % Needle, %Delimiter%, %OmitChars%
 		if (A_LoopField = Haystack)
 			return 1
 	return 0
 }
-
-IsWindow(hWnd*) {
+;15
+IsWindow(hWnd*) {																										;-- sub of SetTaskbarProgress, different approach to IsWindow in gui + window - get/find section
 	if !hWnd.MaxIndex()
 		return DllCall("User32.dll\GetForegroundWindow")
 	return i := DllCall("User32.dll\IsWindow", "Ptr", hWnd[1] )
 		, ErrorLevel := !i
 }
-} 
-
+} ;end sub
+;16
 WinSetPlacement(hwnd, x="",y="",w="",h="",state="") {											;-- Sets window position using workspace coordinates (-> no taskbar)
 	
 	WinGetPlacement(hwnd, x1, y1, w1, h1, state1)
@@ -5096,7 +5432,7 @@ WinSetPlacement(hwnd, x="",y="",w="",h="",state="") {											;-- Sets window 
     NumPut(y+h, wp, 40, "Int")
 	DllCall("SetWindowPlacement", "Ptr", hwnd, "Ptr", &wp) 
 }
-
+;17
 AttachToolWindow(hParent, GUINumber, AutoClose) {												;-- Attaches a window as a tool window to another window from a different process. 
 	global ToolWindows
 	outputdebug AttachToolWindow %GUINumber% to %hParent%
@@ -5116,7 +5452,7 @@ AttachToolWindow(hParent, GUINumber, AutoClose) {												;-- Attaches a wind
 	Gui %GUINumber%: Show, NoActivate
 	return true
 }
-
+;18
 DeAttachToolWindow(GUINumber) {																			;-- removes the attached ToolWindow
 	
 	global ToolWindows
@@ -5138,7 +5474,7 @@ DeAttachToolWindow(GUINumber) {																			;-- removes the attached ToolW
 		}
 	}
 }
-
+;19
 Control_SetTextAndResize(controlHwnd, newText) {                                              	;-- set a new text to a control and resize depending on textwidth and -height
 	
     dc := DllCall("GetDC", "Ptr", controlHwnd)
@@ -5163,14 +5499,19 @@ Control_SetTextAndResize(controlHwnd, newText) {                                
     GuiControl,, %controlHwnd%, %newText%
     GuiControl Move, %controlHwnd%, % "h" h " w" w
 }
-
+;functions end
 } 
+;|   FadeGui()                                	|   WinFadeToggle()                      	|   ShadowBorder()                       	|   FrameShadow() - 2 versions     	|
+;|   RemoveWindowFromTaskbar()	|   ToggleTitleMenuBar()               	|   ToggleFakeFullscreen()             	|   ListView_HeaderFontSet()         	|
+;|   CreateFont()                            	|   FullScreenToggleUnderMouse()	|   SetTaskbarProgress() x 2          	|   WinSetPlacement()                  	|
+;|   AttachToolWindow()                 	|   DeAttachToolWindow()            	|   ControlSetTextAndResize()       	|   winfade()                                  	|
+;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Gui - control type functions (48)
+{ ;Gui control type (48) -- specialized functions for controls
 
-		{ ;ComboBox control functions (1)
+		{ ;ComboBox (1)
 
-GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
+GetComboBoxChoice(TheList, TheCurrent) {																	;-- Combobox function
 
 	; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
 	TheValue := -1
@@ -5188,23 +5529,9 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 
 		} 
 
-		{ ;Edit and HEdit control functions (7)
+		{ ;Edit and HEdit (7)
 
-				;************************
-				; Edit Control Functions
-				;************************
-				;
-				; http://www.autohotkey.com/forum/topic22748.html
-				;
-				; Standard parameters:
-				;   Control, WinTitle   If WinTitle is not specified, 'Control' may be the
-				;                       unique ID (hwnd) of the control.  If "A" is specified
-				;                       in Control, the control with input focus is used.
-				;
-				; Standard/default return value:
-				;   true on success, otherwise false.
-
-				Edit_Standard_Params(ByRef Control, ByRef WinTitle) {  								;-- these are helper functions to use with Edit or HEdit controls
+				Edit_Standard_Params(ByRef Control, ByRef WinTitle) {  								;-- these are helper functions to use with edit controls
 					if (Control="A" && WinTitle="") { ; Control is "A", use focused control.
 						ControlGetFocus, Control, A
 						WinTitle = A
@@ -5214,14 +5541,14 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 					}
 				}
 
-				Edit_TextIsSelected(Control="", WinTitle="") {												;--
+				Edit_TextIsSelected(Control="", WinTitle="") {												;-- returns bool if text is selected in an edit control
 					; Returns true if text is selected, otherwise false.
 				;
 					Edit_Standard_Params(Control, WinTitle)
 					return Edit_GetSelection(start, end, Control, WinTitle) and (start!=end)
 				}
 
-				Edit_GetSelection(ByRef start, ByRef end, Control="", WinTitle="") {				;--
+				Edit_GetSelection(ByRef start, ByRef end, Control="", WinTitle="") {				;-- get selected text in an edit control
 					; Gets the start and end offset of the current selection.
 				;
 					Edit_Standard_Params(Control, WinTitle)
@@ -5233,7 +5560,7 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 					return true
 				}
 
-				Edit_Select(start=0, end=-1, Control="", WinTitle="") {								;--
+				Edit_Select(start=0, end=-1, Control="", WinTitle="") {									;-- selects text inside in an edit control
 					; Selects text in a text box, given absolute character positions (starting at 0.)
 					;
 					; start:    Starting character offset, or -1 to deselect.
@@ -5245,7 +5572,7 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 					return (ErrorLevel != "FAIL")
 				}
 
-				Edit_SelectLine(line=0, include_newline=false, Control="", WinTitle="") {	;--
+				Edit_SelectLine(line=0, include_newline=false, Control="", WinTitle="") {		;-- selects one line in an edit control
 						; Selects a line of text.
 					;
 					; line:             One-based line number, or 0 to select the current line.
@@ -5277,7 +5604,7 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 					return (ErrorLevel != "FAIL")
 				}
 
-				Edit_DeleteLine(line=0, Control="", WinTitle="") {										;--
+				Edit_DeleteLine(line=0, Control="", WinTitle="") {											;-- delete one line in an edit control
 						; Deletes a line of text.
 				;
 				; line:     One-based line number, or 0 to delete current line.
@@ -5293,7 +5620,7 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 					return false
 				}
 
-				Edit_VCenter(HEDIT) {																				;-- Vertically Align Text
+				Edit_VCenter(HEDIT) {																						;-- Vertically Align Text for edit controls
 
 					; by just me, http://ahkscript.org/boards/viewtopic.php?f=5&t=4673#p44099
 					; the Edit control must have the ES_MULTILINE style (0x0004 \ +Multi)!
@@ -5325,9 +5652,9 @@ GetComboBoxChoice(TheList, TheCurrent) {																;-- Combobox function
 
 		} 
 
-		{ ;ImageList control type functions (2)
+		{ ;ImageList (2)
 
-IL_LoadIcon(FullFilePath, IconNumber := 1, LargeIcon := 1) {									;--
+IL_LoadIcon(FullFilePath, IconNumber := 1, LargeIcon := 1) {										;-- no description
 	HIL := IL_Create(1, 1, !!LargeIcon)
 	IL_Add(HIL, FullFilePath, IconNumber)
 	HICON := DllCall("Comctl32.dll\ImageList_GetIcon", "Ptr", HIL, "Int", 0, "UInt", 0, "UPtr")
@@ -5335,7 +5662,7 @@ IL_LoadIcon(FullFilePath, IconNumber := 1, LargeIcon := 1) {									;--
 	return HICON
 }
 
-IL_GuiButtonIcon(Handle, File, Index := 1, Options := "") {											;--
+IL_GuiButtonIcon(Handle, File, Index := 1, Options := "") {											;-- no description
 
 	RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
 	RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
@@ -5360,9 +5687,9 @@ IL_GuiButtonIcon(Handle, File, Index := 1, Options := "") {											;--
 
 		} 
 
-		{ ;Listbox control functions (3)
+		{ ;Listbox (3)
 
-LB_AdjustItemHeight(HListBox, Adjust) {																		;-- Listbox function
+LB_AdjustItemHeight(HListBox, Adjust) {																	;-- Listbox function
 	; https://autohotkey.com/board/topic/89793-set-height-of-listbox-rows/
 	; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
 	Return LB_SetItemHeight(HListBox, LB_GetItemHeight(HListBox) + Adjust)
@@ -5385,7 +5712,7 @@ LB_SetItemHeight(HListBox, NewHeight) {																	;-- Listbox function
 
 		} 
 
-		{ ;Listview functions (35)
+		{ ;Listview (35)
 
 LV_GetCount(hLV) {																											;-- get current count of notes in from any listview 
 
@@ -5486,7 +5813,7 @@ LV_Select(r:=1, Control:="", WinTitle:="") {																		;-- select/deselec
 
 }
 
-LV_GetItemText(item_index, sub_index, ctrl_id, win_id) {												;-- read the text from an item in a TListView
+LV_GetItemText(item_index, sub_index, ctrl_id, win_id) {												;-- read the text from an item in a ListView
 
 		; https://autohotkey.com/board/topic/18299-reading-listview-of-another-app/
 		; code from Tigerite
@@ -5525,7 +5852,7 @@ LV_GetItemText(item_index, sub_index, ctrl_id, win_id) {												;-- read the
         return %szText%
     }
 
-LV_GetText(hListView,iItem,iSubItem,ByRef lpString,nMaxCount) {									;--
+LV_GetText(hListView,iItem,iSubItem,ByRef lpString,nMaxCount) {									;-- get text by item and subitem from a Listview
         ;const
         NULL = 0
         PROCESS_ALL_ACCESS = 0x001F0FFF
@@ -5612,8 +5939,9 @@ LV_GetText(hListView,iItem,iSubItem,ByRef lpString,nMaxCount) {									;--
         }
         return result
     }
-{ ;Sub	for LV_GetItemText and LV_GetText
-ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) {
+{ ;Sub of LV_GetItemText and LV_GetText
+	
+ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) {					;-- Sub of LV_GetItemText and LV_GetText
 
 ; Original versions of ExtractInteger and InsertInteger provided by Chris
 ; - from the AutoHotkey help file - Version 1.0.37.04
@@ -5636,7 +5964,8 @@ ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) {
    ; Otherwise, convert the value (now known to be 32-bit) to its signed counterpart:
    return -(0xFFFFFFFF - result + 1)
 }
-InsertInteger(pInteger, ByRef pDest, pOffset = 0, pSize = 4) {
+
+InsertInteger(pInteger, ByRef pDest, pOffset = 0, pSize = 4) {										;-- Sub of LV_GetItemText and LV_GetText
 ; To preserve any existing contents in pDest, only pSize number of bytes starting at pOffset
 ; are altered in it. The caller must ensure that pDest has sufficient capacity.
 
@@ -6465,7 +6794,7 @@ LV_ClickRow(HLV, Row) { 																								;-- simulates a left mousebutton
 
 		}
 
-		{ ;TabControl functions (2)
+		{ ;TabControl (2)
 
 TabCtrl_GetCurSel(HWND) { 																						;-- Indexnumber of active tab in a gui
 	; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
@@ -6508,17 +6837,18 @@ TabCtrl_GetItemText(HWND, Index = 0) {																	;-- returns text of a tab
       Return SetError(0, StrGet(NumGet(TCITEM, TCTXTP, "UPtr")))
 }
 { ;sub of TabCtrl functions
-SetError(ErrorValue, ReturnValue) {
+	
+SetError(ErrorValue, ReturnValue) {																				;-- sub of TabCtrl functions
 
 	;; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
    ErrorLevel := ErrorValue
    Return ReturnValue
 }
-} 
+} ;end sub
 
 		} 
 
-		{ ;Treeview functions (2)
+		{ ;Treeview (2)
 
 TV_Find(VarText) {																										;-- returns the ID of an item based on the text of the item
 
@@ -6718,7 +7048,7 @@ TV_Load(src, p:=0, recurse:=false) {																			;-- loads TreeView items 
 
 		} 
 
-		{ ;GDI Control functions (2)
+		{ ;GDIControl (2)
 
 ControlCreateGradient(Handle, Colors*) {																	;-- draws a gradient as background picture
 
@@ -6768,14 +7098,39 @@ AddGraphicButtonPlus(ImgPath, Options="", Text="") {												;-- GDI+ add a g
 
     return hBM
 }
-
+;functions end
 		} 
 	}
+;|                                                                                            Combobox control functions                                                                                  	|
+;|   GetComboBoxChoice()            	|   LB_GetItemHeight()                  	|   LB_SetItemHeight()                  	|
+;|                                                                                                Edit control functions                                                                                         	|
+;|   Edit_Standard_Params()          	|   Edit_TextIsSelected()                 	|   Edit_GetSelection()                    	|   Edit_Select()                              	|
+;|   Edit_SelectLine()                      	|   Edit_DeleteLine()                      	|
+;|                                                                                                GDI control functions                                                                                        	|
+;|   ControlCreateGradient()          	|   AddGraphicButtonPlus()          	|
+;|                                                                                                IMAGELIST functions                                                                                          	|
+;|   IL_LoadIcon()                           	|   IL_GuiButtonIcon()                   	|
+;|                                                                                                  Listbox functions                                                                                              	|
+;|   LB_AdjustItemHeight()	            	|
+;|                                                                                                 Listview functions                                                                                             	|
+;|   LV_GetCount()                         	|   LV_SetSelColors()                     	|   LV_Select()                               	|   LV_GetItemText()                      	|
+;|   LV_GetText()                            	|   LV_SetBackgroundUrl()            	|   LV_MoveRow()                         	|   LV_MoveRow()                         	|
+;|   LV_Find()                                 	|   LV_GetSelectedText()                	|   LV_Notification()                      	|   LV_IsChecked()                         	|
+;|   LV_HeaderFontSet()                 	|   LV_SetCheckState()                  	|   LV_SetItemState()                     	|   LV_SubitemHitTest()                 	|
+;|   LV_EX_FindString()                  	|   LV_RemoveSelBorder()             	|   LV_SetExplorerTheme()            	|   LV_Update()                             	|
+;|   LV_RedrawItem()                     	|   LV_SetExStyle()                         	|   LV_GetExStyle()                        	|   LV_IsItemVisible()                     	|
+;|   LV_SetIconSpacing()                	|   LV_GetIconSpacing()                	|   LV_GetItemPos()                       	|   LV_SetItemPos()                       	|
+;|   LV_MouseGetCellPos()             	|   LV_GetColOrderLocal()             	|   LV_GetColOrder()                     	|   LV_SetColOrderLocal()             	|
+;|   LV_GetCheckedItems()             	|   LV_ClickRow()                          	|
+;|                                                                                             TabControl functions                                                                                            	|
+;|   TabCtrl_GetCurSel()                	|   TabCtrl_GetItemText()              	|
+;|                                                                                                REEVIEW functions                                                                                            	|
+;|   TV_Find()	                                	|   TV_Load()	                                	|
 
-{ ;Gui/Window/Screen - functions for retreaving informations (67)
+{ ;Gui - get informations from windows and screen (67)
 
-{ ; SCREEN-------get (2)
-screenDims() {																											;-- returns informations of active screen (size, DPI and orientation)
+{ ;screen  get (2)
+screenDims() {                                                                                                          	;-- returns informations of active screen (size, DPI and orientation)
 
 	W := A_ScreenWidth
 	H := A_ScreenHeight
@@ -6786,7 +7141,7 @@ screenDims() {																											;-- returns informations of active scre
 
 }
 
-DPIFactor() {																												;-- determines the Windows setting to the current DPI factor
+DPIFactor() {                                                                                                            	;-- determines the Windows setting to the current DPI factor
 
 	RegRead, DPI_value, HKEY_CURRENT_USER, Control Panel\Desktop\WindowMetrics, AppliedDPI
 	; the reg key was not found - it means default settings
@@ -6800,9 +7155,9 @@ DPIFactor() {																												;-- determines the Windows setting to t
 
 } 
 
-{ ; CONTROL type - get (not control specific functions) (18)
-
-ControlExists(class) {																									;-- true/false for ControlClass
+{ ;control  get (23)
+;1
+ControlExists(class) {                                                                                                	;-- true/false for ControlClass
   WinGet, WinList, List  ;gets a list of all windows
   Loop, % WinList
   {
@@ -6813,8 +7168,8 @@ ControlExists(class) {																									;-- true/false for ControlClass
   }
   return 0
 }
-
-GetFocusedControl()  {   																								;-- retrieves the ahk_id (HWND) of the active window's focused control.
+;2
+GetFocusedControl()  {                                                                                            	;-- retrieves the ahk_id (HWND) of the active window's focused control.
 
         ; This script requires Windows 98+ or NT 4.0 SP3+.
         /*
@@ -6845,8 +7200,8 @@ GetFocusedControl()  {   																								;-- retrieves the ahk_id (HWND)
 
 	Return focusedHwnd
 }
-
-GetControls(hwnd, controls="") {																				;-- returns an array with ClassNN, Hwnd and text of all controls of a window
+;3
+GetControls(hwnd, controls="") {                                                                            	;-- returns an array with ClassNN, Hwnd and text of all controls of a window
 
 	if !isobject(controls)
 		controls:=[]
@@ -6874,14 +7229,14 @@ GetControls(hwnd, controls="") {																				;-- returns an array with Cl
 	return controls
 
 }
-
-GetOtherControl(refHwnd,shift,controls,type="hwnd") {											;--
+;4
+GetOtherControl(refHwnd,shift,controls,type="hwnd") {                                        	;--
 	for k,v in controls
 		if v[type]=refHwnd
 			return controls[k+shift].hwnd
 }
-
-ListControls(hwnd, obj=0, arr="") {																				;-- similar function to GetControls but returns a comma seperated list
+;5
+ListControls(hwnd, obj=0, arr="") {                                                                         	;-- similar function to GetControls but returns a comma seperated list
 
 	if !isobject(arr)
 		arr:=[]
@@ -6903,7 +7258,7 @@ ListControlsReturn:
 	return str
 
 }
-
+;6
 Control_GetClassNN( hWnd, hCtrl ) {  																		;-- no-loop
 
 	; SKAN: www.autohotkey.com/forum/viewtopic.php?t=49471
@@ -6915,7 +7270,7 @@ Control_GetClassNN( hWnd, hCtrl ) {  																		;-- no-loop
 	 Return SubStr( CN, P+2, InStr( CN, LF, 0, P+2 ) -P-2 )
 
 }
-
+;7
 ControlGetClassNN(hWndWindow,hWndControl) {													;-- with loop
 
 	; https://autohotkey.com/board/topic/45627-function-control-getclassnn-get-a-control-classnn/
@@ -6929,7 +7284,7 @@ ControlGetClassNN(hWndWindow,hWndControl) {													;-- with loop
 	}
 
 }
-
+;8
 ControlGetClassNN( control="", Window="", Text="", ExWin="", ExText="" ) {	    	;-- different method is used here in compare to the already existing functions in this collection
 	
 	WinGet, cl, ControlList, % Window, % Text, % ExWin, % ExText
@@ -6943,7 +7298,7 @@ ControlGetClassNN( control="", Window="", Text="", ExWin="", ExText="" ) {	    	
 			return cl%A_Index%
 	return 0
 }
-
+;9
 GetClassName( hwnd ) { 																						    	;-- returns HWND's class name without its instance number, e.g. "Edit" or "SysListView32"
 	
 		;https://autohotkey.com/board/topic/45515-remap-hjkl-to-act-like-left-up-down-right-arrow-keys/#entry283368
@@ -6951,7 +7306,7 @@ GetClassName( hwnd ) { 																						    	;-- returns HWND's class name 
 			DllCall("GetClassName", "uint", hwnd, "str", buff, "int", 255 )
 			return buff
 }
-
+;10
 Control_GetFont(hWnd, ByRef Name, ByRef Size, ByRef Style, 									;-- get the currently used font of a control
 IsGDIFontSize := 0) {
 
@@ -6973,12 +7328,12 @@ IsGDIFontSize := 0) {
 
     Size := IsGDIFontSize ? -NumGet(LOGFONT, 0, "Int") : Round((-NumGet(LOGFONT, 0, "Int") * 72) / A_ScreenDPI)
 }
-
+;11
 IsControlFocused(hwnd) {																							;-- true/false if a specific control is focused
     VarSetCapacity(GuiThreadInfo, 48) , NumPut(48, GuiThreadInfo, 0)
     Return DllCall("GetGUIThreadInfo", uint, 0, str, GuiThreadInfo) ? (hwnd = NumGet(GuiThreadInfo, 12)) ? True : False : False
 }
-
+;12
 getControlNameByHwnd(winHwnd,controlHwnd) {													;-- self explaining
 	
 	bufSize=1024
@@ -6996,7 +7351,7 @@ getControlNameByHwnd(winHwnd,controlHwnd) {													;-- self explaining
 	return var1
 
 }
-
+;13
 getByControlName(winHwnd,name) {																		;-- search by control name return hwnd
 	
 	winget,controlList,controlListhwnd,ahk_id %winHwnd%
@@ -7030,7 +7385,7 @@ getByControlName(winHwnd,name) {																		;-- search by control name ret
     return arr
 	
 }
-
+;14
 getNextControl(winHwnd, controlName="", accName="", classNN="", accHelp="") {	;-- I'm not sure if this feature works could be an AHK code for the Control.GetNextControl method for System.Windows.Forms
 
 	winget, list, controllisthwnd, ahk_id %winHwnd%
@@ -7081,14 +7436,14 @@ getNextControl(winHwnd, controlName="", accName="", classNN="", accHelp="") {	;-
 	return ret
 
 }
-
+;15
 IsControlUnderCursor(ControlClass) {																			;-- Checks if a specific control is under the cursor and returns its ClassNN if it is.
 	MouseGetPos, , , , control
 	if (InStr(Control, ControlClass))
 		return control
 	return false
 }
-
+;16
 GetFocusedControl(Option := "") {																				;-- get focused control from active window -multi Options[ClassNN \ Hwnd \ Text \ List \ All] available 
 
 	; https://autohotkey.com/boards/viewtopic.php?f=6&t=23987 from V for Vendetta
@@ -7123,7 +7478,7 @@ GetFocusedControl(Option := "") {																				;-- get focused control fro
 
 	return, FocusedControl " - " FocusedControlId "`n`n____Text____`n`n" FocusedControlText "`n`n____List____`n`n" FocusedControlList
 }
-
+;17
 ControlGetTextExt(hControl, hWinTitle)  {                                                       			;-- 3 different variants are tried to determine the text of a control
 
 	/*                                                   	DESCRIPTION
@@ -7150,7 +7505,7 @@ ControlGetTextExt(hControl, hWinTitle)  {                                       
    } 
    Return ControlText 
 }
-
+;18
 getControlInfo(type="button", text="", ret="w", fontsize="", fontmore="") {			;-- get width and heights of controls
 	static test
 	Gui, wasteGUI:New
@@ -7163,7 +7518,7 @@ getControlInfo(type="button", text="", ret="w", fontsize="", fontmore="") {			;-
 	if ret=h
 		return testh
 }
-
+;19
 FocusedControl() { 																								    	;-- returns the HWND of the currently focused control, or 0 if there was a problem
 	;https://autohotkey.com/board/topic/45515-remap-hjkl-to-act-like-left-up-down-right-arrow-keys/#entry283368
 	NumPut(VarSetCapacity( gti, 48, 0 ), gti, 0, "int")
@@ -7172,7 +7527,7 @@ FocusedControl() { 																								    	;-- returns the HWND of the curr
 	return 0
 
 }
-
+;20
 Control_GetFont( hwnd ,ByRef Name,ByRef Style,ByRef Size) { 									;-- retrieves the used font of a control
 ; www.autohotkey.com/forum/viewtopic.php?p=465438#465438  
 ; https://autohotkey.com/board/topic/7984-ahk-functions-incache-cache-list-of-recent-items/page-11
@@ -7184,12 +7539,259 @@ Control_GetFont( hwnd ,ByRef Name,ByRef Style,ByRef Size) { 									;-- retriev
  Style := Trim(((W:=NumGet(LF,16,"Int"))=700 ? " Bold" : W=400 ? "" : " w" W ) . (NumGet(LF,20,"UChar") ? " Italic" : "") . (NumGet(LF,21,"UChar") ? " Underline" : "") . (NumGet(LF,22,"UChar") ? " StrikeOut" : ""))
  Size := Round( ( -NumGet( LF,0,"Int" )*72 ) / DPI ) 
 }
+;21
+WinForms_GetClassNN(WinID, fromElement, ElementName) {                              	;-- Check which ClassNN an element has
 
+	; function by Ixiko 2018 last_change 28.01.2018
+	/* Funktionsinfo: Deutsch
+		;Achtung: da manchmal 2 verschiedene Elemente den gleichen Namen enthalten können hat die Funktion einen zusätzlichen Parameter: "fromElement"
+		;die Funktion untersucht ob das hier angebene Element im ClassNN enthalten ist zb. Button in WindowsForms10.BUTTON.app.0.378734a2
+		;die Groß- und Kleinschreibung ist nicht zu beachten
+	*/
+
+	/* function info: english
+		;Caution: sometimes 2 and more different elements in a gui can contain the same name, therefore the function has an additional parameter: "fromElement"
+		;it examines whether the element specified here is contained in the ClassNN, eg. Button in WindowsForms10.BUTTON.app.0.378734a2
+		;this function is: case-insensitive
+	*/
+
+	WinGet, CtrlList, ControlList, ahk_id %WinID%
+
+	Loop, Parse, CtrlList, `n
+	{
+			classnn:= A_LoopField
+			ControlGetText, Name, %classnn% , ahk_id %WinID%
+			If Instr(Name, ElementName, false) and Instr(classnn, fromElement, false)
+																				break
+			;sleep, 2000
+		}
+
+
+return classNN
+}
+;22
+GetExtraStyle(hWnd) {                                                                                             	;-- get Extra Styles from a control
+
+    WinGetClass Class, ahk_id %hWnd%
+
+    If (Class == "SysListView32") {
+        Message := 0x1037 ; LVM_GETEXTENDEDLISTVIEWSTYLE
+    } Else If (Class == "SysTreeView32") {
+        Message := 0x112D ; TVM_GETEXTENDEDSTYLE
+    } Else If (Class == "SysTabControl32") {
+        Message := 0x1335 ; TCM_GETEXTENDEDSTYLE
+    } Else If (Class == "ToolbarWindow32") {
+        Message := 0x455 ; TB_GETEXTENDEDSTYLE
+    } Else If (Class == "ComboBox" && g_Style & 0x10) {
+        Message := 0x409 ; CBEM_GETEXTENDEDSTYLE
+    }
+
+    SendMessage %Message%, 0, 0,, ahk_id %hWnd%
+    Return Format("0x{:08X}", ErrorLevel)
+
+}
+;23
+GetToolbarItems(hToolbar) {                                                                                    	;-- retrieves the text/names of all items of a toolbar
+
+    WinGet PID, PID, ahk_id %hToolbar%
+
+    If !(hProc := DllCall("OpenProcess", "UInt", 0x438, "Int", False, "UInt", PID, "Ptr")) {
+        Return
+    }
+
+    If (A_Is64bitOS) {
+        Try DllCall("IsWow64Process", "Ptr", hProc, "int*", Is32bit := true)
+    } Else {
+        Is32bit := True
+    }
+
+    RPtrSize := Is32bit ? 4 : 8
+    TBBUTTON_SIZE := 8 + (RPtrSize * 3)
+
+    SendMessage 0x418, 0, 0,, ahk_id %hToolbar% ; TB_BUTTONCOUNT
+    ButtonCount := ErrorLevel
+
+    IDs := [] ; Command IDs
+    Loop %ButtonCount% {
+        Address := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0, "uPtr", TBBUTTON_SIZE, "UInt", 0x1000, "UInt", 4, "Ptr")
+
+        SendMessage 0x417, % A_Index - 1, Address,, ahk_id %hToolbar% ; TB_GETBUTTON
+        If (ErrorLevel == 1) {
+            VarSetCapacity(TBBUTTON, TBBUTTON_SIZE, 0)
+            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", Address, "Ptr", &TBBUTTON, "uPtr", TBBUTTON_SIZE, "Ptr", 0)
+            IDs.Push(NumGet(&TBBUTTON, 4, "Int"))
+        }
+
+        DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", Address, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
+    }
+
+    ToolbarItems := []
+    Loop % IDs.Length() {
+        ButtonID := IDs[A_Index]
+        ;SendMessage 0x44B, %ButtonID% , 0,, ahk_id %hToolbar% ; TB_GETBUTTONTEXTW
+        ;BufferSize := ErrorLevel * 2
+        BufferSize := 128
+
+        Address := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0, "uPtr", BufferSize, "UInt", 0x1000, "UInt", 4, "Ptr")
+
+        SendMessage 0x44B, %ButtonID%, Address,, ahk_id %hToolbar% ; TB_GETBUTTONTEXTW
+
+        VarSetCapacity(Buffer, BufferSize, 0)
+        DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", Address, "Ptr", &Buffer, "uPtr", BufferSize, "Ptr", 0)
+
+        ToolbarItems.Push({"ID": IDs[A_Index], "String": Buffer})
+
+        DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", Address, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
+    }
+
+    DllCall("CloseHandle", "Ptr", hProc)
+
+    Return ToolbarItems
+}
+;24
+ControlGetTabs(hTab) {                                                                                            	;-- retrieves the text of tabs in a tab control
+
+    ; https://autohotkey.com/board/topic/70727-ahk-l-controlgettabs/
+	; a Lexikos function
+
+	; Parameters:
+	; Control - the HWND, ClassNN or text of the control.
+	;WinTitle - same as ControlGet, but unused if Control is a HWND.
+	; WinText - as above.
+
+	; Returns:
+	; An array of strings on success.
+	;An empty string on failure.
+
+	; Requirements:
+	; AutoHotkey v1.1.
+	; A compatible tab control
+
+    Static MAX_TEXT_LENGTH := 260
+         , MAX_TEXT_SIZE := MAX_TEXT_LENGTH * (A_IsUnicode ? 2 : 1)
+
+    WinGet PID, PID, ahk_id %hTab%
+
+    ; Open the process for read/write and query info.
+    ; PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION
+    If !(hProc := DllCall("OpenProcess", "UInt", 0x438, "Int", False, "UInt", PID, "Ptr")) {
+        Return
+    }
+
+    ; Should we use the 32-bit struct or the 64-bit struct?
+    If (A_Is64bitOS) {
+        Try DllCall("IsWow64Process", "Ptr", hProc, "int*", Is32bit := true)
+    } Else {
+        Is32bit := True
+    }
+
+    RPtrSize := Is32bit ? 4 : 8
+    TCITEM_SIZE := 16 + RPtrSize * 3
+
+    ; Allocate a buffer in the (presumably) remote process.
+    remote_item := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0
+                         , "uPtr", TCITEM_SIZE + MAX_TEXT_SIZE
+                         , "UInt", 0x1000, "UInt", 4, "Ptr") ; MEM_COMMIT, PAGE_READWRITE
+    remote_text := remote_item + TCITEM_SIZE
+
+    ; Prepare the TCITEM structure locally.
+    VarSetCapacity(TCITEM, TCITEM_SIZE, 0)
+    NumPut(1, TCITEM, 0, "UInt") ; mask (TCIF_TEXT)
+    NumPut(remote_text, TCITEM, 8 + RPtrSize) ; pszText
+    NumPut(MAX_TEXT_LENGTH, TCITEM, 8 + RPtrSize * 2, "Int") ; cchTextMax
+
+    ; Write the local structure into the remote buffer.
+    DllCall("WriteProcessMemory", "Ptr", hProc, "Ptr", remote_item, "Ptr", &TCITEM, "uPtr", TCITEM_SIZE, "Ptr", 0)
+
+    Tabs := []
+    VarSetCapacity(TabText, MAX_TEXT_SIZE)
+
+    SendMessage 0x1304, 0, 0,, ahk_id %hTab% ; TCM_GETITEMCOUNT
+    Loop % (ErrorLevel != "FAIL") ? ErrorLevel : 0 {
+        ; Retrieve the item text.
+        SendMessage, % (A_IsUnicode) ? 0x133C : 0x1305, A_Index - 1, remote_item,, ahk_id %hTab% ; TCM_GETITEM
+        If (ErrorLevel == 1) { ; Success
+            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", remote_text, "Ptr", &TabText, "uPtr", MAX_TEXT_SIZE, "Ptr", 0)
+        } Else {
+            TabText := ""
+        }
+
+        Tabs[A_Index] := TabText
+    }
+
+    ; Release the remote memory and handle.
+    DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", remote_item, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
+    DllCall("CloseHandle", "Ptr", hProc)
+
+    Return Tabs
+}
+;25
+GetHeaderInfo(hHeader) {                                                                                      	;-- Returns an object containing width and text for each item of a remote header control
+    ; Returns an object containing width and text for each item of a remote header control
+    Static MAX_TEXT_LENGTH := 260
+         , MAX_TEXT_SIZE := MAX_TEXT_LENGTH * (A_IsUnicode ? 2 : 1)
+
+    WinGet PID, PID, ahk_id %hHeader%
+
+    ; Open the process for read/write and query info.
+    ; PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION
+    If !(hProc := DllCall("OpenProcess", "UInt", 0x438, "Int", False, "UInt", PID, "Ptr")) {
+        Return
+    }
+
+    ; Should we use the 32-bit struct or the 64-bit struct?
+    If (A_Is64bitOS) {
+        Try DllCall("IsWow64Process", "Ptr", hProc, "int*", Is32bit := true)
+    } Else {
+        Is32bit := True
+    }
+
+    RPtrSize := Is32bit ? 4 : 8
+    cbHDITEM := (4 * 6) + (RPtrSize * 6)
+
+    ; Allocate a buffer in the (presumably) remote process.
+    remote_item := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0
+                         , "uPtr", cbHDITEM + MAX_TEXT_SIZE
+                         , "UInt", 0x1000, "UInt", 4, "Ptr") ; MEM_COMMIT, PAGE_READWRITE
+    remote_text := remote_item + cbHDITEM
+
+    ; Prepare the HDITEM structure locally.
+    VarSetCapacity(HDITEM, cbHDITEM, 0)
+    NumPut(0x3, HDITEM, 0, "UInt") ; mask (HDI_WIDTH | HDI_TEXT)
+    NumPut(remote_text, HDITEM, 8, "Ptr") ; pszText
+    NumPut(MAX_TEXT_LENGTH, HDITEM, 8 + RPtrSize * 2, "Int") ; cchTextMax
+
+    ; Write the local structure into the remote buffer.
+    DllCall("WriteProcessMemory", "Ptr", hProc, "Ptr", remote_item, "Ptr", &HDITEM, "uPtr", cbHDITEM, "Ptr", 0)
+
+    HDInfo := {}
+    VarSetCapacity(HDText, MAX_TEXT_SIZE)
+
+    SendMessage 0x1200, 0, 0,, ahk_id %hHeader% ; HDM_GETITEMCOUNT
+    Loop % (ErrorLevel != "FAIL") ? ErrorLevel : 0 {
+        ; Retrieve the item text.
+        SendMessage, % (A_IsUnicode) ? 0x120B : 0x1203, A_Index - 1, remote_item,, ahk_id %hHeader% ; HDM_GETITEMW
+        If (ErrorLevel == 1) { ; Success
+            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", remote_item, "Ptr", &HDITEM, "uPtr", MAX_TEXT_SIZE, "Ptr", 0)
+            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", remote_text, "Ptr", &HDText, "uPtr", MAX_TEXT_SIZE, "Ptr", 0)
+        } Else {
+            TabText := ""
+        }
+
+        HDInfo.Push({"Width": NumGet(HDITEM, 4, "UInt"), "Text": HDText})
+    }
+
+    ; Release the remote memory and handle.
+    DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", remote_item, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
+    DllCall("CloseHandle", "Ptr", hProc)
+
+    Return HDInfo
+}
 
 } 
 
-{ ; GUI / window - get/find (45)
-
+{ ;gui + window  get/find (40)
+;1
 IsOverTitleBar(x, y, hWnd) { 																						;-- WM_NCHITTEST wrapping: what's under a screen point?
 
 	; This function is from http://www.autohotkey.com/forum/topic22178.html
@@ -7199,7 +7801,7 @@ IsOverTitleBar(x, y, hWnd) { 																						;-- WM_NCHITTEST wrapping: wh
    else
       return false
 }
-
+;2
 WinGetPosEx(hWindow,ByRef X="",ByRef Y="",ByRef Width="", 								;-- gets the position, size, and offset of a window
 ByRef Height="", ByRef Offset_X="",ByRef Offset_Y="")  {
 
@@ -7372,59 +7974,57 @@ ByRef Height="", ByRef Offset_X="",ByRef Offset_Y="")  {
     NumPut(Offset_Y:=(dpiAdjusted_Height-GWR_Height)//2,RECTPlus,20,"Int")
     Return &RECTPlus
     }
-
+;3
 GetParent(hWnd) {																										;-- get parent win handle of a window
 
 	return DllCall("GetParent", "Ptr", hWnd, "Ptr")
 
 }
-
+;4
 GetWindow(hWnd,uCmd) {																							;-- DllCall wrapper for GetWindow function
 
 	return DllCall( "GetWindow", "Ptr", hWnd, "uint", uCmd, "Ptr")
 
 }
-
+;5
 GetForegroundWindow() {																							;-- returns handle of the foreground window
 
 	return DllCall("GetForeGroundWindow", "Ptr")
 
 }
-
+;6
 IsWindowVisible(hWnd) {																							;-- self explaining
-
 	return DllCall("IsWindowVisible", "Ptr", hWnd)
-
 }
-
+;7
 IsFullScreen(hwnd) {																									;-- specific window is a fullscreen window?
 
   WinGet, Style, Style, ahk_id %hwnd%
   return !(Style & 0x40000) ; 0x40000 = WS_SIZEBOX
 
 }
-
+;8
 IsClosed(win, wait) {																										;-- AHK function (WinWaitClose) wrapper
 
 	WinWaitClose, ahk_id %win%,, %wait%
 	return ((ErrorLevel = 1) ? False : True)
 
 }
-
+;9
 GetClassLong(hWnd, Param) {																					;--
 
     Static GetClassLong := A_PtrSize == 8 ? "GetClassLongPtr" : "GetClassLong"
     Return DllCall(GetClassLong, "Ptr", hWnd, "int", Param)
 
 }
-
+;10
 GetWindowLong(hWnd, Param) {																				;--
 
     ;GetWindowLong := A_PtrSize == 8 ? "GetWindowLongPtr" : "GetWindowLong"
     Return DllCall("GetWindowLong", "Ptr", hWnd, "int", Param)
 
 }
-
+;11
 GetClassStyles(Style) {																									;--
 
     Static CS := {0x1: "CS_VREDRAW"
@@ -7451,8 +8051,8 @@ GetClassStyles(Style) {																									;--
     Return RTrim(Styles, ", ") . ")"
 
 }
-
-GetTabOrderIndex(hWnd) {																							;--
+;12
+GetTabOrderIndex(hWnd) {																						;--
 
     hParent := GetAncestor(hWnd)
 
@@ -7478,232 +8078,14 @@ GetTabOrderIndex(hWnd) {																							;--
 
     Return 0
 }
-
+;13
 GetCursor(CursorHandle) {																							;--
 
     Cursor := Cursors[CursorHandle]
     Return (Cursor != "") ? Cursor : CursorHandle
 
 }
-
-GetExtraStyle(hWnd) {																									;-- get Extra Styles from a gui/window
-
-    WinGetClass Class, ahk_id %hWnd%
-
-    If (Class == "SysListView32") {
-        Message := 0x1037 ; LVM_GETEXTENDEDLISTVIEWSTYLE
-    } Else If (Class == "SysTreeView32") {
-        Message := 0x112D ; TVM_GETEXTENDEDSTYLE
-    } Else If (Class == "SysTabControl32") {
-        Message := 0x1335 ; TCM_GETEXTENDEDSTYLE
-    } Else If (Class == "ToolbarWindow32") {
-        Message := 0x455 ; TB_GETEXTENDEDSTYLE
-    } Else If (Class == "ComboBox" && g_Style & 0x10) {
-        Message := 0x409 ; CBEM_GETEXTENDEDSTYLE
-    }
-
-    SendMessage %Message%, 0, 0,, ahk_id %hWnd%
-    Return Format("0x{:08X}", ErrorLevel)
-
-}
-
-GetToolbarItems(hToolbar) {																						;-- retrieves the text/names of all items of a toolbar
-
-    WinGet PID, PID, ahk_id %hToolbar%
-
-    If !(hProc := DllCall("OpenProcess", "UInt", 0x438, "Int", False, "UInt", PID, "Ptr")) {
-        Return
-    }
-
-    If (A_Is64bitOS) {
-        Try DllCall("IsWow64Process", "Ptr", hProc, "int*", Is32bit := true)
-    } Else {
-        Is32bit := True
-    }
-
-    RPtrSize := Is32bit ? 4 : 8
-    TBBUTTON_SIZE := 8 + (RPtrSize * 3)
-
-    SendMessage 0x418, 0, 0,, ahk_id %hToolbar% ; TB_BUTTONCOUNT
-    ButtonCount := ErrorLevel
-
-    IDs := [] ; Command IDs
-    Loop %ButtonCount% {
-        Address := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0, "uPtr", TBBUTTON_SIZE, "UInt", 0x1000, "UInt", 4, "Ptr")
-
-        SendMessage 0x417, % A_Index - 1, Address,, ahk_id %hToolbar% ; TB_GETBUTTON
-        If (ErrorLevel == 1) {
-            VarSetCapacity(TBBUTTON, TBBUTTON_SIZE, 0)
-            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", Address, "Ptr", &TBBUTTON, "uPtr", TBBUTTON_SIZE, "Ptr", 0)
-            IDs.Push(NumGet(&TBBUTTON, 4, "Int"))
-        }
-
-        DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", Address, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
-    }
-
-    ToolbarItems := []
-    Loop % IDs.Length() {
-        ButtonID := IDs[A_Index]
-        ;SendMessage 0x44B, %ButtonID% , 0,, ahk_id %hToolbar% ; TB_GETBUTTONTEXTW
-        ;BufferSize := ErrorLevel * 2
-        BufferSize := 128
-
-        Address := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0, "uPtr", BufferSize, "UInt", 0x1000, "UInt", 4, "Ptr")
-
-        SendMessage 0x44B, %ButtonID%, Address,, ahk_id %hToolbar% ; TB_GETBUTTONTEXTW
-
-        VarSetCapacity(Buffer, BufferSize, 0)
-        DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", Address, "Ptr", &Buffer, "uPtr", BufferSize, "Ptr", 0)
-
-        ToolbarItems.Push({"ID": IDs[A_Index], "String": Buffer})
-
-        DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", Address, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
-    }
-
-    DllCall("CloseHandle", "Ptr", hProc)
-
-    Return ToolbarItems
-}
-
-ControlGetTabs(hTab) {																								;-- retrieves the text of tabs in a tab control
-
-    ; https://autohotkey.com/board/topic/70727-ahk-l-controlgettabs/
-	; a Lexikos function
-
-	; Parameters:
-	; Control - the HWND, ClassNN or text of the control.
-	;WinTitle - same as ControlGet, but unused if Control is a HWND.
-	; WinText - as above.
-
-	; Returns:
-	; An array of strings on success.
-	;An empty string on failure.
-
-	; Requirements:
-	; AutoHotkey v1.1.
-	; A compatible tab control
-
-    Static MAX_TEXT_LENGTH := 260
-         , MAX_TEXT_SIZE := MAX_TEXT_LENGTH * (A_IsUnicode ? 2 : 1)
-
-    WinGet PID, PID, ahk_id %hTab%
-
-    ; Open the process for read/write and query info.
-    ; PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION
-    If !(hProc := DllCall("OpenProcess", "UInt", 0x438, "Int", False, "UInt", PID, "Ptr")) {
-        Return
-    }
-
-    ; Should we use the 32-bit struct or the 64-bit struct?
-    If (A_Is64bitOS) {
-        Try DllCall("IsWow64Process", "Ptr", hProc, "int*", Is32bit := true)
-    } Else {
-        Is32bit := True
-    }
-
-    RPtrSize := Is32bit ? 4 : 8
-    TCITEM_SIZE := 16 + RPtrSize * 3
-
-    ; Allocate a buffer in the (presumably) remote process.
-    remote_item := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0
-                         , "uPtr", TCITEM_SIZE + MAX_TEXT_SIZE
-                         , "UInt", 0x1000, "UInt", 4, "Ptr") ; MEM_COMMIT, PAGE_READWRITE
-    remote_text := remote_item + TCITEM_SIZE
-
-    ; Prepare the TCITEM structure locally.
-    VarSetCapacity(TCITEM, TCITEM_SIZE, 0)
-    NumPut(1, TCITEM, 0, "UInt") ; mask (TCIF_TEXT)
-    NumPut(remote_text, TCITEM, 8 + RPtrSize) ; pszText
-    NumPut(MAX_TEXT_LENGTH, TCITEM, 8 + RPtrSize * 2, "Int") ; cchTextMax
-
-    ; Write the local structure into the remote buffer.
-    DllCall("WriteProcessMemory", "Ptr", hProc, "Ptr", remote_item, "Ptr", &TCITEM, "uPtr", TCITEM_SIZE, "Ptr", 0)
-
-    Tabs := []
-    VarSetCapacity(TabText, MAX_TEXT_SIZE)
-
-    SendMessage 0x1304, 0, 0,, ahk_id %hTab% ; TCM_GETITEMCOUNT
-    Loop % (ErrorLevel != "FAIL") ? ErrorLevel : 0 {
-        ; Retrieve the item text.
-        SendMessage, % (A_IsUnicode) ? 0x133C : 0x1305, A_Index - 1, remote_item,, ahk_id %hTab% ; TCM_GETITEM
-        If (ErrorLevel == 1) { ; Success
-            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", remote_text, "Ptr", &TabText, "uPtr", MAX_TEXT_SIZE, "Ptr", 0)
-        } Else {
-            TabText := ""
-        }
-
-        Tabs[A_Index] := TabText
-    }
-
-    ; Release the remote memory and handle.
-    DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", remote_item, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
-    DllCall("CloseHandle", "Ptr", hProc)
-
-    Return Tabs
-}
-
-GetHeaderInfo(hHeader) {																							;--
-    ; Returns an object containing width and text for each item of a remote header control
-    Static MAX_TEXT_LENGTH := 260
-         , MAX_TEXT_SIZE := MAX_TEXT_LENGTH * (A_IsUnicode ? 2 : 1)
-
-    WinGet PID, PID, ahk_id %hHeader%
-
-    ; Open the process for read/write and query info.
-    ; PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION
-    If !(hProc := DllCall("OpenProcess", "UInt", 0x438, "Int", False, "UInt", PID, "Ptr")) {
-        Return
-    }
-
-    ; Should we use the 32-bit struct or the 64-bit struct?
-    If (A_Is64bitOS) {
-        Try DllCall("IsWow64Process", "Ptr", hProc, "int*", Is32bit := true)
-    } Else {
-        Is32bit := True
-    }
-
-    RPtrSize := Is32bit ? 4 : 8
-    cbHDITEM := (4 * 6) + (RPtrSize * 6)
-
-    ; Allocate a buffer in the (presumably) remote process.
-    remote_item := DllCall("VirtualAllocEx", "Ptr", hProc, "Ptr", 0
-                         , "uPtr", cbHDITEM + MAX_TEXT_SIZE
-                         , "UInt", 0x1000, "UInt", 4, "Ptr") ; MEM_COMMIT, PAGE_READWRITE
-    remote_text := remote_item + cbHDITEM
-
-    ; Prepare the HDITEM structure locally.
-    VarSetCapacity(HDITEM, cbHDITEM, 0)
-    NumPut(0x3, HDITEM, 0, "UInt") ; mask (HDI_WIDTH | HDI_TEXT)
-    NumPut(remote_text, HDITEM, 8, "Ptr") ; pszText
-    NumPut(MAX_TEXT_LENGTH, HDITEM, 8 + RPtrSize * 2, "Int") ; cchTextMax
-
-    ; Write the local structure into the remote buffer.
-    DllCall("WriteProcessMemory", "Ptr", hProc, "Ptr", remote_item, "Ptr", &HDITEM, "uPtr", cbHDITEM, "Ptr", 0)
-
-    HDInfo := {}
-    VarSetCapacity(HDText, MAX_TEXT_SIZE)
-
-    SendMessage 0x1200, 0, 0,, ahk_id %hHeader% ; HDM_GETITEMCOUNT
-    Loop % (ErrorLevel != "FAIL") ? ErrorLevel : 0 {
-        ; Retrieve the item text.
-        SendMessage, % (A_IsUnicode) ? 0x120B : 0x1203, A_Index - 1, remote_item,, ahk_id %hHeader% ; HDM_GETITEMW
-        If (ErrorLevel == 1) { ; Success
-            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", remote_item, "Ptr", &HDITEM, "uPtr", MAX_TEXT_SIZE, "Ptr", 0)
-            DllCall("ReadProcessMemory", "Ptr", hProc, "Ptr", remote_text, "Ptr", &HDText, "uPtr", MAX_TEXT_SIZE, "Ptr", 0)
-        } Else {
-            TabText := ""
-        }
-
-        HDInfo.Push({"Width": NumGet(HDITEM, 4, "UInt"), "Text": HDText})
-    }
-
-    ; Release the remote memory and handle.
-    DllCall("VirtualFreeEx", "Ptr", hProc, "Ptr", remote_item, "UPtr", 0, "UInt", 0x8000) ; MEM_RELEASE
-    DllCall("CloseHandle", "Ptr", hProc)
-
-    Return HDInfo
-}
-
+;14
 GetClientCoords(hWnd, ByRef x, ByRef y) {																	;--
     VarSetCapacity(POINT, 8, 0)
     NumPut(x, POINT, 0, "Int")
@@ -7713,7 +8095,7 @@ GetClientCoords(hWnd, ByRef x, ByRef y) {																	;--
     x := NumGet(POINT, 0, "Int")
     y := NumGet(POINT, 4, "Int")
 }
-
+;15
 GetClientSize(hwnd, ByRef w, ByRef h) {																		;-- get size of window without border
 	; https://autohotkey.com/board/topic/91733-command-to-get-gui-client-areas-sizes/
     VarSetCapacity(rc, 16)
@@ -7721,14 +8103,14 @@ GetClientSize(hwnd, ByRef w, ByRef h) {																		;-- get size of window 
     w := NumGet(rc, 8, "int")
     h := NumGet(rc, 12, "int")
 }
-
+;16
 GetWindowCoords(hWnd, ByRef x, ByRef y) {																;--
     hParent := GetParent(hWnd)
     WinGetPos px, py,,, % "ahk_id" . (hParent == 0 ? hWnd : hParent)
     x := x - px
     y := y - py
 }
-
+;17
 GetWindowPos(hWnd, ByRef X, ByRef Y, ByRef W, ByRef H) {										;--
     VarSetCapacity(RECT, 16, 0)
     DllCall("GetWindowRect", "Ptr", hWnd, "Ptr", &RECT)
@@ -7738,7 +8120,7 @@ GetWindowPos(hWnd, ByRef X, ByRef Y, ByRef W, ByRef H) {										;--
     w := NumGet(RECT, 8, "Int") - X
     H := NumGet(RECT, 12, "Int") - Y
 }
-
+;18
 GetWindowPlacement(hWnd) {																					;-- Gets window position using workspace coordinates (-> no taskbar), returns an object
     VarSetCapacity(WINDOWPLACEMENT, 44, 0)
     NumPut(44, WINDOWPLACEMENT)
@@ -7752,7 +8134,7 @@ GetWindowPlacement(hWnd) {																					;-- Gets window position using wo
     ; 1 = normal, 2 = minimized, 3 = maximized
     Return Result
 }
-
+;19
 GetWindowInfo(hWnd) {                                                                                         	;-- returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)
     NumPut(VarSetCapacity(WINDOWINFO, 60, 0), WINDOWINFO)
     DllCall("GetWindowInfo", "Ptr", hWnd, "Ptr", &WINDOWINFO)
@@ -7774,11 +8156,11 @@ GetWindowInfo(hWnd) {                                                           
     wi.Version := NumGet(WINDOWINFO, 58, "UShort")
     Return wi
 }
-
+;20
 GetOwner(hWnd) {                                                                                                  	;--
     Return DllCall("GetWindow", "Ptr", hWnd, "UInt", 4) ; GW_OWNER
 }
-
+;21
 FindWindow(WinTitle, WinClass:="", WinText:="", ParentTitle:="",                        	;-- Finds the requested window,and return it's ID
 ParentClass:="", DetectHiddenWins:="off", DectectHiddenTexts:="off") {
 
@@ -7834,7 +8216,7 @@ ParentClass:="", DetectHiddenWins:="off", DectectHiddenTexts:="off") {
 
 	return sSelectedWinID
 }
-
+;22
 FindWindow(title, class="", style="", exstyle="", processname="",                          	;-- Finds the first window matching specific criterias.
 allowempty = false) {									
 	
@@ -7864,80 +8246,67 @@ allowempty = false) {
 	}
 	return 0
 }
-
+;23
 ShowWindow(hWnd, nCmdShow := 1) {	                                                                	;-- uses a DllCall to show a window
     DllCall("ShowWindow", "Ptr", hWnd, "Int", nCmdShow)
 }
-
+;24
 IsWindow(hWnd) {																										;-- wrapper for IsWindow DllCall
     Return DllCall("IsWindow", "Ptr", hWnd)
 }
-
-IsWindowVisible(hWnd) {																							;--
-    Return DllCall("IsWindowVisible", "Ptr", hWnd)
-}
-
+;25
 GetClassName(hWnd) {																								;-- wrapper for AHK WinGetClass function
-
 	WinGetClass Class, ahk_id %hWnd%
     Return Class
 }
+;26
+FindChildWindow(Parent, Child, DetectHiddenWindow="On") {								;--finds childWindow Hwnds of the parent window
 
-WinForms_GetClassNN(WinID, fromElement, ElementName) {									;-- Check which ClassNN an element has
+/*       	DESCRIPTION of function FindChildWindow		
 
-	; function by Ixiko 2018 last_change 28.01.2018
-	/* Funktionsinfo: Deutsch
-		;Achtung: da manchmal 2 verschiedene Elemente den gleichen Namen enthalten können hat die Funktion einen zusätzlichen Parameter: "fromElement"
-		;die Funktion untersucht ob das hier angebene Element im ClassNN enthalten ist zb. Button in WindowsForms10.BUTTON.app.0.378734a2
-		;die Groß- und Kleinschreibung ist nicht zu beachten
-	*/
+			------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------		
+			Description:			finds childWindow handles from a parent window by using Name and/or class or only the WinID of the parentWindow
+			Link: 					https://autohotkey.com/board/topic/46786-enumchildwindows/
+			Author: 				mickey 
+			2-Author:				modified by IXIKO on 
+			Date:					May 09, 2018 
+			last change: 		27.10.2018 - if there was no title or text for the childwindow the returned value was empty, so this function can handle now a new search parameter  -Class or ClassNN-, 
+															 therefore the child parameter becomes an object
+			Parameter:			both are objects. 
+										Pass the following {Key:Value} pairs like this for Parent: {title: "Name of window", class: "Class (NN) Name", ID: ParentWinID}
+										for child : title, class - is available
+										for further informations look at example(s)
+			return value:		a comma separated list of hwnds or nothing if there's no match
+			Dependencies:		EnumChildWindow(), GetClassNN(), GetClassNN_EnumChildProc() 
+			------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------		
+	
+*/
 
-	/* function info: english
-		;Caution: sometimes 2 and more different elements in a gui can contain the same name, therefore the function has an additional parameter: "fromElement"
-		;it examines whether the element specified here is contained in the ClassNN, eg. Button in WindowsForms10.BUTTON.app.0.378734a2
-		;this function is: case-insensitive
-	*/
+/*		EXAMPLE(s)																																																														
+					hMdi:= FindChildWindow({Class: "OptoAppClass"}, {Class: "MDIClient"}, "Off")
+					HEXhwnd:= Format("0x{:x}", hMdi)
+					MsgBox, % HEXhwnd
 
-	WinGet, CtrlList, ControlList, ahk_id %WinID%
-
-	Loop, Parse, CtrlList, `n
-	{
-			classnn:= A_LoopField
-			ControlGetText, Name, %classnn% , ahk_id %WinID%
-			If Instr(Name, ElementName, false) and Instr(classnn, fromElement, false)
-																				break
-			;sleep, 2000
-		}
-
-
-return classNN
-}
-
-FindChildWindow(Parent, ChildWinTitle, DetectHiddenWindow="On") {              	;-- finds child window hwnds of the parent window
-
-/* 																						READ THIS FOR MORE INFORMATIONS																														|
-												a function from AHK-Forum : https://autohotkey.com/board/topic/46786-enumchildwindows/																					|
-																			it has been modified by IXIKO last change on May 10, 2018																										|
-																																																																			|
-	-finds childWindow handles from a parent window by using Name and/or class or only the WinID of the parentWindow																					   		|
-	-it returns a comma separated list of hwnds or nothing if there's no match																																								|
-																																																																			|
-	-Parent parameter is an array. Pass the following {Key:Value} pairs like this - WinTitle: "Name of window", WinClass: "Class (NN) Name", WinID: ParentWinID									|
-																																																																			*/
+					hWZ:= FindChildWindow({Class: "OptoAppClass"}, {Title: "Wartezimmer"}, "Off")
+					HEXhwnd:= Format("0x{:x}", hWZ)
+					MsgBox, % HEXhwnd
+*/
 
 		detect:= A_DetectHiddenWindows
-		global SearchChildTitle
+		global SearchChildTitle, SearchChildClass, active_id
 		global ChildHwnds =
 
 		;build ParentWinTitle parameter from ParentObject
 		If Parent.WinID {
-				id:= Parent.WinID
-				ParentWinTitle:= "ahk_id " . id
+				ParentWinTitle:= "ahk_id " . Parent.ID
 		} else {
-			ParentWinTitle:= Parent.WinTitle
-			If Parent.WinClass
-					ParentWinTitle.= " ahk_class " Parent.WinClass
+			ParentWinTitle:= Parent.Title
+			If Parent.Class
+					ParentWinTitle.= " ahk_class " Parent.Class
 		}
+
+		SearchChildTitle := Child.Title
+		SearchChildClass := Child.class
 
 		WinGet, active_id, ID, %ParentWinTitle%
 
@@ -7947,30 +8316,31 @@ FindChildWindow(Parent, ChildWinTitle, DetectHiddenWindow="On") {              	
 		if not EnumAddress  ; Fast-mode is okay because it will be called only from this thread:
 			EnumAddress := RegisterCallback("EnumChildWindow") ; , "Fast")
 
-		; Pass control to EnumWindows(), which calls the callback repeatedly:
-		SearchChildTitle = %ChildWinTitle%
-
 		result:= DllCall("EnumChildWindows", UInt, active_id, UInt, EnumAddress, UInt, 0)
 
 		DetectHiddenWindows %detect%
-
 		ChildHwnds:= SubStr(ChildHwnds, 1, StrLen(ChildHwnds)-1)
 
 		return ChildHwnds
 }
-EnumChildWindow(hwnd, lParam) { 																			;-- sub function of FindChildWindow
+;{ sub of FindChildWindow
+EnumChildWindow(hwnd, lParam) { 																												;--sub function of FindChildWindow
 
 	global ChildHwnds
-	global SearchChildTitle
+	global SearchChildTitle, SearchChildClass, active_id
 
 	WinGetTitle, childtitle, ahk_id %hwnd%
-	If InStr(childtitle, SearchChildTitle) {
+	childclassNN:= GetClassNN(hwnd, active_id)
+
+	If (InStr(childtitle, SearchChildTitle) and InStr(childclassNN, SearchChildClass))
+	{
 			ChildHwnds.= hwnd . "`;"
-		}
+	}
 
     return true  ; Tell EnumWindows() to continue until all windows have been enumerated.
 }
-
+;}
+;28
 WinGetMinMaxState(hwnd) {																						;-- get state if window ist maximized or minimized
 
 	;; this function is from AHK-Forum: https://autohotkey.com/board/topic/13020-how-to-maximize-a-childdocument-window/
@@ -7984,7 +8354,7 @@ WinGetMinMaxState(hwnd) {																						;-- get state if window ist maxim
 
 	return (zoomed>iconic) ? "z":"i"
 }
-
+;29
 GetBgBitMapHandle(hPic)	{																						;-- returns the handle of a background bitmap in a gui
 
 	;found at: https://autohotkey.com/boards/viewtopic.php?t=27128
@@ -7992,11 +8362,11 @@ GetBgBitMapHandle(hPic)	{																						;-- returns the handle of a backg
 	return ErrorLevel
 
 }
-
+;30
 GetLastActivePopup(hwnd) {																						;-- passes the handle of the last active pop-up window of a parent window
-	return DLLCall("GetLastActivePopup", "uint", AlbisWinID)
+	return DLLCall("GetLastActivePopup", "uint", hwnd)
 }
-
+;31
 GetFreeGuiNum(start, prefix = "") {																				;-- gets a free gui number.
 	/* Group: About
 	o v0.81 by majkinetor.
@@ -8012,7 +8382,7 @@ GetFreeGuiNum(start, prefix = "") {																				;-- gets a free gui numbe
 	}
 	return 0
 }
-
+;32
 IsWindowUnderCursor(hwnd) {                                                                               	;-- Checks if a specific window is under the cursor.
 	MouseGetPos, , , win
 	if hwnd is number
@@ -8020,7 +8390,7 @@ IsWindowUnderCursor(hwnd) {                                                     
 	else
 		return InStr(WinGetClass("ahk_class " win), hwnd)
 }
-
+;33
 GetCenterCoords(guiW) {                                                                                        	;-- ?center a gui between 2 monitors?
 
 	;https://github.com/number1nub/CreoWindows
@@ -8041,11 +8411,11 @@ GetCenterCoords(guiW) {                                                         
 	}
 	return { limit: leftMon, left: round((leftMon/2)-(guiW/2)), right: round((leftMon + (rightMon/2))-(guiW/2)) }
 }
-
+;34
 RMApp_NCHITTEST() {                                                                                            	;-- Determines what part of a window the mouse is currently over
 	
-	/*                                      	DESCRIPTON
-	Function: RMApp_NCHITTEST()
+	/*                         	DESCRIPTON
+		Function: RMApp_NCHITTEST()
 		Determines what part of a window the mouse is currently over.
 	*/
 	
@@ -8055,7 +8425,7 @@ RMApp_NCHITTEST() {                                                             
 	RegExMatch("ERROR TRANSPARENT NOWHERE CLIENT CAPTION SYSMENU SIZE MENU HSCROLL VSCROLL MINBUTTON MAXBUTTON LEFT RIGHT TOP TOPLEFT TOPRIGHT BOTTOM BOTTOMLEFT BOTTOMRIGHT BORDER OBJECT CLOSE HELP", "(?:\w+\s+){" ErrorLevel+2&0xFFFFFFFF "}(?<AREA>\w+\b)", HT)
 	Return HTAREA
 }
-
+;35
 GetCPA_file_name( p_hw_target ) {                                                                         	;-- retrieves Control Panel applet icon
 	
    WinGet, pid_target, PID, ahk_id %p_hw_target%
@@ -8087,7 +8457,7 @@ GetCPA_file_name( p_hw_target ) {                                               
    else
       return, false
 }
-
+;36
 WinGetClientPos( Hwnd ) {												        									;-- gives back the coordinates of client area inside a gui/window - with DpiFactor correction
 	
 	/*                         EXAMPLE
@@ -8125,7 +8495,7 @@ WinGetClientPos( Hwnd ) {												        									;-- gives back the coordin
 	h := NumGet( size, 12, "Int" ) // dpifactor
 	return { X: x, Y: y, W: w, H: h }
 }
-
+;37
 CheckWindowStatus(hwnd, timeout=100) {																;-- check's if a window is responding or not responding (hung or crashed) - 
 
  /* 									Description
@@ -8160,8 +8530,8 @@ CheckWindowStatus(hwnd, timeout=100) {																;-- check's if a window is
 	NR_temp =0 ; init
 	return DllCall("SendMessageTimeout", "UInt", hwnd, "UInt", 0x0000, "Int", 0, "Int", 0, "UInt", 0x0002, "UInt", TimeOut, "UInt *", NR_temp)
 }
-
-GetWindowOrder(hwnd="",visibleWin=1) {												            	;-- determines the window order for a given (parent-)hwnd 
+;38
+GetWindowOrder(hwnd="",visibleWin=1) {                                                            	;-- determines the window order for a given (parent-)hwnd 
 	if !hwnd
 		hwnd:=winexist("ahk_pid " DllCall("GetCurrentProcessId"))
 	
@@ -8195,7 +8565,7 @@ GetWindowOrder(hwnd="",visibleWin=1) {												            	;-- determines th
 	return {array: arr, index: max+1}
 	
 }
-;44
+;39
 EnumWindows(hWnd := 0, HiddenWindows := true, Flags := "") {								;-- Get a list with all the top-level windows on the screen or controls in the window
 	
 	/*                              	DESCRIPTION
@@ -8249,7 +8619,7 @@ EnumWindows(hWnd := 0, HiddenWindows := true, Flags := "") {								;-- Get a li
 				return true
 	}	} return true, Data.List.Push(hWnd)
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/ms633493(v=vs.85).aspx
-;45
+;40
 
 } 
 
@@ -8390,13 +8760,107 @@ MinMaxInfo(W, L, M, H) {																							;--
 	}
 }
 
-} 
+GetMouseTaskButton(ByRef hwnd) {                                                                          	;-- Gets the index+1 of the taskbar button which the mouse is hovering over
+    
+	/* Lexikos' Function :
+	
+		Link: 	https://autohotkey.com/board/topic/58215-middle-click-titlebartaskbar-close-windows-semi-solved/
+		; Gets the index+1 of the taskbar button which the mouse is hovering over. 
+		; Returns an empty string if the mouse is not over the taskbar's task toolbar. 
+		; 
+		; Some code and inspiration from Sean's TaskButton.ahk 
+	*/
+	
+	CoordMode, Mouse, Screen 
+    MouseGetPos, x, y, win, ctl, 2 
+		; Check if hovering over taskbar. 
+    WinGetClass, cl, ahk_id %win% 
+    if (cl != "Shell_TrayWnd") 
+        return 
+		; Check if hovering over a Toolbar. 
+    WinGetClass, cl, ahk_id %ctl% 
+    if (cl != "ToolbarWindow32") 
+        return 
+		; Check if hovering over task-switching buttons (specific toolbar). 
+    hParent := DllCall("GetParent", "Uint", ctl) 
+    WinGetClass, cl, ahk_id %hParent% 
+    if (cl != "MSTaskSwWClass") 
+        return 
+    
+    WinGet, pidTaskbar, PID, ahk_class Shell_TrayWnd 
+
+    hProc := DllCall("OpenProcess", "Uint", 0x38, "int", 0, "Uint", pidTaskbar) 
+    pRB := DllCall("VirtualAllocEx", "Uint", hProc, "Uint", 0, "Uint", 20, "Uint", 0x1000, "Uint", 0x4) 
+
+    VarSetCapacity(pt, 8, 0) 
+    NumPut(x, pt, 0, "int") 
+    NumPut(y, pt, 4, "int") 
+    
+		; Convert screen coords to toolbar-client-area coords. 
+    DllCall("ScreenToClient", "uint", ctl, "uint", &pt) 
+    
+		; Write POINT into explorer.exe. 
+    DllCall("WriteProcessMemory", "uint", hProc, "uint", pRB+0, "uint", &pt, "uint", 8, "uint", 0) 
+
+		; SendMessage, 0x447,,,, ahk_id %ctl%  ; TB_GETHOTITEM 
+    SendMessage, 0x445, 0, pRB,, ahk_id %ctl%  ; TB_HITTEST 
+    btn_index := ErrorLevel 
+		; Convert btn_index to a signed int, since result may be -1 if no 'hot' item. 
+    if btn_index > 0x7FFFFFFF 
+        btn_index := -(~btn_index) - 1 
+    
+    
+    if (btn_index > -1)  { 
+			; Get button info. 
+        SendMessage, 0x417, btn_index, pRB,, ahk_id %ctl%   ; TB_GETBUTTON 
+    
+        VarSetCapacity(btn, 20) 
+        DllCall("ReadProcessMemory", "Uint", hProc, "Uint", pRB, "Uint", &btn, "Uint", 20, "Uint", 0) 
+    
+        state := NumGet(btn, 8, "UChar")  ; fsState 
+        pdata := NumGet(btn, 12, "UInt")  ; dwData 
+        
+        ret := DllCall("ReadProcessMemory", "Uint", hProc 
+            , "Uint", pdata, "UintP", hwnd, "Uint", 4, "Uint", 0) 
+    } else {
+        hwnd = 0 
+	}
+        
+    DllCall("VirtualFreeEx", "Uint", hProc, "Uint", pRB, "Uint", 0, "Uint", 0x8000) 
+    DllCall("CloseHandle", "Uint", hProc) 
+
+
+    ; Negative values indicate seperator items. (abs(btn_index) is the index) 
+    return btn_index > -1 ? btn_index+1 : 0 
+}
 
 } 
 
-{ ;Gui/Window - interacting and other functions for gui or windows (43)
+} 
+;|   screenDims()                           	|   DPIFactor()                               	|
+
+;|   ControlExists(1)                       	|   GetFocusedControl(2)               	|   GetControls(3)                          	|   GetOtherControl(4)                  	|
+;|   ListControls(5)                         	|   Control_GetClassNN(6)            	|   ControlGetClassNN(7,8)          	|   GetClassName(9)                     	|
+;|   Control_GetFont(10)                	|   IsControlFocused(11)                	|   getControlNameByHwnd(12)   	|   getByControlName(13)            	|
+;|   getNextControl(14)                 	|   IsControlUnderCursor(15)        	|   GetFocusedControl(16)            	|   ControlGetTextExt(17)              	|
+;|   getControlInfo(18)                   	|   FocusedControl(19)                  	|   Control_GetFont(20)                	|   WinForms_GetClassNN(21)      	|
+;|   GetExtraStyle(22)                    	|   GetToolbarItems(23)                	|   ControlGetTabs(24)                  	|   GetHeaderInfo(25)                    	|
+
+;|   IsOverTitleBar(1)                      	|   WinGetPosEx(2)                         	|   GetParent(3)                             	|   GetWindow(4)                          	|
+;|   GetForegroundWindow(5)        	|   IsWindowVisible(6)                   	|   IsFullScreen(7)                          	|   IsClosed(8)                                	|
+;|   GetClassLong(9)                       	|   GetWindowLong(10)                	|   GetClassStyles(11)                    	|   GetTabOrderIndex(12)               	|
+;|   GetCursor(13)                          	|   GetClientCoords(14)                 	|   GetClientSize(15)                      	|   GetWindowCoords(16)             	|
+;|   GetWindowPos(17)                  	|   GetWindowPlacement(18)       	|   GetWindowInfo(19)                  	|   GetOwner(20)                          	|
+;|   FindWindow(21,22)                  	|   ShowWindow(23)                    		|   IsWindow(24)                           	|   GetClassName(25)                   	|
+;|   FindChildWindow(26)               	|   WinGetMinMaxState(28)           	|   GetBgBitMapHandle(29)          	|   GetLastActivePopup(30)           	|
+;|   GetFreeGuiNum(31)                 	|   IsWindowUnderCursor(32)        	|   GetCenterCoords(33)               	|   RMApp_NCHITTEST(34)           	|
+;|   GetCPA_file_name(35)             	|   WinGetClientPos(36)                	|   CheckWindowStatus(37)          	|   GetWindowOrder(38)               	|
+;|   EnumWindows(39)                  	|
+;|   TabCtrl_GetCurSel()                 	|   TabCtrl_GetItemText()              	|
+
+{ ;gui + interacting with elements (44) -- and other functions for gui or windows
 		
-;01		
+;01
 SureControlClick(CName, WinTitle, WinText="") { 														;--Window Activation + ControlDelay to -1 + checked if control received the click
 		;by Ixiko 2018
 		Critical
@@ -10095,10 +10559,57 @@ CenterWindow(hWnd, Pos := "") {																				;-- center a window or set po
 		return MoveWindow(hWnd, (L?0:R?(mw-w):C?((mw/2)-(w/2)):x) +mx, (T?0:B?(mh-h):C?((mh/2)-(h/2)):y) +my, w, h)
 	return MoveWindow(hWnd, ((mw/2) - (w/2)) +mx, ((mh/2) - (h/2)) +my, w, h)
 }
+;44
+SetTrayIcon( Gui0=0 ) {                                                                                            	;-- sets a hex coded icon to as try icon
+	/*    	DESCRIPTION of function SetTrayIcon()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	sets a hex coded icon to as try icon
+			Link              	:	from AHKScriptMaster by
+			Author         	:	SKAN
+			Date            	:	29-Nov-2008
+			AHK-Version	:	AHK-basic? V1?
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	icon, tray, process
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+ Hex := "W1Y1Z10101X1Y4Z2801X16V28V1U2T1Y4RCKMFF9C9CZFFA2A2ZFFAAAAZFFB0BYFFB4B4ZFFBABAZFF"
+ . "BFBFZFFC4C4ZFFCACAZFFD1D1ZFFD6D6ZFFDDDDZFFE4E4ZFFEBEBZFFFFFFKWBDVCEVADVCEV9DVCEV7BVCE"
+ . "V5AVCDV37ABA988ACV246765458AV13V58V12V37V12V25V12V24V22V23KYFFFFXC3C3XC3C3XC3C3XC3C3X"
+ . "C3C3XCZ3XCZ3XCZ3XCZ3XC3C3XC3C3XC3C3XC3C3XC3C3XFFFFX"
+ VarSetCapacity(Z,512,48), Nums:="512|256|128|64|32|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2"
+ Loop, Parse, Nums, |                                  ;  uncompressing nulls in hex data
+  StringReplace,hex,hex,% Chr(70+A_Index),% SubStr(Z,1,A_LoopField),All
+ VarSetCapacity( IconData,( nSize:=StrLen(Hex)//2) )
+ Loop %nSize%
+   NumPut( "0x" . SubStr(Hex,2*A_Index-1,2), IconData, A_Index-1, "Char" )
+ hICon := DllCall( "CreateIconFromResourceEx", UInt,&IconData+22, UInt,0, Int,1
+                   ,UInt,196608, Int,16, Int,16, UInt,0 )
+ PID := DllCall("GetCurrentProcessId"), VarSetCapacity( NID,444,0 ), NumPut( 444,NID )
+ NumPut( Gui0,NID,4 ), NumPut( 1028,NID,8 ), NumPut( 2,NID,12 ), NumPut( hIcon,NID,20 )
+ Menu, Tray, Icon,,, 1
+ DllCall( "shell32\Shell_NotifyIcon", UInt,0x1, UInt,&NID )
+}
 
 } 
+;|   ChooseColor()                         	|   GetWindowIcon()                     	|   GetImageType()                       	|   GetStatusBarText()                   	|
+;|   GetAncestor()                          	|   MinMaxInfo()                           	|   OnMessage( "MinMaxInfo")      	|   SureControlClick()                    	|
+;|   SureControlCheck()                 	|   ControlClick2()                        		|   ControlFromPoint()                  	|   EnumChildFindPoint()              	|
+;|   ControlDoubleClick()               	|   WinWaitForMinimized()           	|   CenterWindow()                       	|   GuiCenterButtons()                  	|
+;|   CenterControl()                       	|   SetWindowIcon()                      	|   SetWindowPos()                       	|   TryKillWin()                              	|
+;|   Win32_SendMessage()            	|   Win32_TaskKill()                      	|   Win32_Terminate()                  	|   TabActivate()                           	|
+;|   FocuslessScroll()                      	|   FocuslessScrollHorizontal()       	|   Menu_Show()                           	|   CatMull_ControlMove()            	|
+;|   Gui_AutoHide()                       	|   SetButtonF()                             	|   AddToolTip()                            	|   HelpToolTips()                          	|
+;|   DisableFadeEffect()                  	|   SetWindowTransistionDisable()	|   DisableMinimizeAnim()            	|   AutoCloseBlockingWindows()  	|
+;|   WinActivateEx()                       	|   ClickOK()                                 	|   ControlSelectTab()                   	|   SetParentByClass()                   	|
+;|   MoveTogether()                       	|   WinWaitCreated()                    	|   closeContextMenu()                 	|   SetWindowTheme()                  	|
+;|   HideFocusBorder()                   	|   unmovable()                            	|   movable()                                 	|   GuiDisableMove()                    	|
+;|   WinInsertAfter()                       	|   CenterWindow()                       	|   SetTrayIcon()                             	|
 
-{ ;Gui - menu all types of functions (12)
+{ ;gui + menu  all types of functions (12)
 		
 GetMenu(hWnd) {																										;-- returns hMenu handle
 	;; only wraps DllCall(GetMenu)
@@ -10523,93 +11034,16 @@ Critical
 
 
 } 
-
-	
-} 
-;|														|														|														|														|
-; -----------------------------------------------------------	#Custom Gui Elements#	---------------------------------------------------------------
-;|	HtmlBox()                                	|	EditBox()										|	Popup()										|	PIC_GDI_GUI()                         	|
-;|	SplitButton()									|	BetterBox()									|	BtnBox()										|	LoginBox()									|
-;|	MultiBox()									|	PassBox()										|	CreateHotkeyWindow()				|	GetUserInput()								|
-;|   guiMsgBox()                             	|   URLPrefGui()                            	|	TaskDialog()						    		|	ITaskDialogDirect()						|
-;|	TaskDialogMsgBox()					|	TaskDialogToUnicode()				|	TaskDialogCallback()					|  TT_Console()                             	|
-;|   ToolTipEx()                                	|   SafeInput()                                 	|   DisableCloseButton()                	|
-;
-; ----------------------------------------------------------	#Gui - changing functions#	---------------------------------------------------------------
-;|	FadeGui()										|	WinFadeToggle()							|	ShadowBorder()							|	FrameShadow() - 2 versions			|
-;|	RemoveWindowFromTaskbar()	|	ToggleTitleMenuBar()					|	ToggleFakeFullscreen()	        	   	|	ListView_HeaderFontSet()			|
-;|	CreateFont()									|	FullScreenToggleUnderMouse()	|	SetTaskbarProgress() x 2				|   WinSetPlacement()                   	|
-;|  AttachToolWindow()                 	|   DeAttachToolWindow()            	|   ControlSetTextAndResize()       	|   winfade()                                    	|
-;
-; -----------------------------------------------------------	#control type functions#	---------------------------------------------------------------
-;|	*Combobox control functions***	|	*********************************	|	********************************* 	|	********************************	|
-;|	GetComboBoxChoice()					|	LB_GetItemHeight()						|	LB_SetItemHeight()						|
-;|	****** Edit control functions ****	|    *******************************	|	*********************************	|	********************************	|
-;|	Edit_Standard_Params()				|	Edit_TextIsSelected()						|	Edit_GetSelection()						|	Edit_Select()									|
-;|	Edit_SelectLine()							|	Edit_DeleteLine()							|
-;|	****** GDI control functions ****	| 	*********************************	|	*********************************	|	********************************	|
-;|	ControlCreateGradient()				|	AddGraphicButtonPlus()				|
-;|	****** IMAGELIST functions ****	| 	*********************************	|	*********************************	|	********************************	|
-;|	IL_LoadIcon()								|	IL_GuiButtonIcon()						|
-;|	******** Listbox functions ******	| 	*********************************	|	*********************************	|	********************************	|
-;|	LB_AdjustItemHeight()					|
-;|	******** Listview functions *****	| 	*********************************	|	*********************************	|	********************************	|
-;|	LV_GetCount()								|	LV_SetSelColors()							|	LV_Select()									|	LV_GetItemText()							|
-;|	LV_GetText()									|	LV_SetBackgroundUrl()				|	LV_MoveRow()								|	LV_MoveRow()								|
-;|  LV_Find()                                  	|   LV_GetSelectedText()                 	|   LV_Notification()                      	|   LV_IsChecked()                         	|
-;|  LV_HeaderFontSet()                   	|   LV_SetCheckState()                   	|   LV_SetItemState()                     	|   LV_SubitemHitTest()                 	|
-;|  LV_EX_FindString()                   	|   LV_RemoveSelBorder()               	|   LV_SetExplorerTheme()              	|   LV_Update()                               	|
-;|  LV_RedrawItem()                      	|   LV_SetExStyle()                           	|   LV_GetExStyle()                           	|   LV_IsItemVisible()                       	|
-;|  LV_SetIconSpacing()                 	|   LV_GetIconSpacing()                   	|   LV_GetItemPos()                        	|   LV_SetItemPos()                          	|
-;|   LV_MouseGetCellPos()              	|   LV_GetColOrderLocal()              	|   LV_GetColOrder()                        	|   LV_SetColOrderLocal()               	|
-;|   LV_GetCheckedItems()              	|   LV_ClickRow()                            	|
-;|	****** TabControl functions ****	| 	*********************************	|	*********************************	|	********************************	|
-;|	TabCtrl_GetCurSel()						|	TabCtrl_GetItemText()					|
-;|	***** TREEVIEW functions	*****	| 	*********************************	|	*********************************	|	********************************	|
-;|	TV_Find()										|	TV_Load()										|
-; ---------------------------------------------------  #gui/window/screen - retreaving informations#  ------------------------------------------------
-;|	 screenDims()								|	DPIFactor()									|	ControlExists()								|	GetFocusedControl()					|
-;|	 GetControls()								|	GetOtherControl()						|	ListControls()								|	Control_GetClassNN()					|
-;|	 ControlGetClassNN()	x	2			|   GetClassName()                       	|   Control_GetFont()						|	IsControlFocused()						|
-;|	 IsOverTitleBar()							|	WinGetPosEx()					    		|	GetParent()									|	GetWindow()								|
-;|	 GetForegroundWindow()	 	  		|	IsWindowVisible()						|	IsFullScreen()								|	IsClosed()										|
-;|	 GetClassLong()							|	GetWindowLong()						|	GetClassStyles()							|	GetTabOrderIndex()						|
-;|	 GetCursor()									|	GetExtraStyle()								|	GetToolbarItems()						|	ControlGetTabs()							|
-;|	 GetHeaderInfo()							|	GetClientCoords()						|	GetClientSize()								|	GetWindowCoords()						|
-;|	 GetWindowPos()							|	GetWindowPlacement()				|	GetWindowInfo()							|	GetOwner()									|
-;|	 FindWindow()								|	ShowWindow()								|	IsWindow()									|	IsWindowVisible()						|
-;|	 GetClassName()							|	WinForms_GetClassNN()				|	FindChildWindow()						|	WinGetMinMaxState()					|
-;|	 GetBgBitMapHandle()					|	GetLastActivePopup()					|	getControlNameByHwnd()			|	getByControlName()					|
-;|	 getNextControl()							|	TabCtrl_GetCurSel()						|	TabCtrl_GetItemText()					|	IsControlUnderCursor()            	|
-;|   GetFreeGuiNum()                    	|   IsWindowUnderCursor()           	|   GetCenterCoords()                   	|   RMApp_NCHITTEST()               	|
-;|   GetCPA_file_name()                	|   GetFocusedControl()                 	|   ControlGetTextExt()                   	|   getControlInfo()                        	|
-;|   WinGetClientPos()                   	|   FocusedControl()                        	|   CheckWindowStatus()               	|   Control_GetFont()                      	|
-;|   GetWindowOrder()                   	|   EnumWindows()                        	|
-; ---------------------------------------------------------	#interacting or other functions#	----------------------------------------------------------
-;|   ChooseColor()								|	GetWindowIcon()							|	GetImageType()							|	GetStatusBarText()						|
-;|   GetAncestor()								|	MinMaxInfo()								|	OnMessage( "MinMaxInfo")			|	SureControlClick()						|
-;| 	 SureControlCheck()						|	ControlClick2()								|	ControlFromPoint()						|	EnumChildFindPoint()					|
-;|   ControlDoubleClick()                  	|   WinWaitForMinimized()				|	CenterWindow()							|	GuiCenterButtons()						|
-;|   CenterControl()							|   SetWindowIcon()							|	SetWindowPos()							|	TryKillWin()									|	
-;|   Win32_SendMessage()					|	Win32_TaskKill()							|	Win32_Terminate()						|	TabActivate()								|	
-;|   FocuslessScroll()							|	FocuslessScrollHorizontal()			|	Menu_Show()								|	CatMull_ControlMove()				|
-;|   Gui_AutoHide()			   				|	SetButtonF()									|	AddToolTip()								|	HelpToolTips()								|   
-;|   DisableFadeEffect()						|   SetWindowTransistionDisable()	|   DisableMinimizeAnim()            	|   AutoCloseBlockingWindows()   	|
-;|	 WinActivateEx()                      	|   ClickOK()                                   	|   ControlSelectTab()                     	|   SetParentByClass()                    	|     
-;|	 MoveTogether()                       	|   WinWaitCreated()                     	|   closeContextMenu()                  	|   SetWindowTheme()                   	|     
-;|	 HideFocusBorder()                  	|   unmovable()                              	|   movable()                                 	|   GuiDisableMove()                        |
-;|   WinInsertAfter()                       	|   CenterWindow()                         	|
-;------------------------------------------------------------------	#Menu functions#	----------------------------------------------------------------
-;|	 GetMenu()                               	|	GetSubMenu()								|	GetMenuItemCount()					|	GetMenuItemID()							|     
-;|	 GetMenuString()                     	|	MenuGetAll()								|	MenuGetAll_sub()							|	GetContextMenuState()				|     
-;|	 GetContextMenuID()               	|	GetContextMenuText()					|	ExtractInteger()							|	InsertInteger()								|     
-;|	 Menu_AssignBitmap()             	|   InvokeVerb()                              	|
+;|    GetMenu()                               	|   GetSubMenu()                          	|   GetMenuItemCount()               	|   GetMenuItemID()                     	|
+;|    GetMenuString()                     	|   MenuGetAll()                            	|   MenuGetAll_sub()                     	|   GetContextMenuState()            	|
+;|    GetContextMenuID()               	|   GetContextMenuText()             	|   ExtractInteger()                        	|   InsertInteger()                          	|
+;|    Menu_AssignBitmap()             	|   InvokeVerb()                            	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Filesystem (33)
-;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-InvokeVerb(path, menu, validate=True) {												;-- Executes the context menu item of the given path
+{ ;Filesystem (35)
+;1
+InvokeVerb(path, menu, validate=True) {											                                                                    	;-- Executes the context menu item of the given path
 
     ;by A_Samurai
     ;v 1.0.1 http://sites.google.com/site/ahkref/custom-functions/invokeverb
@@ -10685,8 +11119,8 @@ InvokeVerb(path, menu, validate=True) {												;-- Executes the context menu
         objFolderItem.InvokeVerbEx(Menu)
 
 }
-
-Function_Eject(Drive){																				;-- ejects a drive medium
+;2
+Function_Eject(Drive){																			                                                                    	;-- ejects a drive medium
 	Try
 	{
 
@@ -10717,8 +11151,8 @@ Function_Eject(Drive){																				;-- ejects a drive medium
 		Return 0
 	}
 }
-
-FileGetDetail(FilePath, Index) { 																;-- Get specific file property by index
+;3
+FileGetDetail(FilePath, Index) { 															                                                                    	;-- Get specific file property by index
    Static MaxDetails := 350
    SplitPath, FilePath, FileName , FileDir
    If (FileDir = "")
@@ -10728,8 +11162,8 @@ FileGetDetail(FilePath, Index) { 																;-- Get specific file property 
    Item := Folder.ParseName(FileName)
    Return Folder.GetDetailsOf(Item, Index)
 }
-
-FileGetDetails(FilePath) { 																		;-- Create an array of concrete file properties
+;4
+FileGetDetails(FilePath) { 																	                                                                    	;-- Create an array of concrete file properties
    Static MaxDetails := 350
    Shell := ComObjCreate("Shell.Application")
    Details := []
@@ -10744,12 +11178,12 @@ FileGetDetails(FilePath) { 																		;-- Create an array of concrete fil
    }
    Return Details
 }
-
-DirExist(dirPath) {																						;-- Checks if a directory exists
+;5
+DirExist(dirPath) {																				                                                                    	;-- Checks if a directory exists
    return InStr(FileExist(dirPath), "D") ? 1 : 0
 }
-
-GetDetails() { 																							;-- Create an array of possible file properties
+;6
+GetDetails() { 																						                                                                    	;-- Create an array of possible file properties
    Static MaxDetails := 350
    Shell := ComObjCreate("Shell.Application")
    Details := []
@@ -10762,8 +11196,8 @@ GetDetails() { 																							;-- Create an array of possible file prope
    }
    Return Details
 }
-
-Start(Target, Minimal = false, Title = "") { 												;-- Start programs or scripts easier
+;7
+Start(Target, Minimal = false, Title = "") { 											                                                                    	;-- Start programs or scripts easier
    cPID = -1
    if Minimal
       Run %ComSpec% /c "%Target%", A_WorkingDir, Min UseErrorLevel, cPID
@@ -10781,16 +11215,16 @@ Start(Target, Minimal = false, Title = "") { 												;-- Start programs or s
    else
       return, -1
 }
-
-IsFileEqual(filename1, filename2) { 															;-- Returns whether or not two files are equal
+;8
+IsFileEqual(filename1, filename2) { 														                                                                    	;-- Returns whether or not two files are equal
     ;TODO make this work for big files, too (this version reads it all into memory first)
    FileRead, file1, %filename1%
    FileRead, file2, %filename2%
 
    return file1==file2
 }
-
-WatchDirectory(p*) {  																				;-- Watches a directory/file for file changes
+;9
+WatchDirectory(p*) {  																			                                                                    	;-- Watches a directory/file for file changes
 
     ;By HotKeyIt
     ;Docs: http://www.autohotkey.com/forum/viewtopic.php?p=398565#398565
@@ -10938,8 +11372,8 @@ WatchDirectory(p*) {  																				;-- Watches a directory/file for file 
    }
    Return
 }
-
-WatchDirectory(WatchFolder="", WatchSubDirs=true) {						;-- it's different from above not tested
+;10
+WatchDirectory(WatchFolder="", WatchSubDirs=true) {					                                                                    	;-- it's different from above not tested
 
 	;--https://autohotkey.com/board/topic/41653-watchdirectory/page-2
 
@@ -11135,8 +11569,8 @@ WatchDirectory(WatchFolder="", WatchSubDirs=true) {						;-- it's different from
 			, UInt , 0  )
 	Return
 }
-
-GetFileIcon(File, SmallIcon := 1) {                                                        	;-- 
+;11
+GetFileIcon(File, SmallIcon := 1) {                                                                                                                            	;-- 
 
     VarSetCapacity(SHFILEINFO, cbFileInfo := A_PtrSize + 688)
     If (DllCall("Shell32.dll\SHGetFileInfoW"
@@ -11148,8 +11582,8 @@ GetFileIcon(File, SmallIcon := 1) {                                             
         Return NumGet(SHFILEINFO, 0, "Ptr")
     }
 }
-
-ExtractAssociatedIcon(ByRef ipath, ByRef idx) {										;-- Extracts the associated icon's index for the file specified in path
+;12
+ExtractAssociatedIcon(ByRef ipath, ByRef idx) {									                                                                    	;-- Extracts the associated icon's index for the file specified in path
 
 	; http://msdn.microsoft.com/en-us/library/bb776414(VS.85).aspx
 	; shell32.dll
@@ -11162,8 +11596,8 @@ ExtractAssociatedIcon(ByRef ipath, ByRef idx) {										;-- Extracts the associ
 		return ErrorLevel
 
 }
-
-ExtractAssociatedIconEx(ByRef ipath, ByRef idx, ByRef iID) {					;-- Extracts the associated icon's index and ID for the file specified in path
+;13
+ExtractAssociatedIconEx(ByRef ipath, ByRef idx, ByRef iID) {				                                                                    	;-- Extracts the associated icon's index and ID for the file specified in path
 
 		; http://msdn.microsoft.com/en-us/library/bb776415(VS.85).aspx
 		; shell32.dll
@@ -11175,12 +11609,12 @@ ExtractAssociatedIconEx(ByRef ipath, ByRef idx, ByRef iID) {					;-- Extracts th
 			hIcon := DllCall("ExtractAssociatedIconEx", "UInt", hInst, "UInt", &ipath, "UShortP", idx, "UShortP", iID)
 			return ErrorLevel
 }
-
-DestroyIcon(hIcon) {																				;--
+;14
+DestroyIcon(hIcon) {																			                                                                    	;--
 	DllCall("DestroyIcon", UInt, hIcon)
 }
-
-listfunc(file){																								;-- list all functions inside ahk scripts
+;15
+listfunc(file){																							                                                                	;-- list all functions inside ahk scripts
 
 	fileread, z, % file
 	StringReplace, z, z, `r, , All			; important
@@ -11195,8 +11629,8 @@ listfunc(file){																								;-- list all functions inside ahk scripts
 	Sort, lst
 	return lst
 }
-
-CreateOpenWithMenu(FilePath, Recommended := True, 						;-- creates an 'open with' menu for the passed file.
+;16
+CreateOpenWithMenu(FilePath, Recommended := True, 					                                                                    	;-- creates an 'open with' menu for the passed file.
 ShowMenu := False, MenuName := "OpenWithMenu", Others := "Others") {
 
 	; ==================================================================================================================================
@@ -11347,16 +11781,16 @@ ShowMenu := False, MenuName := "OpenWithMenu", Others := "Others") {
    Else
       Return ThisMenuName
 }
-
-FileCount(filter) {																						;-- count matching files in the working directory
+;17
+FileCount(filter) {																					                                                                    	;-- count matching files in the working directory
 
    loop,files,%filter%
      Count := A_Index
    return Count
 
 }
-
-GetImageTypeW(File) {																			;-- Identify the image type (UniCode)
+;18
+GetImageTypeW(File) {																		                                                                    	;-- Identify the image type (UniCode)
 
 /* Description: Identify the image type
 
@@ -11399,8 +11833,8 @@ GetImageTypeW(File) {																			;-- Identify the image type (UniCode)
 
 Return,Type
 }
-
-FileWriteLine( _File, _Data = "", _Linenum = 1, _Replace = true ) {     		;-- to write data at specified line in a file.
+;19
+FileWriteLine( _File, _Data = "", _Linenum = 1, _Replace = true ) {                                                                         		;-- to write data at specified line in a file.
 
     FileRead, _FileData, % _File
     _DataBefore := Substr( _FileData, 1, Instr( _FileData, "`r`n", false, 1, _Linenum - 1 ) )
@@ -11409,8 +11843,8 @@ FileWriteLine( _File, _Data = "", _Linenum = 1, _Replace = true ) {     		;-- to
     FileDelete, % _File
     FileAppend, % _FileData, % _File
 }
-
-FileMD5( sFile = "", cSz = 4 ) {            														;-- file MD5 hashing
+;20
+FileMD5( sFile = "", cSz = 4 ) {            													                                                                    	;-- file MD5 hashing
 
     cSz := ( cSz<0 || cSz>8 ) ? 2**22 : 2**( 18+cSz ), VarSetCapacity( Buffer, cSz, 0 )
     hFil := DllCall( "CreateFile", Str, sFile, UInt, 0x80000000, Int, 1, Int, 0, Int, 3, Int, 0, Int, 0 )
@@ -11425,8 +11859,8 @@ FileMD5( sFile = "", cSz = 4 ) {            														;-- file MD5 hashing
         N := NumGet( MD5_CTX, 87+A_Index, "Char" ), MD5 .= SubStr( Hex, N>>4, 1 ) . SubStr( Hex, N&15, 1 )
     return MD5
 }
-
-FileCRC32(sFile="",cSz=4) {																		;-- computes and returns CRC32 hash for a File passed as parameter
+;21
+FileCRC32(sFile="",cSz=4) {																	                                                                    	;-- computes and returns CRC32 hash for a File passed as parameter
 
 	; by SKAN www.autohotkey.com/community/viewtopic.php?t=64211
 	cSz := (cSz<0||cSz>8) ? 2**22 : 2**(18+cSz), VarSetCapacity( Buffer,cSz,0 ) ; 10-Oct-2009
@@ -11443,8 +11877,8 @@ FileCRC32(sFile="",cSz=4) {																		;-- computes and returns CRC32 hash
 	SetFormat, Integer, %A_FI%
 	Return CRC32, DllCall( "FreeLibrary", UInt,hMod )
 }
-
-FindFreeFileName(FilePath) {																	;-- Finds a non-existing filename for Filepath by appending a number in brackets to the name
+;22
+FindFreeFileName(FilePath) {																                                                                    	;-- Finds a non-existing filename for Filepath by appending a number in brackets to the name
 	
 	SplitPath, FilePath,, dir, extension, filename
 	Testpath := FilePath ;Return path if it doesn't exist
@@ -11456,8 +11890,8 @@ FindFreeFileName(FilePath) {																	;-- Finds a non-existing filename f
 	}
 	return TestPath
 }
-
-CountFilesR(Folder) {																				;-- count files recursive in specific folder (uses COM method)
+;23
+CountFilesR(Folder) {																			                                                                    	;-- count files recursive in specific folder (uses COM method)
 	static Counter=0,  fso
 	fso := fso?fso:ComObjCreate("Scripting.FileSystemObject")
 	Folder := fso.GetFolder(Folder)	, Counter += Counter?0:CountFiles(Folder.path)
@@ -11465,27 +11899,27 @@ CountFilesR(Folder) {																				;-- count files recursive in specific f
 		Counter += CountFiles(Subfolder.path) , CountFilesR(Subfolder.path)
 	return Counter
 }
-
-CountFiles(Folder) {                                                                             	;-- count files in specific folder (uses COM method)
+;24
+CountFiles(Folder) {                                                                                                                                                 	;-- count files in specific folder (uses COM method)
 	fso := ComObjCreate("Scripting.FileSystemObject")
 	Folder := fso.GetFolder(Folder)
 	return fso.GetFolder(Folder).Files.Count
 }
-
-PathInfo(ByRef InputVar) {																		;-- splits a given path to return as object
+;25
+PathInfo(ByRef InputVar) {																	                                                                    	;-- splits a given path to return as object
 	SplitPath, InputVar, f, d, e, n, dr
 	return	Object("FileName",f,"Dir",d,"Extension",e,"NameNoExt",n,"Drive",dr)
 }
-
-DriveSpace(Drv="", Free=1) { 																	;-- retrieves the DriveSpace
+;26
+DriveSpace(Drv="", Free=1) { 																                                                                    	;-- retrieves the DriveSpace
 	; www.autohotkey.com/forum/viewtopic.php?p=92483#92483
 	Drv := Drv . ":\",  VarSetCapacity(SPC, 30, 0), VarSetCapacity(BPS, 30, 0)
 	VarSetCapacity(FC , 30, 0), VarSetCapacity(TC , 30, 0)  
 	DllCall( "GetDiskFreeSpaceA", Str,Drv, UIntP,SPC, UIntP,BPS, UIntP,FC, UIntP,TC )
 	Return Free=1 ? (SPC*BPS*FC) : (SPC*BPS*TC) ; Ternary Operator requires 1.0.46+
 }
-
-GetBinaryType(FileName) {																		;-- determines the bit architecture of an executable program
+;27
+GetBinaryType(FileName) {																	                                                                    	;-- determines the bit architecture of an executable program
   IfNotExist, %FileName%, Return "File not found"
   Binary:=DllCall("GetBinaryType","Str", FileName, "UInt *", RetVal)
   IfEqual, Binary, 0, Return "Not Executable"
@@ -11494,8 +11928,8 @@ GetBinaryType(FileName) {																		;-- determines the bit architecture o
   BinaryType:="BinaryType" . RetVal + 1
 Return (%BinaryType%)
 }
-
-GetFileAttributes(Filename, ByRef Attrib := "", ByRef Path := "", ByRef Type := "") {																			;-- get attributes of a file or folder
+;28
+GetFileAttributes(Filename, ByRef Attrib := "", ByRef Path := "", ByRef Type := "") {											    	;-- get attributes of a file or folder
 	
 	/*                              	DESCRIPTION
 	
@@ -11533,8 +11967,8 @@ GetFileAttributes(Filename, ByRef Attrib := "", ByRef Path := "", ByRef Type := 
 		Type := Attrib&0x10?"D":"F"
 	return OutputVar
 }
-
-SetFileTime(Time := "", FilePattern := "", WhichTimeMCA := "M", OperateOnFolders := false, Recurse := false) {								;-- to set the time
+;29
+SetFileTime(Time := "", FilePattern := "", WhichTimeMCA := "M", OperateOnFolders := false, Recurse := false) {	;-- to set the time
 	if IsObject(Time)
 		for k, v in Time
 			FileSetTime, %v%, %FilePattern%, % k=1?"M":k=2?"C":k=3?"A":k, %OperateOnFolders%, %Recurse%
@@ -11542,8 +11976,8 @@ SetFileTime(Time := "", FilePattern := "", WhichTimeMCA := "M", OperateOnFolders
 		FileSetTime, %Time%, %FilePattern%, %A_LoopField%, %OperateOnFolders%, %Recurse%
 	return !ErrorLevel
 }
-
-SetFileAttributes(Attributes, Filename, Mode := "FD") {																														;-- set attributes of a file or folder
+;30
+SetFileAttributes(Attributes, Filename, Mode := "FD") {																								;-- set attributes of a file or folder
 	
 	/*                              	DESCRIPTION
 	
@@ -11580,8 +12014,8 @@ SetFileAttributes(Attributes, Filename, Mode := "FD") {																									
 	} else Attrib := Attributes, Filename := (StrLen(Filename) > 260 ? "\\?\" : "") Filename
 	return DllCall("Kernel32.dll\SetFileAttributesW", "Ptr",  &Filename, "UInt", Attrib)
 }
-
-FileSetSecurity(Path, Trustee := "", AccessMask := 0x1F01FF, Flags := 1, AccesFlag := 0) { 																;--  set security for the file / folder
+;31
+FileSetSecurity(Path, Trustee := "", AccessMask := 0x1F01FF, Flags := 1, AccesFlag := 0) { 										;--  set security for the file / folder
 	
 	/*                              	DESCRIPTION
 	
@@ -11634,8 +12068,8 @@ FileSetSecurity(Path, Trustee := "", AccessMask := 0x1F01FF, Flags := 1, AccesFl
 	, oDiscretionaryAcl.AddAce(oAccessControlEntry)
 	, oADsSecurityUtility.SetSecurityDescriptor(Path, 1, oADsSecurityDescriptor, 1)
 }
-
-FileSetOwner(Path, Owner := "") {																																						;-- set the owner to file / directory
+;32
+FileSetOwner(Path, Owner := "") {																																;-- set the owner to file / directory
 	
 	/*                              	DESCRIPTION
 	
@@ -11654,8 +12088,8 @@ FileSetOwner(Path, Owner := "") {																																						;-- set t
 	, oADsSecurityDescriptor.Owner := Owner
 	, oADsSecurityUtility.SetSecurityDescriptor(Path, 1, oADsSecurityDescriptor, 1)
 }
-
-FileGetOwner(Path) { 																																											;-- get the owner to file / directory
+;33
+FileGetOwner(Path) { 																																					;-- get the owner to file / directory
 	
 	/*                              	DESCRIPTION
 	
@@ -11671,24 +12105,155 @@ FileGetOwner(Path) { 																																											;-- get the owne
 	, oADsSecurityDescriptor := oADsSecurityUtility.GetSecurityDescriptor(GetFullPathName(Path), 1, 1)
 	return oADsSecurityDescriptor.Owner
 }
+;34
+GetFileFormat(file) {                                                                                                                                                	;-- retreaves the codepage format of a file
 
+  static BOM:={254_255:"UTF-16 BE",255_254:"UTF-16 LE",239_187_191:"UTF-8",247_100_76:"UTF-1",14_254_255:"SCSU",251_238_40:"BOCU-1"
+              ,0_0_254_255:"UTF-32 BE",255_254_0_0:"UTF-32 LE",43_47_118_43:"UTF-7",43_47_118_47:"UTF-7",43_47_118_56:"UTF-7"
+              ,43_47_118_57:"UTF-7",221_115_102_115:"UTF-EBCDIC",132_49_149_51:"GB 18030"}
+  If !FileExist(file)
+		return
+	FileRead,text,*c %file%
+
+  BOM2:=NumGet(&text,"UChar") "_" NumGet(&text+1,"UChar"), BOM3:=BOM2 "_" NumGet(&text+2,"UChar"), BOM4:=BOM3 "_" NumGet(&text+3,"UChar")
+  If BOM.HasKey(BOM4)
+    return BOM[BOM4]
+  else if BOM.HasKey(BOM3)
+    return BOM[BOM3]
+  else if BOM.HasKey(BOM2)
+    return BOM[BOM2]
+  FileGetSize,size,%file%
+  return StrLen(StrGet(&text,"UTF-8"))=size?"ANSI":"UTF-8 no BOM"
+}
+;35
+HashFile(filePath,hashType=2)  {	                                                                                                                            	;-- calculate hashes (MD2,MD5,SH1,SHA256, SHA384, SHA512) from file
+
+	/*    	DESCRIPTION of function HashFile()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	calculate hashes (MD2,MD5,SH1,SHA256, SHA384, SHA512) from file
+			Link              	:	http://www.autohotkey.com/forum/viewtopic.php?t=71133
+			Author         	:	Deo
+			Date             	:	24 Apr 2011
+			AHK-Version	:	AHK_L
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	hash, MD, SHA, compare, file, crypt 
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+	
+			filePath := "C:\Windows\notepad.exe"
+
+			msgbox % "MD5:`n" HashFile(filePath,2)
+			msgbox % "SHA:`n" HashFile(filePath,3)
+			msgbox % "SHA512:`n" HashFile(filePath,6)
+	
+	*/
+
+   PROV_RSA_AES                 	:= 24
+   CRYPT_VERIFYCONTEXT     	:= 0xF0000000
+   BUFF_SIZE                         	:= 1024 * 1024 ; 1 MB
+   HP_HASHVAL                     	:= 0x0002
+   HP_HASHSIZE                     	:= 0x0004
+   
+   HASH_ALG := (hashType = 1 OR hashType = "MD2") ? (CALG_MD2 := 32769) : HASH_ALG
+   HASH_ALG := (hashType = 2 OR hashType = "MD5") ? (CALG_MD5 := 32771) : HASH_ALG
+   HASH_ALG := (hashType = 3 OR hashType = "SHA") ? (CALG_SHA := 32772) : HASH_ALG
+   HASH_ALG := (hashType = 4 OR hashType = "SHA256") ? (CALG_SHA_256 := 32780) : HASH_ALG   ;Vista+ only
+   HASH_ALG := (hashType = 5 OR hashType = "SHA384") ? (CALG_SHA_384 := 32781) : HASH_ALG   ;Vista+ only
+   HASH_ALG := (hashType = 6 OR hashType = "SHA512") ? (CALG_SHA_512 := 32782) : HASH_ALG   ;Vista+ only
+   
+   f := FileOpen(filePath,"r","CP0")
+   if !IsObject(f)
+      return 0
+   if !hModule := DllCall( "GetModuleHandleW", "str", "Advapi32.dll", "Ptr" )
+      hModule := DllCall( "LoadLibraryW", "str", "Advapi32.dll", "Ptr" )
+   if !dllCall("Advapi32\CryptAcquireContextW"
+            ,"Ptr*",hCryptProv
+            ,"Uint",0
+            ,"Uint",0
+            ,"Uint",PROV_RSA_AES
+            ,"UInt",CRYPT_VERIFYCONTEXT )
+      Gosub,HashTypeFreeHandles
+   
+   if !dllCall("Advapi32\CryptCreateHash"
+            ,"Ptr",hCryptProv
+            ,"Uint",HASH_ALG
+            ,"Uint",0
+            ,"Uint",0
+            ,"Ptr*",hHash )
+      Gosub, HashTypeFreeHandles
+   
+   VarSetCapacity(read_buf,BUFF_SIZE,0)
+   
+    hCryptHashData := DllCall("GetProcAddress", "Ptr", hModule, "AStr", "CryptHashData", "Ptr")
+   While (cbCount := f.RawRead(read_buf, BUFF_SIZE))
+   {
+      if (cbCount = 0)
+         break
+      
+      if !dllCall(hCryptHashData
+               ,"Ptr",hHash
+               ,"Ptr",&read_buf
+               ,"Uint",cbCount
+               ,"Uint",0 )
+         Gosub, HashTypeFreeHandles
+   }
+   
+   if !dllCall("Advapi32\CryptGetHashParam"
+            ,"Ptr",hHash
+            ,"Uint",HP_HASHSIZE
+            ,"Uint*",HashLen
+            ,"Uint*",HashLenSize := 4
+            ,"UInt",0 ) 
+      Gosub, HashTypeFreeHandles
+      
+   VarSetCapacity(pbHash,HashLen,0)
+   if !dllCall("Advapi32\CryptGetHashParam"
+            ,"Ptr",hHash
+            ,"Uint",HP_HASHVAL
+            ,"Ptr",&pbHash
+            ,"Uint*",HashLen
+            ,"UInt",0 )
+      Gosub, HashTypeFreeHandles   
+   
+   SetFormat,integer,Hex
+   loop,%HashLen%
+   {
+      num := numget(pbHash,A_index-1,"UChar")
+      hashval .= substr((num >> 4),0) . substr((num & 0xf),0)
+   }
+   SetFormat,integer,D
+      
+HashTypeFreeHandles:
+   f.Close()
+   DllCall("FreeLibrary", "Ptr", hModule)
+   dllCall("Advapi32\CryptDestroyHash","Ptr",hHash)
+   dllCall("Advapi32\CryptReleaseContext","Ptr",hCryptProv,"UInt",0)
+   return hashval
+}
 
 } 
-;|														|														|														|														|
-;|	 InvokeVerb()								|	Function_Eject()							|	FileGetDetail()								|	FileGetDetails()							|
-;|	 DirExist()										|	GetDetails()									|	Start()	             							|	IsFileEqual()									|
-;|	 WatchDirectory()	x 2				|	GetFileIcon()									| 	ExtractAssociatedIcon()				|	ExtractAssociatedIconEx()				|
-;|	 DestroyIcon()								|	listfunc()										|	CreateOpenWithMenu()				|	FileCount()									|
-;|	 IdentifyImageTypW()					|	FileWriteLine()								|	FileMD5()										|   FileCRC32()                              	|
-;|   FindFreeFileName()                 	|   CountFilesR()                            	|   CountFiles()                              	|   PathInfo()                                   	|
-;|	 DriveSpace()                           	|   GetBinaryType()                         	|   GetFileAttributes()                    	|   SetFileTime()                          	 	|
-;|	 SetFileAttributes()                   	|   FileSetSecurity()                         	|   FileSetOwner()                          	|   FileGetOwner()                         	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   InvokeVerb()                            	|   Function_Eject()                        	|   FileGetDetail()                          	|   FileGetDetails()                        	|
+;|   DirExist()                                 	|   GetDetails()                              	|   Start()                                       	|   IsFileEqual()                             	|
+;|   WatchDirectory()	x 2                	|   GetFileIcon()                            	|   ExtractAssociatedIcon()            	|   ExtractAssociatedIconEx()         	|
+;|   DestroyIcon()                           	|   listfunc()                                   	|   CreateOpenWithMenu()           	|   FileCount()                               	|
+;|   IdentifyImageTypW()               	|   FileWriteLine()                          	|   FileMD5()                                 	|   FileCRC32()                              	|
+;|   FindFreeFileName()                 	|   CountFilesR()                            	|   CountFiles()                              	|   PathInfo()                                 	|
+;|   DriveSpace()                            	|   GetBinaryType()                       	|   GetFileAttributes()                    	|   SetFileTime()                            	|
+;|   SetFileAttributes()                    	|   FileSetSecurity()                       	|   FileSetOwner()                          	|   FileGetOwner()                         	|
+;|   GetFileFormat()                        	|   HashFile()                                	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Font things (6)
+{ ;Font things (10)
 ;1
-CreateFont(pFont="") {                                                                                                                     	;-- creates font in memory which can be used with any API function accepting font handles
+CreateFont(pFont="") {                                                                                                 	;-- creates font in memory which can be used with any API function accepting font handles
 
 	;a function by majkinetor
 	;https://autohotkey.com/board/topic/21003-function-createfont/
@@ -11737,7 +12302,7 @@ CreateFont(pFont="") {                                                          
 	return hFont
 }
 ;2
-GetHFONT(Options := "", Name := "") {																								;-- gets a handle to a font used in a AHK gui for example
+GetHFONT(Options := "", Name := "") {                                                                      	;-- gets a handle to a font used in a AHK gui for example
    
    ; source: https://github.com/aviaryan/Clipjump/blob/master/lib/anticj_func_labels.ahk
    ; dependings: no
@@ -11750,7 +12315,7 @@ GetHFONT(Options := "", Name := "") {																								;-- gets a handle t
    Return HFONT
 }
 ;3
-MsgBoxFont(Fontstring, title, msg) {                                                                                               	;-- style your MsgBox with with your prefered font
+MsgBoxFont(Fontstring, title, msg) {                                                                           	;-- style your MsgBox with with your prefered font
 ; https://autohotkey.com/board/topic/21003-function-createfont/
 hFont := CreateFont("s14 italic, Courier New")
 	SetTimer, OnTimer, -30
@@ -11764,7 +12329,7 @@ OnTimer:
 return
 }
 ;4
-GetFontProperties(HFONT) {																												;-- to get the current font's width and height
+GetFontProperties(HFONT) {                                                                                       	;-- to get the current font's width and height
 	
 	/*                              	DESCRIPTION
 	
@@ -11809,7 +12374,7 @@ GetFontProperties(HFONT) {																												;-- to get the current fon
    Return Font
 }
 ;5
-FontEnum(lfCharSet := 1, FontName := "") {																						;-- enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure
+FontEnum(lfCharSet := 1, FontName := "") {                                                               	;-- enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure
 	/*                              	DESCRIPTION
 	
 			SOURCES Parameters:
@@ -11837,12 +12402,14 @@ FontEnum(lfCharSet := 1, FontName := "") {																						;-- enumerates a
 	return true
 } ;https://msdn.microsoft.com/en-us/library/dd162620(v=vs.85).aspx
 ;6
-GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1) {							;-- calculate the height and width of the text in the specified font 
+GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1) {  	;-- calculate the height and width of the text in the specified font 
 	/*                              	DESCRIPTION
 	
-			Syntax: GetFontTextDimension( [hFont], [Text], [out Width], [out Height] )
-			Returns: 0|1
-			
+			Syntax: 			GetFontTextDimension( [hFont], [Text], [out Width], [out Height] )
+			How to:			use CreateFont() to get hFont
+			Returns: 
+			Dependings: 	GetStockObject()
+				
 	*/
 	hFont := hFont?hFont:GetStockObject(17), hDC := GetDC()
 	, hSelectObj := SelectObject(hDC, hFont), VarSetCapacity(SIZE, 8, 0)
@@ -11856,21 +12423,180 @@ GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1)
 	, Height := Floor((NumGet(TEXTMETRIC, 0, "Int")*c)+(NumGet(TEXTMETRIC,16, "Int")*(Floor(c+0.5)-1))+0.5)+8
 	return true
 } ;https://msdn.microsoft.com/en-us/library/dd144938(v=vs.85).aspx
+{ ;sub of GetFontTextDimension
+GetStockObject(nr) {
+
+	return DllCall( "GetStockObject", UInt, nr)
+}
 
 }
-;|														|														|														|														|
-;| 	CreateFont()                             	|   GetHFONT()                              	|   MsgBoxFont()                            	|   GetFontProperties()                   	|
-;|   FontEnum()                              	|   GetFontTextDimension()           	|
+;7
+FontClone(hFont) {                                                                                                      	;-- backup hFont in memory for further processing
+
+		/*    	DESCRIPTION of function 
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	backup hFont in memory for further processing
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?t=36461
+			Author         	:	jeeswg
+			Date	            	:	
+			AHK-Version	:	AHK_L ???
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+	
+			q:: ;control get font, font get average character width
+			SendMessage, 0x31, 0, 0, Edit1, ahk_class Notepad ;WM_GETFONT := 0x31
+			hFont := ErrorLevel
+			hFont2 := JEE_FontClone(hFont)
+			MsgBox, % JEE_StrGetDimAvgCharWidth(hFont2)*8
+			return
+			;iTabLength
+			;The size of each tab stop, in units equal to the average character width.
+			;(a tab character is 8 times wider than the average character width)
+
+			;e.g. hFontNew := JEE_FontClone(hFont)
+	
+	*/
+	
+
+
+	VarSetCapacity(LOGFONT, 92, 0) ;LOGFONT (Unicode)
+	vSize := DllCall("gdi32\GetObject", Ptr,hFont, Int,0, Ptr,0)
+	DllCall("gdi32\GetObject", Ptr,hFont, Int,vSize, Ptr,&LOGFONT)
+	return DllCall("CreateFontIndirect", Ptr,&LOGFONT, Ptr)
+}
+;8
+GuiDefaultFont() {                                                                                                        	;-- returns the default Fontname & Fontsize
+	
+	/*    	DESCRIPTION of function 
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	AutoHotkey uses the 'default GUI font' for controls, if you do not specify one in your script. 
+                                    	This 'default GUI font' is system wide and the same one being used in MenuBar.
+                                    	GuiDefaultFont() returns the Fontname & Fontsize.
+			Link              	:	www.autohotkey.com/forum/viewtopic.php?p=465438#465438
+			Author         	:	SKAN
+			Date	            	:	???
+			AHK-Version	:	AHK v1
+			License         	:	
+			Parameter(s)	:	none
+			Return value	:	Fontname, A_LastError contains FontSize
+			Remark(s)    	:	
+			Dependencies	:	none
+			KeyWords    	:	Font, Gui, DllCall
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+
+			A_GuiFont     := GuiDefaultFont()
+			A_GuiFontSize := A_LastError
+			MsgBox, %A_GuiFont%`t%A_GuiFontSize%
+
+	*/
+	
+	 hFont := DllCall( "GetStockObject", UInt,17 ) ; DEFAULT_GUI_FONT
+	 VarSetCapacity( LF, szLF := 60*( A_IsUnicode ? 2:1 ) )
+	 DllCall("GetObject", UInt,hFont, Int,szLF, UInt,&LF )
+	 hDC := DllCall( "GetDC", UInt,hwnd ), DPI := DllCall( "GetDeviceCaps", UInt,hDC, Int,90 )
+	 DllCall( "ReleaseDC", Int,0, UInt,hDC ), S := Round( ( -NumGet( LF,0,"Int" )*72 ) / DPI )
+Return DllCall( "MulDiv",Int,&LF+28, Int,1,Int,1, Str ), DllCall( "SetLastError", UInt,S )
+}
+;9
+StrGetDimAvgCharWidth(hFont) {                                                                              	;-- average width of a character in pixels
+	
+		/*    	DESCRIPTION of function StrGetDimAvgCharWidth()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	The size of each tab stop, in units equal to the average character width.
+                                     	(a tab character is 8 times wider than the average character width)
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?t=36461
+			Author         	:	jeeswg
+			Date	            	:	30 Aug 2017
+			AHK-Version	:	
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	FontClone()
+			KeyWords    	:	Font, Width, DllCall, Gdi
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+	
+			q:: ;control get font, font get average character width
+        	SendMessage, 0x31, 0, 0, Edit1, ahk_class Notepad ;WM_GETFONT := 0x31
+        	hFont := ErrorLevel
+        	hFont2 := JEE_FontClone(hFont)
+        	MsgBox, % JEE_StrGetDimAvgCharWidth(hFont2)*8
+        	return
+	
+	*/
+
+	vText := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	hDC := DllCall("user32\GetDC", Ptr,0, Ptr)
+	hFontOld := DllCall("gdi32\SelectObject", Ptr,hDC, Ptr,hFont, Ptr)
+	;HWND_DESKTOP := 0
+	VarSetCapacity(SIZE, 8, 0)
+	DllCall("gdi32\GetTextExtentPoint32", Ptr,hDC, Str,vText, Int,StrLen(vText), Ptr,&SIZE)
+	DllCall("gdi32\SelectObject", Ptr,hDC, Ptr,hFontOld, Ptr)
+	DllCall("user32\ReleaseDC", Ptr,0, Ptr,hDC)
+	vTextW1 := NumGet(SIZE, 0, "Int") ;cx ;logical units
+	vTextW2 := Floor((vTextW1/26+1)/2)
+	return vTextW2
+}
+;10
+CreateFont(nHeight, nWidth, nEscapement, nOrientation, fnWeight,                        	;-- creates HFont for use with GDI
+fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision,
+fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace) {
+
+/*
+HFONT CreateFont(
+  int nHeight,               // height of font
+  int nWidth,                // average character width
+  int nEscapement,           // angle of escapement
+  int nOrientation,          // base-line orientation angle
+  int fnWeight,              // font weight
+  DWORD fdwItalic,           // italic attribute option
+  DWORD fdwUnderline,        // underline attribute option
+  DWORD fdwStrikeOut,        // strikeout attribute option
+  DWORD fdwCharSet,          // character set identifier
+  DWORD fdwOutputPrecision,  // output precision
+  DWORD fdwClipPrecision,    // clipping precision
+  DWORD fdwQuality,          // output quality
+  DWORD fdwPitchAndFamily,   // pitch and family
+  LPCTSTR lpszFace           // typeface name
+);
+*/
+
+	return DllCall("CreateFont"
+				, "Int" , nHeight           , "Int" , nWidth          , "Int" , nEscapement
+				, "Int" , nOrientation      , "Int" , fnWeight        , "UInt", fdwItalic
+				, "UInt", fdwUnderline      , "UInt", fdwStrikeOut    , "UInt", fdwCharSet
+				, "UInt", fdwOutputPrecision, "UInt", fdwClipPrecision, "UInt", fdwQuality
+				, "UInt", fdwPitchAndFamily , "Str" , lpszFace)
+}
+}
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   CreateFont()                            	|   GetHFONT()                             	|   MsgBoxFont()                           	|   GetFontProperties()                  	|
+;|   FontEnum()                             	|   GetFontTextDimension()          	|   FontClone()                              	|   GuiDefaultFont()                      	|
+;|   StrGetDimAvgCharWidth()      	|   CreateFont()                             	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Hooks-Messaging (7)
-
-OnMessageEx(MsgNumber, params*) {												;-- Allows multiple functions to be called automatically when the script receives the specified message
+{ ;Hooks/Messaging (9)
+;1
+OnMessageEx(MsgNumber, params*) {                                          	;-- Allows multiple functions to be called automatically when the script receives the specified message
 
     ;version 1.0.2 by A_Samurai http://sites.google.com/site/ahkref/custom-functions/onmessageex
 
-	/*													Description
+	/*                                              	Description
 
 		Allows multiple functions to be called automatically when the script receives the specified message.
 
@@ -11906,7 +12632,7 @@ OnMessageEx(MsgNumber, params*) {												;-- Allows multiple functions to be
 
 	*/
 
-	/*													Examples
+	/*                                              	Examples
 
 		#Persistent
 		Gui, Font, s20
@@ -12099,8 +12825,8 @@ OnMessageEx(MsgNumber, params*) {												;-- Allows multiple functions to be
         }
     }
 }
-
-ReceiveData(wParam, lParam) {															;--  By means of OnMessage(), this function has been set up to be called automatically whenever new data arrives on the connection.
+;2
+ReceiveData(wParam, lParam) {                                                       	;--  By means of OnMessage(), this function has been set up to be called automatically whenever new data arrives on the connection.
 
    global ShowRecieved
    global ReceivedData
@@ -12139,8 +12865,8 @@ ReceiveData(wParam, lParam) {															;--  By means of OnMessage(), this f
 	}
     return 1  ; Tell the program that no further processing of this message is needed.
 }
-
-HDrop(fnames,x=0,y=0) {																;-- Drop files to another app
+;3
+HDrop(fnames,x=0,y=0) {                                                                	;-- Drop files to another app
 
 	/*						Description
 
@@ -12172,8 +12898,8 @@ HDrop(fnames,x=0,y=0) {																;-- Drop files to another app
    DllCall("GlobalUnlock","UInt",hDrop)
    Return hDrop
 }
-
-WM_MOVE(wParam, lParam, nMsg, hWnd) { 									;-- UpdateLayeredWindow
+;4
+WM_MOVE(wParam, lParam, nMsg, hWnd) {                                  	;-- UpdateLayeredWindow
 
 If   A_Gui
 &&   DllCall("UpdateLayeredWindow", "Uint", hWnd, "Uint", 0, "int64P", (lParam<<48>>48)&0xFFFFFFFF|(lParam&0xFFFF0000)<<32>>16, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0)
@@ -12184,9 +12910,9 @@ else
 Gui, 2: Show, Center
 Return   0
 }
-
+;5
 OnMessage(0x46, "WM_WINDOWPOSCHANGING")
-WM_WINDOWPOSCHANGING(wParam, lParam) {							;-- two different examples of handling a WM_WINDOWPOSCHANGING
+WM_WINDOWPOSCHANGING(wParam, lParam) {	                        	;-- two different examples of handling a WM_WINDOWPOSCHANGING
 
     if (A_Gui = 1 && !(NumGet(lParam+24) & 0x2)) ; SWP_NOMOVE=0x2
     {
@@ -12195,8 +12921,8 @@ WM_WINDOWPOSCHANGING(wParam, lParam) {							;-- two different examples of handl
         Gui, 2:Show, X%x% Y%y% NA
     }
 }
-; or
-WM_WINDOWPOSCHANGING(wParam, lParam) {
+;6
+WM_WINDOWPOSCHANGING(wParam, lParam) {                           	;-- second examples of handling a WM_WINDOWPOSCHANGING
 
 	global
 
@@ -12213,12 +12939,12 @@ WM_WINDOWPOSCHANGING(wParam, lParam) {
 	Return
 
 }
-
-CallNextHookEx(nCode, wParam, lParam, hHook = 0) {						;-- Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this function either before or after processing the hook information
+;7
+CallNextHookEx(nCode, wParam, lParam, hHook = 0) {                 	;-- Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this function either before or after processing the hook information
    Return DllCall("CallNextHookEx", "Uint", hHook, "int", nCode, "Uint", wParam, "Uint", lParam)
 }
-
-WM_DEVICECHANGE( wParam, lParam) { 										;-- Detects whether a CD has been inserted instead and also outputs the drive - global drv
+;8
+WM_DEVICECHANGE( wParam, lParam) {                                       	;-- Detects whether a CD has been inserted instead and also outputs the drive - global drv
 
 Global Drv
  global DriveNotification
@@ -12256,18 +12982,58 @@ Global Drv
  }
 Return TRUE
 }
+;9
+ObjectNameChange(hWinEventHook, event, hwnd,                      	;-- titlebar hook to detect when title changes, (Lexikos' code)
+idObject, idChild, thread, time){
 
+		; a Lexikos function
+
+	  /*		Example
+	  
+				#NoTrayIcon
+
+				; EVENT_OBJECT_NAMECHANGE = 0x800C
+				; WINEVENT_OUTOFCONTEXT = 0x0000
+				hook := DllCall("SetWinEventHook", "uint", 0x800C, "uint", 0x800C
+					, "uint", 0, "uint", RegisterCallback("ObjectNameChange")
+					, "uint", 0, "uint", 0, "uint", 0)
+				OnExit, UnHook
+
+				#t::
+					active := WinExist("A")+0
+					WinGetTitle, title
+					InputBox, newtitle, Enter new title:,,,600,100,,,,, %title% ; yay commas
+					If !ErrorLevel {
+						WinSetTitle, %newtitle%
+						Win_%active% := newtitle
+					}
+				return
+	  
+				UnHook:
+					ExitApp, DllCall("UnhookWinEvent", "uint", hook) ; Yes, this works.
+				Return
+	  
+	  */
+
+	; If the object is a window (OBJID_WINDOW), is not hidden, and is not a child window,
+	if (idObject=0) && WinExist("ahk_id " hwnd) && DllCall("GetAncestor","uint",hwnd,"uint",1)=DllCall("GetDesktopWindow")
+		If(newtitle := Win_%hwnd%)!=""{
+			WinGetTitle, title, ahk_id %hwnd%
+			If(title != newtitle)
+				WinSetTitle, ahk_id %hwnd%,, %newtitle%
+		}
+}
 
 } 
-;|														|														|														|														|
-;|	OnMessageEx()							|	ReceiveData()								|	HDrop()										|	WM_MOVE()								|
-;|	WM_WINDOWPOSCHANGING()	|	CallNextHookEx()							|	WM_DEVICECHANGE()				|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   OnMessageEx(1)                        	|   ReceiveData(2)                           	|   HDrop(3)                                  	|   WM_MOVE(4)                            	|
+;|   WM_WINDOWPOSCHANGING	|   CallNextHookEx(7)	                   	|   WM_DEVICECHANGE(8)           	|   ObjectNameChange()               	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Internet / Network - Functions (23)
-
-DownloadFile(url, file, info="") {															;--
+{ ;Internet/Network (21)
+;1
+DownloadFile(url, file, info="") {											            				;--
     static vt
     if !VarSetCapacity(vt)
     {
@@ -12289,8 +13055,8 @@ DownloadFile(url, file, info="") {															;--
     Progress Off
     return ErrorLevel
 }
-
-NewLinkMsg(VideoSite, VideoName = "") {										;--
+;2
+NewLinkMsg(VideoSite, VideoName = "") {								            		;--
 
    global lng
 
@@ -12305,8 +13071,8 @@ NewLinkMsg(VideoSite, VideoName = "") {										;--
 		return, -1
 
 }
-
-TimeGap(ntp="de.pool.ntp.org")	{													;-- Determine by what amount the local system time differs to that of an ntp server
+;3
+TimeGap(ntp="de.pool.ntp.org")	{								            					;-- Determine by what amount the local system time differs to that of an ntp server
 
 		;Bobo's function
 		;https://autohotkey.com/boards/viewtopic.php?f=10&t=34806
@@ -12315,8 +13081,8 @@ TimeGap(ntp="de.pool.ntp.org")	{													;-- Determine by what amount the lo
 		Return % SubStr(array[4], 10)		                ; difference of time/gap ...
 
 }
-
-GetSourceURL( str ) {																			;--
+;4
+GetSourceURL( str ) {																            			;--
 
     FragIdent := RegExReplace( str, "i).*<b.*?>(.*?<!--s\w{11}t-->).*", "$1" )
 
@@ -12327,8 +13093,8 @@ GetSourceURL( str ) {																			;--
     Return SourceURL
 
 }
-
-DNS_QueryName(IP, ByRef NameArray := "") {									;--
+;5
+DNS_QueryName(IP, ByRef NameArray := "") {						            			;--
 
    Static OffRR := (A_PtrSize * 2) + 16 ; offset of resource record (RR) within the DNS_RECORD structure
    HDLL := DllCall("LoadLibrary", "Str", "Dnsapi.dll", "UPtr")
@@ -12351,9 +13117,9 @@ DNS_QueryName(IP, ByRef NameArray := "") {									;--
    Return NameArray[1] ; returnes the first name from the NameArray on success, otherwise an empty string
 
 }
-
-	;this 4 belongs together
-GetHTMLFragment() {																			;--
+;6
+	;this 4 belong together
+GetHTMLFragment() {																            			;--
 
     FmtArr := EnumClipFormats(), NmeArr := GetClipFormatNames( FmtArr )
 
@@ -12372,7 +13138,7 @@ GetHTMLFragment() {																			;--
     Return ScrubFragmentIdents( StrGet( ClpPtr, "UTF-8" ) )
 
 }
-ScrubFragmentIdents( HTMFrag ) {														;--
+ScrubFragmentIdents( HTMFrag ) {											            			;--
 
     HTMObj := ComObjCreate( "HTMLFile" ), HTMObj.Write( HTMFrag )
     MarkUp := HTMObj.getElementsByTagName( "HTML" )[ 0 ].OuterHtml
@@ -12382,7 +13148,7 @@ ScrubFragmentIdents( HTMFrag ) {														;--
 
     Return MarkUp
 }
-EnumClipFormats() {																			;--
+EnumClipFormats() {																            			;--
     FmtArr := [], DllCall( "OpenClipboard" )
 
     While ( DllCall( "CountClipboardFormats" ) >= a_index )
@@ -12390,7 +13156,7 @@ EnumClipFormats() {																			;--
 
     Return FmtArr
 }
-GetClipFormatNames( FmtArr ) {														;--
+GetClipFormatNames( FmtArr ) {													            	;--
     if ( FmtArr.Length() = False )
     {
         DllCall( "CloseClipboard" )
@@ -12408,8 +13174,8 @@ GetClipFormatNames( FmtArr ) {														;--
     Return FmtNmArr
 }
 	;------------------------------
-
-GoogleTranslate(phrase,LangIn,LangOut) {											;--
+;7
+GoogleTranslate(phrase,LangIn,LangOut) {							            				;--
 
 		Critical
 		base := "https://translate.google.com.tw/?hl=en&tab=wT#"
@@ -12427,8 +13193,8 @@ GoogleTranslate(phrase,LangIn,LangOut) {											;--
 return Result
 
 }
-
-getText(byref html) {																			;-- get text from html
+;8
+getText(byref html) {												            							;-- get text from html
 
 	html:=RegExReplace(html,"[\n\r\t]+","")
 
@@ -12442,33 +13208,33 @@ getText(byref html) {																			;-- get text from html
 	html:=regexreplace(html,"i)&nbsp;"," ")
 	return html
 }
-
-getHtmlById(byref html,id,outer=false) {												;--
+;9
+getHtmlById(byref html,id,outer=false) {		            										;--
 	RegExMatch(html,"is)<([^>\s]+)[^>]*\sid=(?:(?:""" id """)|(?:'" id "')|(?:" id "))[^>]*>(.*?)<\s*\/\s*\1\s*>",match)
 	return outer ? match : match2
 }
-
-getTextById(byref html,id,trim=true) {                                             	;--
+;10
+getTextById(byref html,id,trim=true) {                                                         	;--
 	return trim ? trim(s:=getText(getHtmlById(html,id))) : s
 }
-
-getHtmlByTagName(byref html,tagName,outer=false) {					;--
+;11
+getHtmlByTagName(byref html,tagName,outer=false) {		            			;--
 	arr:=[]
 	i:=0
 	while i:=regexmatch(html,"is)<" tagName "(?:\s[^>]*)?>(.*?)<\s*\/\s*" tagName "\s*>",match,i+1)
 		outer ? arr.insert(match) : arr.insert(match1)
 	return arr
 }
-
-getTextByTagName(byref html,tagName,trim=true) {						;--
+;12
+getTextByTagName(byref html,tagName,trim=true) {		            				;--
 	arr:=getHtmlByTagName(html,tagName)
 	arr2:=[]
 	for k,v in arr
 		trim ? arr2.insert(trim(s:=getText(v))) : arr2.insert(s)
 	return arr2
 }
-
-CreateGist(content, description:="", filename:="file1.ahk", 				;--
+;13
+CreateGist(content, description:="", filename:="file1.ahk", 		            		;--
 token:="", public:=true) {
 
 	url := "https://api.github.com/gists"
@@ -12489,8 +13255,8 @@ token:="", public:=true) {
 	else
 		throw, whr.ResponseText
 }
-
-GetAllResponseHeaders(Url, RequestHeaders := "",                       	;-- gets the values of all HTTP headers
+;14
+GetAllResponseHeaders(Url, RequestHeaders := "",                                   	;-- gets the values of all HTTP headers
 NO_AUTO_REDIRECT := false, NO_COOKIES := false) {
 
 	static INTERNET_OPEN_TYPE_DIRECT := 1
@@ -12558,8 +13324,8 @@ NO_AUTO_REDIRECT := false, NO_COOKIES := false) {
 	return output
 
 }
-
-NetStat() {                                                                                        	;--passes information over network connections similar to the netstat -an CMD command.
+;15
+NetStat() {                                                                                                    	;--passes information over network connections similar to the netstat -an CMD command.
 
 	/*	Description: a function by jNizM
 
@@ -12656,8 +13422,8 @@ NetStat() {                                                                     
 	}
 	return list
 }
-
-ExtractTableData( FilePath, HeadingsArray, Delimiter, SaveDir ) {		;-- extracts tables from HTML files
+;16
+ExtractTableData( FilePath, HeadingsArray, Delimiter, SaveDir ) {	            	;-- extracts tables from HTML files
 
 	static htmObj
 
@@ -12779,12 +13545,12 @@ ExtractTableData( FilePath, HeadingsArray, Delimiter, SaveDir ) {		;-- extracts 
 
 	return tablesDataString
 }
-
-IsConnected(URL="https://autohotkey.com/boards/") {                	;-- Returns true if there is an available internet connection
+;17
+IsConnected(URL="https://autohotkey.com/boards/") {                            	;-- Returns true if there is an available internet connection
 	return DllCall("Wininet.dll\InternetCheckConnection", "Str", URL,"UInt", 1, "UInt",0, "UInt")
 }
-
-HostToIp(NodeName) {																		;-- gets the IP address for the given host directly using the WinSock 2.0 dll, without using temp files or third party utilities
+;18
+HostToIp(NodeName) {								            										;-- gets the IP address for the given host directly using the WinSock 2.0 dll, without using temp files or third party utilities
 	/*                              	DESCRIPTION
 
 			Link: https://autohotkey.com/board/topic/9051-host-to-ip-address-using-winsock-20-dll/
@@ -12886,8 +13652,8 @@ ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4)
 	Return result 
 }
 ;}
-
-LocalIps() {																							;-- with small changes to HostToIP() this can be used to retrieve all LocalIP's
+;19
+LocalIps() {										            													;-- with small changes to HostToIP() this can be used to retrieve all LocalIP's
 	/*                              	DESCRIPTION
 	
 			Link: https://autohotkey.com/board/topic/9051-host-to-ip-address-using-winsock-20-dll/
@@ -12955,8 +13721,8 @@ LocalIps() {																							;-- with small changes to HostToIP() this can
    } 
    return IPs 
 } 
-
-GetAdaptersInfo() {																				;-- GetAdaptersAddresses function & IP_ADAPTER_ADDRESSES structure
+;20
+GetAdaptersInfo() {																	            			;-- GetAdaptersAddresses function & IP_ADAPTER_ADDRESSES structure
 	/*                              	DESCRIPTION
 	
 				Link: https://autohotkey.com/boards/viewtopic.php?t=18768
@@ -13010,19 +13776,125 @@ GetAdaptersInfo() {																				;-- GetAdaptersAddresses function & IP_AD
     ; output the data we received and free the buffer
     return IP_ADAPTER_INFO, VarSetCapacity(buf, 0), VarSetCapacity(addr, 0)
 }
+;21
+DNSQuery(AddrOrName, ByRef ResultArray := "", ByRef CNAME := "") {		;-- retrieve IP adresses or host/domain names from DNS
+   
+	/*    	DESCRIPTION of function DNSQuery()
+			 ==================================================================================================================================
+			 Function:
+					Query DNS to get the IPv4 address(es) for the given host/domain name or vice versa.
+			 Parameters:
+					AddrOrName  -  host/domain name or IPv4 address (xxx.xxx.xxx.xxx).
+					ResultArray -  optional array to retrieve multiple answers.
+					CNAME       -  optional variable to retrieve the 'canonical name' (CNAME) returned from DNS for host/domain name queries.
+			 Return values:
+					On success: First returned address or name.
+					On failure: an empty string, ErrorLevel is set to the DNS error code.
+			 Link:
+					https://autohotkey.com/boards/viewtopic.php?t=489
+			 License:
+					The Unlicense (for details see http://unlicense.org/).
+			 MSDN:
+					DnsQuery   -> msdn.microsoft.com/en-us/library/ms682016(v=vs.85).aspx
+					DNS_RECORD -> msdn.microsoft.com/en-us/library/ms682082(v=vs.85).aspx
+			 DNS record types:
+					DNS_TYPE_A = 0x01, DNS_TYPE_CNAME = 0x05, DNS_TYPE_PTR = 0x0C
+			 DNS record options:
+					DNS_QUERY_STANDARD = 0, DNS_QUERY_USE_TCP_ONLY = 0x02, DNS_QUERY_BYPASS_CACHE = 0x08, DNS_QUERY_NO_HOSTS_FILE = 0x40
+					DNS_QUERY_WIRE_ONLY = 0x0100
+					DNS_FREE_TYPE:
+					DnsFreeRecordList = 1
+			 ==================================================================================================================================		
+	*/
+   
+	/*    	EXAMPLE(s)
+			
+			#NoEnv
+			AddrOrName := "www.berlin.de"
+			Addr := DNSQuery(AddrOrName, Results, Name)
+			MsgBox, 0, %AddrOrName%, % "Result: " . Addr . "`nError: " . ErrorLevel
+			Msg := ""
+			For I, V In Results {
+			   Msg .= V . "`r`n"
+			}
+			MsgBox, 0, Results, %Msg%
+			MsgBox, 0, CNAME, %Name%
+			Name := DNSQuery(Addr, Results)
+			MsgBox, 0, %Addr%, % "Result: " . Name . "`nError: " . ErrorLevel
+			Msg := ""
+			For I, V In Results {
+			   Msg .= V . "`r`n"
+			}
+			MsgBox, 0, Results, %Msg%
+			ExitApp
+			
+	*/
+   
+   Static OffRR := (A_PtrSize * 2) + 16 ; offset of resource record (RR) within the DNS_RECORD structure
+   HDLL := DllCall("LoadLibrary", "Str", "Dnsapi.dll", "UPtr")
+   CNAME := ""
+   Error := 0
+   ResultArray := []
+   If RegExMatch(AddrOrName, "^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", IP) {
+      RevIP := IP4 . "." . IP3 . "." . IP2 . "." . IP1 . ".IN-ADDR.ARPA"
+      If !(Error := DllCall("Dnsapi.dll\DnsQuery_", "Str", RevIP, "Short", 0x0C, "UInt", 0, "Ptr", 0, "PtrP", PDNS, "Ptr", 0)) {
+         REC_TYPE := NumGet(PDNS + 0, A_PtrSize * 2, "UShort")
+         If (REC_TYPE = 0x0C) { ; DNS_TYPE_PTR
+            PDR := PDNS
+            While (PDR) {
+               Name := StrGet(NumGet(PDR + 0, OffRR, "UPtr"))
+               ResultArray.Push(Name)
+               PDR := NumGet(PDR + 0, "UPtr")
+            }
+         }
+         DllCall("Dnsapi.dll\DnsRecordListFree", "Ptr", PDNS, "Int", 1) ; DnsFreeRecordList
+      }
+   }
+   Else {
+      CNAME := AddrOrName
+      Loop {
+         If !(Error := DllCall("Dnsapi.dll\DnsQuery_", "Str", CNAME, "Short", 0x01, "UInt", 0, "Ptr", 0, "PtrP", PDNS, "Ptr", 0)) {
+            REC_TYPE := NumGet(PDNS + 0, A_PtrSize * 2, "UShort")
+            If (REC_TYPE = 0x05) { ; DNS_TYPE_CNAME
+               CNAME := StrGet(NumGet(PDNS + OffRR, "UPtr"))
+               DllCall("Dnsapi.dll\DnsRecordListFree", "Ptr", PDNS, "Int", 1) ; DnsFreeRecordList
+               Continue
+            }
+            If (REC_TYPE = 0x01) { ; DNS_TYPE_A
+               PDR := PDNS
+               While (PDR) {
+                  Addr := ""
+                  Loop, 4
+                     Addr .= NumGet(PDR + OffRR + (A_Index - 1), "UChar") . "."
+                  ResultArray.Push(RTrim(Addr, "."))
+                  PDR := NumGet(PDR + 0, "UPtr")
+               }
+               DllCall("Dnsapi.dll\DnsRecordListFree", "Ptr", PDNS, "Int", 1) ; DnsFreeRecordList
+               Break
+            }
+         }
+         Break
+      }
+   }
+   DllCall("FreeLibrary", "Ptr", HDLL)
+   ErrorLevel := Error
+   Return ResultArray[1]
+}
+
 
 } 
-;|														|														|														|														|
-;|	DownloadFile()							|	NewLinkMsg()								|	TimeGap()									|	GetSourceURL()							|
-;|	DNS_QueryName()						|	GetHTMLFragment()					|	ScrubFragmentIdents()					|	EnumClipFormats()						|
-;|	GetClipFormatNames()				|	GoogleTranslate()						|	getText()										|	getHtmlById()								|
-;|	getTextById()								|	getHtmlByTagName()					|	getTextByTagName()					|	DNS_QueryName()						|
-;|	CreateGist()									|	GetAllResponseHeaders()				|	NetStat()										|	ExtractTableData()                   	|
-;|   IsConnected()                          	|   HostToIp()                                	|   LocalIps()                                  	|   GetAdaptersInfo()                      	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   DownloadFile()                        	|   NewLinkMsg()                          	|   TimeGap()                                	|   GetSourceURL()                        	|
+;|   DNS_QueryName()                 	|   GetHTMLFragment()                	|   ScrubFragmentIdents()	            	|   EnumClipFormats()                  	|
+;|   GetClipFormatNames()            	|   GoogleTranslate()                    	|   getText()                                   	|   getHtmlById()                          	|
+;|   getTextById()                            	|   getHtmlByTagName()              	|   getTextByTagName()               	|   DNS_QueryName()                  	|
+;|   CreateGist()	                            	|   GetAllResponseHeaders()	        	|   NetStat()                                  	|   ExtractTableData()                   	|
+;|   IsConnected()                          	|   HostToIp()                                	|   LocalIps()                                  	|   GetAdaptersInfo()                     	|
+;|   DNSQuery()                            	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Mathematical (converting) functions (21)
+{ ;Math/Converting (21)
 ;1	
 Min(x, y) {																						;-- returns the smaller of 2 numbers
   return x < y ? x : y
@@ -13356,18 +14228,18 @@ ARGBToRGB(ARGB) {																		;-- convert ARGB to RGB.
 ;22
 
 
-} 
-;|														|														|														|														|
-;|	Min()											|	Max()											|	Mean()											|	Median()										|
-;|	Mode()											|	Dec2Base()									|	Base2Dec()									|	HexToFloat()								|
-;|	FloatToHex()								|	CalculateDistance()						|	IsInRange()									|   FormatFileSize()                        	|
-;|  Color_RGBtoHSV()                    	|   Color_HSVtoRGB()                     	|   JEE_HexToBinData()                  	|   JEE_BinDataToHex()                   	|
-;|  JEE_BinDataToHex2()               	|   RadianToDegree()                     	|   DegreeToRadian()                     	|   RGBToARGB()                            	|
-;|  ARGBToRGB()                           	|
+} ;end
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   Min()                                       	|   Max()                                        	|   Mean()                                     	|   Median()                                  	|
+;|   Mode()                                    	|   Dec2Base()                                	|   Base2Dec()                               	|   HexToFloat()                            	|
+;|   FloatToHex()                            	|   CalculateDistance()	                	|   IsInRange()                               	|   FormatFileSize()                       	|
+;|   Color_RGBtoHSV()                   	|   Color_HSVtoRGB()                     	|   JEE_HexToBinData()                 	|   JEE_BinDataToHex()                 	|
+;|   JEE_BinDataToHex2()              	|   RadianToDegree()                     	|   DegreeToRadian()                    	|   RGBToARGB()                          	|
+;|   ARGBToRGB()                          	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Object functions (4)
+{ ;Objects (4)
 
 ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;--
 
@@ -13421,6 +14293,7 @@ evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
 	clipboard := out
 	return r
 }
+;{ sub of evalRPN() 
 StackShow(stack){																			;--
 
 	for each, value in stack
@@ -13428,6 +14301,7 @@ StackShow(stack){																			;--
 	return subStr(out, 2)
 
 }
+;}
 
 ExploreObj(Obj, NewRow = "`n", Equal = "  =  ", Indent = "`t"   	;-- Returns a string containing the formatted object keys and values (very nice for debugging!)
 	, Depth = 12, CurIndent = "") {	
@@ -13437,13 +14311,16 @@ ExploreObj(Obj, NewRow = "`n", Equal = "  =  ", Indent = "`t"   	;-- Returns a s
 }
 
 } 
-;|														|														|														|														|
-;|	ObjMerge()									|	evalRPN()										|	StackShow()									|   ExploreObj()                              	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   ObjMerge()                                	|   evalRPN()                                	|   StackShow()                             	|   ExploreObj()                             	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;String / Array / Text Operations (37)
+{ ;String/ Array/Text (43)
 
+; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
+{
+;1
 Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArray
 
    ;TDArray : a two dimensional TDArray
@@ -13464,7 +14341,7 @@ Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArr
         lastIndex := prevIndex
     }
 }
-
+;2
 SortArray(Array, Order="A") {															;-- ordered sort: Ascending, Descending, Reverse
 
     ;Order A: Ascending, D: Descending, R: Reverse
@@ -13497,7 +14374,7 @@ SortArray(Array, Order="A") {															;-- ordered sort: Ascending, Descend
             Partitions .= "|" pivot+1 "," epos        ;the right partition
     } Until !Partitions
 }
-
+;3
 QuickSort(Arr, Ascend = True, M*) {												;-- Sort array using QuickSort algorithm
 
 	;******************************************************************************
@@ -13763,6 +14640,186 @@ CatCol(Vet*) {
 }
 } ; sub end
 
+}
+
+; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
+{
+;4
+StringMD5( ByRef V, L = 0 ) {               											;-- String MD5 Hashing
+
+    VarSetCapacity( MD5_CTX, 104, 0 ), DllCall( "advapi32\MD5Init", Str, MD5_CTX )
+    DllCall( "advapi32\MD5Update", Str, MD5_CTX, Str, V, UInt, L ? L : VarSetCapacity( V ) )
+    DllCall( "advapi32\MD5Final", Str, MD5_CTX )
+    Loop % StrLen( Hex := "123456789ABCDEF0" )
+        N := NumGet( MD5_CTX, 87+A_Index, "Char" ), MD5 .= SubStr( Hex, N>>4, 1 ) . SubStr( Hex, N&15, 1 )
+    return MD5
+
+}
+;5
+uriEncode(str) { 																				;-- a function to escape characters like & for use in URLs.
+
+    f = %A_FormatInteger%
+    SetFormat, Integer, Hex
+    If RegExMatch(str, "^\w+:/{0,2}", pr)
+        StringTrimLeft, str, str, StrLen(pr)
+    StringReplace, str, str, `%, `%25, All
+    Loop
+        If RegExMatch(str, "i)[^\w\.~%/:]", char)
+           StringReplace, str, str, %char%, % "%" . SubStr(Asc(char),3), All
+        Else Break
+    SetFormat, Integer, %f%
+    Return, pr . str
+}
+;6
+Ansi2Unicode(ByRef sString, ByRef wString, CP = 0) {					;-- easy convertion from Ansi to Unicode, you can set prefered codepage 
+     nSize := DllCall("MultiByteToWideChar"
+      , "Uint", CP
+      , "Uint", 0
+      , "Uint", &sString
+      , "int",  -1
+      , "Uint", 0
+      , "int",  0)
+
+   VarSetCapacity(wString, nSize * 2)
+
+   DllCall("MultiByteToWideChar"
+      , "Uint", CP
+      , "Uint", 0
+      , "Uint", &sString
+      , "int",  -1
+      , "Uint", &wString
+      , "int",  nSize)
+}
+;7
+Unicode2Ansi(ByRef wString, ByRef sString, CP = 0) {					;-- easy convertion from Unicode to Ansi, you can set prefered codepage
+     nSize := DllCall("WideCharToMultiByte"
+      , "Uint", CP
+      , "Uint", 0
+      , "Uint", &wString
+      , "int",  -1
+      , "Uint", 0
+      , "int",  0
+      , "Uint", 0
+      , "Uint", 0)
+
+   VarSetCapacity(sString, nSize)
+
+   DllCall("WideCharToMultiByte"
+      , "Uint", CP
+      , "Uint", 0
+      , "Uint", &wString
+      , "int",  -1
+      , "str",  sString
+      , "int",  nSize
+      , "Uint", 0
+      , "Uint", 0)
+}
+;8
+Ansi2Oem(sString) {																		;-- using Ansi2Unicode and Unicode2Ansi functions
+	Ansi2Unicode(sString, wString, 0)
+	Unicode2Ansi(wString, zString, 1)
+	Return zString
+}
+;9
+Oem2Ansi(zString) {                                                                    	;-- using Ansi2Unicode and Unicode2Ansi functions
+	Ansi2Unicode(zString, wString, 1)
+	Unicode2Ansi(wString, sString, 0)
+	Return sString
+}
+;10
+Ansi2UTF8(sString) {                                                                    	;-- using Ansi2Unicode and Unicode2Ansi functions
+	Ansi2Unicode(sString, wString, 0)
+	Unicode2Ansi(wString, zString, 65001)
+	Return zString
+}
+;11
+UTF82Ansi(zString) {                                                                    	;-- using Ansi2Unicode and Unicode2Ansi functions
+	Ansi2Unicode(zString, wString, 65001)
+	Unicode2Ansi(wString, sString, 0)
+	Return sString
+}
+;12
+AddTrailingBackslash(ptext) {															;-- adds a backslash to the beginning of a string if there is none
+
+	if (SubStr(ptext, 0, 1) <> "\")
+		return, ptext . "\"
+	return, ptext
+
+}
+;13
+CheckQuotes(Path) {																		;--
+
+   if (InStr(Path, A_Space, false) <> 0)
+   {
+      Path = "%Path%"
+   }
+   return, Path
+}
+;14
+ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {							;-- hopefully working, not tested function, it uses RegExReplace
+
+   Replace_RegEx := "im)[\/:*?""<>|]*"
+
+   S_OUT := RegExReplace(S_IN, Replace_RegEx, "")
+   if (S_OUT = 0)
+      return, S_IN
+   if (ErrorLevel = 0) and (S_OUT <> "")
+      return, S_OUT
+
+}
+
+}
+
+; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
+{
+;15
+ParseJsonStrToArr(json_data) {														;-- Parse Json string to an array
+
+  	/*                              	DESCRIPTION of Function ParseJsonStrToArr (v1.2.1)
+							
+				 
+				 Link:
+				 Syntax: 							ParseJsonStrToArr(json_data)
+				 Parameters:
+				 Return Value:					return an array
+				 Remarks:     					Each item in the array still is string type
+				 Related:
+				 Example:
+														j := "[,,]"
+														arr = ParseJsonStrToArr(j)
+				
+	*/
+
+   arr := []
+   pos :=1
+   While pos:=RegExMatch(json_data,"((?:{)[\s\S][^{}]+(?:}))", j, pos+StrLen(j))
+   {
+	arr.Insert(j1)                      ; insert json string to array  arr=[{"id":"a1","subject":"s1"},{"id":"a2","subject":"s2"},{"id":"a3","subject":"s3"}]
+   }
+   return arr
+}
+;16
+parseJSON(txt) {																				;-- Parse Json string to an object
+
+	out := {}
+	Loop																				; Go until we say STOP
+	{
+		ind := A_index															; INDex number for whole array
+		ele := strX(txt,"{",n,1, "}",1,1, n)									; Find next ELEment {"label":"value"}
+		if (n > strlen(txt)) {
+			break																	; STOP when we reach the end
+		}
+		sub := StrSplit(ele,",")												; Array of SUBelements for this ELEment
+		Loop, % sub.MaxIndex()
+		{
+			StringSplit, key, % sub[A_Index] , : , `"					; Split each SUB into label (key1) and value (key2)
+			out[ind,key1] := key2											; Add to the array
+		}
+	}
+	return out
+
+}
+;17
 GetNestedTag(data,tag,occurrence="1") {										;--
 
 	; AHK Forum Topic : http://www.autohotkey.com/forum/viewtopic.php?t=77653
@@ -13792,7 +14849,7 @@ GetNestedTag(data,tag,occurrence="1") {										;--
 	 	strng=
 	 Return strng
 	}
-
+;18
 GetHTMLbyID(HTMLSource, ID, Format=0) {									;-- uses COM
 
 	;Format 0:Text 1:HTML 2:DOM
@@ -13807,8 +14864,8 @@ GetHTMLbyID(HTMLSource, ID, Format=0) {									;-- uses COM
 	Return (result := oHTML.getElementById(ID)[(Format ? "innerHTML" : "innerText")]) ? result : "", ComObjError(ComError)
 
 }
-
-GetHTMLbyTag(HTMLSource, Tag, Occurrence=1, Format=0) {		;-- uses COM
+;19
+GetHTMLbyTag(HTMLSource, Tag, Occurrence=1, Format=0) {	;-- uses COM
 
 	;Format 0:Text 1:HTML 2:DOM
 	ComError := ComObjError(false), `(oHTML := ComObjCreate("HtmlFile")).write(HTMLSource)
@@ -13822,7 +14879,7 @@ GetHTMLbyTag(HTMLSource, Tag, Occurrence=1, Format=0) {		;-- uses COM
 	return (result := oHTML.getElementsByTagName(Tag)[Occurrence-1][(Format ? "innerHTML" : "innerText")]) ? result : "", ComObjError(ComError)
 
 }
-
+;20
 GetXmlElement(xml, pathToElement) {											;-- RegEx function
 
    Loop, parse, pathToElement, .,
@@ -13840,7 +14897,7 @@ GetXmlElement(xml, pathToElement) {											;-- RegEx function
    return xml
 
 }
-
+;21
 sXMLget( xml, node, attr = "" ) {														;-- simple solution to get information out of xml and html
 
 	;  by infogulch - simple solution get information out of xml and html
@@ -13854,88 +14911,11 @@ sXMLget( xml, node, attr = "" ) {														;-- simple solution to get inform
 
 }
 
-ParseJsonStrToArr(json_data) {														;-- Parse Json string to an array
-
-	;-----------------------------
-	;
-	; Function: ParseJsonStrToArr(v1.2.1)
-	; Description:
-	;		Parse Json string to an array
-	; Syntax: ParseJsonStrToArr(json_data)
-	; Parameters:
-	;       json_data - json string
-	; Return Value:
-	;		return an array
-	; Remarks:
-	;		Each item in the array still is string type
-	; Related:
-	;		N/A
-	; Example:
-	;		j := "[{'id':'a1','subject':'s1'},{'id':'a2','subject':'s2},{'id':'a3','subject':'s3'}]"
-	;		arr = ParseJsonStrToArr(j)
-	;
-	;-------------------------------------------------------------------------------
-
-
-   arr := []
-   pos :=1
-   While pos:=RegExMatch(json_data,"((?:{)[\s\S][^{}]+(?:}))", j, pos+StrLen(j))
-   {
-	arr.Insert(j1)                      ; insert json string to array  arr=[{"id":"a1","subject":"s1"},{"id":"a2","subject":"s2"},{"id":"a3","subject":"s3"}]
-   }
-   return arr
 }
 
-parseJSON(txt) {																				;-- Parse Json string to an object
-
-	out := {}
-	Loop																				; Go until we say STOP
-	{
-		ind := A_index															; INDex number for whole array
-		ele := strX(txt,"{",n,1, "}",1,1, n)									; Find next ELEment {"label":"value"}
-		if (n > strlen(txt)) {
-			break																	; STOP when we reach the end
-		}
-		sub := StrSplit(ele,",")												; Array of SUBelements for this ELEment
-		Loop, % sub.MaxIndex()
-		{
-			StringSplit, key, % sub[A_Index] , : , `"					; Split each SUB into label (key1) and value (key2)
-			out[ind,key1] := key2											; Add to the array
-		}
-	}
-	return out
-
-}
-
-AddTrailingBackslash(ptext) {															;-- adds a backslash to the beginning of a string if there is none
-
-	if (SubStr(ptext, 0, 1) <> "\")
-		return, ptext . "\"
-	return, ptext
-
-}
-
-CheckQuotes(Path) {																		;--
-
-   if (InStr(Path, A_Space, false) <> 0)
-   {
-      Path = "%Path%"
-   }
-   return, Path
-}
-
-ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {							;-- hopefully working, not tested function, it uses RegExReplace
-
-   Replace_RegEx := "im)[\/:*?""<>|]*"
-
-   S_OUT := RegExReplace(S_IN, Replace_RegEx, "")
-   if (S_OUT = 0)
-      return, S_IN
-   if (ErrorLevel = 0) and (S_OUT <> "")
-      return, S_OUT
-
-}
-
+; ----------------------------------------------------------------  #String handling#  ------------------------------------------------------------------
+{
+;22
 cleanlines(ByRef txt) {																		;-- removes all empty lines
 
 	Loop, Parse, txt, `n, `r
@@ -13948,7 +14928,7 @@ cleanlines(ByRef txt) {																		;-- removes all empty lines
 	}
 	return newtxt
 }
-
+;23
 cleancolon(txt) {																				;-- what for? removes on ':' at beginning of a string
 
 	if substr(txt,1,1)=":" {
@@ -13958,7 +14938,7 @@ cleancolon(txt) {																				;-- what for? removes on ':' at beginning o
 	return txt
 
 }
-
+;24
 cleanspace(ByRef txt) {																	;-- removes all Space chars
 
 	StringReplace txt,txt,`n`n,%A_Space%, All
@@ -13971,7 +14951,17 @@ cleanspace(ByRef txt) {																	;-- removes all Space chars
 	}
 	return txt
 }
-
+;25
+SplitLine(str, Byref key, ByRef val) {                                              	;-- split string to key and value
+	
+	If (p := InStr(str, "=")) {
+		key := Trim(SubStr(str, 1, p - 1))
+		val := Trim(SubStr(str, p + 1))
+		Return True
+	}
+	Return False
+}
+;26
 EnsureEndsWith(string, char) {  														;-- Ensure that the string given ends with a given char
 
    if ( StringRight(string, strlen(char)) <> char )
@@ -13979,14 +14969,14 @@ EnsureEndsWith(string, char) {  														;-- Ensure that the string given e
 
    return string
 }
-
+;27
 EnsureStartsWith(string, char) { 														;-- Ensure that the string given starts with a given char
    if ( StringLeft(string, strlen(char)) <> char )
       string := char . string
 
    return string
 }
-
+;28
 StrPutVar(string, ByRef var, encoding) {    										;-- Convert the data to some Enc, like UTF-8, UTF-16, CP1200 and so on
    { ;-------------------------------------------------------------------------------
     ;
@@ -14011,77 +15001,7 @@ StrPutVar(string, ByRef var, encoding) {    										;-- Convert the data to so
         * ((encoding="cp1252"||encoding="utf-16") ? 2 : 1) )
     return StrPut(string, &var, encoding)
 }
-
-StringMD5( ByRef V, L = 0 ) {               											;-- String MD5 Hashing
-
-    VarSetCapacity( MD5_CTX, 104, 0 ), DllCall( "advapi32\MD5Init", Str, MD5_CTX )
-    DllCall( "advapi32\MD5Update", Str, MD5_CTX, Str, V, UInt, L ? L : VarSetCapacity( V ) )
-    DllCall( "advapi32\MD5Final", Str, MD5_CTX )
-    Loop % StrLen( Hex := "123456789ABCDEF0" )
-        N := NumGet( MD5_CTX, 87+A_Index, "Char" ), MD5 .= SubStr( Hex, N>>4, 1 ) . SubStr( Hex, N&15, 1 )
-    return MD5
-
-}
-
-uriEncode(str) { 																				;-- a function to escape characters like & for use in URLs.
-
-    f = %A_FormatInteger%
-    SetFormat, Integer, Hex
-    If RegExMatch(str, "^\w+:/{0,2}", pr)
-        StringTrimLeft, str, str, StrLen(pr)
-    StringReplace, str, str, `%, `%25, All
-    Loop
-        If RegExMatch(str, "i)[^\w\.~%/:]", char)
-           StringReplace, str, str, %char%, % "%" . SubStr(Asc(char),3), All
-        Else Break
-    SetFormat, Integer, %f%
-    Return, pr . str
-}
-
-Ansi2Unicode(ByRef sString, ByRef wString, CP = 0) {					;-- easy convertion from Ansi to Unicode, you can set prefered codepage 
-     nSize := DllCall("MultiByteToWideChar"
-      , "Uint", CP
-      , "Uint", 0
-      , "Uint", &sString
-      , "int",  -1
-      , "Uint", 0
-      , "int",  0)
-
-   VarSetCapacity(wString, nSize * 2)
-
-   DllCall("MultiByteToWideChar"
-      , "Uint", CP
-      , "Uint", 0
-      , "Uint", &sString
-      , "int",  -1
-      , "Uint", &wString
-      , "int",  nSize)
-}
-
-Unicode2Ansi(ByRef wString, ByRef sString, CP = 0) {					;-- easy convertion from Unicode to Ansi, you can set prefered codepage
-     nSize := DllCall("WideCharToMultiByte"
-      , "Uint", CP
-      , "Uint", 0
-      , "Uint", &wString
-      , "int",  -1
-      , "Uint", 0
-      , "int",  0
-      , "Uint", 0
-      , "Uint", 0)
-
-   VarSetCapacity(sString, nSize)
-
-   DllCall("WideCharToMultiByte"
-      , "Uint", CP
-      , "Uint", 0
-      , "Uint", &wString
-      , "int",  -1
-      , "str",  sString
-      , "int",  nSize
-      , "Uint", 0
-      , "Uint", 0)
-}
-
+;29
 RegExSplit(ByRef psText, psRegExPattern, piStartPos:=1) {				;-- split a String by a regular expressin pattern and you will receive an array as a result
 
 	;https://autohotkey.com/board/topic/123708-useful-functions-collection/ - ObiWanKenobi
@@ -14115,7 +15035,7 @@ ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {
 	}
 }
 } ; sub end
-
+;30
 StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
 
     if ( _Option = "Bloat" )
@@ -14155,14 +15075,14 @@ StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String
     return _NewString
 
 }
-
+;31
 StrCount(Haystack,Needle) {															;-- a very handy function to count a needle in a Haystack
 	
 	; https://github.com/joedf/AEI.ahk/blob/master/AEI.ahk
 	StringReplace, Haystack, Haystack, %Needle%, %Needle%, UseErrorLevel
 	return ErrorLevel
 }
-
+;32
 SuperInstr(Hay, Needles, return_min=true, Case=false,               	;-- Returns min/max position for a | separated values of Needle(s)
 Startpoint=1, Occurrence=1)	{					
 	
@@ -14191,7 +15111,7 @@ Startpoint=1, Occurrence=1)	{
 	}
 	return pos
 }
-
+;33
 LineDelete(V, L, R := "", O := "", ByRef M := "") {                            	;-- deletes lines of text from variables / no loop
 	
 	/*                              	DESCRIPTION
@@ -14259,7 +15179,43 @@ LineDelete(V, L, R := "", O := "", ByRef M := "") {                            	
 	}
 	Return X
 }
+;34
+GetWordsNumbered(string, conditions) {										;-- gives back an array of words from a string, you can specify the position of the words you want to keep
 
+	/*                              	DESCRIPTION
+
+			by Ixiko 2018 - i know there's a better way, but I needed a function quickly
+			
+			Parameters:
+			string:						the string to split in words
+			conditions:				it's not the best name for this parameter, conditions must be a comma separated list of numbers like : "1,2,5,6"
+	
+	*/
+	
+	;this lines are not mine, they remove some chars i didn't need and they remove repeated space chars to one
+	new:= RegExReplace(string, "(\s+| +(?= )|\s+$)", A_Space)
+	new:= RegExReplace(new, "(,+)", A_Space)
+	word:= StrSplit(new, A_Space)
+
+	Loop, % word.MaxIndex()
+	{
+		If A_Index not in %conditions%
+				word[A_Index]:= " "
+	}
+
+	Loop, % word.MaxIndex()
+	{
+		If (word[A_Index] = " ")
+				word.Delete(A_Index)
+	}
+
+return word
+}
+}
+
+; ----------------------------------------------------------------------  #others#  ---------------------------------------------------------------------- 
+{
+;35	
 ExtractFuncTOuserAHK(data) {                                                     	;-- extract user function and helps to write it to userAhk.api
 		
 	; https://autohotkey.com/board/topic/78781-extract-function-declarations-from-ahk-lib-to-scite4ahk/	
@@ -14380,7 +15336,7 @@ ExtractFuncTOuserAHK(data) {                                                    
 
 return
 }
-
+;36
 PdfToText(PdfPath) {																		;-- copies a selected PDF file to memory - it needs xpdf - pdftotext.exe
 	
 	;  This function copies a selected PDF file to memory.  This function was written by kon at AHK forums
@@ -14407,7 +15363,7 @@ PdfToText(PdfPath) {																		;-- copies a selected PDF file to memory -
         strStdOut := objExec.StdOut.ReadAll()
     return strStdOut
 }
-
+;37
 PdfPageCounter(PathToPdfFile){                                                		;-- counts pages of a pdffile (works with 95% of pdf files)
 	
 	;https://autohotkey.com/board/topic/90560-pdf-page-counter/
@@ -14423,7 +15379,7 @@ PdfPageCounter(PathToPdfFile){                                                		
             PageCount++
     return, PageCount
 }
-
+;38
 PasteWithIndent(clp, ind="Tab", x=1) {											;-- paste string to an editor with your prefered indent key
 
 	;use Tab or Space for example , x how many times you want to have an indent, clp = can contains many lines (lines must liminated through `n)
@@ -14439,18 +15395,8 @@ PasteWithIndent(clp, ind="Tab", x=1) {											;-- paste string to an editor w
 		
 return
 }
-
-SplitLine(str, Byref key, ByRef val) {                                              	;-- split string to key and value
-	
-	If (p := InStr(str, "=")) {
-		key := Trim(SubStr(str, 1, p - 1))
-		val := Trim(SubStr(str, p + 1))
-		Return True
-	}
-	Return False
-}
-
-Ask_and_SetbackFocus(AskTitle, AskText) {										;-- by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret
+;39
+Ask_and_SetbackFocus(AskTitle, AskText) {									;-- by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret
 
 	/*                              	DESCRIPTION
 					
@@ -14497,63 +15443,29 @@ Ask_and_SetbackFocus(AskTitle, AskText) {										;-- by opening a msgbox you l
 		return 0
 	
 }
-
-GetWordsNumbered(string, conditions) {										;-- gives back an array of words from a string, you can specify the position of the words you want to keep
-
-	/*                              	DESCRIPTION
-
-			by Ixiko 2018 - i know there's a better way, but I needed a function quickly
-			
-			Parameters:
-			string:						the string to split in words
-			conditions:				it's not the best name for this parameter, conditions must be a comma separated list of numbers like : "1,2,5,6"
-	
-	*/
-	
-	;this lines are not mine, they remove some chars i didn't need and they remove repeated space chars to one
-	new:= RegExReplace(string, "(\s+| +(?= )|\s+$)", A_Space)
-	new:= RegExReplace(new, "(,+)", A_Space)
-	word:= StrSplit(new, A_Space)
-
-	Loop, % word.MaxIndex()
-	{
-		If A_Index not in %conditions%
-				word[A_Index]:= " "
-	}
-
-	Loop, % word.MaxIndex()
-	{
-		If (word[A_Index] = " ")
-				word.Delete(A_Index)
-	}
-
-return word
-}
-
+;40
 CleanLine(Target) {																			;-- Return a line with leading and trailing spaces removed, and tabs converted to spaces
-	/*                              	DESCRIPTION
-	
-			Func: CleanLine
+
+	/*                              	DESCRIPTION of Func: CleanLine
+				
 			 Return a line with leading and trailing spaces removed, and tabs converted to spaces. This is mostly useful
 			 for command-line parsing when the command-line is coming from an unknown source.  It makes subsequent
 			 parsing of the string using searches and regular expressions simpler, without much danger of removing things
 			 you're likely to need.
 			 
+			 Parameters:		Target   - ByRef Target String to clean
+
+			 Returns:   			String minus leading and trailing spaces, and all tabs converted to a single space.
+			 
 	*/
 	
-
- Parameters:
-  Target   - ByRef Target String to clean
-
- Returns:
-  String minus leading and trailing spaces, and all tabs converted to a single space.
-
    Work := RegexReplace(Target, "\t"  , " ")
    Work := RegexReplace(Work  , "^\s+", "")
    Work := RegexReplace(Work  , "\s+$", "")
+   
    return Work
 }
-
+;41
 StrTrim(Target) {																				;-- Remove all leading and trailing whitespace including tabs, spaces, CR and LF
 	
 	/*                              	DESCRIPTION
@@ -14574,7 +15486,7 @@ StrTrim(Target) {																				;-- Remove all leading and trailing whitesp
 	
    return RegexReplace(RegexReplace(Target, "^\s+", ""), "\s+$", "")
 }
-
+;42
 StrDiff(str1, str2, maxOffset:=5) {													;-- SIFT3 : Super Fast and Accurate string distance algorithm
 
 	/*                              	DESCRIPTION
@@ -14642,7 +15554,7 @@ StrDiff(str1, str2, maxOffset:=5) {													;-- SIFT3 : Super Fast and Accur
 	}
 	return ((n0 + m0)/2 - lcs) / (n0 > m0 ? n0 : m0)
 }
-
+;43
 PrintArr(Arr, Option := "w800 h200", GuiNum := 90) {					;-- show values of an array in a listview gui for debugging
     for index, obj in Arr {
         if (A_Index = 1) {
@@ -14684,24 +15596,25 @@ PrintArr(Arr, Option := "w800 h200", GuiNum := 90) {					;-- show values of an a
         LV_ModifyCol(A_Index, "AutoHdr")
     Gui, %GuiNum%: Show,, Array
 }
-
+}
 
 } 
-;|														|														|														|														|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
-;|	Sort2DArray()								|	SortArray()									|	QuickSort()									|
+;|   Sort2DArray()								|   SortArray()									|   QuickSort()									|
 ;|
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
-;|	uriEncode()									|	Ansi2Unicode()					    	| 	 Unicode2Ansi()							| 	 StringMD5()								|
-;|	AddTrailingBackslash()				|	CheckQuotes()								|	ReplaceForbiddenChars()				|
+;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                        	|    Ansi2Oem()                             	|
+;|   Oem2Ansi()                             	|   Ansi2UTF8()                             	|   UTF82Ansi()                             	|   StringMD5()					             	|
+;|   AddTrailingBackslash()				|   CheckQuotes()								|   ReplaceForbiddenChars()				|
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
-;|	ParseJsonStrToArr()						|	 parseJSON()								|	GetNestedTag()							|	GetHTMLbyID()							|
-;|	GetHTMLbyTag()							|	GetXmlElement()							|	sXMLget()										
+;|   ParseJsonStrToArr()	                	|    parseJSON()                            	|   GetNestedTag()                        	|   GetHTMLbyID()							|
+;|   GetHTMLbyTag()                     	|   GetXmlElement()                      	|   sXMLget()                                 	|
 ; ----------------------------------------------------------------  #String handling#  ------------------------------------------------------------------
-;| 	 cleanlines()									|	cleancolon()									|	cleanspace()									|   SplitLine()                                  	|
-;| 	 EnsureEndsWith()						|	EnsureStartsWith()						|	StrPutVar()									|
-;|	 RegExSplit()									|	StringM()										|   StrCount()                                 	|   SuperInstr()                               	|
-;|   LineDelete()                               	|   GetWordsNumbered()                	|
+;|   cleanlines()									|   cleancolon()									|   cleanspace()									|   SplitLine()                                  	|
+;|   EnsureEndsWith()						|   EnsureStartsWith()						|   StrPutVar()									|
+;|   RegExSplit()                             	|   StringM()										|   StrCount()                                 	|   SuperInstr()                               	|
+;|   LineDelete()                             	|   GetWordsNumbered()                	|
 ; ----------------------------------------------------------------------  #others#  ----------------------------------------------------------------------
 ;|   ExtractFuncTOuserAHK()          	|   PdfToText()                               	|   PdfPageCounter()                     	|   PasteWithIndent()                       	|
 ;|   Ask_and_SetbackFocus()            	|   CleanLine()                                	|   StrTrim()                                   	|   StrDiff()                                      	|
@@ -14709,8 +15622,8 @@ PrintArr(Arr, Option := "w800 h200", GuiNum := 90) {					;-- show values of an a
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Keys - Hotkeys - Hotstring - functions (8)
-	
+{ ;Keys/Hotkeys/Hotstring (9)
+;1
 DelaySend(Key, Interval=200, SendMethod="Send") { 					;-- Send keystrokes delayed
 
 	/*
@@ -14756,12 +15669,12 @@ DelaySend(Key, Interval=200, SendMethod="Send") { 					;-- Send keystrokes delay
         }
     Return
 }
-
+;2
 SetLayout(layout, winid) {																;-- set a keyboard layout
     Result := (DllCall("LoadKeyboardLayout", "Str", layout, "UInt", "257"))
     DllCall("SendMessage", "UInt", winid, "UInt", "80", "UInt", "1", "UInt", Result)
 }
-
+;3
 GetAllInputChars() {																			;-- Returns a string with input characters
 
     Loop 256
@@ -14771,7 +15684,7 @@ GetAllInputChars() {																			;-- Returns a string with input character
 
     Return ChrStr
 }
-
+;4
 ReleaseModifiers(Beep = 1, CheckIfUserPerformingAction = 0,    ;-- helps to solve the Hotkey stuck problem
 AdditionalKeys = ""	, timeout := "") {
 	
@@ -14818,7 +15731,7 @@ AdditionalKeys = ""	, timeout := "") {
 	}
 	return
 }
-
+;5
 isaKeyPhysicallyDown(Keys) {															;-- belongs to ReleaseModifiers() function
 	
   if isobject(Keys)
@@ -14831,7 +15744,7 @@ isaKeyPhysicallyDown(Keys) {															;-- belongs to ReleaseModifiers() fun
   	return Keys ;keys!
   return 0
 }
-
+;6
 GetText(ByRef MyText = "") {                                                       	;-- copies the selected text to a variable while preserving the clipboard.(Ctrl+C method)
 	
    SavedClip := ClipboardAll
@@ -14848,7 +15761,7 @@ GetText(ByRef MyText = "") {                                                    
    Clipboard := SavedClip
    Return MyText
 }
-
+;7
 PutText(MyText) {                                       	                                	;-- Pastes text from a variable while preserving the clipboard. (Ctrl+v method)
 	
    SavedClip := ClipboardAll 
@@ -14860,7 +15773,7 @@ PutText(MyText) {                                       	                       
    Clipboard := SavedClip
    Return
 }
-
+;8
 Hotkeys(ByRef Hotkeys) {																;-- a handy function to show all used hotkeys in script
 
 	/*                              	DESCRIPTION
@@ -14911,15 +15824,68 @@ If (A_ComputerName = "Laptop") {
         }
     return Hotkeys
 }
+;9
+BlockKeyboard(block=-1) { 															;-- block keyboard, and unblock it through usage of keyboard
+	
+	;Thanks to Lexikos
+	 ; -1, true or false.
+	 
+	static hHook = 0, cb = 0
+	if !cb ; register callback once only.
+		cb := RegisterCallback("BlockKeyboardProc","Fast")
+	if (block = -1) ; toggle
+		block := (hHook=0)
+	if ( (hHook!=0) = (block!=0) ) ; already (un)blocked, no action necessary.
+		return
+	if (block) 
+		{
+		hHook := DllCall("SetWindowsHookEx"
+		, "int", 13 ; WH_KEYBOARD_LL
+		, "uint", cb ; lpfn (callback)
+		, "uint", 0 ; hMod (NULL)
+		, "uint", 0) ; dwThreadId (all threads)
+		}
+	else
+		{
+		DllCall("UnhookWindowsHookEx", "uint", hHook)
+		hHook = 0
+		}
+	}
+;{ sub of BlockKeyboard
+BlockKeyboardProc(nCode, wParam, lParam) {
+
+	static count=1, Keys:=["r","F12","LCtrl",".","CapsLock"]   ;password, some keys don't work, beware!
+	if (NumGet(lParam+8) & 0x80) 
+		{
+		if (NumGet(lParam+4)=GetKeyHex(Keys[count]))
+			count++
+		else
+			count=1
+		If (count=Keys.MaxIndex()+1)
+			BlockKeyboard(false)
+		}
+	return 1
+	}
+
+GetKeyHex(Key) {
+
+	OldFormat:=A_FormatInteger
+	SetFormat, Integer, H
+	Ans:=GetKeySC(Key) + 0
+	SetFormat, Integer, % OldFormat
+	return Ans
+}
+;} end sub
 
 } 
-;|														|														|														|														|
-;|	DelaySend()									|	SetLayout()									|	GetAllInputChars()						|   ReleaseModifiers()						|
-;|  isaKeyPhysicallyDown()				|   GetText()                                  	|   PutText()                                   	|   Hotkeys()                                  	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   DelaySend(1)                           	|   SetLayout(2)	                            	|   GetAllInputChars(3)                 	|   ReleaseModifiers(4)                  	|
+;|   isaKeyPhysicallyDown(5)        	|   GetText(6)                                  	|   PutText(7)                                	|   Hotkeys(8)                               	|
+;|   BlockKeyboard(9)                      	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;ToolTips - messages (6)
+{ ;ToolTips (6)
 	
 ShowTrayBalloon(TipTitle = "", TipText = "", ShowTime = 5000, TipType = 1) {					;--
 
@@ -16120,135 +17086,135 @@ AddToolTip(hControl,p_Text) {																							;-- this is a function from 
 
 
 } 
-;|														|														|														|														|
-;| ShowTrayBalloon()						|   ColoredTooltip()                        	|   AddToolTip() x 4                          	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   ShowTrayBalloon()                  	|   ColoredTooltip()                       	|   AddToolTip() x 4                       	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;System / binary handling in memory / deep system manipulation (62)
+{ ;System functions/Binary handling (55)
 
 ;1
-CreateNamedPipe(Name, OpenMode=3, PipeMode=0, MaxInstances=255) {	    	;-- creates an instance of a named pipe and returns a handle for subsequent pipe operations
+CreateNamedPipe(Name, OpenMode=3, PipeMode=0, MaxInstances=255) {          	;-- creates an instance of a named pipe and returns a handle for subsequent pipe operations
     return DllCall("CreateNamedPipe","str","\\.\pipe\" Name,"uint",OpenMode
         ,"uint",PipeMode,"uint",MaxInstances,"uint",0,"uint",0,"uint",0,"uint",0)
 }
 ;2
-RestoreCursors() {																						    			;-- for normal cursor at GUI
+RestoreCursors() {                                                                                                        	;-- for normal cursor at GUI
    SPI_SETCURSORS := 0x57
    DllCall( "SystemParametersInfo", UInt,SPI_SETCURSORS, UInt,0, UInt,0, UInt,0 )
 }
 ;3
-SetSystemCursor( Cursor = "", cx = 0, cy = 0 ) {										    				;-- enables an application to customize the system cursors by using a file or by using the system cursor
+SetSystemCursor( Cursor = "", cx = 0, cy = 0 ) {                                                         	;-- enables an application to customize the system cursors by using a file or by using the system cursor
 
 	BlankCursor := 0, SystemCursor := 0, FileCursor := 0
 	SystemCursors = 32512IDC_ARROW,32513IDC_IBEAM,32514IDC_WAIT,32515IDC_CROSS
-		,32516IDC_UPARROW,32640IDC_SIZE,32641IDC_ICON,32642IDC_SIZENWSE
-		,32643IDC_SIZENESW,32644IDC_SIZEWE,32645IDC_SIZENS,32646IDC_SIZEALL
-		,32648IDC_NO,32649IDC_HAND,32650IDC_APPSTARTING,32651IDC_HELP
+        ,32516IDC_UPARROW,32640IDC_SIZE,32641IDC_ICON,32642IDC_SIZENWSE
+        ,32643IDC_SIZENESW,32644IDC_SIZEWE,32645IDC_SIZENS,32646IDC_SIZEALL
+        ,32648IDC_NO,32649IDC_HAND,32650IDC_APPSTARTING,32651IDC_HELP
 	If Cursor =
 	{
-		VarSetCapacity( AndMask, 32*4, 0xFF ), VarSetCapacity( XorMask, 32*4, 0 )
-		BlankCursor = 1
+        VarSetCapacity( AndMask, 32*4, 0xFF ), VarSetCapacity( XorMask, 32*4, 0 )
+        BlankCursor = 1
 	}
 	Else If SubStr( Cursor,1,4 ) = "IDC_"
 	{
-		Loop, Parse, SystemCursors, `,
-		{
-			CursorName := SubStr( A_Loopfield, 6, 15 )
-			CursorID := SubStr( A_Loopfield, 1, 5 )
-			SystemCursor = 1
-			If ( CursorName = Cursor )
-			{
-				CursorHandle := DllCall( "LoadCursor", Uint,0, Int,CursorID )
-				Break
-			}
-		}
-		If CursorHandle =
-		{
-			Msgbox,, SetCursor, Error: Invalid cursor name
-			CursorHandle = Error
-		}
+        Loop, Parse, SystemCursors, `,
+        {
+        	CursorName := SubStr( A_Loopfield, 6, 15 )
+        	CursorID := SubStr( A_Loopfield, 1, 5 )
+        	SystemCursor = 1
+        	If ( CursorName = Cursor )
+        	{
+                CursorHandle := DllCall( "LoadCursor", Uint,0, Int,CursorID )
+                Break
+        	}
+        }
+        If CursorHandle =
+        {
+        	Msgbox,, SetCursor, Error: Invalid cursor name
+        	CursorHandle = Error
+        }
 	}
 	Else If FileExist( Cursor )
 	{
-		SplitPath, Cursor,,, Ext
-		If Ext = ico
-			uType := 0x1
-		Else If Ext in cur,ani
-			uType := 0x2
-		Else
-		{
-			Msgbox,, SetCursor, Error: Invalid file type
-			CursorHandle = Error
-		}
-		FileCursor = 1
+        SplitPath, Cursor,,, Ext
+        If Ext = ico
+        	uType := 0x1
+        Else If Ext in cur,ani
+        	uType := 0x2
+        Else
+        {
+        	Msgbox,, SetCursor, Error: Invalid file type
+        	CursorHandle = Error
+        }
+        FileCursor = 1
 	}
 	Else
 	{
-		Msgbox,, SetCursor, Error: Invalid file path or cursor name
-		CursorHandle = Error
+        Msgbox,, SetCursor, Error: Invalid file path or cursor name
+        CursorHandle = Error
 	}
 	If CursorHandle != Error
 	{
-		Loop, Parse, SystemCursors, `,
-		{
-			If BlankCursor = 1
-			{
-				Type = BlankCursor
-				%Type%%A_Index% := DllCall( "CreateCursor", Uint,0, Int,0, Int,0, Int,32, Int,32, Uint,&AndMask, Uint,&XorMask )
-				CursorHandle := DllCall( "CopyImage", Uint,%Type%%A_Index%, Uint,0x2, Int,0, Int,0, Int,0 )
-				DllCall( "SetSystemCursor", Uint,CursorHandle, Int,SubStr( A_Loopfield, 1, 5 ) )
-			}
-			Else If SystemCursor = 1
-			{
-				Type = SystemCursor
-				CursorHandle := DllCall( "LoadCursor", Uint,0, Int,CursorID )
-				%Type%%A_Index% := DllCall( "CopyImage"
-					, Uint,CursorHandle, Uint,0x2, Int,cx, Int,cy, Uint,0 )
-				CursorHandle := DllCall( "CopyImage", Uint,%Type%%A_Index%, Uint,0x2, Int,0, Int,0, Int,0 )
-				DllCall( "SetSystemCursor", Uint,CursorHandle, Int,SubStr( A_Loopfield, 1, 5 ) )
-			}
-			Else If FileCursor = 1
-			{
-				Type = FileCursor
-				%Type%%A_Index% := DllCall( "LoadImageA"
-					, UInt,0, Str,Cursor, UInt,uType, Int,cx, Int,cy, UInt,0x10 )
-				DllCall( "SetSystemCursor", Uint,%Type%%A_Index%, Int,SubStr( A_Loopfield, 1, 5 ) )
-			}
-		}
+        Loop, Parse, SystemCursors, `,
+        {
+        	If BlankCursor = 1
+        	{
+                Type = BlankCursor
+                %Type%%A_Index% := DllCall( "CreateCursor", Uint,0, Int,0, Int,0, Int,32, Int,32, Uint,&AndMask, Uint,&XorMask )
+                CursorHandle := DllCall( "CopyImage", Uint,%Type%%A_Index%, Uint,0x2, Int,0, Int,0, Int,0 )
+                DllCall( "SetSystemCursor", Uint,CursorHandle, Int,SubStr( A_Loopfield, 1, 5 ) )
+        	}
+        	Else If SystemCursor = 1
+        	{
+                Type = SystemCursor
+                CursorHandle := DllCall( "LoadCursor", Uint,0, Int,CursorID )
+                %Type%%A_Index% := DllCall( "CopyImage"
+                	, Uint,CursorHandle, Uint,0x2, Int,cx, Int,cy, Uint,0 )
+                CursorHandle := DllCall( "CopyImage", Uint,%Type%%A_Index%, Uint,0x2, Int,0, Int,0, Int,0 )
+                DllCall( "SetSystemCursor", Uint,CursorHandle, Int,SubStr( A_Loopfield, 1, 5 ) )
+        	}
+        	Else If FileCursor = 1
+        	{
+                Type = FileCursor
+                %Type%%A_Index% := DllCall( "LoadImageA"
+                	, UInt,0, Str,Cursor, UInt,uType, Int,cx, Int,cy, UInt,0x10 )
+                DllCall( "SetSystemCursor", Uint,%Type%%A_Index%, Int,SubStr( A_Loopfield, 1, 5 ) )
+        	}
+        }
 	}
 }
 ;4
-SystemCursor(OnOff=1) {  																				    		;-- hiding mouse cursor
+SystemCursor(OnOff=1) {                                                                                           	;-- hiding mouse cursor
 
 	; Borrowed from Laszlo's post @ http://www.autohotkey.com/board/topic/5727-hiding-the-mouse-cursor/
 	; INIT = "I","Init"; OFF = 0,"Off"; TOGGLE = -1,"T","Toggle"; ON = others
 
     static AndMask, XorMask, $, h_cursor
-        ,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13 	; system cursors
-        , b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13  	; blank cursors
-        , h1,h2,h3,h4,h5,h6,h7,h8,h9,h10,h11,h12,h13   	; handles of default cursors
-    if (OnOff = "Init" or OnOff = "I" or $ = "") {      			; init when requested or at first call
+        ,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13                                      	; system cursors
+        , b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13                                   	; blank cursors
+        , h1,h2,h3,h4,h5,h6,h7,h8,h9,h10,h11,h12,h13                                    	; handles of default cursors
+    if (OnOff = "Init" or OnOff = "I" or $ = "") {                                            	; init when requested or at first call
 
-			$ = h                                          						; active default cursors
-			VarSetCapacity( h_cursor,4444, 1 )
-			VarSetCapacity( AndMask, 32*4, 0xFF )
-			VarSetCapacity( XorMask, 32*4, 0 )
-			system_cursors = 32512,32513,32514,32515,32516,32642,32643,32644,32645,32646,32648,32649,32650
-			StringSplit c, system_cursors, `,
-			Loop %c0%
-			{
-				h_cursor   := DllCall( "LoadCursor", "uint",0, "uint",c%A_Index% )
-				h%A_Index% := DllCall( "CopyImage",  "uint",h_cursor, "uint",2, "int",0, "int",0, "uint",0 )
-				b%A_Index% := DllCall("CreateCursor","uint",0, "int",0, "int",0
-					, "int",32, "int",32, "uint",&AndMask, "uint",&XorMask )
-			}
+        	$ = h                                                                                                	; active default cursors
+        	VarSetCapacity( h_cursor,4444, 1 )
+        	VarSetCapacity( AndMask, 32*4, 0xFF )
+        	VarSetCapacity( XorMask, 32*4, 0 )
+        	system_cursors = 32512,32513,32514,32515,32516,32642,32643,32644,32645,32646,32648,32649,32650
+        	StringSplit c, system_cursors, `,
+        	Loop %c0%
+        	{
+                h_cursor   := DllCall( "LoadCursor", "uint",0, "uint",c%A_Index% )
+                h%A_Index% := DllCall( "CopyImage",  "uint",h_cursor, "uint",2, "int",0, "int",0, "uint",0 )
+                b%A_Index% := DllCall("CreateCursor","uint",0, "int",0, "int",0
+                	, "int",32, "int",32, "uint",&AndMask, "uint",&XorMask )
+        	}
     }
 
     if (OnOff = 0 or OnOff = "Off" or $ = "h" and (OnOff < 0 or OnOff = "Toggle" or OnOff = "T"))
-        $ = b  																	; use blank cursors
+        $ = b                                                                  	; use blank cursors
     else
-        $ = h  																	; use the saved cursors
+        $ = h                                                                  	; use the saved cursors
 
     Loop %c0%
     {
@@ -16258,25 +17224,25 @@ SystemCursor(OnOff=1) {  																				    		;-- hiding mouse cursor
 
 }
 ;4
-ToggleSystemCursor( p_id, p_hide=false ) {                                                            	;-- choose a cursor from system cursor list
+ToggleSystemCursor( p_id, p_hide=false ) {                                                                	;-- choose a cursor from system cursor list
 	
-	/*					DESCRIPTION
+	/*                	DESCRIPTION
 	
 	from Library of Lateralus138's window functions, objects, and classes for AutoHotkey
 	Email: faithnomoread@yahoo.com for help, suggestions, or possible collaboration.
-	OCR_NORMAL		IDC_ARROW		32512	1
-	OCR_IBEAM		IDC_IBEAM		32513	2
-	OCR_WAIT		IDC_WAIT		32514	3
-	OCR_CROSS		IDC_CROSS		32515	4
-	OCR_UP			IDC_UPARROW		32516	5
-	OCR_SIZENWSE	IDC_SIZENWSE	32642	6
-	OCR_SIZENESW	IDC_SIZENESW	32643	7
-	OCR_SIZEWE		IDC_SIZEWE		32644	8
-	OCR_SIZENS		IDC_SIZENS		32645	9
-	OCR_SIZEALL		IDC_SIZEALL		32646	10
-	OCR_NO			IDC_NO			32648	11
-	OCR_HAND		IDC_HAND		32649	12
-	OCR_APPSTARTING	IDC_APPSTARTING	32650	13
+	OCR_NORMAL         	IDC_ARROW            	32512	1
+	OCR_IBEAM            		IDC_IBEAM              	32513	2
+	OCR_WAIT              		IDC_WAIT                	32514	3
+	OCR_CROSS             	IDC_CROSS              	32515	4
+	OCR_UP                  		IDC_UPARROW       	32516	5
+	OCR_SIZENWSE       	IDC_SIZENWSE        	32642	6
+	OCR_SIZENESW       	IDC_SIZENESW        	32643	7
+	OCR_SIZEWE           	IDC_SIZEWE             	32644	8
+	OCR_SIZENS           		IDC_SIZENS             	32645	9
+	OCR_SIZEALL          		IDC_SIZEALL            	32646	10
+	OCR_NO                  	IDC_NO                   	32648	11
+	OCR_HAND             	IDC_HAND              	32649	12
+	OCR_APPSTARTING	IDC_APPSTARTING  	32650	13
 	*/
 	
 	static	system_cursor_list
@@ -16297,47 +17263,47 @@ ToggleSystemCursor( p_id, p_hide=false ) {                                      
 	
 	if ( cursor_w != 32 or cursor_h != 32 )
 	{
-		MsgBox, System parameters not supported!
-		return
+        MsgBox, System parameters not supported!
+        return
 	}
 	
 	if ( p_hide )
 	{
-		if ( ix_b < ix_e )
-			return
+        if ( ix_b < ix_e )
+        	return
 
-		h_cursor := DllCall( "LoadCursor", "uint", 0, "uint", id )
-		
-		h_cursor := DllCall( "CopyImage", "uint", h_cursor, "uint", 2, "int", 0, "int", 0, "uint", 0 )
-		
-		StringReplace, system_cursor_list, system_cursor_list, |%p_id%:%id%, |%p_id%:%id%`,%h_cursor%
-		
-		VarSetCapacity( AndMask, 32*4, 0xFF )
-		VarSetCapacity( XorMask, 32*4, 0 )
-		
-		h_cursor := DllCall( "CreateCursor"
-								, "uint", 0
-								, "int", 0
-								, "int", 0
-								, "int", cursor_w
-								, "int", cursor_h
-								, "uint", &AndMask
-								, "uint", &XorMask )
+        h_cursor := DllCall( "LoadCursor", "uint", 0, "uint", id )
+        
+        h_cursor := DllCall( "CopyImage", "uint", h_cursor, "uint", 2, "int", 0, "int", 0, "uint", 0 )
+        
+        StringReplace, system_cursor_list, system_cursor_list, |%p_id%:%id%, |%p_id%:%id%`,%h_cursor%
+        
+        VarSetCapacity( AndMask, 32*4, 0xFF )
+        VarSetCapacity( XorMask, 32*4, 0 )
+        
+        h_cursor := DllCall( "CreateCursor"
+                                , "uint", 0
+                                , "int", 0
+                                , "int", 0
+                                , "int", cursor_w
+                                , "int", cursor_h
+                                , "uint", &AndMask
+                                , "uint", &XorMask )
 	}
 	else
 	{
-		if ( ix_b > ix_e )
-			return
+        if ( ix_b > ix_e )
+        	return
 
-		StringMid, h_cursor, system_cursor_list, ix_b, ix_e-ix_b+1
-		
-		StringReplace, system_cursor_list, system_cursor_list, |%p_id%:%id%`,%h_cursor%, |%p_id%:%id% 
+        StringMid, h_cursor, system_cursor_list, ix_b, ix_e-ix_b+1
+        
+        StringReplace, system_cursor_list, system_cursor_list, |%p_id%:%id%`,%h_cursor%, |%p_id%:%id% 
 	}
 	
 	result := DllCall( "SetSystemCursor", "uint", h_cursor, "uint", id )
 }
 ;5
-SetTimerF( Function, Period=0, ParmObject=0, Priority=0 ) {  					    			;-- Starts a timer that can call functions and object methods
+SetTimerF( Function, Period=0, ParmObject=0, Priority=0 ) {                                    	;-- Starts a timer that can call functions and object methods
 	
  Static current,tmrs:=Object() ;current will hold timer that is currently running
  If IsFunc( Function ) || IsObject( Function ){
@@ -16374,7 +17340,7 @@ SetTimerF( Function, Period=0, ParmObject=0, Priority=0 ) {  					    			;-- Sta
  }
 }
 ;6
-GlobalVarsScript(var="",size=102400,ByRef object=0) {                                          	;-- 
+GlobalVarsScript(var="",size=102400,ByRef object=0) {                                             	;-- 
 
 	
   global
@@ -16399,167 +17365,167 @@ GlobalVarsScript(var="",size=102400,ByRef object=0) {                           
   Return globalVarsScript
 }
 ;7
-patternScan(pattern, haystackAddress, haystackSize) {		 							    		;-- 
+patternScan(pattern, haystackAddress, haystackSize) {                                              	;-- scan for a pattern in memory
 
 	/*                              	DESCRIPTION
 	
-			 Parameters
-			 
-						 pattern
-									A string of two digit numbers representing the hex value of each byte of the pattern. The '0x' hex-prefix is not required
-									?? Represents a wildcard byte (can be any value)
-									All of the digit groups must be 2 characters long i.e 05, 0F, and ??, NOT 5, F or ?
-									Spaces, tabs, and 0x hex-prefixes are optional
-									
-						 haystackAddress
-									The memory address of the binary haystack eg &haystack
-									
-						 haystackAddress
-									The byte length of the binary haystack
-			
-						 Return values
-						  0  	Not Found
-						 -1 	An odd number of characters were passed via pattern
-								Ensure you use two digits to represent each byte i.e. 05, 0F and ??, and not 5, F or ?
-						 -2   	No valid bytes in the needle/pattern
-						 int 	The offset from haystackAddress of the start of the found pattern
-						
+        	 Parameters
+        	 
+                         pattern
+                                	A string of two digit numbers representing the hex value of each byte of the pattern. The '0x' hex-prefix is not required
+                                	?? Represents a wildcard byte (can be any value)
+                                	All of the digit groups must be 2 characters long i.e 05, 0F, and ??, NOT 5, F or ?
+                                	Spaces, tabs, and 0x hex-prefixes are optional
+                                	
+                         haystackAddress
+                                	The memory address of the binary haystack eg &haystack
+                                	
+                         haystackAddress
+                                	The byte length of the binary haystack
+        	
+                         Return values
+                          0  	Not Found
+                         -1 	An odd number of characters were passed via pattern
+                                Ensure you use two digits to represent each byte i.e. 05, 0F and ??, and not 5, F or ?
+                         -2   	No valid bytes in the needle/pattern
+                         int 	The offset from haystackAddress of the start of the found pattern
+                        
 	*/
 	
 
-		StringReplace, pattern, pattern, 0x,, All
-		StringReplace, pattern, pattern, %A_Space%,, All
-		StringReplace, pattern, pattern, %A_Tab%,, All
-		pattern := RTrim(pattern, "?")				; can pass patterns beginning with ?? ?? - but why not just start the pattern with the first known byte
-		loopCount := bufferSize := StrLen(pattern) / 2
-		if Mod(StrLen(pattern), 2)
-			return -1
-		VarSetCapacity(binaryNeedle, bufferSize)
-		aOffsets := [], startGap := 0
-		loop, % loopCount
-		{
-			hexChar := SubStr(pattern, 1 + 2 * (A_Index - 1), 2)
-			if (hexChar != "??") && (prevChar = "??" || A_Index = 1)
-				binNeedleStartOffset := A_index - 1
-			else if (hexChar = "??" && prevChar != "??" && A_Index != 1)
-			{
+        StringReplace, pattern, pattern, 0x,, All
+        StringReplace, pattern, pattern, %A_Space%,, All
+        StringReplace, pattern, pattern, %A_Tab%,, All
+        pattern := RTrim(pattern, "?")                ; can pass patterns beginning with ?? ?? - but why not just start the pattern with the first known byte
+        loopCount := bufferSize := StrLen(pattern) / 2
+        if Mod(StrLen(pattern), 2)
+        	return -1
+        VarSetCapacity(binaryNeedle, bufferSize)
+        aOffsets := [], startGap := 0
+        loop, % loopCount
+        {
+        	hexChar := SubStr(pattern, 1 + 2 * (A_Index - 1), 2)
+        	if (hexChar != "??") && (prevChar = "??" || A_Index = 1)
+                binNeedleStartOffset := A_index - 1
+        	else if (hexChar = "??" && prevChar != "??" && A_Index != 1)
+        	{
 
-				aOffsets.Insert({ "binNeedleStartOffset": binNeedleStartOffset
-								, "binNeedleSize": A_Index - 1 - binNeedleStartOffset
-								, "binNeedleGap": !aOffsets.MaxIndex() ? 0 : binNeedleStartOffset - startGap + 1}) ; equals number of wildcard bytes between two sub needles
-				startGap := A_index
-			}
+                aOffsets.Insert({ "binNeedleStartOffset": binNeedleStartOffset
+                                , "binNeedleSize": A_Index - 1 - binNeedleStartOffset
+                                , "binNeedleGap": !aOffsets.MaxIndex() ? 0 : binNeedleStartOffset - startGap + 1}) ; equals number of wildcard bytes between two sub needles
+                startGap := A_index
+        	}
 
-			if (A_Index = loopCount) ; last char cant be ??
-				aOffsets.Insert({ "binNeedleStartOffset": binNeedleStartOffset
-								, "binNeedleSize": A_Index - binNeedleStartOffset
-								, "binNeedleGap": !aOffsets.MaxIndex() ? 0 : binNeedleStartOffset - startGap + 1})
-			prevChar := hexChar
-			if (hexChar != "??")
-			{
-				numput("0x" . hexChar, binaryNeedle, A_index - 1, "UChar")
-				realNeedleSize++
-			}
-		}
-		if !realNeedleSize
-			return -2 ; no valid bytes in the needle
+        	if (A_Index = loopCount) ; last char cant be ??
+                aOffsets.Insert({ "binNeedleStartOffset": binNeedleStartOffset
+                                , "binNeedleSize": A_Index - binNeedleStartOffset
+                                , "binNeedleGap": !aOffsets.MaxIndex() ? 0 : binNeedleStartOffset - startGap + 1})
+        	prevChar := hexChar
+        	if (hexChar != "??")
+        	{
+                numput("0x" . hexChar, binaryNeedle, A_index - 1, "UChar")
+                realNeedleSize++
+        	}
+        }
+        if !realNeedleSize
+        	return -2 ; no valid bytes in the needle
 
-		haystackOffset := 0
-		aOffset := aOffsets[arrayIndex := 1]
-		loop
-		{
-			if (-1 != foundOffset := scanInBuf(haystackAddress, &binaryNeedle + aOffset.binNeedleStartOffset, haystackSize, aOffset.binNeedleSize, haystackOffset))
-			{
-				; either the first subneedle was found, or the current subneedle is the correct distance from the previous subneedle
-				; The scanInBuf returned 'foundOffset' is relative to haystackAddr regardless of haystackOffset
-				if (arrayIndex = 1 || foundOffset = haystackOffset)
-				{
-					if (arrayIndex = 1)
-					{
-						currentStartOffstet := aOffset.binNeedleSize + foundOffset ; save the offset of the match for the first part of the needle - if remainder of needle doesn't match,  resume search from here
-						tmpfoundAddress := foundOffset
-					}
-					if (arrayIndex = aOffsets.MaxIndex())
-						return foundAddress := tmpfoundAddress - aOffsets[1].binNeedleStartOffset  ;+ haystackAddress ; deduct the first needles starting offset - in case user passed a pattern beginning with ?? eg "?? ?? 00 55"
-					prevNeedleSize := aOffset.binNeedleSize
-					aOffset := aOffsets[++arrayIndex]
-					haystackOffset := foundOffset + prevNeedleSize + aOffset.binNeedleGap   ; move the start of the haystack ready for the next needle - accounting for previous needle size and any gap/wildcard-bytes between the two needles
-					continue
-				}
-				; else the offset of the found subneedle was not the correct distance from the end of the previous subneedle
-			}
-			if (arrayIndex = 1) ; couldn't find the first part of the needle
-				return 0
-			; the subsequent subneedle couldn't be found.
-			; So resume search from the address immediately next to where the first subneedle was found
-			aOffset := aOffsets[arrayIndex := 1]
-			haystackOffset := currentStartOffstet
-		}
+        haystackOffset := 0
+        aOffset := aOffsets[arrayIndex := 1]
+        loop
+        {
+        	if (-1 != foundOffset := scanInBuf(haystackAddress, &binaryNeedle + aOffset.binNeedleStartOffset, haystackSize, aOffset.binNeedleSize, haystackOffset))
+        	{
+                ; either the first subneedle was found, or the current subneedle is the correct distance from the previous subneedle
+                ; The scanInBuf returned 'foundOffset' is relative to haystackAddr regardless of haystackOffset
+                if (arrayIndex = 1 || foundOffset = haystackOffset)
+                {
+                	if (arrayIndex = 1)
+                	{
+                        currentStartOffstet := aOffset.binNeedleSize + foundOffset ; save the offset of the match for the first part of the needle - if remainder of needle doesn't match,  resume search from here
+                        tmpfoundAddress := foundOffset
+                	}
+                	if (arrayIndex = aOffsets.MaxIndex())
+                        return foundAddress := tmpfoundAddress - aOffsets[1].binNeedleStartOffset  ;+ haystackAddress ; deduct the first needles starting offset - in case user passed a pattern beginning with ?? eg "?? ?? 00 55"
+                	prevNeedleSize := aOffset.binNeedleSize
+                	aOffset := aOffsets[++arrayIndex]
+                	haystackOffset := foundOffset + prevNeedleSize + aOffset.binNeedleGap   ; move the start of the haystack ready for the next needle - accounting for previous needle size and any gap/wildcard-bytes between the two needles
+                	continue
+                }
+                ; else the offset of the found subneedle was not the correct distance from the end of the previous subneedle
+        	}
+        	if (arrayIndex = 1) ; couldn't find the first part of the needle
+                return 0
+        	; the subsequent subneedle couldn't be found.
+        	; So resume search from the address immediately next to where the first subneedle was found
+        	aOffset := aOffsets[arrayIndex := 1]
+        	haystackOffset := currentStartOffstet
+        }
 
 	}
 ;8
-scanInBuf(haystackAddr, needleAddr, haystackSize, needleSize, StartOffset = 0) {	;-- 
-		;Doesn't WORK with AHK 64 BIT, only works with AHK 32 bit
+scanInBuf(haystackAddr, needleAddr, haystackSize, needleSize, StartOffset = 0)     {	;-- scan for a pattern in memory buffer
+        ;Doesn't WORK with AHK 64 BIT, only works with AHK 32 bit
 	/*                              	DESCRIPTION
 	
-			;taken from:
-				;http://www.autohotkey.com/board/topic/23627-machine-code-binary-buffer-searching-regardless-of-null/
-				; -1 not found else returns offset address (starting at 0)
-				; The returned offset is relative to the haystackAddr regardless of StartOffset
-					static fun
-					
+        	;taken from:
+                ;http://www.autohotkey.com/board/topic/23627-machine-code-binary-buffer-searching-regardless-of-null/
+                ; -1 not found else returns offset address (starting at 0)
+                ; The returned offset is relative to the haystackAddr regardless of StartOffset
+                	static fun
+                	
 	*/
 	
 
-		; AHK32Bit a_PtrSize = 4 | AHK64Bit - 8 bytes
-		if (a_PtrSize = 8)
-		  return -1
+        ; AHK32Bit a_PtrSize = 4 | AHK64Bit - 8 bytes
+        if (a_PtrSize = 8)
+          return -1
 
-		ifequal, fun,
-		{
-		  h =
-		  (  LTrim join
-		     5589E583EC0C53515256579C8B5D1483FB000F8EC20000008B4D108B451829C129D9410F8E
-		     B10000008B7D0801C78B750C31C0FCAC4B742A4B742D4B74364B74144B753F93AD93F2AE0F
-		     858B000000391F75F4EB754EADF2AE757F3947FF75F7EB68F2AE7574EB628A26F2AE756C38
-		     2775F8EB569366AD93F2AE755E66391F75F7EB474E43AD8975FC89DAC1EB02895DF483E203
-		     8955F887DF87D187FB87CAF2AE75373947FF75F789FB89CA83C7038B75FC8B4DF485C97404
-		     F3A775DE8B4DF885C97404F3A675D389DF4F89F82B45089D5F5E5A595BC9C2140031C0F7D0
-		     EBF0
-		  )
-		  varSetCapacity(fun, strLen(h)//2)
-		  loop % strLen(h)//2
-		     numPut("0x" . subStr(h, 2*a_index-1, 2), fun, a_index-1, "char")
-		}
+        ifequal, fun,
+        {
+          h =
+          (  LTrim join
+             5589E583EC0C53515256579C8B5D1483FB000F8EC20000008B4D108B451829C129D9410F8E
+             B10000008B7D0801C78B750C31C0FCAC4B742A4B742D4B74364B74144B753F93AD93F2AE0F
+             858B000000391F75F4EB754EADF2AE757F3947FF75F7EB68F2AE7574EB628A26F2AE756C38
+             2775F8EB569366AD93F2AE755E66391F75F7EB474E43AD8975FC89DAC1EB02895DF483E203
+             8955F887DF87D187FB87CAF2AE75373947FF75F789FB89CA83C7038B75FC8B4DF485C97404
+             F3A775DE8B4DF885C97404F3A675D389DF4F89F82B45089D5F5E5A595BC9C2140031C0F7D0
+             EBF0
+          )
+          varSetCapacity(fun, strLen(h)//2)
+          loop % strLen(h)//2
+             numPut("0x" . subStr(h, 2*a_index-1, 2), fun, a_index-1, "char")
+        }
 
-		return DllCall(&fun, "uInt", haystackAddr, "uInt", needleAddr
-		              , "uInt", haystackSize, "uInt", needleSize, "uInt", StartOffset)
+        return DllCall(&fun, "uInt", haystackAddr, "uInt", needleAddr
+                      , "uInt", haystackSize, "uInt", needleSize, "uInt", StartOffset)
 	}
 ;9
-hexToBinaryBuffer(hexString, byRef buffer) {													    		;-- 
+hexToBinaryBuffer(hexString, byRef buffer) {                                                              	;-- 
 	
 	StringReplace, hexString, hexString, 0x,, All
 	StringReplace, hexString, hexString, %A_Space%,, All
 	StringReplace, hexString, hexString, %A_Tab%,, All
 	if !length := strLen(hexString)
 	{
-		msgbox nothing was passed to hexToBinaryBuffer
-		return 0
+        msgbox nothing was passed to hexToBinaryBuffer
+        return 0
 	}
 	if mod(length, 2)
 	{
-		msgbox Odd Number of characters passed to hexToBinaryBuffer`nEnsure two digits are used for each byte e.g. 0E
-		return 0
+        msgbox Odd Number of characters passed to hexToBinaryBuffer`nEnsure two digits are used for each byte e.g. 0E
+        return 0
 	}
 	byteCount := length/ 2
 	VarSetCapacity(buffer, byteCount)
 	loop, % byteCount
-		numput("0x" . substr(hexString, 1 + (A_index - 1) * 2, 2), buffer, A_index - 1, "UChar")
+        numput("0x" . substr(hexString, 1 + (A_index - 1) * 2, 2), buffer, A_index - 1, "UChar")
 	return byteCount
 
 }
 ;10
-RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {		    	;-- Provides RegRead64() function that do not redirect to Wow6432Node on 64-bit machines
+RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {              	;-- Provides RegRead64() function that do not redirect to Wow6432Node on 64-bit machines (for ansi- and unicode)
 
 	; _reg64.ahk ver 0.1 by tomte
 	; Script for AutoHotkey   ( http://www.autohotkey.com/ )
@@ -16579,114 +17545,115 @@ RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {		    	;-- Pro
 	; If the value name is blank/omitted the subkey's default value is used, if the value is omitted with RegWrite64() a blank/zero value is written
 	;
 
-	HKEY_CLASSES_ROOT	:= 0x80000000	; http://msdn.microsoft.com/en-us/library/aa393286.aspx
-	HKEY_CURRENT_USER	:= 0x80000001
-	HKEY_LOCAL_MACHINE	:= 0x80000002
-	HKEY_USERS			:= 0x80000003
-	HKEY_CURRENT_CONFIG	:= 0x80000005
-	HKEY_DYN_DATA		:= 0x80000006
-	HKCR := HKEY_CLASSES_ROOT
-	HKCU := HKEY_CURRENT_USER
-	HKLM := HKEY_LOCAL_MACHINE
-	HKU	 := HKEY_USERS
-	HKCC := HKEY_CURRENT_CONFIG
+	HKEY_CLASSES_ROOT   := 0x80000000   ; http://msdn.microsoft.com/en-us/library/aa393286.aspx
+    HKEY_CURRENT_USER   := 0x80000001
+    HKEY_LOCAL_MACHINE  := 0x80000002
+    HKEY_USERS          := 0x80000003
+    HKEY_CURRENT_CONFIG := 0x80000005
+    HKEY_DYN_DATA       := 0x80000006
+    HKCR := HKEY_CLASSES_ROOT
+    HKCU := HKEY_CURRENT_USER
+    HKLM := HKEY_LOCAL_MACHINE
+    HKU  := HKEY_USERS
+    HKCC := HKEY_CURRENT_CONFIG
+    
+    REG_NONE                := 0    ; http://msdn.microsoft.com/en-us/library/ms724884.aspx
+    REG_SZ                  := 1
+    REG_EXPAND_SZ           := 2
+    REG_BINARY              := 3
+    REG_DWORD               := 4
+    REG_DWORD_BIG_ENDIAN    := 5
+    REG_LINK                := 6
+    REG_MULTI_SZ            := 7
+    REG_RESOURCE_LIST       := 8
 
-	REG_NONE 				:= 0	; http://msdn.microsoft.com/en-us/library/ms724884.aspx
-	REG_SZ 					:= 1
-	REG_EXPAND_SZ			:= 2
-	REG_BINARY				:= 3
-	REG_DWORD				:= 4
-	REG_DWORD_BIG_ENDIAN	:= 5
-	REG_LINK				:= 6
-	REG_MULTI_SZ			:= 7
-	REG_RESOURCE_LIST		:= 8
+    KEY_QUERY_VALUE := 0x0001   ; http://msdn.microsoft.com/en-us/library/ms724878.aspx
+    KEY_WOW64_64KEY := 0x0100   ; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
+    KEY_SET_VALUE   := 0x0002
+    KEY_WRITE       := 0x20006
+    ENC := A_IsUnicode?"W":"A"
+    hKey := "", sValueType := ""
 
-	KEY_QUERY_VALUE := 0x0001	; http://msdn.microsoft.com/en-us/library/ms724878.aspx
-	KEY_WOW64_64KEY := 0x0100	; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
-	KEY_SET_VALUE	:= 0x0002
-	KEY_WRITE		:= 0x20006
-
-	myhKey := %sRootKey%		; pick out value (0x8000000x) from list of HKEY_xx vars
-	IfEqual,myhKey,, {		; Error - Invalid root key
-		ErrorLevel := 3
-		return ""
-	}
-
-	RegAccessRight := KEY_QUERY_VALUE + KEY_WOW64_64KEY
-
-	DllCall("Advapi32.dll\RegOpenKeyExA", "uint", myhKey, "str", sKeyName, "uint", 0, "uint", RegAccessRight, "uint*", hKey)	; open key
-	DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint*", sValueType, "uint", 0, "uint", 0)		; get value type
-	If (sValueType == REG_SZ or sValueType == REG_EXPAND_SZ) {
-		VarSetCapacity(sValue, vValueSize:=DataMaxSize)
-		DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sValue, "uint*", vValueSize)	; get string or string-exp
-	} Else If (sValueType == REG_DWORD) {
-		VarSetCapacity(sValue, vValueSize:=4)
-		DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "uint*", sValue, "uint*", vValueSize)	; get dword
-	} Else If (sValueType == REG_MULTI_SZ) {
-		VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
-		DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)	; get string-mult
-		sValue := ExtractData(&sTmp) "`n"
-		Loop {
-			If (errorLevel+2 >= &sTmp + vValueSize)
-				Break
-			sValue := sValue ExtractData( errorLevel+1 ) "`n"
-		}
-	} Else If (sValueType == REG_BINARY) {
-		VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
-		DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)	; get binary
-		sValue := ""
-		SetFormat, integer, h
-		Loop %vValueSize% {
-			hex := SubStr(Asc(SubStr(sTmp,A_Index,1)),3)
-			StringUpper, hex, hex
-			sValue := sValue hex
-		}
-		SetFormat, integer, d
-	} Else {				; value does not exist or unsupported value type
-		DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
-		ErrorLevel := 1
-		return ""
-	}
-	DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
-	return sValue
+    myhKey := %sRootKey%        ; pick out value (0x8000000x) from list of HKEY_xx vars
+    IfEqual,myhKey,, {      ; Error - Invalid root key
+        ErrorLevel := 3
+        return ""
+    }
+    RegAccessRight := KEY_QUERY_VALUE + KEY_WOW64_64KEY
+    ;VarSetCapacity(sValueType, 4)
+    DllCall("Advapi32.dll\RegOpenKeyEx" ENC, "uint", myhKey, "str", sKeyName, "uint", 0, "uint", RegAccessRight, "uint*", hKey)    ; open key
+    DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint*", sValueType, "uint", 0, "uint", 0)     ; get value type
+    If (sValueType == REG_SZ or sValueType == REG_EXPAND_SZ) {
+        VarSetCapacity(sValue, vValueSize:=DataMaxSize)
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sValue, "uint*", vValueSize) ; get string or string-exp
+    } Else If (sValueType == REG_DWORD) {
+        VarSetCapacity(sValue, vValueSize:=4)
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "uint*", sValue, "uint*", vValueSize)   ; get dword
+    } Else If (sValueType == REG_MULTI_SZ) {
+        VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get string-mult
+        sValue := ExtractData(&sTmp) "`n"
+        Loop {
+            If (errorLevel+2 >= &sTmp + vValueSize)
+                Break
+            sValue := sValue ExtractData( errorLevel+1 ) "`n" 
+        }
+    } Else If (sValueType == REG_BINARY) {
+        VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get binary
+        sValue := ""
+        SetFormat, integer, h
+        Loop %vValueSize% {
+            hex := SubStr(Asc(SubStr(sTmp,A_Index,1)),3)
+            StringUpper, hex, hex
+            sValue := sValue hex
+        }
+        SetFormat, integer, d
+    } Else {                ; value does not exist or unsupported value type
+        DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
+        ErrorLevel := 1
+        return ""
+    }
+    DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
+    return sValue
 }
 ;11
-RegWrite64(sValueType, sRootKey, sKeyName, sValueName = "", sValue = "") {		;-- RegWrite64() function that do not redirect to Wow6432Node on 64-bit machines
+RegWrite64(sValueType, sRootKey, sKeyName, sValueName = "", sValue = "") {      	;-- RegWrite64() function that do not redirect to Wow6432Node on 64-bit machines
 
-	HKEY_CLASSES_ROOT	:= 0x80000000	; http://msdn.microsoft.com/en-us/library/aa393286.aspx
-	HKEY_CURRENT_USER	:= 0x80000001
-	HKEY_LOCAL_MACHINE	:= 0x80000002
-	HKEY_USERS			:= 0x80000003
-	HKEY_CURRENT_CONFIG	:= 0x80000005
-	HKEY_DYN_DATA		:= 0x80000006
-	HKCR := HKEY_CLASSES_ROOT
-	HKCU := HKEY_CURRENT_USER
-	HKLM := HKEY_LOCAL_MACHINE
-	HKU	 := HKEY_USERS
-	HKCC := HKEY_CURRENT_CONFIG
+	HKEY_CLASSES_ROOT         	:= 0x80000000                        	; http://msdn.microsoft.com/en-us/library/aa393286.aspx
+	HKEY_CURRENT_USER        	:= 0x80000001
+	HKEY_LOCAL_MACHINE      	:= 0x80000002
+	HKEY_USERS                        	:= 0x80000003
+	HKEY_CURRENT_CONFIG    	:= 0x80000005
+	HKEY_DYN_DATA                	:= 0x80000006
+	HKCR                                   	:= HKEY_CLASSES_ROOT
+	HKCU                                   	:= HKEY_CURRENT_USER
+	HKLM                                  	:= HKEY_LOCAL_MACHINE
+	HKU	                                    	:= HKEY_USERS
+	HKCC                                   	:= HKEY_CURRENT_CONFIG
 
-	REG_NONE 				:= 0	; http://msdn.microsoft.com/en-us/library/ms724884.aspx
-	REG_SZ 					:= 1
-	REG_EXPAND_SZ			:= 2
-	REG_BINARY				:= 3
-	REG_DWORD				:= 4
-	REG_DWORD_BIG_ENDIAN	:= 5
-	REG_LINK				:= 6
-	REG_MULTI_SZ			:= 7
-	REG_RESOURCE_LIST		:= 8
+	REG_NONE                          	:= 0                                          	; http://msdn.microsoft.com/en-us/library/ms724884.aspx
+	REG_SZ                                	:= 1
+	REG_EXPAND_SZ                		:= 2
+	REG_BINARY                        	:= 3
+	REG_DWORD                       	:= 4
+	REG_DWORD_BIG_ENDIAN		:= 5
+	REG_LINK                            	:= 6
+	REG_MULTI_SZ                    	:= 7
+	REG_RESOURCE_LIST          	:= 8
 
-	KEY_QUERY_VALUE := 0x0001	; http://msdn.microsoft.com/en-us/library/ms724878.aspx
-	KEY_WOW64_64KEY := 0x0100	; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
-	KEY_SET_VALUE	:= 0x0002
-	KEY_WRITE		:= 0x20006
+	KEY_QUERY_VALUE             	:= 0x0001                                	; http://msdn.microsoft.com/en-us/library/ms724878.aspx
+	KEY_WOW64_64KEY            	:= 0x0100                                	; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
+	KEY_SET_VALUE                   	:= 0x0002
+	KEY_WRITE                          	:= 0x20006
 
-	myhKey := %sRootKey%			; pick out value (0x8000000x) from list of HKEY_xx vars
-	myValueType := %sValueType%		; pick out value (0-8) from list of REG_SZ,REG_DWORD etc. types
-	IfEqual,myhKey,, {		; Error - Invalid root key
+	myhKey := %sRootKey%                                                         	; pick out value (0x8000000x) from list of HKEY_xx vars
+	myValueType := %sValueType%                                            		; pick out value (0-8) from list of REG_SZ,REG_DWORD etc. types
+	IfEqual,myhKey,, {                                                                    	; Error - Invalid root key
 		ErrorLevel := 3
 		return ErrorLevel
 	}
-	IfEqual,myValueType,, {	; Error - Invalid value type
+	IfEqual,myValueType,, {                                                           	; Error - Invalid value type
 		ErrorLevel := 2
 		return ErrorLevel
 	}
@@ -16724,7 +17691,7 @@ ExtractData(pointer) {
 }
 } 
 ;12
-KillProcess(proc) {																					     				;-- uses DllCalls to end a process
+KillProcess(proc) {                                                                                                        	;-- uses DllCalls to end a process
 
 	; https://autohotkey.com/board/topic/119052-check-if-a-process-exists-if-it-does-kill-it/page-2
 
@@ -16757,7 +17724,7 @@ KillProcess(proc) {																					     				;-- uses DllCalls to end a proc
     return "", DllCall("kernel32.dll\SetLastError", "UInt", nTTL)
 }
 ;13
-LoadScriptResource(ByRef Data, Name, Type = 10) {									     			;-- loads a resource into memory (e.g. picture, scripts..)
+LoadScriptResource(ByRef Data, Name, Type = 10) {                                                 	;-- loads a resource into memory (e.g. picture, scripts..)
 
 	;https://autohotkey.com/board/topic/77519-load-and-display-imagespng-jpg-with-loadscriptresource/
 
@@ -16768,7 +17735,7 @@ LoadScriptResource(ByRef Data, Name, Type = 10) {									     			;-- loads a re
 
 		if A_IsCompiled {
 			If size := LoadScriptResource(buf,".\sample.ico")
-				hIcon := HIconFromBuffer(buf, 64, 64)
+                hIcon := HIconFromBuffer(buf, 64, 64)
 			else MsgBox Resource could not be loaded!
 		} else {
 			FileRead, buf, *c %A_ScriptDir%\sample.ico
@@ -16802,22 +17769,22 @@ LoadScriptResource(ByRef Data, Name, Type = 10) {									     			;-- loads a re
     return DataSize
 }
 ;14
-HIconFromBuffer(ByRef Buffer, width, height) {											    			;-- Function provides a HICON handle e.g. from a resource previously loaded into memory (LoadScriptResource)
+HIconFromBuffer(ByRef Buffer, width, height) {                                                           	;-- Function provides a HICON handle e.g. from a resource previously loaded into memory (LoadScriptResource)
 
 	;Ptr := Ptr ? "Ptr" : "Uint"	; For AutoHotkey Basic Users
 	hIcon := DllCall( "CreateIconFromResourceEx"
-		, UInt, &Buffer+22
-		, UInt, NumGet(Buffer,14)
-		, Int,1
-		, UInt, 0x30000
-		, Int, width
-		, Int, height
-		, UInt, 0
-		, Ptr)
+        , UInt, &Buffer+22
+        , UInt, NumGet(Buffer,14)
+        , Int,1
+        , UInt, 0x30000
+        , Int, width
+        , Int, height
+        , UInt, 0
+        , Ptr)
 	return hIcon
 }
 ;15
-hBMPFromPNGBuffer(ByRef Buffer, width, height) {										     		;-- Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)
+hBMPFromPNGBuffer(ByRef Buffer, width, height) {                                                   	;-- Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)
 
 	;modified SKAN's code ; http://www.autohotkey.com/forum/post-147052.html#147052
 
@@ -16837,12 +17804,12 @@ hBMPFromPNGBuffer(ByRef Buffer, width, height) {										     		;-- Function pr
 	DllCall( "gdiplus\GdipCreateHBITMAPFromBitmap", Ptr,pBitmap, PtrP, hBitmap, UInt,0)
 
 	hNewBitMap := DllCall("CopyImage"
-		  , Ptr, hBitmap
-		  , UInt, 0
-		  , Int, width
-		  , Int, height
-		  , UInt, 0x00000008      ;LR_COPYDELETEORG
-		  , Ptr)
+          , Ptr, hBitmap
+          , UInt, 0
+          , Int, width
+          , Int, height
+          , UInt, 0x00000008      ;LR_COPYDELETEORG
+          , Ptr)
 
 	DllCall( "gdiplus\GdipDisposeImage", Ptr, pBitmap )
 	DllCall( "gdiplus\GdiplusShutdown", Ptr, pToken )
@@ -16851,96 +17818,96 @@ hBMPFromPNGBuffer(ByRef Buffer, width, height) {										     		;-- Function pr
 	Return hNewBitMap
 }
 ;16
-SaveSetColours(set := False, liteSet := True) {													    		;-- Sys colours saving adapted from an approach found in Bertrand Deo's code
+SaveSetColours(set := False, liteSet := True) {                                                	            	;-- Sys colours saving adapted from an approach found in Bertrand Deo's code
 
 	; https://gist.github.com/qwerty12/110b6e68faa60a0145198722c8b8c291
 	; The rest is from Michael Maltsev: https://github.com/RaMMicHaeL/Windows-10-Color-Control
 	static DWMCOLORIZATIONPARAMS, IMMERSIVE_COLOR_PREFERENCE
-		   ,DwmGetColorizationParameters := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "dwmapi.dll", "Ptr"), "Ptr", 127, "Ptr")
-		   ,DwmSetColorizationParameters := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "dwmapi.dll", "Ptr"), "Ptr", 131, "Ptr")
-		   ,GetUserColorPreference := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "uxtheme.dll", "Ptr"), "AStr", "GetUserColorPreference", "Ptr")
-		   ,SetUserColorPreference := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "uxtheme.dll", "Ptr"), "Ptr", 122, "Ptr")
-		   ,WM_SYSCOLORCHANGE := 0x0015, sys_colours, sav_colours, colourCount := 31, GetSysColor := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "user32.dll", "Ptr"), "AStr", "GetSysColor", "Ptr")
+           ,DwmGetColorizationParameters := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "dwmapi.dll", "Ptr"), "Ptr", 127, "Ptr")
+           ,DwmSetColorizationParameters := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "dwmapi.dll", "Ptr"), "Ptr", 131, "Ptr")
+           ,GetUserColorPreference := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "uxtheme.dll", "Ptr"), "AStr", "GetUserColorPreference", "Ptr")
+           ,SetUserColorPreference := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "uxtheme.dll", "Ptr"), "Ptr", 122, "Ptr")
+           ,WM_SYSCOLORCHANGE := 0x0015, sys_colours, sav_colours, colourCount := 31, GetSysColor := DllCall("GetProcAddress", "Ptr", DllCall("GetModuleHandleW", "WStr", "user32.dll", "Ptr"), "AStr", "GetSysColor", "Ptr")
 	if (!set) {
-		if (!VarSetCapacity(DWMCOLORIZATIONPARAMS)) {
-			VarSetCapacity(sys_colours, 4 * colourCount)
-			,VarSetCapacity(sav_colours, 4 * colourCount)
-			VarSetCapacity(DWMCOLORIZATIONPARAMS, 28)
-			,VarSetCapacity(IMMERSIVE_COLOR_PREFERENCE, 8)
-			Loop % colourCount
-				NumPut(A_Index - 1, sys_colours, 4 * (A_Index - 1))
-		}
-		Loop % colourCount
-			NumPut(DllCall(GetSysColor, "Int", A_Index - 1, "UInt"), sav_colours, 4 * (A_Index - 1), "UInt")
-		DllCall(DwmGetColorizationParameters, "Ptr", &DWMCOLORIZATIONPARAMS)
-		DllCall(GetUserColorPreference, "Ptr", &IMMERSIVE_COLOR_PREFERENCE, "Int", False)
+        if (!VarSetCapacity(DWMCOLORIZATIONPARAMS)) {
+        	VarSetCapacity(sys_colours, 4 * colourCount)
+        	,VarSetCapacity(sav_colours, 4 * colourCount)
+        	VarSetCapacity(DWMCOLORIZATIONPARAMS, 28)
+        	,VarSetCapacity(IMMERSIVE_COLOR_PREFERENCE, 8)
+        	Loop % colourCount
+                NumPut(A_Index - 1, sys_colours, 4 * (A_Index - 1))
+        }
+        Loop % colourCount
+        	NumPut(DllCall(GetSysColor, "Int", A_Index - 1, "UInt"), sav_colours, 4 * (A_Index - 1), "UInt")
+        DllCall(DwmGetColorizationParameters, "Ptr", &DWMCOLORIZATIONPARAMS)
+        DllCall(GetUserColorPreference, "Ptr", &IMMERSIVE_COLOR_PREFERENCE, "Int", False)
 	} else {
-		if (!liteSet)
-			DllCall("SetSysColors", "int", colourCount, "Ptr", &sys_colours, "Ptr", &sav_colours)
-		if (VarSetCapacity(DWMCOLORIZATIONPARAMS)) {
-			if (!liteSet)
-				DllCall(DwmSetColorizationParameters, "Ptr", &DWMCOLORIZATIONPARAMS, "UInt", 0)
-			DllCall(SetUserColorPreference, "Ptr", &IMMERSIVE_COLOR_PREFERENCE, "Int", True)
-		}
+        if (!liteSet)
+        	DllCall("SetSysColors", "int", colourCount, "Ptr", &sys_colours, "Ptr", &sav_colours)
+        if (VarSetCapacity(DWMCOLORIZATIONPARAMS)) {
+        	if (!liteSet)
+                DllCall(DwmSetColorizationParameters, "Ptr", &DWMCOLORIZATIONPARAMS, "UInt", 0)
+        	DllCall(SetUserColorPreference, "Ptr", &IMMERSIVE_COLOR_PREFERENCE, "Int", True)
+        }
 	}
 }
 ;17
-ChangeMacAdress() {																						    		;-- change MacAdress, it makes changes to the registry!
+ChangeMacAdress() {                                                                                                  	;-- change MacAdress, it makes changes to the registry!
 
-		; http://ahkscript.org/germans/forums/viewtopic.php?t=8423 from ILAN12346
-		; Caution: Really only change if you know what a MAC address is or what you are doing.
-		; I do not assume any liability for any damages!
+        ; http://ahkscript.org/germans/forums/viewtopic.php?t=8423 from ILAN12346
+        ; Caution: Really only change if you know what a MAC address is or what you are doing.
+        ; I do not assume any liability for any damages!
 
-		Rootkey := "HKEY_LOCAL_MACHINE"
-		ValueName := "DriverDesc"
-		loop
-		{
-		  Subkey := "SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}\" . num := "00" . (A_Index < 10  ? "0" . A_Index : A_Index)
-		  RegRead, name, % Rootkey, % Subkey, % ValueName
-		  if name
-			nwa .= name . "***" . num . (A_Index = 1 ? "||" : "|")
-		  Else
-			break
-		}
-		gui, Font, s10
-		Gui, Add, Edit, x10 y40 w260 h20 +Center vmac,
-		Gui, Add, DropDownList, x10 y10 w260 h20 r10 vselect gselect, % RegExReplace(nwa, "\*\*\*", _
-											  . "                                                   *")
-		Gui, Add, Button, x280 y10 w60 h50 gset , Set Mac
-		Gui, Show, x270 y230 h70 w350, MAC
-		ValueName := "NetworkAddress"
-		Return
+        Rootkey := "HKEY_LOCAL_MACHINE"
+        ValueName := "DriverDesc"
+        loop
+        {
+          Subkey := "SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}\" . num := "00" . (A_Index < 10  ? "0" . A_Index : A_Index)
+          RegRead, name, % Rootkey, % Subkey, % ValueName
+          if name
+        	nwa .= name . "***" . num . (A_Index = 1 ? "||" : "|")
+          Else
+        	break
+        }
+        gui, Font, s10
+        Gui, Add, Edit, x10 y40 w260 h20 +Center vmac,
+        Gui, Add, DropDownList, x10 y10 w260 h20 r10 vselect gselect, % RegExReplace(nwa, "\*\*\*", _
+                                        	  . "                                                   *")
+        Gui, Add, Button, x280 y10 w60 h50 gset , Set Mac
+        Gui, Show, x270 y230 h70 w350, MAC
+        ValueName := "NetworkAddress"
+        Return
 
-		select:
-		  gui, submit, NoHide
-		  Subkey := "SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}\" . substr(select,instr(select, "*")+1)
-		  RegRead, macaddr, % Rootkey, % Subkey, % ValueName
-		  GuiControl,, mac, % macaddr
-		Return
+        select:
+          gui, submit, NoHide
+          Subkey := "SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}\" . substr(select,instr(select, "*")+1)
+          RegRead, macaddr, % Rootkey, % Subkey, % ValueName
+          GuiControl,, mac, % macaddr
+        Return
 
-		set:
-		  gui, submit, NoHide
-		  link := "SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}\" . substr(select,instr(select, "*")+1)
-		  RegRead, macaddr, % Rootkey, % Subkey, % ValueName
-		  newmac := RegExReplace(RegExReplace(mac, "-", ""), " ","")
-		  StringLower, newmac, newmac
-		  maccheck := "0x" . newmac
-		  if (strlen(newmac)=12 && (maccheck+1)) || !strlen(newmac)
-			RegWrite, REG_SZ, % RootKey, % SubKey , % ValueName, % newmac
-		  Else
-			MsgBox,16, Error, Incorrect MAC address
-			MsgBox, 48,Successful, New MAC Address Acquired
-			MsgBox, 36,Reconnect?,The network adapter needs to be reconnected. `n`n reconnect now?
-			 IfMsgBox, Yes
-			  Run, "ipconfig.exe" -renew,,Hide
-		Return
+        set:
+          gui, submit, NoHide
+          link := "SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002bE10318}\" . substr(select,instr(select, "*")+1)
+          RegRead, macaddr, % Rootkey, % Subkey, % ValueName
+          newmac := RegExReplace(RegExReplace(mac, "-", ""), " ","")
+          StringLower, newmac, newmac
+          maccheck := "0x" . newmac
+          if (strlen(newmac)=12 && (maccheck+1)) || !strlen(newmac)
+        	RegWrite, REG_SZ, % RootKey, % SubKey , % ValueName, % newmac
+          Else
+        	MsgBox,16, Error, Incorrect MAC address
+        	MsgBox, 48,Successful, New MAC Address Acquired
+        	MsgBox, 36,Reconnect?,The network adapter needs to be reconnected. `n`n reconnect now?
+        	 IfMsgBox, Yes
+        	  Run, "ipconfig.exe" -renew,,Hide
+        Return
 
-		GuiClose:
-		  ExitApp
+        GuiClose:
+          ExitApp
 
 }
 ;18
-ListAHKStats(Section="ListVars") {																	        	;-- Select desired section: ListLines, ListVars, ListHotkeys, KeyHistory
+ListAHKStats(Section="ListVars") {                                                                              	;-- Select desired section: ListLines, ListVars, ListHotkeys, KeyHistory
 
 	; Based on the "ListVars" feature of Lexikos
 	; http://www.autohotkey.com/forum/post-165430.html#165430
@@ -17005,13 +17972,13 @@ ListAHKStats(Section="ListVars") {																	        	;-- Select desired s
     return text
 }
 ;19
-MouseExtras(HoldSub, HoldTime="200", DoubleSub=""								    		;-- Allows to use subroutines for Holding and Double Clicking a Mouse Button.
+MouseExtras(HoldSub, HoldTime="200", DoubleSub=""                                           	;-- Allows to use subroutines for Holding and Double Clicking a Mouse Button.
 , DClickTime="0.2", Button="") {
 
 	; Author: Pulover [Rodolfo U. Batista]
 	; rodolfoub@gmail.com
 
-	/*		Description
+	/*        Description
 		- Allows to use subroutines for Holding and Double Clicking a Mouse Button.
 		- Keeps One-Click and Drag functions.
 		- Works with combinations, i.e. LButton & RButton.
@@ -17044,12 +18011,12 @@ MouseExtras(HoldSub, HoldTime="200", DoubleSub=""								    		;-- Allows to use
 		If (A_TimeSinceThisHotkey > HoldTime)
 		{
 			If IsLabel(HoldSub)
-				GoSub, %HoldSub%
+                GoSub, %HoldSub%
 			Else
 			{
-				Send {%Button% Down}
-				KeyWait, %Button%
-				Send {%Button% Up}
+                Send {%Button% Down}
+                KeyWait, %Button%
+                Send {%Button% Up}
 			}
 			return
 		}
@@ -17066,25 +18033,25 @@ MouseExtras(HoldSub, HoldTime="200", DoubleSub=""								    		;-- Allows to use
 		{
 			If !IsLabel(DoubleSub)
 			{
-				Send {%Button%}
-				return
+                Send {%Button%}
+                return
 			}
 			KeyWait, %Button%, D T%DClickTime%
 			If ErrorLevel
-				Send {%Button%}
+                Send {%Button%}
 			Else
 			{
-				If IsLabel(DoubleSub)
-					GoSub, %DoubleSub%
-				Else
-					Send {%Button%}
+                If IsLabel(DoubleSub)
+                	GoSub, %DoubleSub%
+                Else
+                	Send {%Button%}
 			}
 			return
 		}
 	}
 }
 ;20
-TimedFunction( _Label, _Params = 0, _Period = 250 ) {                                             	;-- SetTimer functionality for functions
+TimedFunction( _Label, _Params = 0, _Period = 250 ) {                                              	;-- SetTimer functionality for functions
 
     /*
     MIT License
@@ -17111,7 +18078,7 @@ TimedFunction( _Label, _Params = 0, _Period = 250 ) {                           
 
 }
 ;21
-ListGlobalVars() {																								    		;-- ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
+ListGlobalVars() {                                                                                                         	;-- ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
 
 	; Written by Lexikos - see: http://www.autohotkey.com/board/topic/20925-listvars/#entry156570
 	/*		examples
@@ -17161,7 +18128,7 @@ ListGlobalVars() {																								    		;-- ListGlobalVars() neither sho
     return text
 }
 ;22
-TaskList(delim:="|",getArray:=0,sort:=0) {		     														;-- list all running tasks (no use of COM)		
+TaskList(delim:="|",getArray:=0,sort:=0) {		                                                            	;-- list all running tasks (no use of COM)		
 	
 		;https://github.com/Lateralus138/Task-Lister
 		
@@ -17192,9 +18159,9 @@ TaskList(delim:="|",getArray:=0,sort:=0) {		     														;-- list all runn
 		   e := DllCall("Psapi.dll\GetModuleBaseName", "Ptr", h, "Ptr", 0, "Str", n, "UInt", A_IsUnicode ? s//2 : s)
 		   if !e    
 			  if e := DllCall("Psapi.dll\GetProcessImageFileName", "Ptr", h, "Str", n, "UInt", A_IsUnicode ? s//2 : s)
-				{
-					 SplitPath, n, n
-				}
+                {
+                	 SplitPath, n, n
+                }
 		   DllCall("CloseHandle", "Ptr", h)  
 		   if (n && e)  
 			  l .= n . d, c++
@@ -17203,36 +18170,36 @@ TaskList(delim:="|",getArray:=0,sort:=0) {		     														;-- list all runn
 		l:=SubStr(l,1,StrLen(l)-1) " " ndir
 		If getArray
 			{
-				proc:=!proc?Object():""
-				Loop, Parse, l, |
-					proc.Push(A_LoopField)
+                proc:=!proc?Object():""
+                Loop, Parse, l, |
+                	proc.Push(A_LoopField)
 			}
 		If sort
 			Sort, l, D%delim%
 		Return getArray?proc:l
 }
 ;23
-MouseDpi(mode_speed:=0) {																				    	;-- Change the current dpi setting of the mouse
+MouseDpi(mode_speed:=0) {                                                                                     	;-- Change the current dpi setting of the mouse
 	
 	; https://github.com/Lateralus138/OnTheFlyDpi/blob/master/ontheflydpi_funcs.ahk
 	DllCall("SystemParametersInfo","UInt",0x70,"UInt",0,"UIntP",_current_,"UInt",0)
 	If mode_speed Is Not Number
 		{
 			If (InStr(mode_speed,"reset") And (_current_!=10)){
-				DllCall("SystemParametersInfo","UInt",0x71,"UInt",0,"UInt",10,"UInt",0)
-				DllCall("SystemParametersInfo","UInt",0x70,"UInt",0,"UIntP",_current_,"UInt",0)
+                DllCall("SystemParametersInfo","UInt",0x71,"UInt",0,"UInt",10,"UInt",0)
+                DllCall("SystemParametersInfo","UInt",0x70,"UInt",0,"UIntP",_current_,"UInt",0)
 			}
 			Return _current_
 		}
 	mode_speed	:=(mode_speed!=0 And mode_speed>20)?20
-				:(mode_speed!=0 And mode_speed<0)?1
-				:mode_speed
+                :(mode_speed!=0 And mode_speed<0)?1
+                :mode_speed
 	If (mode_speed!=0 And (_current_!=mode_speed))
 		DllCall("SystemParametersInfo","UInt",0x71,"UInt",0,"UInt",mode_speed,"UInt",0)
 	Return !mode_speed?_current_:mode_speed
 }
 ;24
-SendToAHK(String, WinString) {                                                                                	;-- Sends strings by using a hidden gui between AHK scripts
+SendToAHK(String, WinString) {                                                                                 	;-- Sends strings by using a hidden gui between AHK scripts
 			
 	/*                              	EXAMPLE(s) will be found in ReceiveFromAHK() function
 	*/
@@ -17261,7 +18228,7 @@ SendToAHK(String, WinString) {                                                  
 	DetectHiddenWindows %Prev_DetectHiddenWindows%
 }
 ;25
-ReceiveFromAHK(wParam, lParam, Msg) {																	;-- Receiving strings from SendToAHK
+ReceiveFromAHK(wParam, lParam, Msg) {                                                                  	;-- Receiving strings from SendToAHK
 
 	/*                              	EXAMPLE(s)
 	
@@ -17271,10 +18238,10 @@ ReceiveFromAHK(wParam, lParam, Msg) {																	;-- Receiving strings from
 			
 			
 			MyTimer:
-				if receivedVar 
-				Received_String := receivedVar, receivedVar := ""
-				Msgbox "%Received_String%"
-				
+                if receivedVar 
+                Received_String := receivedVar, receivedVar := ""
+                Msgbox "%Received_String%"
+                
 			return
 			
 	*/
@@ -17285,12 +18252,12 @@ ReceiveFromAHK(wParam, lParam, Msg) {																	;-- Receiving strings from
 			{
 			tempVar .= Chr(wParam)
 			if lParam
-				receivedVar := tempVar, tempVar := ""
+                receivedVar := tempVar, tempVar := ""
 			}
 		
 }
 ;26
-GetUIntByAddress(_addr, _offset = 0) {																		;-- get UInt direct from memory. I found this functions only within one script 
+GetUIntByAddress(_addr, _offset = 0) {                                                                       	;-- get UInt direct from memory. I found this functions only within one script 
 	/*                              	DESCRIPTION
 	
 			Origin: https://autohotkey.com/board/topic/15950-treeview-with-tooltip-tvn-getinfotip-notification/
@@ -17304,7 +18271,7 @@ GetUIntByAddress(_addr, _offset = 0) {																		;-- get UInt direct from
 	Return result
 }
 ;27
-SetUIntByAddress(_addr, _integer, _offset = 0) {															;-- write UInt direct to memory
+SetUIntByAddress(_addr, _integer, _offset = 0) {                                                	        	;-- write UInt direct to memory
 	/*                              	DESCRIPTION
 	
 			Origin: https://autohotkey.com/board/topic/15950-treeview-with-tooltip-tvn-getinfotip-notification/
@@ -17313,13 +18280,13 @@ SetUIntByAddress(_addr, _integer, _offset = 0) {															;-- write UInt di
 	Loop 4
 	{
 		DllCall("RtlFillMemory"
-				, "UInt", _addr + _offset + A_Index-1
-				, "UInt", 1
-				, "UChar", (_integer >> 8*(A_Index-1)) & 0xFF)
+                , "UInt", _addr + _offset + A_Index-1
+                , "UInt", 1
+                , "UChar", (_integer >> 8*(A_Index-1)) & 0xFF)
 	}
 }
 ;28
-SetRestrictedDacl() {																									;-- run this in your script to hide it from Task Manager
+SetRestrictedDacl() {                                                                                                    	;-- run this in your script to hide it from Task Manager
 	
 	/*                              	DESCRIPTION
 	
@@ -17343,58 +18310,58 @@ SetRestrictedDacl() {																									;-- run this in your script to hid
 	if (!_GetTokenInformation(hToken, TokenUser := 1, 0, 0, dwLengthNeeded))
 		if (A_LastError == 122 && VarSetCapacity(TOKEN_USER, dwLengthNeeded)) ; ERROR_INSUFFICIENT_BUFFER
 			if (_GetTokenInformation(hToken, TokenUser, &TOKEN_USER, dwLengthNeeded, dwLengthNeeded)) {
-				SECURITY_MAX_SID_SIZE := 68
-				SIDs := {"WinWorldSid": "1", "WinLocalSystemSid": "22", "WinBuiltinAdministratorsSid": "26"}
-				for k, v in SIDs {
-					SIDs.SetCapacity(k, (cbSid := SECURITY_MAX_SID_SIZE))
-					if (!DllCall("advapi32\CreateWellKnownSid", "UInt", v+0, "Ptr", 0, "Ptr", SIDs.GetAddress(k), "UInt*", cbSid)) {
-						DllCall("CloseHandle", "Ptr", hToken)
-						return ret
-					}
-				}
+                SECURITY_MAX_SID_SIZE := 68
+                SIDs := {"WinWorldSid": "1", "WinLocalSystemSid": "22", "WinBuiltinAdministratorsSid": "26"}
+                for k, v in SIDs {
+                	SIDs.SetCapacity(k, (cbSid := SECURITY_MAX_SID_SIZE))
+                	if (!DllCall("advapi32\CreateWellKnownSid", "UInt", v+0, "Ptr", 0, "Ptr", SIDs.GetAddress(k), "UInt*", cbSid)) {
+                		DllCall("CloseHandle", "Ptr", hToken)
+                		return ret
+                	}
+                }
 
-				EA := [{ "grfAccessPermissions": PROCESS_ALL_ACCESS := (STANDARD_RIGHTS_REQUIRED := 0x000F0000) | (SYNCHRONIZE := 0x00100000) | 0xFFFF ; 0xFFF for XP and 2000
-						,"grfAccessMode":        GRANT_ACCESS := 1
-						,"grfInheritance":       NO_INHERITANCE := 0
-						,"TrusteeForm":          TRUSTEE_IS_SID := 0
-						,"TrusteeType":          TRUSTEE_IS_WELL_KNOWN_GROUP := 5
-						,"ptstrName":            SIDs.GetAddress("WinLocalSystemSid")}
-					  ,{ "grfAccessPermissions": PROCESS_ALL_ACCESS
-						,"grfAccessMode":        GRANT_ACCESS
-						,"grfInheritance":       NO_INHERITANCE
-						,"TrusteeForm":          TRUSTEE_IS_SID
-						,"TrusteeType":          TRUSTEE_IS_WELL_KNOWN_GROUP
-						,"ptstrName":            SIDs.GetAddress("WinBuiltinAdministratorsSid")}
-					  ,{ "grfAccessPermissions": PROCESS_QUERY_LIMITED_INFORMATION := 0x1000 | PROCESS_CREATE_PROCESS := 0x0080
-						,"grfAccessMode":        GRANT_ACCESS
-						,"grfInheritance":       NO_INHERITANCE
-						,"TrusteeForm":          TRUSTEE_IS_SID
-						,"TrusteeType":          TRUSTEE_IS_USER := 1
-						,"ptstrName":            NumGet(TOKEN_USER,, "Ptr")} ; user script is running under
-					  ,{ "grfAccessPermissions": PROCESS_ALL_ACCESS
-						,"grfAccessMode":        DENY_ACCESS := 3
-						,"grfInheritance":       NO_INHERITANCE
-						,"TrusteeForm":          TRUSTEE_IS_SID
-						,"TrusteeType":          TRUSTEE_IS_WELL_KNOWN_GROUP
-						,"ptstrName":            SIDs.GetAddress("WinWorldSid")}]
+                EA := [{ "grfAccessPermissions": PROCESS_ALL_ACCESS := (STANDARD_RIGHTS_REQUIRED := 0x000F0000) | (SYNCHRONIZE := 0x00100000) | 0xFFFF ; 0xFFF for XP and 2000
+                		,"grfAccessMode":        GRANT_ACCESS := 1
+                		,"grfInheritance":       NO_INHERITANCE := 0
+                		,"TrusteeForm":          TRUSTEE_IS_SID := 0
+                		,"TrusteeType":          TRUSTEE_IS_WELL_KNOWN_GROUP := 5
+                		,"ptstrName":            SIDs.GetAddress("WinLocalSystemSid")}
+                	  ,{ "grfAccessPermissions": PROCESS_ALL_ACCESS
+                		,"grfAccessMode":        GRANT_ACCESS
+                		,"grfInheritance":       NO_INHERITANCE
+                		,"TrusteeForm":          TRUSTEE_IS_SID
+                		,"TrusteeType":          TRUSTEE_IS_WELL_KNOWN_GROUP
+                		,"ptstrName":            SIDs.GetAddress("WinBuiltinAdministratorsSid")}
+                	  ,{ "grfAccessPermissions": PROCESS_QUERY_LIMITED_INFORMATION := 0x1000 | PROCESS_CREATE_PROCESS := 0x0080
+                		,"grfAccessMode":        GRANT_ACCESS
+                		,"grfInheritance":       NO_INHERITANCE
+                		,"TrusteeForm":          TRUSTEE_IS_SID
+                		,"TrusteeType":          TRUSTEE_IS_USER := 1
+                		,"ptstrName":            NumGet(TOKEN_USER,, "Ptr")} ; user script is running under
+                	  ,{ "grfAccessPermissions": PROCESS_ALL_ACCESS
+                		,"grfAccessMode":        DENY_ACCESS := 3
+                		,"grfInheritance":       NO_INHERITANCE
+                		,"TrusteeForm":          TRUSTEE_IS_SID
+                		,"TrusteeType":          TRUSTEE_IS_WELL_KNOWN_GROUP
+                		,"ptstrName":            SIDs.GetAddress("WinWorldSid")}]
 
-				padding := A_PtrSize == 8 ? 4 : 0
-				cbEXPLICIT_ACCESS_W := (4 * 3) + padding + (A_PtrSize + (4 * 3) + padding + A_PtrSize)
-				VarSetCapacity(EXPLICIT_ACCESS_W, cbEXPLICIT_ACCESS_W * EA.MaxIndex(), 0)
-				for i, v in EA {
-					thisEA := cbEXPLICIT_ACCESS_W * (i - 1)
-					NumPut(v.grfAccessPermissions, EXPLICIT_ACCESS_W, thisEA, "UInt")
-					NumPut(v.grfAccessMode, EXPLICIT_ACCESS_W, thisEA + 4, "UInt")
-					NumPut(v.grfInheritance, EXPLICIT_ACCESS_W, thisEA + (4 * 2), "UInt")
-					NumPut(v.TrusteeForm, EXPLICIT_ACCESS_W, thisEA + ((4 * 3) + padding + A_PtrSize + 4), "UInt")
-					NumPut(v.TrusteeType, EXPLICIT_ACCESS_W, thisEA + ((4 * 3) + padding + A_PtrSize + (4 * 2)), "UInt")
-					NumPut(v.ptstrName, EXPLICIT_ACCESS_W, thisEA + ((4 * 3) + padding + A_PtrSize + (4 * 3) + padding), "Ptr")				
-				}
-						
-				if (!DllCall("advapi32\SetEntriesInAcl", "UInt", EA.MaxIndex(), "Ptr", &EXPLICIT_ACCESS_W, "Ptr", 0, "Ptr*", pNewDacl)) {
-					ret := !DllCall("Advapi32\SetSecurityInfo", "Ptr", hCurProc, "UInt", SE_KERNEL_OBJECT := 6, "UInt", DACL_SECURITY_INFORMATION := 0x00000004, "Ptr", 0, "Ptr", 0, "Ptr", pNewDacl, "Ptr", 0)
-					DllCall("LocalFree", "Ptr", pNewDacl, "Ptr")
-				}
+                padding := A_PtrSize == 8 ? 4 : 0
+                cbEXPLICIT_ACCESS_W := (4 * 3) + padding + (A_PtrSize + (4 * 3) + padding + A_PtrSize)
+                VarSetCapacity(EXPLICIT_ACCESS_W, cbEXPLICIT_ACCESS_W * EA.MaxIndex(), 0)
+                for i, v in EA {
+                	thisEA := cbEXPLICIT_ACCESS_W * (i - 1)
+                	NumPut(v.grfAccessPermissions, EXPLICIT_ACCESS_W, thisEA, "UInt")
+                	NumPut(v.grfAccessMode, EXPLICIT_ACCESS_W, thisEA + 4, "UInt")
+                	NumPut(v.grfInheritance, EXPLICIT_ACCESS_W, thisEA + (4 * 2), "UInt")
+                	NumPut(v.TrusteeForm, EXPLICIT_ACCESS_W, thisEA + ((4 * 3) + padding + A_PtrSize + 4), "UInt")
+                	NumPut(v.TrusteeType, EXPLICIT_ACCESS_W, thisEA + ((4 * 3) + padding + A_PtrSize + (4 * 2)), "UInt")
+                	NumPut(v.ptstrName, EXPLICIT_ACCESS_W, thisEA + ((4 * 3) + padding + A_PtrSize + (4 * 3) + padding), "Ptr")                
+                }
+                		
+                if (!DllCall("advapi32\SetEntriesInAcl", "UInt", EA.MaxIndex(), "Ptr", &EXPLICIT_ACCESS_W, "Ptr", 0, "Ptr*", pNewDacl)) {
+                	ret := !DllCall("Advapi32\SetSecurityInfo", "Ptr", hCurProc, "UInt", SE_KERNEL_OBJECT := 6, "UInt", DACL_SECURITY_INFORMATION := 0x00000004, "Ptr", 0, "Ptr", 0, "Ptr", pNewDacl, "Ptr", 0)
+                	DllCall("LocalFree", "Ptr", pNewDacl, "Ptr")
+                }
 			}
 	
 	DllCall("CloseHandle", "Ptr", hToken)
@@ -17406,7 +18373,7 @@ _GetTokenInformation(TokenHandle, TokenInformationClass, ByRef TokenInformation,
 }
 ;}
 ;29
-getActiveProcessName() {																							;-- this function finds the process to the 'ForegroundWindow'
+getActiveProcessName() {                                                                                           	;-- this function finds the process to the 'ForegroundWindow'
 	;by Lexikos  https://autohotkey.com/boards/viewtopic.php?p=73137#p73137
 	handle := DllCall("GetForegroundWindow", "Ptr")
 	DllCall("GetWindowThreadProcessId", "Int", handle, "int*", pid)
@@ -17421,14 +18388,14 @@ getActiveProcessName() {																							;-- this function finds the proce
 	return pname
 }
 ;30
-enumChildCallback(hwnd, pid) {																					;-- i think this retreave's the child process ID for a known gui hwnd and the main process ID
+enumChildCallback(hwnd, pid) {                                                                                 	;-- i think this retreave's the child process ID for a known gui hwnd and the main process ID
 	DllCall("GetWindowThreadProcessId", "Int", hwnd, "int*", child_pid)
 	if (child_pid != pid)
 		global true_pid := child_pid
 	return 1
 }
 ;31
-GetDllBase(DllName, PID = 0) {		;--
+GetDllBase(DllName, PID = 0) {                                                                                   	;--
     TH32CS_SNAPMODULE := 0x00000008
     INVALID_HANDLE_VALUE = -1
     VarSetCapacity(me32, 548, 0)
@@ -17450,7 +18417,7 @@ GetDllBase(DllName, PID = 0) {		;--
     Return 0
 }
 ;32
-getProcBaseFromModules(process) {		;--
+getProcBaseFromModules(process) {                                                                         	;--
 
 /*
 	http://stackoverflow.com/questions/14467229/get-base-address-of-process
@@ -17463,26 +18430,26 @@ getProcBaseFromModules(process) {		;--
 
 
 	_MODULEINFO := "
-					(
-					  LPVOID lpBaseOfDll;
-					  DWORD  SizeOfImage;
-					  LPVOID EntryPoint;
-				  	)"
+                	(
+                	  LPVOID lpBaseOfDll;
+                	  DWORD  SizeOfImage;
+                	  LPVOID EntryPoint;
+                  	)"
 	Process, Exist, %process%
-	if ErrorLevel 							; PROCESS_QUERY_INFORMATION + PROCESS_VM_READ
+	if ErrorLevel                 			; PROCESS_QUERY_INFORMATION + PROCESS_VM_READ
 		hProc := DllCall("OpenProcess", "uint", 0x0400 | 0x0010 , "int", 0, "uint", ErrorLevel)
 	if !hProc
 		return -2
 	VarSetCapacity(mainExeNameBuffer, 2048 * (A_IsUnicode ? 2 : 1))
 	DllCall("psapi\GetModuleFileNameEx", "uint", hProc, "Uint", 0
-				, "Ptr", &mainExeNameBuffer, "Uint", 2048 / (A_IsUnicode ? 2 : 1))
+                , "Ptr", &mainExeNameBuffer, "Uint", 2048 / (A_IsUnicode ? 2 : 1))
 	mainExeName := StrGet(&mainExeNameBuffer)
 	; mainExeName = main executable module of the process
 	size := VarSetCapacity(lphModule, 4)
 	loop
 	{
 		DllCall("psapi\EnumProcessModules", "uint", hProc, "Ptr", &lphModule
-				, "Uint", size, "Uint*", reqSize)
+                , "Uint", size, "Uint*", reqSize)
 		if ErrorLevel
 			return -3, DllCall("CloseHandle","uint",hProc)
 		else if (size >= reqSize)
@@ -17494,12 +18461,12 @@ getProcBaseFromModules(process) {		;--
 	loop % reqSize / A_PtrSize ; sizeof(HMODULE) - enumerate the array of HMODULEs
 	{
 		DllCall("psapi\GetModuleFileNameEx", "uint", hProc, "Uint", numget(lphModule, (A_index - 1) * 4)
-				, "Ptr", &lpFilename, "Uint", 2048 / (A_IsUnicode ? 2 : 1))
+                , "Ptr", &lpFilename, "Uint", 2048 / (A_IsUnicode ? 2 : 1))
 		if (mainExeName = StrGet(&lpFilename))
 		{
 			moduleInfo := struct(_MODULEINFO)
 			DllCall("psapi\GetModuleInformation", "uint", hProc, "Uint", numget(lphModule, (A_index - 1) * 4)
-				, "Ptr", moduleInfo[], "Uint", SizeOf(moduleInfo))
+                , "Ptr", moduleInfo[], "Uint", SizeOf(moduleInfo))
 			;return moduleInfo.SizeOfImage, DllCall("CloseHandle","uint",hProc)
 			return moduleInfo.lpBaseOfDll, DllCall("CloseHandle","uint",hProc)
 		}
@@ -17507,7 +18474,7 @@ getProcBaseFromModules(process) {		;--
 	return -1, DllCall("CloseHandle","uint",hProc) ; not found
 }
 ;33
-InjectDll(pid,dllpath)  {																									;-- injects a dll to a running process (ahkdll??)
+InjectDll(pid,dllpath)  {                                                                                                	;-- injects a dll to a running process (ahkdll??)
 
     FileGetSize, size, %dllpath%
     file := FileOpen(dllpath, "r")
@@ -17532,7 +18499,7 @@ InjectDll(pid,dllpath)  {																									;-- injects a dll to a running
 
 }
 ;34
-getProcessBaseAddress(WindowTitle, MatchMode=3)	{											;-- gives a pointer to the base address of a process for further memory reading
+getProcessBaseAddress(WindowTitle, MatchMode=3)	{                                            	;-- gives a pointer to the base address of a process for further memory reading
 
 	;-- https://autohotkey.com/boards/viewtopic.php?t=9016
 	;--WindowTitle can be anything ahk_exe ahk_class etc
@@ -17548,7 +18515,7 @@ getProcessBaseAddress(WindowTitle, MatchMode=3)	{											;-- gives a pointer 
 	return BaseAddress
 }
 ;35
-LoadFile(path, exe:="", exception_level:=-1) {																;-- Loads a script file as a child process and returns an object
+LoadFile(path, exe:="", exception_level:=-1) {                                                             	;-- Loads a script file as a child process and returns an object
 
 	/*		DESCRIPTION
 
@@ -17639,16 +18606,16 @@ class LoadFile {
 }
 } 
 ;36
-ReadProcessMemory(hProcess, BaseAddress, Buffer, Bytes := 0								;-- reads data from a memory area in a given process.
+ReadProcessMemory(hProcess, BaseAddress, Buffer, Bytes := 0                                	;-- reads data from a memory area in a given process.
 , ByRef NumberOfBytesRead := "", ReturnType := "UInt") {
 
 		/*                              	DESCRIPTION
 		
 			The entire area to be read must be accessible or the operation will fail
-			Syntax: 				ReadProcessMemory ([hProcess], [BaseAddress], [data (out)], [size, in bytes], [NumberOfBytesRead (in_out)], [ReturnType])
+			Syntax:                 ReadProcessMemory ([hProcess], [BaseAddress], [data (out)], [size, in bytes], [NumberOfBytesRead (in_out)], [ReturnType])
 			Parameters:			BaseAddress: a pointer to the base address in the specific process to read
-			Data: 					A pointer to a buffer that receives the contents of the address space of the specified process.
-			Size: 					the number of bytes that is read from the specified processNumberOfBytesRead: receives the number of bytes transferred in the specified bufferReturnType: type of value to return. defect = UInt 
+			Data:                 	A pointer to a buffer that receives the contents of the address space of the specified process.
+			Size:                 	the number of bytes that is read from the specified processNumberOfBytesRead: receives the number of bytes transferred in the specified bufferReturnType: type of value to return. defect = UInt 
 			
 	*/
 	
@@ -17663,7 +18630,7 @@ ReadProcessMemory(hProcess, BaseAddress, Buffer, Bytes := 0								;-- reads dat
 	return Result, ErrorLevel := Error
 }
 ;37
-WriteProcessMemory(hProcess, BaseAddress															;-- writes data to a memory area in a specified process. the entire area to be written must be accessible or the operation will fail
+WriteProcessMemory(hProcess, BaseAddress                                                            	;-- writes data to a memory area in a specified process. the entire area to be written must be accessible or the operation will fail
 , Buffer, Bytes := 0, ByRef NumberOfBytesWritten := "") { 
 	
 	/*                              	DESCRIPTION
@@ -17682,7 +18649,7 @@ WriteProcessMemory(hProcess, BaseAddress															;-- writes data to a memo
 	return Result, ErrorLevel := Error
 }
 ;38
-CopyMemory(ByRef Destination, Source, Bytes) {														;-- Copy a block of memory from one place to another
+CopyMemory(ByRef Destination, Source, Bytes) {                                                       	;-- Copy a block of memory from one place to another
 	/*                              	DESCRIPTION
 	
 			Syntax: CopyMemory[ [destination], [source], [bytes] )
@@ -17692,7 +18659,7 @@ CopyMemory(ByRef Destination, Source, Bytes) {														;-- Copy a block of 
 	DllCall("msvcrt.dll\memcpy_s", "Ptr", Destination, "UInt", Bytes, "Ptr", Source, "UInt", Bytes)
 }
 ;39
-MoveMemory(ByRef Destination, Source, Bytes) {                                                   	;-- moves a block memory from one place to another												
+MoveMemory(ByRef Destination, Source, Bytes) {                                                      	;-- moves a block memory from one place to another
    	 /*                              	DESCRIPTION
  			Syntax: MoveMemory [[target], [source], [bytes])
 	*/
@@ -17700,23 +18667,23 @@ MoveMemory(ByRef Destination, Source, Bytes) {                                  
 	DllCall("msvcrt.dll\memmove_s", "Ptr", Destination, "UInt", Bytes, "Ptr", Source, "UInt", Bytes)
 } 
  ;40
-FillMemory(ByRef Destination, Bytes, Fill) {																	;-- fills a block of memory with the specified value
+FillMemory(ByRef Destination, Bytes, Fill) {                                                                  	;-- fills a block of memory with the specified value
 	;Syntax: FillMemory ([destination], [bytes], [value])
 	DllCall("ntdll.dll\RtlFillMemory", "Ptr", Destination, "UInt", Bytes, "UChar", Fill) 
 } ;https://msdn.microsoft.com/en-us/library/windows/hardware/ff561870(v=vs.85).aspx
 ;41
-ZeroMemory(ByRef Destination, Bytes) {																	;-- fills a memory block with zeros
+ZeroMemory(ByRef Destination, Bytes) {                                                                    	;-- fills a memory block with zeros
 	DllCall("ntdll.dll\RtlZeroMemory", "Ptr", Destination, "UInt", Bytes)
 } ;https://msdn.microsoft.com/en-us/library/windows/hardware/ff563610(v=vs.85).aspx
 ;42
-CompareMemory(Source1, Source2, Size := 0) {															;-- compare two memory blocks
+CompareMemory(Source1, Source2, Size := 0) {                                                        	;-- compare two memory blocks
 	
 	/*                              	DESCRIPTION
 	
 			Syntax: 	CompareMemory ([mem1], [mem2], [total size, in bytes])
 			Return:		1 	= mem1> mem2
-							0 	= mem1 = mem2
-							-1	= mem1 <mem2
+                			0 	= mem1 = mem2
+                			-1	= mem1 <mem2
 	*/
 	
 	if !(Size)
@@ -17726,7 +18693,7 @@ CompareMemory(Source1, Source2, Size := 0) {															;-- compare two memor
 	return Result>0?1:Result<0?-1:0, ErrorLevel := ((Result+0)="")
 }
  ;43
-VirtualAlloc(ByRef hProcess := 0, ByRef Address := 0													;-- changes the state of a region of memory within the virtual address space of a specified process. the memory is assigned to zero.AtEOF
+VirtualAlloc(ByRef hProcess := 0, ByRef Address := 0                                                 	;-- changes the state of a region of memory within the virtual address space of a specified process. the memory is assigned to zero.AtEOF
 , ByRef Bytes := 0, AllocationType := 0x00001000, Protect := 0x04, Preferred := 0) {
 	
 	/*                              	DESCRIPTION
@@ -17770,7 +18737,7 @@ VirtualAlloc(ByRef hProcess := 0, ByRef Address := 0													;-- changes the
 	return DllCall("Kernel32.dll\VirtualAllocExNuma", "Ptr", hProcess, "UInt", Address, "UPtr", Bytes, "UInt", AllocationType, "UInt", Protect, "UInt", Preferred, "UInt")
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/aa366891(v=vs.85).aspx
  ;44
-VirtualFree(hProcess := 0, Address := 0, Bytes := 0, AllocationType := 0x8000) {		;-- release a region of pages within the virtual address space of the specified process 
+VirtualFree(hProcess := 0, Address := 0, Bytes := 0, AllocationType := 0x8000) {       	;-- release a region of pages within the virtual address space of the specified process 
 	/*                              	DESCRIPTION
 			Syntax: VirtualFree( [hProcess], [direccion], [tamaño, en bytes], [tipo] )
 			Types:
@@ -17784,17 +18751,17 @@ VirtualFree(hProcess := 0, Address := 0, Bytes := 0, AllocationType := 0x8000) {
 	return DllCall("Kernel32.dll\VirtualFreeEx", "Ptr", hProcess, "UInt", Address, "UPtr", Bytes, "UInt", AllocationType, "UInt"), ErrorLevel := Error
 }
  ;45
-ReduceMem() {																											;-- reduces usage of memory from calling script 
+ReduceMem() {                                                                                                            	;-- reduces usage of memory from calling script 
 	
 	/*                              	DESCRIPTION
 	
-			Link: 					https://autohotkey.com/board/topic/56984-new-process-notifier/
+			Link:                 	https://autohotkey.com/board/topic/56984-new-process-notifier/
 			 Function from: 	New Process Notifier 
 			 Language:       	English
 			 Platform:       		Windows XP or later
 			 			 
-										Copyright (C) 2010 sbc <http://sites.google.com/site/littlescripting/>
-										Licence: GNU GENERAL PUBLIC LICENSE. Please reffer to this page for more information. http://www.gnu.org/licenses/gpl.html
+                                		Copyright (C) 2010 sbc <http://sites.google.com/site/littlescripting/>
+                                		Licence: GNU GENERAL PUBLIC LICENSE. Please reffer to this page for more information. http://www.gnu.org/licenses/gpl.html
 			
 	*/
 	
@@ -17805,7 +18772,7 @@ ReduceMem() {																											;-- reduces usage of memory from calling
     DllCall("CloseHandle", "Int", h)
 }
 ;46
-GlobalLock(hMem) {																									;-- memory management function
+GlobalLock(hMem) {                                                                                                    	;-- memory management function
 	return DllCall("Kernel32.dll\GlobalLock", "Ptr", hMem, "Ptr")
 } GlobalAlloc(Bytes, Flags := 0x0002) {
 	return DllCall("Kernel32.dll\GlobalAlloc", "UInt", Flags, "UInt", Bytes, "Ptr")
@@ -17823,34 +18790,34 @@ GlobalLock(hMem) {																									;-- memory management function
 	return DllCall("Kernel32.dll\GlobalFlags", "Ptr", hMem, "UInt")
 }
 ;47
-LocalFree(hMem*) {																										;-- free a locked memory object
+LocalFree(hMem*) {                                                                                                    		;-- free a locked memory object
 	Error := ErrorLevel, Ok := 0
 	for k, v in hMem
 		Ok += !DllCall("Kernel32.dll\LocalFree", "Ptr", v, "Ptr")
 	return Ok=hMem.MaxIndex(), ErrorLevel := Error
 }
 ;48
-CreateStreamOnHGlobal(hGlobal, DeleteOnRelease := true) {									;-- creates a stream object that uses an HGLOBAL memory handle to store the stream contents. This object is the OLE-provided implementation of the IStream interface.
+CreateStreamOnHGlobal(hGlobal, DeleteOnRelease := true) {                                   	;-- creates a stream object that uses an HGLOBAL memory handle to store the stream contents. This object is the OLE-provided implementation of the IStream interface.
 	DllCall("ole32.dll\CreateStreamOnHGlobal", "Ptr", hGlobal, "Int", !!DeleteOnRelease, "PtrP", IStream)
 	return IStream
 }
 ;49
-CoTaskMemFree(ByRef hMem) {																					;-- releases a memory block from a previously assigned task through a call to the CoTaskMemAlloc () or CoTaskMemAlloc () function.
+CoTaskMemFree(ByRef hMem) {                                                                                 	;-- releases a memory block from a previously assigned task through a call to the CoTaskMemAlloc () or CoTaskMemAlloc () function.
 	Error := ErrorLevel
 	, Ok := DllCall("Ole32.dll\CoTaskMemFree", "UPtr", hMem)
 	return !!Ok, VarSetCapacity(hMem, 0), ErrorLevel := Error
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/ms680722(v=vs.85).aspx
 ;50
-CoTaskMemAlloc(Bytes) {																							;-- assign a working memory block
+CoTaskMemAlloc(Bytes) {                                                                                            	;-- assign a working memory block
 	/*                              	DESCRIPTION
-				Syntax: CoTaskMemAlloc ([memory block size, in bytes])
+                Syntax: CoTaskMemAlloc ([memory block size, in bytes])
 			Return: hMem 
 	*/
 	
 	return DllCall("Ole32.dll\CoTaskMemAlloc", "UPtr", Bytes, "UPtr")
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/ms692727(v=vs.85).aspx
 ;51
-CoTaskMemRealloc(hMem, Bytes) {																			;-- change the size of a previously assigned block of working memory
+CoTaskMemRealloc(hMem, Bytes) {                                                                            	;-- change the size of a previously assigned block of working memory
 	/*                              	DESCRIPTION
 	
 			.Syntax: CoTaskMemRealloc ([hMem], [new size for the memory block, in bytes]) 
@@ -17860,7 +18827,7 @@ CoTaskMemRealloc(hMem, Bytes) {																			;-- change the size of a previ
 	return DllCall("Ole32.dll\CoTaskMemRealloc", "Ptr", hMem, "UPtr", Bytes, "Ptr")
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/ms687280(v=vs.85).aspx
 ;52
-VarAdjustCapacity(ByRef Var) {																					;-- adjusts the capacity of a variable to its content
+VarAdjustCapacity(ByRef Var) {                                                                                   	;-- adjusts the capacity of a variable to its content
 	/*                              	DESCRIPTION
 	
 			Example:
@@ -17878,7 +18845,7 @@ VarAdjustCapacity(ByRef Var) {																					;-- adjusts the capacity of a
 	, VarSetCapacity(Var, Capacity), Var := OutputVar
 }
 ;53
-DllListExports( DLL, Hdr := 0 ) {         																			;-- List of Function exports of a DLL
+DllListExports( DLL, Hdr := 0 ) {                                                                                   	;-- List of Function exports of a DLL
 
 	/*                              	DESCRIPTION
 	
@@ -17918,15 +18885,15 @@ Local LOADED_IMAGE, nSize := VarSetCapacity( LOADED_IMAGE, 84, 0 ), pMappedAddre
 Return RTrim( List, "`n" )
 }
 ;54
-RtlUlongByteSwap64(num){																						;-- routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v2)
+RtlUlongByteSwap64(num){                                                                                        	;-- routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v2)
 	/*                              	DESCRIPTION
 	
 			; Url:
-				;	- https://msdn.microsoft.com/en-us/library/windows/hardware/ff562886(v=vs.85).aspx (RtlUlongByteSwap routine)
-				;	- https://msdn.microsoft.com/en-us/library/e8cxb8tk.aspx (_swab function)
-				; For example, if the Source parameter value is 0x12345678, the routine returns 0x78563412.
-				; works on both 32 and 64 bit.
-				
+                ;	- https://msdn.microsoft.com/en-us/library/windows/hardware/ff562886(v=vs.85).aspx (RtlUlongByteSwap routine)
+                ;	- https://msdn.microsoft.com/en-us/library/e8cxb8tk.aspx (_swab function)
+                ; For example, if the Source parameter value is 0x12345678, the routine returns 0x78563412.
+                ; works on both 32 and 64 bit.
+                
 	*/
 	/*                              	EXAMPLE(s)
 	
@@ -17942,17 +18909,17 @@ RtlUlongByteSwap64(num){																						;-- routine reverses the ordering 
 	return numget(dest,"uint")
 }
 ;55
-RtlUlongByteSwap64(num) {																						;-- routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v1)
+RtlUlongByteSwap64(num) {                                                                                       	;-- routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v1)
 	/*                              	DESCRIPTION
 	
-				Link: https://autohotkey.com/boards/viewtopic.php?f=5&t=39002
-					- https://msdn.microsoft.com/en-us/library/windows/hardware/ff562886(v=vs.85).aspx (RtlUlongByteSwap routine)
-					- https://msdn.microsoft.com/en-us/library/e8cxb8tk.aspx (_swab function)
-				A ULONG value to convert to a byte-swapped version
-				For example, if the Source parameter value is 0x12345678, the routine returns 0x78563412.
-				works on both 32 and 64 bit.
-				v1 version
-				
+                Link: https://autohotkey.com/boards/viewtopic.php?f=5&t=39002
+                	- https://msdn.microsoft.com/en-us/library/windows/hardware/ff562886(v=vs.85).aspx (RtlUlongByteSwap routine)
+                	- https://msdn.microsoft.com/en-us/library/e8cxb8tk.aspx (_swab function)
+                A ULONG value to convert to a byte-swapped version
+                For example, if the Source parameter value is 0x12345678, the routine returns 0x78563412.
+                works on both 32 and 64 bit.
+                v1 version
+                
 	*/
 	/*                              	EXAMPLE(s)
 	
@@ -17969,11 +18936,28 @@ RtlUlongByteSwap64(num) {																						;-- routine reverses the ordering
 	,DllCall("MSVCRT.dll\_swab", "ptr", &src+2, "ptr", &dest, "int", 2, "cdecl")
 	return numget(dest,"uint")
 }
+}
+;|   CreateNamedPipe()                 	|   RestoreCursors()                       	|   SetSystemCursor()                    	|   SystemCursor()                         	|
+;|   ToggleSystemCursor()             	|   SetTimerF()                              	|   IGlobalVarsScript()                   	|   patternScan()                           	|
+;|   scanInBuf()                              	|   hexToBinaryBuffer()	                	|   GetDllBase()                             	|   getProcBaseFromModules()      	|
+;|   RegRead64()                            	|   RegWrite64()                            	|   LoadScriptResource()                	|
+;|   HIconFromBuffer()                   	|   hBMPFromPNGBuffer()            	|   SaveSetColours()                        	|   ChangeMacAdress()                    	|
+;|   ListAHKStats()                         	|   MouseExtras()                          	|   TimedFunction()                        	|   ListGlobalVars()                        	|
+;|   TaskList()                                 	|   MouseDpi()                              	|   SendToAHK()                            	|   ReceiveFromAHK()                   	|
+;|   GetUIntByAddress()                 	|   SetUIntByAddress()                   	|   SetRestrictedDacl()                    	|   getActiveProcessName()           	|
+;|   enumChildCallback()               	|   GetDllBase()                             	|   getProcBaseFromModules()        	|   InjectDll()                                 	|
+;|   getProcessBaseAddress()         	|   LoadFile()                                 	|   ReadProcessMemory()              	|   WriteProcessMemory()             	|
+;|   CopyMemory()                        	|   MoveMemory()                         	|   FillMemory()                             	|   ZeroMemory()                          	|
+;|   CompareMemory()                  	|   VirtualAlloc()                            	|   VirtualFree()                             	|   ReduceMem()                           	|
+;|   GlobalLock()                            	|   LocalFree()                                	|   CreateStreamOnHGlobal()       	|   CoTaskMemFree()                     	|
+;|   CoTaskMemRealloc()               	|   VarAdjustCapacity()                 	|   DllListExports()                         	|   RtlUlongByteSwap64() x2         	|
+;|
+;---------------------------------------------------------------------------------------------------------------------------------------------------------
+;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-{ ;retreaving informations about system, user, hardware (7)
+{ ;retreaving informations about system, user, hardware (8)
 ;1
-UserAccountsEnum(Options := "") {																			;-- list all users with information
+UserAccountsEnum(Options := "") {                                                                        	;-- list all users with information
 	
 	/*                              	DESCRIPTION
 	
@@ -17999,7 +18983,7 @@ UserAccountsEnum(Options := "") {																			;-- list all users with info
 	} return List
 }
 ;2
-GetCurrentUserInfo() {																									;-- obtains information from the current user
+GetCurrentUserInfo() {                                                                                            	;-- obtains information from the current user
 	
 	/*                              	DESCRIPTION
 	
@@ -18020,7 +19004,7 @@ GetCurrentUserInfo() {																									;-- obtains information from the 
 	return CurrentUserInfo
 } 
 ;3
-GetHandleInformation(Handle, ByRef Flags := "") {													;-- obtain certain properties of a HANDLE
+GetHandleInformation(Handle, ByRef Flags := "") {                                                	;-- obtain certain properties of a HANDLE
 	
 	/*                              	DESCRIPTION
 	
@@ -18045,7 +19029,7 @@ GetHandleInformation(Handle, ByRef Flags := "") {													;-- obtain certain
 	return !!Ok, ErrorLevel := Ok?false:A_LastError
 } 
 ;4
-SetHandleInformation(Handle, Flags := 0x00000000) {												;-- establishes the properties of a HANDLE
+SetHandleInformation(Handle, Flags := 0x00000000) {                                          	;-- establishes the properties of a HANDLE
 	
 	/*                              	DESCRIPTION
 	
@@ -18060,7 +19044,7 @@ SetHandleInformation(Handle, Flags := 0x00000000) {												;-- establishes t
 	return !!Ok, ErrorLevel := Ok?false:A_LastError
 }
 ;5
- GetPhysicallyInstalledSystemMemory() { 																	;-- recovers the amount of RAM in physically installed KB from the SMBIOS (System Management BIOS) firmware tables, WIN_V SP1+
+ GetPhysicallyInstalledSystemMemory() {                                                               	;-- recovers the amount of RAM in physically installed KB from the SMBIOS (System Management BIOS) firmware tables, WIN_V SP1+
 	/*                              	DESCRIPTION
 	
 			Example: MsgBox % Round(GetPhysicallyInstalledSystemMemory()/1024, 1) " MB"
@@ -18071,7 +19055,7 @@ SetHandleInformation(Handle, Flags := 0x00000000) {												;-- establishes t
 	return TotalMemoryInKilobytes
 }
 ;6
-GlobalMemoryStatus() {																								;-- retrieves information about the current use of physical and virtual memory of the system
+GlobalMemoryStatus() {                                                                                          	;-- retrieves information about the current use of physical and virtual memory of the system
 	/*                              	EXAMPLE(s)
 			MsgBox % (l:=GlobalMemoryStatus()) "Load: " l.Load " %`nRAM: " Round(l.TotalPhys/(1024**2), 1) " MB" 
 	*/
@@ -18087,7 +19071,7 @@ GlobalMemoryStatus() {																								;-- retrieves information about th
 	, AvailVirtual: NumGet(MEMORYSTATUSEX, 48, "UInt64")} ;espacio disponible de direcciones virtuales del proceso de llamada, en bytes
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/aa366589(v=vs.85).aspx
 ;7
-GetSystemFileCacheSize(ByRef MinimumFileCacheSize := ""										;-- retrieves the current size limits for the working set of the system cache
+GetSystemFileCacheSize(ByRef MinimumFileCacheSize := ""	                                	;-- retrieves the current size limits for the working set of the system cache
 , ByRef MaximumFileCacheSize := "", ByRef Flags := "") {
 	/*                              	DESCRIPTION
 	
@@ -18098,36 +19082,47 @@ GetSystemFileCacheSize(ByRef MinimumFileCacheSize := ""										;-- retrieves t
 	
 	return DllCall("Kernel32.dll\GetSystemFileCacheSize", "Int64P", MinimumFileCacheSize, "Int64P", MaximumFileCacheSize, "UIntP", Flags)
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/aa965224(v=vs.85).aspx
-;
+;8
+Is64bitProcess(pid) {                                                                                                	;-- check if a process is running in 64bit
+
+	;function from Toolbar.ahk - Scite4AHK
+	if !A_Is64bitOS
+		return 0
+	
+	proc := DllCall("OpenProcess", "uint", 0x0400, "uint", 0, "uint", pid, "ptr")
+	DllCall("IsWow64Process", "ptr", proc, "uint*", retval)
+	DllCall("CloseHandle", "ptr", proc)
+	return retval ? 0 : 1
+}
+;9
+getSessionId() {                                                                                                       	;-- this functions finds out ID of current session
+	
+    ProcessId := DllCall("GetCurrentProcessId", "UInt")
+    if ErrorLevel {
+        OutputDebug, Error getting current process id: %ErrorLevel%
+        return
+    }
+    OutputDebug, Current Process Id: %ProcessId%
+
+    DllCall("ProcessIdToSessionId", "UInt", ProcessId, "UInt*", SessionId)
+    if ErrorLevel {
+        OutputDebug, Error getting session id: %ErrorLevel%
+        return
+    }
+    OutputDebug, Current Session Id: %SessionId%
+    return SessionId
+}
 
 }
-} 
-;|														|														|														|														|
-;|	CreateNamedPipe()						|	RestoreCursors()							|	SetSystemCursor()						|	SystemCursor()								|
-;|  ToggleSystemCursor()              	|	SetTimerF()									|	IGlobalVarsScript()						|	patternScan()								|
-;|	scanInBuf()									|	hexToBinaryBuffer()						|	GetDllBase()									|	getProcBaseFromModules()			|
-;|	RegRead64()								|	RegWrite64()								|	LoadScriptResource()					|
-;|	HIconFromBuffer()						|	hBMPFromPNGBuffer()				|	SaveSetColours()							|	ChangeMacAdress()						|
-;|	ListAHKStats()								|	MouseExtras()								|	TimedFunction()							|	ListGlobalVars()							|
-;|	TaskList()										|   MouseDpi()                              	|   SendToAHK()                            	|   ReceiveFromAHK()                   	|
-;|   GetUIntByAddress()                  	|   SetUIntByAddress()                   	|   SetRestrictedDacl()                    	|   getActiveProcessName()           	|
-;|   enumChildCallback()                	|	GetDllBase()									|	getProcBaseFromModules()			|	InjectDll()										|
-;|	getProcessBaseAddress()				|	LoadFile()										|   ReadProcessMemory()              	|   WriteProcessMemory()             	|
-;|   CopyMemory()                         	|   MoveMemory()                         	|   FillMemory()                             	|   ZeroMemory()                          	|
-;|   CompareMemory()                    	|   VirtualAlloc()                            	|   VirtualFree()                             	|   ReduceMem()                           	|
-;|   GlobalLock()                             	|   LocalFree()                                	|   CreateStreamOnHGlobal()       	|   CoTaskMemFree()                     	|
-;|   CoTaskMemRealloc()                	|   VarAdjustCapacity()                  	|   DllListExports()                         	|   RtlUlongByteSwap64() x2            	|
-;|
-; - informations about system, user, hardware -
-;|														|														|														|														|
-;|   UserAccountsEnum()               	|   GetCurrentUserInfo()                 	|   GetHandleInformation()           	|   SetHandleInformation()             	|
-;|   GetPhysicallyInstalledSystemMemory()                                            	|   GlobalMemoryStatus()              	|   GetSystemFileCacheSize()         	|
+;|   UserAccountsEnum(1)             	|   GetCurrentUserInfo(2)             	|   GetHandleInformation(3)         	|   SetHandleInformation(4)         	|
+;|   GetPhysicallyInstalledSystemMemory(5)                                         	|   GlobalMemoryStatus(6)           	|   GetSystemFileCacheSize(7)      	|
+;|   Is64bitProcess(8)                     	|   getSessionId()                           	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;UIAutomation (5)
 ;1	
-CreatePropertyCondition(propertyId, ByRef var, type :="Variant") {     									;-- I hope this one works
+CreatePropertyCondition(propertyId, ByRef var, type :="Variant") {                                   	;-- I hope this one works
 		If (A_PtrSize=8) {
 			if (type!="Variant")
 			UIA_Variant(var,type,var)
@@ -18143,7 +19138,7 @@ CreatePropertyCondition(propertyId, ByRef var, type :="Variant") {     									
 		}
 	}
 ;2
-CreatePropertyCondition(propertyId, ByRef var, type := "Variant") {        								;-- I hope this one is better
+CreatePropertyCondition(propertyId, ByRef var, type := "Variant") {                                  	;-- I hope this one is better
         ; CREDITS: Elgin, http://ahkscript.org/boards/viewtopic.php?f=5&t=6979&p=43985#p43985
         ; Parameters:
         ;   propertyId  - An ID number of the property to check.
@@ -18176,7 +19171,7 @@ CreatePropertyCondition(propertyId, ByRef var, type := "Variant") {        					
         }
     }
 ;3
-CreatePropertyConditionEx(propertyId, ByRef var, type := "Variant", flags := 0x1) {				;--
+CreatePropertyConditionEx(propertyId, ByRef var, type := "Variant", flags := 0x1) {          	;--
         ; PropertyConditionFlags_IgnoreCase = 0x1
         local out:="", hr, bstr
 
@@ -18206,7 +19201,7 @@ CreatePropertyConditionEx(propertyId, ByRef var, type := "Variant", flags := 0x1
         }
     }
 ;4
-UIAgetControlNameByHwnd(_, controlHwnd) {																		;--
+UIAgetControlNameByHwnd(_, controlHwnd) {		                                                            	;--
 	
 	UIAutomation := ComObjCreate("{ff48dba4-60ef-4201-aa87-54103eef594e}", "{30cbe57d-d9d0-452a-ab13-7ac5ac4825ee}")
 	DllCall(NumGet(NumGet(UIAutomation+0)+6*A_PtrSize), "Ptr", UIAutomation, "Ptr", controlHwnd, "Ptr*", IUIAutomationElement)
@@ -18218,7 +19213,7 @@ UIAgetControlNameByHwnd(_, controlHwnd) {																		;--
 	return ret
 }
 ;5
-MouseGetText(x := "", y := "", Encoding := "UTF-16") {															;-- get the text in the specified coordinates, function uses Microsoft UIA
+MouseGetText(x := "", y := "", Encoding := "UTF-16") {                                                      	;-- get the text in the specified coordinates, function uses Microsoft UIA
 	
 	/*                              	DESCRIPTION
 	
@@ -18279,13 +19274,13 @@ MouseGetText(x := "", y := "", Encoding := "UTF-16") {															;-- get the
 } ;http://www.autohotkey.com/board/topic/94619-ahk-l-screen-reader-a-tool-to-get-text-anywhere/
 
 } 
-;|														|														|														|														|
-;|	CreatePropertyCondition()			|	CreatePropertyCondition()			|	CreatePropertyConditionEx()		|	getControlNameByHwnd()			|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   CreatePropertyCondition()      	|   CreatePropertyCondition()       	|   CreatePropertyConditionEx()    	|   getControlNameByHwnd()       	|
 ;|   MouseGetText()                       	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;ACC (MSAA) - different methods (7)
+{ ;ACC (MSAA) (7)
 ;1
 Acc_Get(Cmd, ChildPath="", ChildID=0, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {		;--
 	
@@ -18473,14 +19468,14 @@ GetEnumIndex(Acc, ChildId=0) {                                                  
 
 
 } 
-;|														|														|														|														|
-;|	Acc_Get()										|	Acc_Error()									|	Acc_ChildrenByRole()					|	listAccChildProperty()					|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   Acc_Get()	                                	|   Acc_Error()                                	|   Acc_ChildrenByRole()                	|   listAccChildProperty()                	|
 ;|   GetInfoUnderCursor()              	|   GetAccPath()                            	|   GetEnumIndex()                       	|
 ;|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Internet Explorer/Chrome/FireFox/HTML functions (9)
+{ ;Internet Explorer/Chrome/FireFox/HTML (9)
 ; AutoHotkey_L: von jethrow
 IEGet(name="") {																							    			;-- AutoHotkey_L
    IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
@@ -18650,14 +19645,15 @@ TabActivate(TabName, WinTitle="") {																			;-- a different approach t
 
 
 } 
-;|														|														|														|														|
-;|	IEGet()											|   WBGet()										|	IE_TabActivateByName()				|   IE_TabActivateByHandle()        	|
-;|   IE_TabWinID()                          	|   ReadProxy()                              	|	IE_getURL()									|   ACCTabActivate()                      	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   IEGet()                                     	|   WBGet()                                   	|   IE_TabActivateByName()          	|   IE_TabActivateByHandle()        	|
+;|   IE_TabWinID()                          	|   ReadProxy()                             	|   IE_getURL()                              	|   ACCTabActivate()                      	|
 ;|   TabActivate()                           	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------       
     
-{ ;Variables - Handling (8)
+{ ;Variables (8)
+;1
 ComVar(Type:=0xC) { 																								;-- Creates an object which can be used to pass a value ByRef.
 
     ;   ComVar: Creates an object which can be used to pass a value ByRef.
@@ -18674,15 +19670,17 @@ ComVar(Type:=0xC) { 																								;-- Creates an object which can be u
     ; Store the array and an object which can be used to pass the VARIANT ByRef.
     return { ref: ComObject(0x4000|Type, arr_data), _: arr, base: base }
 }
+;2
 ComVarGet(cv, p*) { 																								;-- Called when script accesses an unknown field.
     if p.MaxIndex() = "" ; No name/parameters, i.e. cv[]
         return cv._[0]
 }
+;3
 ComVarSet(cv, v, p*) { 																							;-- Called when script sets an unknown field.
     if p.MaxIndex() = "" ; No name/parameters, i.e. cv[]:=v
         return cv._[0] := v
 }
-
+;4
 GetScriptVARs() {																										;-- returns a key, value array with all script variables (e.g. for debugging purposes)
 
 		; http://www.autohotkey.com/board/topic/20925-listvars/#entry156570
@@ -18733,7 +19731,7 @@ GetScriptVARs() {																										;-- returns a key, value array with a
     }
     return vars
 }
-
+;5
 Valueof(VarinStr) {																									;-- Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables
 	
 	; https://github.com/aviaryan/autohotkey-scripts/blob/master/Functions/ValueOf.ahk
@@ -18788,7 +19786,7 @@ local Midpoint, emVar, $j, $n
 		VarinStr := Substr(VarinStr, 1, Instr(VarinStr, "%", 0, 1, Midpoint)-1) emVar Substr(VarinStr, Instr(VarinStr, "%", 0, 1, Midpoint+1)+1)
 	}
 }
-
+;6
 type(v) {																													;-- Object version: Returns the type of a value: "Integer", "String", "Float" or "Object"
 
 	/*                              	DESCRIPTION
@@ -18812,7 +19810,7 @@ type(v) {																													;-- Object version: Returns the type of a 
         return "Object"
     return v="" || [v].GetCapacity(1) ? "String" : InStr(v,".") ? "Float" : "Integer"
 }
-
+;7
 type(ByRef v) {																											;-- COM version: Returns the type of a value: "Integer", "String", "Float" or "Object"
 	
 	/*                              	DESCRIPTION
@@ -18833,7 +19831,7 @@ type(ByRef v) {																											;-- COM version: Returns the type of a
 	DllCall("oleaut32\SafeArrayUnaccessData", "ptr", ComObjValue(a))
 	return type=3?"Integer" : type=8?"String" : type=5?"Float" : type
 }
-
+;8
 A_DefaultGui() {																										;-- a nice function to have a possibility to get the number of the default gui
 	
 	/*                              	DESCRIPTION
@@ -18863,13 +19861,13 @@ A_DefaultGui() {																										;-- a nice function to have a possibil
 
 
 } 
-;|														|														|														|														|
-;|	ComVar()										|	ComVarGet()								|	ComVarSet()								|	GetScriptVARs()							|
-;|   Valueof()                                 	|   type() x 2                                     	|   A_DefaultGui()                          	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   ComVar()                                	|   ComVarGet()                           	|   ComVarSet()                            	|   GetScriptVARs()                        	|
+;|   Valueof()                                 	|   type() x 2                                 	|   A_DefaultGui()                         	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;other languages or MCode functions(1)
+{ ;Other languages/MCode (1)
 MCode_Bin2Hex(addr, len, ByRef hex) { 							;-- By Lexikos, http://goo.gl/LjP9Zq
 	Static fun
 	If (fun = "") {
@@ -18898,12 +19896,12 @@ MCode_Bin2Hex(addr, len, ByRef hex) { 							;-- By Lexikos, http://goo.gl/LjP9Z
 }
 
 } 
-;|														|														|														|														|
-;|	MCode_Bin2Hex()						|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|   MCode_Bin2Hex()                    	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;other functions(5)
+{ ;Other (5)
 ;1
 GetCommState(ComPort) {																							;-- this function retrieves the configuration settings of a given serial port
 
@@ -19115,13 +20113,13 @@ WM_SETCURSOR(wParam, lParam) { 																			;-- Prevent "sizing arrow" cur
 
 
 }
-;|														|														|														|														|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
 ;|   pauseSuspendScript()               	|   GetCommState()                       	|   RtlGetVersion()                          	|   PostMessageUnderMouse()       	|
 ;|   WM_SETCURSOR()                   	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ; RegEx - Strings / 
+{ ; RegEx 
 	
 	;1. ####### AHK Code finders ###########
 	
@@ -19151,64 +20149,32 @@ WM_SETCURSOR(wParam, lParam) { 																			;-- Prevent "sizing arrow" cur
 			ApplicationName    := RegExReplace(A_ScriptName,"i)(ahk_)(.*)([.]ahk)","$2") 
 		
 } 
-;|														|														|														|														|
-;|	1. Regex Strings to find functions	|
+;|                                                   	|                                                   	|                                                   	|                                                   	|
+;|  1. Regex Strings to find functions	|
 
 
-;{ ----- NOT SORTED FUNCTION OR FUNCTION I CANT IDENTIFY - but looks interesting
+;{ 
+	/*    	DESCRIPTION of function 
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	
+			Link              	:	
+			Author         	:	
+			Date             	:	
+			AHK-Version	:	
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
 
 
-
-
-
-
+	/*    	EXAMPLE(s)
 	
-
-
-
-
-
+	
+	
+	*/
 
 ;}
-
-
-
-;}
-
-{ ; Script by Rajat saves settings in .ahk file itselfs!
-/*
-[settings]
-like=0
-
-*/
-
-IniRead, like, %a_scriptfullpath%, settings, like
-
-Gui, Add, button, x16 y17 w90 h30 glike, I like this
-Gui, Add, button, x16 y57 w90 h30 gdontlike, I don't like this
-Gui, Add, Text, x26 y97 w70 h20, Previous = %like%
-Gui, Show, x158 y110 h120 w128, Generated using SmartGUI 2.6
-Return
-[]
-GuiClose:
-        Gui, submit
-ExitApp
-
-like:
-        IniWrite, 1, %a_scriptfullpath%, settings, like
-Return
-
-dontlike:
-        IniWrite, 0, %a_scriptfullpath%, settings, like
-Return
-} 
-
-{ ;Scite4AHK options
-
-	{ ; Toggle All Fold RightContextMenu
-# 23 Un/Fold #Region
-command.name.23.$(ahk)=Toggle Fold #Region
-command.23.*.ahk=dostring local text = editor:GetText() tReg = {} pos, iEnd = text:find('#[Rr][Ee][Gg][Ii][Oo][Nn]') \
-if pos ~= nil then table.insert(tReg, pos) while true do \
-pos, iEnd = text:find('#[Rr][Ee][Gg][Ii][Oo][Nn]', iEnd) \
-if pos == nil then

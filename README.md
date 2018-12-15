@@ -10,7 +10,7 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-*Last modification date*: ***30.09.2018***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
+*Last modification date*: ***15.12.2018***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
 
 In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does not work". After trying it with [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey). 
 
@@ -18,24 +18,71 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/Misc-Functions.ahk.png)
 
-<br>
 
-### <u>[30-September-2018] count: 140+402 = 542 functions</u>
+
+## ![Gem](GemSmall.png)[15-December-2018] - 22(new)+542(old) = 564
+
+optimized layout, began to assign a number for functions identification, Split topics to find functions faster, each function will get the following description* over time:
+
+```Autohotkey
+/*    	DESCRIPTION of function 
+    	----------------------------------------------------------------------------
+		Description  	:	
+		Link           	:	
+		Author         	:	
+		Date           	:	
+		AHK-Version 	:	
+		License        	:	
+		Parameter(s)	:
+		Return value	:
+		Remark(s)    	:	
+		Dependencies	:	
+		KeyWords    	:	
+    	----------------------------------------------------------------------------
+*/
+```
+
+**in preparation for a comfortable search and editing program*.
+
+
+
+- **Ansi2Oem()** - using Ansi2Unicode and Unicode2Ansi functions
+- **Oem2Ansi()** - using Ansi2Unicode and Unicode2Ansi functions
+- **Ansi2UTF8()** - using Ansi2Unicode and Unicode2Ansi functions
+- **UTF82Ansi()** - using Ansi2Unicode and Unicode2Ansi functions
+- **FindChildWindow()** - ***new version!*** - If there was no title or text for the childwindow, the returned value was empty, so this function can handle now a new search parameter  -Class or ClassNN-
+- **StdoutToVar_CreateProcess()** - Runs a command line program and returns its output
+- **DNSQuery()** - retrieve IP adresses or host/domain names from DNS
+- **CreateDIB()** - a wonderfull function by SKAN to draw tiled backgrounds (like chess pattern) to a gui, it can also draw gradients
+- **GuiControlLoadImage()** - scale down a picture to fit the given width and height of a picture control
+- **Gdip_ResizeBitmap()** - returns resized bitmap
+- **Gdip_CropBitmap()** - returns cropped bitmap. Specify how many pixels you want to crop (omit) from each side of bitmap rectangle
+- **FontClone()** - backup hFont in memory for further processing
+- **GuiDefaultFont()** - returns the default Fontname & Fontsize
+- **DateDiff()** - returns the difference between two timestamps in the specified units
+- **ObjectNameChange()** - titlebar hook to detect when title changes, (Lexikos’ code)
+- **StrGetDimAvgCharWidth()** - average width of a character in pixels
+- **BlockKeyboard()** - block keyboard, and unblock it through usage of keyboard
+- **GetFileFormat()** - retreaves the codepage format of a file
+- **RunUTF8()** - if a .exe file really requires its command line to be encoded as UTF-8, the following might work (a lexikos function)
+- **Is64bitProcess()** - check if a process is running in 64bit
+- **getSessionId()** - this functions finds out ID of current session
+- **SetTrayIcon()** - sets a hex coded icon to as try icon
+- **HashFile()** - calculate hashes (MD2,MD5,SH1,SHA256, SHA384, SHA512) from file ;23
+- 
+
+
+
+## ![Gem](GemSmall.png) [30-September-2018] count: 140+402 = 542 functions
 
 ### **functions for controls** (10)
 
 - **ControlGetClassNN()** - different method is used here in compare to the already existing functions in this collection
-
-- **FocusedControl()** - returns the HWND of the currently focused control, or 0 if there was a problem
-
+- **FocusedControl()** - returns the HWND of the currently focused control, or 0 if there was a problem**
 - **GetClassName()** - returns HWND‘s class name without its instance number, e.g. “Edit” or “SysListView32”
-
 - **ControlSelectTab()** - SendMessage wrapper to select the current tab on a MS Tab Control.
-
 - **ClickOK()** - function that search for any button in a window that might be an ‘Ok’ button to close a window dialog
-
-- 4 different **AddToolTip()** functions - very easy to use function to add a tooltip to a control
-
+- 4 different **AddToolTip() functions** - very easy to use function to add a tooltip to a control
 - **Control_GetFont()** - retrieves the used font of a control
 
 
@@ -344,7 +391,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-### <u>[15-July-2018] count: 79+323 = 402 functions</u>
+## ![Gem](GemSmall.png) [15-July-2018] count: 79+323 = 402 functions
 
 I’ve found a lot function this time. I checked the found functions that these can not actually be found in any library, so that these can really be called "Rare". I added some more descriptions, examples, links and moved some functions to the right category. 
 
@@ -499,7 +546,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **PathInfo()** - splits a given path to return as object
 
 -----
-###<u>[13-June-2018] count: 323 functions</u>
+## ![Gem](GemSmall.png) [13-June-2018] count: 323 functions
 
 - **TimedFunction() ** - SetTimer functionality for functions
 - **ListGlobalVars() ** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
@@ -523,7 +570,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **GetClientSize()** - get size of window without border
 
 ----
-### <u>[10-June-2018] count: 303 functions</u>
+## ![Gem](GemSmall.png) [10-June-2018] count: 303 functions
 
 *minor layout improvement (so I hope, anyway). In the [AHK forum](https://autohotkey.com/boards/) I read that codefolding does not work. After trying with the [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with  [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey).*
 
@@ -539,7 +586,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **SaveHBITMAPToFile()** - saves a HBitmap to a file, depending function of CaptureScreen()
 
 -----
-### <u>[02-June-2018] count: 293 functions</u>
+## ![Gem](GemSmall.png) [02-June-2018] count: 293 functions
 
 ***6 functions removed*** - depending functions not available or the functions are doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
 
@@ -565,7 +612,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **SaveSetColours()** - Sys colours saving adapted from an approach found in Bertrand Deo's code
 
 -----
-### <u>[28-May-2018] count: 280 functions</u>
+## ![Gem](GemSmall.png) [28-May-2018] count: 280 functions
 
 ***Organized layout***, some functions moved to the right topic, delete duplicate functions, adding more info and examples*
 
@@ -661,7 +708,7 @@ IsWindow(hWnd*) {
 - **TV_Load()** - loads TreeView items from an XML string
 
 -----
-### <u>[22-May-2018] count: 240 functions</u>
+## ![Gem](GemSmall.png) [22-May-2018] count: 240 functions
 
 + **FindChildWindow()** - a very good function to get handles from child windows like MDI childs
 
@@ -680,7 +727,7 @@ IsWindow(hWnd*) {
 + **FrameShadow(HGui)** - Drop Shadow On Borderless Window, (DWM STYLE)
 
 -----
-### <u>[06-May-2018] count: 230 functions</u>
+## ![Gem](GemSmall.png)[06-May-2018] count: 230 functions
 
 - **getByControlName()**  - function uses DllCalls
 - **listAccChildProperty()** - uses COM functionality
@@ -688,7 +735,7 @@ IsWindow(hWnd*) {
 - **TabCtrl_GetCurSel(), TabCtrl_GetItemText()** - the first returns the 1-based index of the currently selected tab, the second returns the tab name
 
 -----
-### <u>[01-May-2018] count: 221 functions</u>
+## ![Gem](GemSmall.png) [01-May-2018] count: 221 functions
 
 - **PIC_GDI_GUI()** - a GDI Gui for showing pictures and more
 - **FullScreenToggleUnderMouse()** - Window to pseudo fullscreen and back
@@ -707,7 +754,7 @@ IsWindow(hWnd*) {
 
 -----
 
-## <u>Complete List of functions</u>
+## ![Gem](GemSmall.png) Complete List of functions ![Gem](GemSmall.png)
 
 *sometimes the function names are the same but they use different methods to get the same result*
 
