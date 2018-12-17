@@ -18,6 +18,19 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK-Rare.ahk_Screenshot.png)
 
+## ![Gem](D:/Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/GemSmall.png)[??-?????????-????] - ??(new)+564(old) =
+
+- **ExtractIcon()** - extract icon from a resource file
+- **GetIconSize()** - determines the size of the icon (Lexikos function)
+- **Gdip_GetHICONDimensions()** - get icon dimensions 
+- **GetBitmapSize()** - Lexikos function to get the size of bitmap
+- **FoxitInvoke()** - wm_command wrapper for FoxitReader Version:  9.1
+- **WinSaveCheckboxes()** - save the status of checkboxes in other apps
+- **GetButtonType()** - uses the style of a button to get it’s name
+- **KeyValueObjectFromLists()** - merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
+- **List2Array()** - function uses StrSplit () to return an array
+- 
+
 
 
 ## ![Gem](GemSmall.png)[15-December-2018] - 22(new)+542(old) = 564
