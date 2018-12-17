@@ -22,7 +22,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ## ![Gem](assets/GemSmall.png) [XX-XXXXXXX-XXXX] - XX(new)+564(old) =  XXX
 
-| FUNCTION                      | DESCRIPTION                                                  |
+| **FUNCTION**                  | **DESCRIPTION**                                              |
 | :---------------------------- | :----------------------------------------------------------- |
 | **ExtratIcon()**              | extract icon from a resource file                            |
 | **GetIconSize()**             | determines the size of the icon (Lexikos function)           |
