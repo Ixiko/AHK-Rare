@@ -1635,7 +1635,7 @@ GetThreadStartAddr(ProcessID) {                                                 
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;graphic (52) - baseID: <05.01>
+{ ;graphic (59) - baseID: <05.01>
 ;1
 LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="",         		;--Loads a picture and returns an HBITMAP or HICON to the caller
 aIconNumber:=0, aUseGDIPlusIfAvailable:=1) {
@@ -3691,6 +3691,308 @@ GetBitmapSize(h_bitmap, ByRef width, ByRef height, ByRef bpp="") {              
     bpp    := NumGet(bm,18, "ushort")
     return true
 } ;</00053>
+;<00054>
+Gdip_BitmapReplaceColor(pBitmap, ByRef pBitmapOut, Color                           	;-- using Mcode to replace a color with a specific variation
+, ReplaceColor, Variation) {
+	
+	/*    	DESCRIPTION of function Gdip_BitmapReplaceColor() ID: 05.01.00054
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	using Mcode to replace a color with a specific variation
+			Link              	:	https://autohotkey.com/board/topic/29449-gdi-standard-library-145-by-tic/page-60
+			Author         	:	????
+			Date	            	:	????
+			AHK-Version	:	AHK V1
+			License         	:	????
+			KeyWords    	:	gdi, image, mcode, processing, color
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+   static BitmapReplaceColor
+   if !BitmapReplaceColor
+   {
+      MCode_BitmapReplaceColor := "83EC248B4424388B4C243C995683E2038BF103C28B542438C1FE10C1F90881E6FF00000081E1FF000000C1F8028"
+      . "9742408894C244085D20F8E0A010000538B5C2430558B6C245033C903C0578B7C243C03C0894C241C89442430897C241889542420837C2440000F8"
+      . "EB90000008D43018BD32BD083C202895424282BF5894C244403C88BD32BD08B442440897424248954242C89442410EB0B8DA424000000008B74242"
+      . "48B5424280FB6140A0FB6013BD67E0A8B74241403F53BD67C268B74244C2BF53BC67E248B5C244C03DD3BC38B5C24387C0E3BC67E128B74244C03F"
+      . "53BC67D088B4424508907EB228B7424440FB6741E03C1E6080BF28B54242CC1E6080BF00FB6040AC1E6080BF08937834424440483C10483C704FF4"
+      . "C241075828B4C241C8B7424148B7C2418037C2430034C2448FF4C2420897C2418894C241C0F851EFFFFFF5F5D5BB8010000005E83C424C3"
+
+      VarSetCapacity(BitmapReplaceColor, StrLen(MCode_BitmapReplaceColor)//2)
+      Loop % StrLen(MCode_BitmapReplaceColor)//2      ;%
+         NumPut("0x" SubStr(MCode_BitmapReplaceColor, (2*A_Index)-1, 2), BitmapReplaceColor, A_Index-1, "char")
+   }
+
+   Width := Gdip_GetImageWidth(pBitmap), Height := Gdip_GetImageHeight(pBitmap)
+   if (Width != Gdip_GetImageWidth(pBitmapOut) || Height != Gdip_GetImageHeight(pBitmapOut))
+      return -1
+
+   if (Variation > 255 || Variation < 0)
+      return -2
+
+   E1 := Gdip_LockBits(pBitmap, 0, 0, Width, Height, Stride1, Scan01, BitmapData1)
+   E2 := Gdip_LockBits(pBitmapOut, 0, 0, Width, Height, Stride2, Scan02, BitmapData2)
+   if (E1 || E2)
+      return -3
+
+   E := DllCall(&BitmapReplaceColor, "uint", Scan01, "uint", Scan02, "int", Width, "int", Height, "int", Stride1, "int", Color, "int", ReplaceColor, "int", Variation)
+   Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmapOut, BitmapData2)
+   return 0
+} ;</00054>
+;<00055>
+Gdi_ExtFloodFill(hDC, XStart, YStart, Color, FillType=0) {                                       	;-- fills an area with the current brush
+	
+	/*    	DESCRIPTION of function ExtFloodFill()  ID: 05.01.00055
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	Fills an area with the current brush
+			Link              	:	https://autohotkey.com/board/topic/29449-gdi-standard-library-145-by-tic/page-62
+			Author         	:	nimda
+			Date	            	:	????
+			AHK-Version	:	AHK V1
+			License         	:	????
+			Parameter(s)	:	Filltypes: 	FloodFillBorder  = 0, FloodFillSurface = 1
+			Remark(s)    	:	Per MSDN [ http://msdn.microsoft.com/en-us/library/dd162709 ]:
+                                    	If the fuFillType parameter is FLOODFILLBORDER, the system assumes that
+                                    	the area to be filled is completely bounded by the color specified by
+                                    	the crColor parameter. The function begins filling at the point specified
+                                    	by the nXStart and nYStart parameters and continues in all directions
+                                    	until it reaches the boundary.
+                                    
+                                    	If fuFillType is FLOODFILLSURFACE, the system assumes that the area to
+                                    	be filled is a single color. The function begins to fill the area at the
+                                    	point specified by nXStart and nYStart and continues in all directions,
+                                    	filling all adjacent regions containing the color specified by crColor.
+			Dependencies	:	none
+			KeyWords    	:	gdi, image, processing
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	/*		EXAMPLE(s)
+	
+        	CoordMode, Mouse
+        	CoordMode, Pixel
+        	KeyWait, LButton, D
+        	MouseGetPos, X, Y
+        	PixelGetColor, color, X, Y
+        	Color |= 0xFF000000
+        
+        	up := (A_PtrSize ? "UPtr" : "UInt")
+        
+        	hDC := DllCall("GetDC", up, 0, up)
+        	hBrushRed := DllCall("CreateSolidBrush", UInt, 0xFFFF0000, up)
+        	DllCall("SelectObject", up, hDC, up, hBrushRed, up)
+        	r := ExtFloodFill(hDC, X, Y, Color, 0)
+        	DllCall("DeleteObject", up, hBrushRed, "int")
+        	DllCall("ReleaseDC", up, 0, up, hDC, "int")
+        
+        	MsgBox % r
+	
+	*/
+	
+	return DllCall( "GDI32\ExtFloodFill", (A_PtrSize ? "UPtr" : "UInt"), hDC
+		 , int, XStart, int, YStart, UInt, Color ; color is in ARGB form
+		 , UInt, FillType, "int" )
+} ;<00055>
+;<00056>
+Gdip_AlphaMask32v1(pBitmap, pBitmapMask, x, y) {                                            	;-- 32bit Gdip-AlphaMask with MCode - one of two builds
+	
+	/*    	DESCRIPTION of function Gdip_AlphaMask32v1() ID: 05.01.00056
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	gdi cutting and aliasing
+			Link              	:	https://autohotkey.com/board/topic/103475-gdi-cutting-anti-aliasing/
+										https://autohotkey.com/boards/viewtopic.php?t=39077
+			Author         	:	Tic
+			Date	            	:	
+			AHK-Version	:	AHK_L, AHK V1
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	library Gdip_All.ahk
+			KeyWords    	:	GDI, Cut, Crop, MCOde
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	static _AlphaMask
+	if !_AlphaMask
+	{
+		MCode_AlphaMask := "8B4424209983E2038D0C028B4424249983E20303C28B54241CC1F902C1F80285D27E7303C003C08944241C8D048D000000000FA"
+		. "F4C242C034C2428538B5C240C55568B742424894424308B442418578D3C888954243085F67E2A8B5424142B54241C8BCF8BC38B2C0A332883C00481E"
+		. "5FFFFFF003368FC83C1044E8969FC75E68B742428037C2434035C242CFF4C243075C45F5E5D5B33C0C3"
+
+		VarSetCapacity(_AlphaMask, StrLen(MCode_AlphaMask)//2)
+		Loop % StrLen(MCode_AlphaMask)//2      ;%
+			NumPut("0x" SubStr(MCode_AlphaMask, (2*A_Index)-1, 2), _AlphaMask, A_Index-1, "char")
+	}
+	Gdip_GetDimensions(pBitmap, w1, h1), Gdip_GetDimensions(pBitmapMask, w2, h2)
+	pBitmapNew := Gdip_CreateBitmap(w1, h1)
+	if !pBitmapNew
+		return -1
+
+	E1 := Gdip_LockBits(pBitmap, 0, 0, w1, h1, Stride1, Scan01, BitmapData1)
+	E2 := Gdip_LockBits(pBitmapMask, 0, 0, w2, h2, Stride2, Scan02, BitmapData2)
+	E3 := Gdip_LockBits(pBitmapNew, 0, 0, w1, h1, Stride3, Scan03, BitmapData3)
+	if (E1 || E2 || E3)
+		return -2
+
+	E := DllCall(&_AlphaMask, "ptr", Scan01, "ptr", Scan02, "ptr", Scan03, "int", w1, "int", h1, "int", w2, "int", h2, "int", Stride1, "int", Stride2, "int", x, "int", y)
+	
+	Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmapMask, BitmapData2), Gdip_UnlockBits(pBitmapNew, BitmapData3)
+	return (E = "") ? -3 : pBitmapNew
+} ;</00056>
+;<00057>
+Gdip_AlphaMask32v2(pBitmap, pBitmapMask, x, y) {                                         	;-- 32bit Gdip-AlphaMask with MCode  - second of two builds
+	
+	/*    	DESCRIPTION of function Gdip_AlphaMask32v2() ID: 05.01.00057
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	gdi cutting and aliasing
+			Link              	:	https://autohotkey.com/board/topic/103475-gdi-cutting-anti-aliasing/
+										https://autohotkey.com/boards/viewtopic.php?t=39077
+			Author         	:	Tic
+			Date	            	:	
+			AHK-Version	:	AHK V2
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	library Gdip_All.ahk
+			KeyWords    	:	GDI, Cut, Crop, MCOde
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	static _AlphaMask
+	if !_AlphaMask
+    {
+        MCode_AlphaMask := "518B4424249983E20303C28BC88B442428995383E20303C28B5424245556C1F902C1F802837C24400057757E85D20F8E0E01000"
+        . "08B5C241C8B74242C03C003C0894424388D048D000000000FAF4C2440034C243C894424348B4424208D3C888954244485F67E2C8B5424182B5424208"
+        . "BCF8BC38B2C0A332883C00481E5FFFFFF003368FC83C10483EE018969FC75E48B74242C037C2434035C2438836C24440175C15F5E5D33C05B59C385D"
+        . "20F8E900000008B5C241C8B74242C03C003C0894424388D048D000000000FAF4C2440034C243C894424348B442420895C24448D3C888954241085F67"
+        . "E428B5424182B5424208BC78BCBEB098DA424000000008BFF8B1981E3000000FFBD000000FF2BEB8B1C1081E3FFFFFF000BEB892883C10483C00483E"
+        . "E0175D98B74242C8B5C2444035C2438037C2434836C241001895C244475A35F5E5D33C05B59C3"
+
+        VarSetCapacity(_AlphaMask, StrLen(MCode_AlphaMask)//2)
+        Loop % StrLen(MCode_AlphaMask)//2      ;%
+            NumPut("0x" SubStr(MCode_AlphaMask, (2*A_Index)-1, 2), _AlphaMask, A_Index-1, "char")
+    }
+	Gdip_GetDimensions(pBitmap, w1, h1), Gdip_GetDimensions(pBitmapMask, w2, h2)
+	pBitmapNew := Gdip_CreateBitmap(w1, h1)
+	if !pBitmapNew
+		return -1
+
+	E1 := Gdip_LockBits(pBitmap, 0, 0, w1, h1, Stride1, Scan01, BitmapData1)
+	E2 := Gdip_LockBits(pBitmapMask, 0, 0, w2, h2, Stride2, Scan02, BitmapData2)
+	E3 := Gdip_LockBits(pBitmapNew, 0, 0, w1, h1, Stride3, Scan03, BitmapData3)
+	if (E1 || E2 || E3)
+		return -2
+
+	E := DllCall(&_AlphaMask, "ptr", Scan01, "ptr", Scan02, "ptr", Scan03, "int", w1, "int", h1, "int", w2, "int", h2, "int", Stride1, "int", Stride2, "int", x, "int", y)
+	
+	Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmapMask, BitmapData2), Gdip_UnlockBits(pBitmapNew, BitmapData3)
+	return (E = "") ? -3 : pBitmapNew
+} ;</00057>
+;<00058>
+Gdip_AlphaMask64(pBitmap, pBitmapMask, x, y, invert=0) {                                	;-- 64bit Gdip-AlphaMask with MCode 
+	
+	/*    	DESCRIPTION of function Gdip_AlphaMask64() ID: 05.01.00058
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	
+			Link              	:	http://www.autohotkey.com/board/topic/103475-gdi-cutting-anti-aliasing/#entry638772
+										https://autohotkey.com/boards/viewtopic.php?t=39077
+			Author         	:	Tic / Learning one
+			Date	            	:	
+			AHK-Version	:	
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	library Gdip_All.ahk
+			KeyWords    	:	GDI, Cut, Crop, MCOde
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+    static _AlphaMask := MCode("
+	(LTrim Join
+1,x86:518b4424249983e2035355568d0c028b4424349983e203c1f902578d3402c1fe02837c2444000f85980000008b4424
+308944243885c00f8e340100008d1c8d000000000faf4c24408d14b500000000895c24348b7424208b5c241c89542444034c
+243c8d2c8e8b4c242c8b742434669085c97e3b8b7c24188bd52b7c24208bc38bf18b0c178d40043348fc8d520481e1ffffff
+003348fc894afc83ee0175e38b4424388b4c242c8b5424448b74243403ee03da83e8018944243875b45f5e5d33c05b59c38b
+5424308954241085d20f8e9c0000008b7c24208d04b5000000008b6c241c894424348d048d000000000faf4c24408b5c2434
+894424388bf0034c243c8d048f8b4c242c894424440f1f400085c97e4b8b5c24188bd02bdf8bf58bf98b068d760425000000
+ff8d5204b9000000ff2bc88b441afc25ffffff000bc8894afc83ef0175d98b4424448b5424108b4c242c8b5c24348b742438
+8b7c242003c603eb83ea01894424448954241075a05f5e5d33c05b59c3,x64:48895c24084c8944241848895424105556574
+1544155415641574883ec108b8424900000004c8bc248637424789983e2034c8be903c2c1f8024c63d08b842488000000998
+3e20303c2c1f80283bc24a8000000004863c848890c240f85a60000008b8c248000000085c90f8e3a0100004c63bc24a0000
+0004e8d3495000000004c63a424980000004533c9458bd9498bea498bd88bf94885f67e584c8b5424604b8d1439480faf142
+4488bc3492bd34903d448c1e202492bd04c03d24e8d042a488bd60f1f4000660f1f840000000000418b0c003308488d40048
+1e1ffffff003348fc41894c02fc4883ea0175e24c8b4424584c03dd4903de49ffc14883ef017594e9a30000008b842480000
+00085c00f8e940000004c63b424a00000004533c94c63bc2498000000418bd94c8b642458498bea8bf84885f67e634c8b542
+4604b8d1431480fafd14c8bdb4c2bda4d2bdf49c1e3024a8d043a4d2bdd4c8d0485000000004d03dc4d03c5488bd64d2bd54
+38b04184d8d400425000000ffb9000000ff2bc8418b40fc25ffffff000bc843894c02fc4883ea0175d6488b0c244803dd49f
+fc14883ef01758c33c0488b5c24504883c410415f415e415d415c5f5e5dc3
+)")
+
+    Gdip_GetDimensions(pBitmap, w1, h1), Gdip_GetDimensions(pBitmapMask, w2, h2)
+    pBitmapNew := Gdip_CreateBitmap(w1, h1)
+    if !pBitmapNew
+        return -1
+
+    E1 := Gdip_LockBits(pBitmap, 0, 0, w1, h1, Stride1, Scan01, BitmapData1)
+    E2 := Gdip_LockBits(pBitmapMask, 0, 0, w2, h2, Stride2, Scan02, BitmapData2)
+    E3 := Gdip_LockBits(pBitmapNew, 0, 0, w1, h1, Stride3, Scan03, BitmapData3)
+    if (E1 || E2 || E3)
+        return -2
+
+    E := DllCall(_AlphaMask, "ptr", Scan01, "ptr", Scan02, "ptr", Scan03, "int", w1, "int", h1, "int", w2, "int", h2, "int", Stride1, "int", Stride2, "int", x, "int", y, "int", invert, "cdecl int")
+    Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmapMask, BitmapData2), Gdip_UnlockBits(pBitmapNew, BitmapData3)
+
+    return (E = "") ? -3 : pBitmapNew
+} ;</00058>
+;<00059>
+CircleCrop(pBitmap, x, y, w, h) {                                                                             	;-- gdi circlecrop with MCode
+	
+	/*    	DESCRIPTION of function CircleCrop() ID: 05.01.00059
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	gdi cutting and aliasing
+			Link              	:	https://autohotkey.com/board/topic/29449-gdi-standard-library-145-by-tic/page-73#entry535199
+			Author         	:	Tic
+			Date	            	:	
+			AHK-Version	:	
+			License         	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	GDI, Cut, Crop, MCOde
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	static _CircleCrop
+	if !_CircleCrop
+	{
+		MCode_CircleCrop := "8B44241C9983E20303C28BC88B4424209983E20303C28B542418C1F902C1F80285D27E6803C003C0894424208D048D000000000"
+		. "FAF4C2428034C2424535556894424288B442410578B7C24188BDA8B5424248D348885D27E228BC78BCE8D49008B29332883C10481E5FFFFFF00312883"
+		. "C00483EA0175E98B5424240374242C037C243083EB0175CD5F5E5D5B33C0C3"
+
+		VarSetCapacity(_CircleCrop, StrLen(MCode_CircleCrop)//2)
+		Loop % StrLen(MCode_CircleCrop)//2      ;%
+			NumPut("0x" SubStr(MCode_CircleCrop, (2*A_Index)-1, 2), _CircleCrop, A_Index-1, "char")
+	}
+	Gdip_GetDimensions(pBitmap, w1, h1)
+	pBitmap2 := Gdip_CreateBitmap(w, h), G2 := Gdip_GraphicsFromImage(pBitmap2)
+	Gdip_SetSmoothingMode(G2, 4)
+	
+	pBrush := Gdip_BrushCreateSolid(0xff00ff00)
+	Gdip_FillEllipse(G2, pBrush, 0, 0, w, h)
+	Gdip_DeleteBrush(pBrush)
+	
+	E1 := Gdip_LockBits(pBitmap, 0, 0, w1, h1, Stride1, Scan01, BitmapData1)
+	E2 := Gdip_LockBits(pBitmap2, 0, 0, w, h, Stride2, Scan02, BitmapData2)
+	
+	E := DllCall(&_CircleCrop, "ptr", Scan01, "ptr", Scan02, "int", w1, "int", h1, "int", w, "int", h, "int", Stride1, "int", Stride2, "int", x, "int", y)
+	
+	Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmap2, BitmapData2)
+	Gdip_DeleteGraphics(G2)
+	return pBitmap2
+} ;</00059>
 
 ;</05.01>
 } 
@@ -3706,7 +4008,8 @@ GetBitmapSize(h_bitmap, ByRef width, ByRef height, ByRef bpp="") {              
 ;|   RGBrightnessToHex()               	|   GetHueColorFromFraction()     	|   SaveHBITMAPToFile()               	|   DrawRotatePictureOnGraphics	|
 ;|   CopyBitmapOnGraphic()          	|   GDI_GrayscaleBitmap()            	|   Convert_BlackWhite()               	|   getHBMinfo()                           	|
 ;|   CreateDIB()                              	|   GuiControlLoadImage()            	|   Gdip_ResizeBitmap()                	|   Gdip_CropBitmap()                   	|
-;|   GetBitmapSize(53)                     	|
+;|   GetBitmapSize(53)                     	|   Gdip_BitmapReplaceColor(54)  	|   Gdi_ExtFloodFill(55)                   	|   Gdip_AlphaMask32v1(56)         	|
+;|   Gdip_AlphaMask32v2(57)         	|   Gdip_AlphaMask64(58)             	|   CircleCrop(59)                           	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -12606,34 +12909,38 @@ HashTypeFreeHandles:
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;Font things (10) - baseID: <08.01>
-;1
+;<00001>
 CreateFont(pFont="") {                                                                                                 	;-- creates font in memory which can be used with any API function accepting font handles
-
-	;a function by majkinetor
-	;https://autohotkey.com/board/topic/21003-function-createfont/
-	/*			DESCRIPTION
 	
-	--------------------------------------------------------------------------
-	 Function:  CreateFont
-				 Creates font in memory which can be used with any API function accepting font handles.
+	/*    	DESCRIPTION of function CreateFont() ID: 08.01.00001
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	Creates font in memory which can be used with any API function accepting font handles
+			Link              	:	https://autohotkey.com/board/topic/21003-function-createfont/
+			Author         	:	majkinetor
+			Date             	:	
+			AHK-Version	:	
+			License         	:	
+			Syntax          	:	
+			Parameter(s)	:	pFont	- AHK font description, "style, face"
+			Return value	:	Font handle
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
 	
-	 Parameters: 
-				pFont	- AHK font description, "style, face"
+	/*    	EXAMPLE(s)
 	
-	 Returns:
-				Font handle
-	
-	 Example:
-	>			hFont := CreateFont("s12 italic, Courier New")
-	>			SendMessage, 0x30, %hFont%, 1,, ahk_id %hGuiControl%  WM_SETFONT = 0x30
+			hFont := CreateFont("s12 italic, Courier New")
+	  		SendMessage, 0x30, %hFont%, 1,, ahk_id %hGuiControl%  WM_SETFONT = 0x30
 	
 	*/
 
 	;parse font 
-	italic      := InStr(pFont, "italic")    ?  1    :  0 
-	underline   := InStr(pFont, "underline") ?  1    :  0 
-	strikeout   := InStr(pFont, "strikeout") ?  1    :  0 
-	weight      := InStr(pFont, "bold")      ? 700   : 400 
+	italic         	:= InStr(pFont, "italic")    ?  1    :  0 
+	underline   	:= InStr(pFont, "underline") ?  1    :  0 
+	strikeout   	:= InStr(pFont, "strikeout") ?  1    :  0 
+	weight      	:= InStr(pFont, "bold")      ? 700   : 400 
 
 	;height 
 	RegExMatch(pFont, "(?<=[S|s])(\d{1,2})(?=[ ,])", height)
@@ -12654,8 +12961,8 @@ CreateFont(pFont="") {                                                          
 					  ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", fontFace)
 
 	return hFont
-}
-;2
+} ;</00001>
+;<00002>
 GetHFONT(Options := "", Name := "") {                                                                      	;-- gets a handle to a font used in a AHK gui for example
    
    ; source: https://github.com/aviaryan/Clipjump/blob/master/lib/anticj_func_labels.ahk
@@ -12667,8 +12974,8 @@ GetHFONT(Options := "", Name := "") {                                           
    HFONT := DllCall("User32.dll\SendMessage", "Ptr", HTX, "UInt", 0x31, "Ptr", 0, "Ptr", 0, "UPtr") ; WM_GETFONT
    Gui, Destroy
    Return HFONT
-}
-;3
+} ;</00002>
+;<00003>
 MsgBoxFont(Fontstring, title, msg) {                                                                           	;-- style your MsgBox with with your prefered font
 ; https://autohotkey.com/board/topic/21003-function-createfont/
 hFont := CreateFont("s14 italic, Courier New")
@@ -12681,16 +12988,17 @@ OnTimer:
 	ControlGet, h, HWND, , Static1, My MsgBox
 	SendMessage, 0x30, %hFont%, 1,, ahk_id %h%  ;WM_SETFONT = 0x30 
 return
-}
-;4
+} ;</00003>
+;<00004>
 GetFontProperties(HFONT) {                                                                                       	;-- to get the current font's width and height
 	
-	/*                              	DESCRIPTION
+	/* 	DESCRIPTION of function GetFontProperties() ID: 08.01.00004
 	
-			Link: https://autohotkey.com/boards/viewtopic.php?t=1979
-			
+			Link  	:	https://autohotkey.com/boards/viewtopic.php?t=1979
+			            	http://msdn.microsoft.com/en-us/library/dd145037%28v=vs.85%29.aspx
+			Author	:	maybe by - just me
 	*/
-	/*                              	EXAMPLE(s)
+	/*      EXAMPLE(s)
 	
 			NoEnv
 			   WM_GETFONT := 0x31
@@ -12726,23 +13034,35 @@ GetFontProperties(HFONT) {                                                      
    Font.PitchAndFamily := NumGet(LF, 27, "UChar")
    Font.FaceName := StrGet(&LF + 28, 32)
    Return Font
-}
-;5
+} ;</00004>
+;<00005>
 FontEnum(lfCharSet := 1, FontName := "") {                                                               	;-- enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure
-	/*                              	DESCRIPTION
 	
-			SOURCES Parameters:
-			hFont: 				specify an identifier to a font, you can use FontCreate (). leave it at zero to use the default font.
-			FontName: 		name of the source.
-			lf CharSet: 		script, value that identifies the set of characters lists all installed sources.
-			Syntax: 			FontEnum ([lfCharSet], [FontName])Example:for k, v in FontEnum ()		
-			
-			Example
-			MsgBox % vNote: to check if a font exists, use the parameters lfCharSet and FontName, if it is not found, return an empty string. 
-			
+	/*    	DESCRIPTION of function FontEnum() ID: 08.01.00005
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure
+			Link              	:	https://msdn.microsoft.com/en-us/library/dd162620(v=vs.85).aspx
+			Author         	:	
+			Date             	:	
+			AHK-Version	:	
+			License         	:	
+			Syntax          	:	FontEnum ([lfCharSet], [FontName])Example:for k, v in FontEnum ()	
+			Parameter(s)	:	hFont: 				specify an identifier to a font, you can use FontCreate (). leave it at zero to use the default font.
+			                        	FontName: 		name of the source.
+			                         	lf CharSet: 		script, value that identifies the set of characters lists all installed sources.
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	font, enumerate, char, charset
+        	-------------------------------------------------------------------------------------------------------------------
 	*/
+
+	/*    	EXAMPLE(s)
 	
+	    	MsgBox % vNote: to check if a font exists, use the parameters lfCharSet and FontName, if it is not found, return an empty string. 
 	
+	*/
+
 	hDC := GetDC(), VarSetCapacity(LOGFONT, 92, 0), NumPut(lfCharSet, LOGFONT, 23, "UChar")
 	if StrLen(FontName)
 		StrPut(FontName, &LOGFONT + 28)
@@ -12754,17 +13074,27 @@ FontEnum(lfCharSet := 1, FontName := "") {                                      
 	if !InArray(Data.List, FontName) ;remover fuentes duplicadas
 		Data.List.Push(FontName)
 	return true
-} ;https://msdn.microsoft.com/en-us/library/dd162620(v=vs.85).aspx
-;6
+} ;</00005>
+;<00006>
 GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1) {  	;-- calculate the height and width of the text in the specified font 
-	/*                              	DESCRIPTION
-	
-			Syntax: 			GetFontTextDimension( [hFont], [Text], [out Width], [out Height] )
-			How to:			use CreateFont() to get hFont
-			Returns: 
-			Dependings: 	GetStockObject()
-				
+
+	/*    	DESCRIPTION of function GetFontTextDimension() ID: 08.01.00006
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	calculate the height and width of the text in the specified font 
+			Link              	:	;https://msdn.microsoft.com/en-us/library/dd144938(v=vs.85).aspx
+			Author         	:	?jeeswg?
+			Date             	:	
+			AHK-Version	:	AHK_L
+			License         	:	
+			Syntax          	:	GetFontTextDimension( [hFont], [Text], [out Width], [out Height] )
+			Parameter(s)	:	
+			Return value	:
+			Remark(s)    	:	use CreateFont() to get hFont
+			Dependencies	:	GetStockObject() ID: 08.01.00007
+			KeyWords    	:	
+        	-------------------------------------------------------------------------------------------------------------------
 	*/
+
 	hFont := hFont?hFont:GetStockObject(17), hDC := GetDC()
 	, hSelectObj := SelectObject(hDC, hFont), VarSetCapacity(SIZE, 8, 0)
 	if !DllCall("Gdi32.dll\GetTextExtentPoint32W", "Ptr", hDC, "Ptr", &Text, "Int", StrLen(Text), "Ptr", &SIZE, "Int")
@@ -12776,18 +13106,34 @@ GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1)
 	, Width := Width + NumGet(TEXTMETRIC, 20, "Int") * 3
 	, Height := Floor((NumGet(TEXTMETRIC, 0, "Int")*c)+(NumGet(TEXTMETRIC,16, "Int")*(Floor(c+0.5)-1))+0.5)+8
 	return true
-} ;https://msdn.microsoft.com/en-us/library/dd144938(v=vs.85).aspx
-{ ;sub of GetFontTextDimension
+}
+{ ;sub of GetFontTextDimension()
+;<00007>
 GetStockObject(nr) {
-
-	return DllCall( "GetStockObject", UInt, nr)
-}
-
-}
-;7
+	
+	/*    	DESCRIPTION of function GetStockObject() ID: 08.01.00007
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	
+			Link              	:	
+			Author         	:	?jeeswg?
+			Date             	:	
+			AHK-Version	:	
+			License         	:	
+			Syntax          	:	GetFontTextDimension( [hFont], [Text], [out Width], [out Height] )
+			Parameter(s)	:	
+			Return value	:
+			Remark(s)    	:	use CreateFont() to get hFont
+			Dependencies	:	GetStockObject() ID: 08.01.00007
+			KeyWords    	:	
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+return DllCall( "GetStockObject", UInt, nr)
+} ;</00007>
+} </00006> 
+;<00008>
 FontClone(hFont) {                                                                                                      	;-- backup hFont in memory for further processing
 
-		/*    	DESCRIPTION of function 
+	/*    	DESCRIPTION of function FontClone() ID: 08.01.00008
         	-------------------------------------------------------------------------------------------------------------------
 			Description  	:	backup hFont in memory for further processing
 			Link              	:	https://autohotkey.com/boards/viewtopic.php?t=36461
@@ -12825,11 +13171,11 @@ FontClone(hFont) {                                                              
 	vSize := DllCall("gdi32\GetObject", Ptr,hFont, Int,0, Ptr,0)
 	DllCall("gdi32\GetObject", Ptr,hFont, Int,vSize, Ptr,&LOGFONT)
 	return DllCall("CreateFontIndirect", Ptr,&LOGFONT, Ptr)
-}
-;8
+} ;</00008>
+;<00009>
 GuiDefaultFont() {                                                                                                        	;-- returns the default Fontname & Fontsize
 	
-	/*    	DESCRIPTION of function 
+	/*    	DESCRIPTION of function GuiDefaultFont() 08.01.00009
         	-------------------------------------------------------------------------------------------------------------------
 			Description  	:	AutoHotkey uses the 'default GUI font' for controls, if you do not specify one in your script. 
                                     	This 'default GUI font' is system wide and the same one being used in MenuBar.
@@ -12861,11 +13207,11 @@ GuiDefaultFont() {                                                              
 	 hDC := DllCall( "GetDC", UInt,hwnd ), DPI := DllCall( "GetDeviceCaps", UInt,hDC, Int,90 )
 	 DllCall( "ReleaseDC", Int,0, UInt,hDC ), S := Round( ( -NumGet( LF,0,"Int" )*72 ) / DPI )
 Return DllCall( "MulDiv",Int,&LF+28, Int,1,Int,1, Str ), DllCall( "SetLastError", UInt,S )
-}
-;9
+} ;</00009>
+;<00010>
 StrGetDimAvgCharWidth(hFont) {                                                                              	;-- average width of a character in pixels
 	
-		/*    	DESCRIPTION of function StrGetDimAvgCharWidth()
+	/*    	DESCRIPTION of function StrGetDimAvgCharWidth() ID: 08.01.00010
         	-------------------------------------------------------------------------------------------------------------------
 			Description  	:	The size of each tab stop, in units equal to the average character width.
                                      	(a tab character is 8 times wider than the average character width)
@@ -12877,7 +13223,7 @@ StrGetDimAvgCharWidth(hFont) {                                                  
 			Parameter(s)	:
 			Return value	:
 			Remark(s)    	:	
-			Dependencies	:	FontClone()
+			Dependencies	:	FontClone() ID: 08.01.00008
 			KeyWords    	:	Font, Width, DllCall, Gdi
         	-------------------------------------------------------------------------------------------------------------------
 	*/
@@ -12904,8 +13250,8 @@ StrGetDimAvgCharWidth(hFont) {                                                  
 	vTextW1 := NumGet(SIZE, 0, "Int") ;cx ;logical units
 	vTextW2 := Floor((vTextW1/26+1)/2)
 	return vTextW2
-}
-;10
+}  ;</00010>
+;<00011>
 CreateFont(nHeight, nWidth, nEscapement, nOrientation, fnWeight,                        	;-- creates HFont for use with GDI
 fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision,
 fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace) {
@@ -12935,11 +13281,59 @@ HFONT CreateFont(
 				, "UInt", fdwUnderline      , "UInt", fdwStrikeOut    , "UInt", fdwCharSet
 				, "UInt", fdwOutputPrecision, "UInt", fdwClipPrecision, "UInt", fdwQuality
 				, "UInt", fdwPitchAndFamily , "Str" , lpszFace)
-}
+} ;</00011>
+;<00012>
+MeasureText(Str, FontOpts = "", FontName = "") {                                                      	;--  Measures the single-line width and height of the passed text
+	
+		/*    	DESCRIPTION of function MeasureText() ID: 08.01.00012
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	Measures the single-line width and height of the passed text
+			Link              	:	https://autohotkey.com/board/topic/64366-function-explore-object/
+										http://www.autohotkey.com/community/viewtopic.php?f=13&t=88163
+			Author         	:	just me
+			Date	            	:	1.0.00.00/2012-06-28/just me
+			AHK-Version	:	1.1.05+
+			License         	:	
+			Parameter(s)	:	Str         -  String to measure.
+                                    	Optional       ---------------------------------------------------------------------------------------------------
+                                    	FontOpts	-  	Options used with the Gui, Font, ... command. 
+                                                           	Default: "" - Default GUI font options
+                                                        	FontName	-  	Font name used with the Gui, Font, ... command.
+                                                          	Default: "" 	-	Default GUI font
+			Return value	:   Object containing two key/value pairs:
+                                       	W  -  measured width.
+                                    	H  -  measured height.
+			Remark(s)    	:	none
+			Dependencies	:	none
+			KeyWords    	:	gdi, font width, measure, 
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	Static DT_FLAGS := 0x0520 ; DT_SINGLELINE = 0x20, DT_NOCLIP = 0x0100, DT_CALCRECT = 0x0400
+	Static WM_GETFONT := 0x31
+
+	Size := {}
+	Gui, New
+	If (FontOpts <> "") || (FontName <> "")
+		Gui, Font, %FontOpts%, %FontName%
+	Gui, Add, Text, hwndHWND
+	SendMessage, WM_GETFONT, 0, 0, , ahk_id %HWND%
+	HFONT := ErrorLevel
+	HDC := DllCall("User32.dll\GetDC", "Ptr", HWND, "Ptr")
+	DllCall("Gdi32.dll\SelectObject", "Ptr", HDC, "Ptr", HFONT)
+	VarSetCapacity(RECT, 16, 0)
+	DllCall("User32.dll\DrawText", "Ptr", HDC, "Str", Str, "Int", -1, "Ptr", &RECT, "UInt", DT_FLAGS)
+	DllCall("User32.dll\ReleaseDC", "Ptr", HWND, "Ptr", HDC)
+	Gui, Destroy
+	Size.W := NumGet(RECT,  8, "Int")
+	Size.H := NumGet(RECT, 12, "Int")
+	Return Size
+} ;</00012>
+
 }
 ;|   CreateFont()                            	|   GetHFONT()                             	|   MsgBoxFont()                           	|   GetFontProperties()                  	|
 ;|   FontEnum()                             	|   GetFontTextDimension()          	|   FontClone()                              	|   GuiDefaultFont()                      	|
-;|   StrGetDimAvgCharWidth()      	|   CreateFont()                             	|
+;|   StrGetDimAvgCharWidth()      	|   CreateFont()                             	|   MeasureText(12)                        	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -14591,7 +14985,7 @@ ARGBToRGB(ARGB) {																		;-- convert ARGB to RGB.
 
 { ;Objects (4) - baseID: <12.01>
 
-ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;--
+ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
 
     If !IsObject(OrigObj) || !IsObject(MergingObj)
         Return False
@@ -14645,20 +15039,67 @@ evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
 }
 ;{ sub of evalRPN() 
 StackShow(stack){																			;--
-
 	for each, value in stack
 		out .= A_Space value
 	return subStr(out, 2)
-
 }
 ;}
+;<00003>
+ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print object function
+, Equal="  =  ", Indent="`t", CurIndent="") {	
+	 
+	/*    	DESCRIPTION of function ExploreObj() ID: 12.01.00003
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	Returns a string containing the formatted object keys and values (very nice for debugging!)
+			Link              	:	https://autohotkey.com/board/topic/64366-function-explore-object/
+										www.autohotkey.com/forum/topic69253.html
+			Author         	:	Learning one / Lexikos
+			Date	            	:	
+			AHK-Version	:	AHK-V1
+			License         	:	
+			Parameter(s)	:	
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	object, debug, output, print
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
 
-ExploreObj(Obj, NewRow = "`n", Equal = "  =  ", Indent = "`t"   	;-- Returns a string containing the formatted object keys and values (very nice for debugging!)
-	, Depth = 12, CurIndent = "") {	
-    for k,v in Obj
-        ToReturn .= CurIndent k (IsObject(v) && depth > 1 ? NewRow ExploreObj(v, NewRow, Equal, Indent, Depth - 1, CurIndent Indent) : Equal v) NewRow
-    return RTrim(ToReturn, NewRow)
-}
+	/*    	EXAMPLE(s)
+	
+			;====== Testing area ======
+			oKey3 := Object("Key`n`n3.1", "value `n`n3.1", "Key3.2", "value 3.2")
+			oKey4 := Object("Key4.1", "value 4.1",  "Key4.2", Object("Key4.2.1", "value 4.2.1", "Key4.2.2", "value 4.2.2"), "Key4.3", "value 4.3")
+			oKey5 := Object("Key5.1", "value 5.1", "Key5.2", "value 5.2", "Key5.3", "value 5.3")
+
+			oRoot := Object()
+			oRoot["Key`n`n1"] := "value 1 `n`nThe string to search for. Matching is not case sensitive unless StringCaseSense has been turned on."
+			oRoot.Key2 := "value 2"
+			oRoot.Key3 := oKey3
+			oRoot.Key4 := oKey4
+			oRoot.Key5 := oKey5
+
+			MsgBox,, Exploring Root object, % ExploreObj(oRoot)
+			MsgBox,, Exploring Root object - 1 level deep, % ExploreObj(oRoot,1)
+			MsgBox,, Exploring Key4 object, % ExploreObj(oKey4)
+			MsgBox,, Exploring oRoot.Key4["Key4.2"] object, % ExploreObj(oRoot.Key4["Key4.2"])
+	
+	*/
+	
+	static ShowChar := 60	; number of characters to show
+	For k,v in Obj {
+		StringReplace, k, k, `n,,all
+		StringReplace, k, k, `r,,all
+		k := (StrLen(k) > ShowChar) ? SubStr(k,1,ShowChar) " ..." : k
+		if (IsObject(v))
+		ToReturn .= CurIndent . k . NewRow . (depth>1 ? %A_ThisFunc%(v, Depth-1, NewRow, Equal, Indent, CurIndent . Indent) . NewRow : "")
+		else {
+			StringReplace, v, v, `n,,all
+			StringReplace, v, v, `r,,all
+			v := (StrLen(v) > ShowChar) ? SubStr(v,1,ShowChar) " ..." : v, ToReturn .= CurIndent . k . Equal . v . NewRow
+		}
+    }
+	return RTrim(ToReturn, NewRow)
+} ;</00003>
 ;<00004>
 KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
 , IncludeKeys:="", KeyREx:="", IncludeValues:="", ValueREx:="") {
@@ -14728,12 +15169,12 @@ return merged
 } ;</00004>
 
 } 
-;|   ObjMerge()                                	|   evalRPN()                                	|   StackShow()                                 	|   ExploreObj()                             	|
+;|   ObjMerge()                                	|   evalRPN()                                	|   StackShow()                                 	|   ExploreObj()                            	|
 ;|   KeyValueObjectFromLists(4)     	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;String/ Array/Text (43) - baseID: <13.01>
+{ ;String/ Array/Text (46) - baseID: <13.01>
 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
 { ;nextID: <13.01.01>
@@ -16043,7 +16484,7 @@ return StrSplit(list, delimiter)
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
 ;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                        	|    Ansi2Oem()                             	|
 ;|   Oem2Ansi()                             	|   Ansi2UTF8()                             	|   UTF82Ansi()                             	|   StringMD5()					             	|
-;|
+;|   CRC32(9)                                 	|
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
 ;|   ParseJsonStrToArr()	                	|    parseJSON()                            	|   GetNestedTag()                        	|   GetHTMLbyID()							|
 ;|   GetHTMLbyTag()                     	|   GetXmlElement()                      	|   sXMLget()                                 	|
@@ -19372,6 +19813,58 @@ RtlUlongByteSwap64(num) {                                                       
 	,DllCall("MSVCRT.dll\_swab", "ptr", &src+2, "ptr", &dest, "int", 2, "cdecl")
 	return numget(dest,"uint")
 }
+;<00056>
+PIDfromAnyID( anyID="" ) {                                                                                           	;-- for easy retreaving of process ID's (PID)
+	
+ 	/*    	DESCRIPTION of function PIDfromAnyID() ID: 16.01.00056
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	for easy retreaving of process ID's
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?t=3533
+			Author         	:	SKAN
+			Date	            	:	10-May-2014
+			AHK-Version	:	
+			License         	:	
+			Parameter(s)	:	thread ID, process name
+			Return value	:	PID
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	process, process id, PID, 
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+		
+	/*    	EXAMPLE(s)
+	
+			MsgBox % PIDfromAnyID()                                     	; Own PID          
+			MsgBox % PIDfromAnyID( "winlogon.exe" )            	; process name
+			MsgBox % PIDfromAnyID( 4 )                                  	; validating raw PID
+
+			MsgBox % PIDfromAnyID( "MyScript.ahk" )            	; PID of a running script
+			MsgBox % PIDfromAnyID( "MyScript.ahk ahk_class AutoHotkey" )  ; precise than above
+			MsgBox % PIDfromAnyID( "Torrent" )                     	; part of window title
+
+			MsgBox % PIDfromAnyID( A_ScripthWnd )             	; Own PID
+
+			MouseGetPos,,, OutputVarWin 
+			MsgBox % PIDfromAnyID( OutputVarWin )            	; PID of Window under mouse 
+	
+	*/
+		
+  Process, Exist, %anyID%
+  If (ErrorLevel), Return ErrorLevel					;IfGreater, ErrorLevel, 0, Return ErrorLevel   	;<-comment line is the original: it uses an old syntax, not recommend for newer scripts
+		
+  DetectHiddenWindows, % SubStr( ( ADHW := A_DetectHiddenWindows ) . "On", -1 )
+  SetTitleMatchMode,   % SubStr( ( ATMM := A_TitleMatchMode )   . "RegEx", -4 ) 
+
+  WinGet, PID, PID, ahk_id %anyID%				 
+  If (!PID)															;IfEqual, PID,, WinGet, PID, PID, %anyID% 	;<-comment line is the original: it uses an old syntax, not recommend for newer scripts
+		WinGet, PID, PID, %anyID%					  
+  
+  DetectHiddenWindows, %ADHW%
+  SetTitleMatchMode, %ATMM%
+  
+Return PID ? PID : 0    
+} ;</00056>
+
 }
 ;|   CreateNamedPipe()                 	|   RestoreCursors()                       	|   SetSystemCursor()                    	|   SystemCursor()                         	|
 ;|   ToggleSystemCursor()             	|   SetTimerF()                              	|   IGlobalVarsScript()                   	|   patternScan()                           	|
@@ -19387,7 +19880,7 @@ RtlUlongByteSwap64(num) {                                                       
 ;|   CompareMemory()                  	|   VirtualAlloc()                            	|   VirtualFree()                             	|   ReduceMem()                           	|
 ;|   GlobalLock()                            	|   LocalFree()                                	|   CreateStreamOnHGlobal()       	|   CoTaskMemFree()                     	|
 ;|   CoTaskMemRealloc()               	|   VarAdjustCapacity()                 	|   DllListExports()                         	|   RtlUlongByteSwap64() x2         	|
-;|
+;|   PIDfromAnyID(56)                   	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 

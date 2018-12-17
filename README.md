@@ -29,7 +29,19 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 - **GetButtonType()** - uses the style of a button to get it’s name
 - **KeyValueObjectFromLists()** - merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
 - **List2Array()** - function uses StrSplit () to return an array
+- **CRC32()** - CRC32 function, uses MCode
+- **MeasureText()** -  Measures the single-line width and height of the passed text
+- **Gdip_BitmapReplaceColor()** - using Mcode to replace a color with a specific variation
+- **Gdi_ExtFloodFill()** - fills an area with the current brush
+- **Gdip_AlphaMask32v1()** - 32bit Gdip-AlphaMask with MCode - one of two builds
+- **Gdip_AlphaMask32v2()** - 32bit Gdip-AlphaMask with MCode  - second of two builds
+- **Gdip_AlphaMask64()** - 64bit Gdip-AlphaMask with MCode 
+- **CircleCrop()** - gdi circlecrop with MCode
+- a renewed **ExploreObj()** function to print contents of an object
+- **PIDfromAnyID()** - for easy retreaving of process ID’s (PID)
 - 
+
+
 
 
 
