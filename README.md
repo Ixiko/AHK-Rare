@@ -16,7 +16,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ------
 
-![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/Misc-Functions.ahk.png)
+![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK-Rare.ahk_Screenshot.png)
 
 
 
