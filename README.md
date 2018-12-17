@@ -1,4 +1,4 @@
-![AHK - Rare Logo](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK%20-%20rare.jpg)
+![AHK - Rare Logo](assets/AHK-Rare-Logo.png)
 
 ------
 
@@ -16,9 +16,11 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ------
 
-![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK-Rare.ahk_Screenshot.png)
+![New Layout](assets/AHK-Rare.ahk_Screenshot.png)
 
-## ![Gem](D:/Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/GemSmall.png) [??-?????????-????] - ??(new)+564(old) =
+
+
+## ![Gem](assets/GemSmall.png) [XX-XXXXXXX-XXXX] - XX(new)+564(old) =  XXX
 
 - **ExtractIcon()** - extract icon from a resource file
 - **GetIconSize()** - determines the size of the icon (Lexikos function)
@@ -45,7 +47,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-## ![Gem](GemSmall.png)[15-December-2018] - 22(new)+542(old) = 564
+## ![Gem](assets/GemSmall.png)[15-December-2018] - 22(new)+542(old) = 564
 
 optimized layout, began to assign a number for functions identification, Split topics to find functions faster, each function will get the following description* over time:
 
@@ -94,11 +96,10 @@ optimized layout, began to assign a number for functions identification, Split t
 - **getSessionId()** - this functions finds out ID of current session
 - **SetTrayIcon()** - sets a hex coded icon to as try icon
 - **HashFile()** - calculate hashes (MD2,MD5,SH1,SHA256, SHA384, SHA512) from file ;23
-- 
 
 
 
-## ![Gem](GemSmall.png) [30-September-2018] count: 140+402 = 542 functions
+## ![Gem](assets/GemSmall.png) [30-September-2018] count: 140+402 = 542 functions
 
 ### **functions for controls** (10)
 
@@ -416,7 +417,7 @@ optimized layout, began to assign a number for functions identification, Split t
 
 
 
-## ![Gem](GemSmall.png) [15-July-2018] count: 79+323 = 402 functions
+## ![Gem](assets/GemSmall.png) [15-July-2018] count: 79+323 = 402 functions
 
 I’ve found a lot function this time. I checked the found functions that these can not actually be found in any library, so that these can really be called "Rare". I added some more descriptions, examples, links and moved some functions to the right category. 
 
@@ -571,7 +572,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **PathInfo()** - splits a given path to return as object
 
 -----
-## ![Gem](GemSmall.png) [13-June-2018] count: 323 functions
+## ![Gem](assets/GemSmall.png) [13-June-2018] count: 323 functions
 
 - **TimedFunction() ** - SetTimer functionality for functions
 - **ListGlobalVars() ** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
@@ -595,7 +596,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **GetClientSize()** - get size of window without border
 
 ----
-## ![Gem](GemSmall.png) [10-June-2018] count: 303 functions
+## ![Gem](assets/GemSmall.png) [10-June-2018] count: 303 functions
 
 *minor layout improvement (so I hope, anyway). In the [AHK forum](https://autohotkey.com/boards/) I read that codefolding does not work. After trying with the [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with  [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey).*
 
@@ -611,7 +612,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **SaveHBITMAPToFile()** - saves a HBitmap to a file, depending function of CaptureScreen()
 
 -----
-## ![Gem](GemSmall.png) [02-June-2018] count: 293 functions
+## ![Gem](assets/GemSmall.png) [02-June-2018] count: 293 functions
 
 ***6 functions removed*** - depending functions not available or the functions are doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
 
@@ -637,7 +638,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **SaveSetColours()** - Sys colours saving adapted from an approach found in Bertrand Deo's code
 
 -----
-## ![Gem](GemSmall.png) [28-May-2018] count: 280 functions
+## ![Gem](assets/GemSmall.png) [28-May-2018] count: 280 functions
 
 ***Organized layout***, some functions moved to the right topic, delete duplicate functions, adding more info and examples*
 
@@ -733,7 +734,7 @@ IsWindow(hWnd*) {
 - **TV_Load()** - loads TreeView items from an XML string
 
 -----
-## ![Gem](GemSmall.png) [22-May-2018] count: 240 functions
+## ![Gem](assets/GemSmall.png) [22-May-2018] count: 240 functions
 
 + **FindChildWindow()** - a very good function to get handles from child windows like MDI childs
 
@@ -752,7 +753,7 @@ IsWindow(hWnd*) {
 + **FrameShadow(HGui)** - Drop Shadow On Borderless Window, (DWM STYLE)
 
 -----
-## ![Gem](GemSmall.png)[06-May-2018] count: 230 functions
+## ![Gem](assets/GemSmall.png)[06-May-2018] count: 230 functions
 
 - **getByControlName()**  - function uses DllCalls
 - **listAccChildProperty()** - uses COM functionality
@@ -760,7 +761,7 @@ IsWindow(hWnd*) {
 - **TabCtrl_GetCurSel(), TabCtrl_GetItemText()** - the first returns the 1-based index of the currently selected tab, the second returns the tab name
 
 -----
-## ![Gem](GemSmall.png) [01-May-2018] count: 221 functions
+## ![Gem](assets/GemSmall.png) [01-May-2018] count: 221 functions
 
 - **PIC_GDI_GUI()** - a GDI Gui for showing pictures and more
 - **FullScreenToggleUnderMouse()** - Window to pseudo fullscreen and back
@@ -779,7 +780,7 @@ IsWindow(hWnd*) {
 
 -----
 
-## ![Gem](GemSmall.png) Complete List of functions ![Gem](GemSmall.png)
+## ![Gem](assets/GemSmall.png) Complete List of functions ![Gem](assets/GemSmall.png)
 
 *sometimes the function names are the same but they use different methods to get the same result*
 
