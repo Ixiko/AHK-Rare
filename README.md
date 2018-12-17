@@ -18,7 +18,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 ![New Layout](https://raw.githubusercontent.com/Ixiko/AHK-Rare/master/AHK-Rare.ahk_Screenshot.png)
 
-## ![Gem](D:/Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/GemSmall.png)[??-?????????-????] - ??(new)+564(old) =
+## ![Gem](D:/Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/GemSmall.png) [??-?????????-????] - ??(new)+564(old) =
 
 - **ExtractIcon()** - extract icon from a resource file
 - **GetIconSize()** - determines the size of the icon (Lexikos function)
