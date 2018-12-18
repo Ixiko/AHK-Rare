@@ -13209,7 +13209,7 @@ GuiDefaultFont() {                                                              
 Return DllCall( "MulDiv",Int,&LF+28, Int,1,Int,1, Str ), DllCall( "SetLastError", UInt,S )
 } ;</00009>
 ;<00010>
-StrGetDimAvgCharWidth(hFont) {                                                                              	;-- average width of a character in pixels
+StrGetDimAvgCharWidth(hFont) {                                                                               	;-- average width of a character in pixels
 	
 	/*    	DESCRIPTION of function StrGetDimAvgCharWidth() ID: 08.01.00010
         	-------------------------------------------------------------------------------------------------------------------
@@ -14975,7 +14975,7 @@ ARGBToRGB(ARGB) {																		;-- convert ARGB to RGB.
 
 } ;end
 ;|   Min()                                       	|   Max()                                        	|   Mean()                                     	|   Median()                                  	|
-;|   Mode()                                    	|   Dec2Base()                                	|   Base2Dec()                               	|   HexToFloat()                            	|
+;|   Mode()                                     	|   Dec2Base()                                	|   Base2Dec()                               	|   HexToFloat()                            	|
 ;|   FloatToHex()                            	|   CalculateDistance()	                	|   IsInRange()                               	|   FormatFileSize()                       	|
 ;|   Color_RGBtoHSV()                   	|   Color_HSVtoRGB()                     	|   JEE_HexToBinData()                 	|   JEE_BinDataToHex()                 	|
 ;|   JEE_BinDataToHex2()              	|   RadianToDegree()                     	|   DegreeToRadian()                    	|   RGBToARGB()                          	|
@@ -16482,7 +16482,7 @@ return StrSplit(list, delimiter)
 ;|   Sort2DArray()								|   SortArray()									|   QuickSort()									|
 ;|
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
-;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                        	|    Ansi2Oem()                             	|
+;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                         	|    Ansi2Oem()                             	|
 ;|   Oem2Ansi()                             	|   Ansi2UTF8()                             	|   UTF82Ansi()                             	|   StringMD5()					             	|
 ;|   CRC32(9)                                 	|
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
@@ -16492,7 +16492,7 @@ return StrSplit(list, delimiter)
 ;|   cleanlines()									|   cleancolon()									|   cleanspace()									|   SplitLine()                                  	|
 ;|   EnsureEndsWith()						|   EnsureStartsWith()						|   StrPutVar()									|
 ;|   RegExSplit()                             	|   StringM()										|   StrCount()                                 	|   SuperInstr()                               	|
-;|   LineDelete()                             	|   GetWordsNumbered()                	|   AddTrailingBackslash()				|   CheckQuotes()								|
+;|   LineDelete()                             	|   GetWordsNumbered()                	|   AddTrailingBackslash()	    			|   CheckQuotes()								|
 ;|   ReplaceForbiddenChars()			|
 ; ----------------------------------------------------------------------  #others#  ----------------------------------------------------------------------
 ;|   ExtractFuncTOuserAHK()          	|   PdfToText()                               	|   PdfPageCounter()                     	|   PasteWithIndent()                       	|
@@ -16758,7 +16758,7 @@ GetKeyHex(Key) {
 
 } 
 ;|   DelaySend(1)                           	|   SetLayout(2)	                            	|   GetAllInputChars(3)                 	|   ReleaseModifiers(4)                  	|
-;|   isaKeyPhysicallyDown(5)        	|   GetText(6)                                  	|   PutText(7)                                	|   Hotkeys(8)                               	|
+;|   isaKeyPhysicallyDown(5)         	|   GetText(6)                                  	|   PutText(7)                                	|   Hotkeys(8)                                	|
 ;|   BlockKeyboard(9)                      	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
