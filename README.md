@@ -42,6 +42,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 | **CircleCrop()**              | gdi circlecrop with MCode                                    |
 | **ExploreObj()**              | renewed function to print contents of an object              |
 | **PIDfromAnyID()**            | for easy retreaving of process ID’s (PID)                    |
+| **sortArray()**               | well working function (*with example*)                       |
 
 
 

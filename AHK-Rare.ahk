@@ -7,7 +7,7 @@
 
 { ;Clipboard (9) - baseID: <01.01>
 	
-;<000001>
+;<01.01.000001>
 ClipboardGetDropEffect() {																				;-- Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
 	
 	/*                              	DESCRIPTION
@@ -29,8 +29,8 @@ ClipboardGetDropEffect() {																				;-- Clipboard function. Retrieves 
       }
    }
    Return DropEffect
-} ;</000001>
-;<000002>
+} ;</01.01.000001>
+;<01.01.000002>
 ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
 	
    Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
@@ -76,8 +76,8 @@ ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer func
       DllCall("CloseClipboard")
    }
    Return
-} ;</000002>
-;<000003>
+} ;</01.01.000002>
+;<01.01.000003>
 CopyFilesToClipboard(arrFilepath, bCopy) {													;-- copy files to clipboard
 	
 	/*                              	DESCRIPTION
@@ -132,8 +132,8 @@ CopyFilesToClipboard(arrFilepath, bCopy) {													;-- copy files to clipboa
 	DllCall("SetClipboardData","uint",0xF,"ptr",hPath)
 	DllCall("SetClipboardData","uint",uDropEffect,"ptr",hGblEffect)
 	DllCall("CloseClipboard")
-} ;</000003>
-;<000004>
+} ;</01.01.000003>
+;<01.01.000004>
 FileToClipboard(PathToCopy) {																		;-- copying the path to clipboard
 	
 	;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
@@ -163,8 +163,8 @@ FileToClipboard(PathToCopy) {																		;-- copying the path to clipboard
     ; Place the data on the clipboard. CF_HDROP=0xF
     DllCall("SetClipboardData","uint",0xF,"uint",hPath)
     DllCall("CloseClipboard")
-} ;</000004>
-;<000005>
+} ;</01.01.000004>
+;<01.01.000005>
 FileToClipboard(PathToCopy) {																		;-- a second way to copying the path to clipboard
     ; Expand to full paths:
     Loop, Parse, PathToCopy, `n, `r
@@ -200,8 +200,8 @@ FileToClipboard(PathToCopy) {																		;-- a second way to copying the p
     ; Place the data on the clipboard. CF_HDROP=0xF
     DllCall("SetClipboardData","uint",0xF,"uint",hPath)
     DllCall("CloseClipboard")
-} ;</000005>
-;<000006>
+} ;</01.01.000005>
+;<01.01.000006>
 ImageToClipboard(Filename) {																		;-- Copies image data from file to the clipboard. (first of three approaches)
 	
 	;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
@@ -214,8 +214,8 @@ ImageToClipboard(Filename) {																		;-- Copies image data from file to
     if ! DllCall("SetClipboardData","uint",0x2,"uint",hbm)
         DllCall("DeleteObject","uint",hbm)
     DllCall("CloseClipboard")
-} ;</000006>
-;<000007>
+} ;</01.01.000006>
+;<01.01.000007>
 Gdip_ImageToClipboard(Filename) {																;-- Copies image data from file to the clipboard. (second approach)
 	
 	;https://autohotkey.com/board/topic/23162-how-to-copy-a-file-to-the-clipboard/
@@ -235,8 +235,8 @@ Gdip_ImageToClipboard(Filename) {																;-- Copies image data from file
     if ! DllCall("SetClipboardData","uint",0x2,"uint",hbm)
         DllCall("DeleteObject","uint",hbm)
     DllCall("CloseClipboard")
-} ;</000007>
-;<000008>
+} ;</01.01.000007>
+;<01.01.000008>
 Gdip_ImageToClipboard(Filename) {																;-- Copies image data from file to the clipboard. (third approach)
 	
 	;by Lexikos
@@ -281,8 +281,8 @@ Gdip_ImageToClipboard(Filename) {																;-- Copies image data from file
             DllCall("GlobalFree","uint",hMem)
         DllCall("CloseClipboard")
     }
-} ;</000008>
-;<000009>
+} ;</01.01.000008>
+;<01.01.000009>
 AppendToClipboard( files, cut=0) { 																;-- Appends files to CF_HDROP structure in clipboard
 	DllCall("OpenClipboard", "Ptr", 0)
 	if (DllCall("IsClipboardFormatAvailable", "Uint", 1)) ;If text is stored in clipboard, clear it and consider it empty (even though the clipboard may contain CF_HDROP due to text being copied to a temp file for pasting)
@@ -292,7 +292,7 @@ AppendToClipboard( files, cut=0) { 																;-- Appends files to CF_HDROP
 	Sort, txt , U ;Remove duplicates
 	CopyToClipboard(txt, true, cut)
 	return
-} ;</000009>
+} ;</01.01.000009>
 
 ; </01.01>
 }
@@ -304,8 +304,8 @@ AppendToClipboard( files, cut=0) { 																;-- Appends files to CF_HDROP
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;Command line (5) - baseID: <02.01>
-;[000001]>
-CMDret_RunReturn(CMDin, WorkingDir=0) {                                                        		;--
+;<02.01.000001>
+CMDret_RunReturn(CMDin, WorkingDir=0) {                                                        	        	;--
 
 /*
 ; ******************************************************************
@@ -416,9 +416,9 @@ CMDret_RunReturn(CMDin, WorkingDir=0) {                                         
   }
   StringTrimLeft, CMDout, CMDout, 1
   Return, CMDout
-} ;</000001>
-;2
-ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {		;-- Sends text to a console's input stream
+} ;</02.01.000001>
+;<02.01.000002>
+ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {           		;-- Sends text to a console's input stream
 
 	; Sends text to a console's input stream. WinTitle may specify any window in
 	; the target process. Since each process may be attached to only one console,
@@ -468,15 +468,16 @@ ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {		;
         ; Detach from %WinTitle%'s console.
         DllCall("FreeConsole")
     return
-}
+} ;</02.01.000002>
 { ;sub for ConsoleSend
-ScanCode( wParam, lParam ) {                                                                                	;--  sub for ConsoleSend
+;<02.01.000003>
+ScanCode( wParam, lParam ) {                                                                                        	;--  sub for ConsoleSend
  Clipboard := "SC" SubStr((((lParam>>16) & 0xFF)+0xF000),-2)
  GuiControl,, SC, %Clipboard%
-}
+} ;</02.01.000003>
 } ;sub end
-;3
-StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {         		;-- Store command line output in autohotkey variable. Supports both x86 and x64.
+;<02.01.000004>
+StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {                 		;-- Store command line output in autohotkey variable. Supports both x86 and x64.
 
 	; Modified  :  maz-1 https://gist.github.com/maz-1/768bf7938e533907d54bff276db80904
   Static StrGet := "StrGet"           ; Modified  :  SKAN 31-Aug-2013 http://goo.gl/j8XJXY
@@ -615,7 +616,7 @@ StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {        
   VarSetCapacity(PROCESS_INFORMATION, 0)
 
 Return Isfunc( Callback ) ? %Callback%( "", 0 ) : sOutput
-}
+} ;</02.01.000004>
 ;functions end
 { ;Parameter examples 
 
@@ -647,29 +648,34 @@ xpdftotext.exe
 RunWait,%PDFtoTextEXE% -f 1 -l 1 %ConversionType% -cfg "%xpdfrcFile%" "%SourceFolder%%FileNameCurrent%" "%DestFolder%%FileNameCurrentTXT%",,Hide
 
 }
-;4
-StdoutToVar_CreateProcess(sCmd, sEncoding:="CP0", sDir:="", ByRef nExitCode:=0) {	;-- Runs a command line program and returns its output.
+;<02.01.000005>
+StdoutToVar_CreateProcess(sCmd, sEncoding:="CP0", sDir:="", ByRef nExitCode:=0) {	;-- Runs a command line program and returns its output
 	
-	; ----------------------------------------------------------------------------------------------------------------------
-	; Function .....: StdoutToVar_CreateProcess
-	; Description ..: Runs a command line program and returns its output.
-	; Parameters ...: sCmd      - Commandline to execute.
-	; ..............: sEncoding - Encoding used by the target process. Look at StrGet() for possible values.
-	; ..............: sDir      - Working directory.
-	; ..............: nExitCode - Process exit code, receive it as a byref parameter.
-	; Return .......: Command output as a string on success, empty string on error.
-	; AHK Version ..: AHK_L x32/64 Unicode/ANSI
-	; Link .............: https://autohotkey.com/boards/viewtopic.php?f=6&t=791
-	; Author .......: Sean (http://goo.gl/o3VCO8), modified by nfl and by Cyruz
-	; License ......: WTFPL - http://www.wtfpl.net/txt/copying/
-	; Changelog ....: Feb. 20, 2007 - Sean version.
-	; ..............: Sep. 21, 2011 - nfl version.
-	; ..............: Nov. 27, 2013 - Cyruz version (code refactored and exit code).
-	; ..............: Mar. 09, 2014 - Removed input, doesn't seem reliable. Some code improvements.
-	; ..............: Mar. 16, 2014 - Added encoding parameter as pointed out by lexikos.
-	; ..............: Jun. 02, 2014 - Corrected exit code error.
-	; ..............: Nov. 02, 2016 - Fixed blocking behavior due to ReadFile thanks to PeekNamedPipe.
-	; ----------------------------------------------------------------------------------------------------------------------
+		/*    	DESCRIPTION of function StdoutToVar_CreateProcess() 02.01.000005
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	Runs a command line program and returns its output
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?f=6&t=791
+			Author         	:	Sean (http://goo.gl/o3VCO8), modified by nfl and by Cyruz
+			Date             	:	Feb. 20, 2007 - Sean version.
+			AHK-Version	:	AHK_L x32/64 Unicode/ANSI
+			License         	:	WTFPL - http://www.wtfpl.net/txt/copying/
+			Syntax          	:	
+			Parameter(s)	:	sCmd          	- Commandline to execute.
+                                		sEncoding 	- Encoding used by the target process. Look at StrGet() for possible values.
+                                		sDir          	- Working directory.
+                                		nExitCode 	- Process exit code, receive it as a byref parameter.
+			Return value	:	Command output as a string on success, empty string on error
+			Changelog   	:  	Sep. 21, 2011 - nfl version.
+	                                	Nov. 27, 2013 - Cyruz version (code refactored and exit code).
+	                                	Mar. 09, 2014 - Removed input, doesn't seem reliable. Some code improvements.
+	                                	Mar. 16, 2014 - Added encoding parameter as pointed out by lexikos.
+	                                	Jun. 02, 2014 - Corrected exit code error.
+	                                	Nov. 02, 2016 - Fixed blocking behavior due to ReadFile thanks to PeekNamedPipe.
+			Remark(s)    	:	
+			Dependencies	:	none
+			KeyWords    	:	command line, stdout, 
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
 	
     DllCall( "CreatePipe",           PtrP,hStdOutRd, PtrP,hStdOutWr, Ptr,0, UInt,0 )
     DllCall( "SetHandleInformation", Ptr,hStdOutWr, UInt,1, UInt,1                 )
@@ -708,9 +714,9 @@ StdoutToVar_CreateProcess(sCmd, sEncoding:="CP0", sDir:="", ByRef nExitCode:=0) 
     DllCall( "CloseHandle",        Ptr,NumGet(pi,A_PtrSize)          )
     DllCall( "CloseHandle",        Ptr,hStdOutRd                     )
     Return sOutput
-}
-;5
-RunUTF8(target, workdir:=".") {                                                                               	;-- if a .exe file really requires its command line to be encoded as UTF-8, the following might work (a lexikos function)
+} ;</02.01.000005>
+;<02.01.000006>
+RunUTF8(target, workdir:=".") {                                                                                       	;-- if a .exe file really requires its command line to be encoded as UTF-8, the following might work (a lexikos function)
 		
     ; PROCESS_INFORMATION pi;
     VarSetCapacity(pi, 24, 0)
@@ -727,7 +733,7 @@ RunUTF8(target, workdir:=".") {                                                 
     ; Clean up.
     DllCall("CloseHandle", "ptr", NumGet(pi, 0))
     DllCall("CloseHandle", "ptr", NumGet(pi, A_PtrSize))
-}
+} ;</02.01.000006>
 
 } 
 ;|   CMDret_RunReturn(1)                	|   ConsoleSend(2)                          	|   StdOutStream(3)                        	|   StdoutToVar_CreateProcess(4)   	|
@@ -15178,7 +15184,7 @@ return merged
 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
 { ;nextID: <13.01.01>
-;1
+;<000001>
 Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArray
 
    ;TDArray : a two dimensional TDArray
@@ -15198,8 +15204,8 @@ Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArr
         }
         lastIndex := prevIndex
     }
-}
-;2
+} ;</000001>
+;<000002>
 SortArray(Array, Order="A") {															;-- ordered sort: Ascending, Descending, Reverse
 
     ;Order A: Ascending, D: Descending, R: Reverse
@@ -15231,8 +15237,8 @@ SortArray(Array, Order="A") {															;-- ordered sort: Ascending, Descend
         if (epos - pivot) > 1    ;if more than one elements
             Partitions .= "|" pivot+1 "," epos        ;the right partition
     } Until !Partitions
-}
-;3
+} ;</000002>
+;<000003>
 QuickSort(Arr, Ascend = True, M*) {												;-- Sort array using QuickSort algorithm
 
 	;******************************************************************************
@@ -15367,8 +15373,9 @@ QuickSort(Arr, Ascend = True, M*) {												;-- Sort array using QuickSort al
 	}
 
 	Return Out
-}
+} ;</000004>
 { ; sub start - depending functions for QuickSort
+;<000005>
 QuickAux(Arr,Ascend, N, LI, NCol) {
 ;=================================================================
 ;                       QuickAux
@@ -15446,8 +15453,8 @@ IF (LI>0) {
 ; BEFORE and AFTER arrays need to be sorted before
 ; N stores the array position to be sorted in the original array
 return Cat(QuickAux(Before,Ascend,N,LI,NCol), Middle, QuickAux(After,Ascend,N,LI+LB+LM,NCol)) ; So Concat the sorted BEFORE, MIDDLE and sorted AFTER arrays
-}
-
+} ;</000005>
+;</000006>
 Cat(Vet*) {
 
 	;*************************************************************
@@ -15462,8 +15469,8 @@ Cat(Vet*) {
 			VRes.InsertAt(L,V*)
 	}
 	Return VRes
-}
-
+} ;</000006>
+;<000007>
 CatCol(Vet*) {
 
 	;***************************************************************************
@@ -15495,8 +15502,84 @@ CatCol(Vet*) {
 		}
 	}
 	Return VRes
-}
+} ;</000007>
 } ; sub end
+;<000008>
+sortArray( a, o := "A") {                                                                   	;-- sorts an array (another way)
+	
+		/*    	DESCRIPTION of function sortArray()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	
+			Link              	:	https://sites.google.com/site/ahkref/custom-functions/sortarray
+	                                	https://www.autohotkey.com/boards/viewtopic.php?t=60181
+			Author         	:	IMEime
+			Date             	:	20.12.2018
+			AHK-Version	:	AHK_V1
+			License         	:	
+			Syntax          	:	
+			Parameter(s)	:
+			Return value	:	array
+			Remark(s)    	:	
+			Dependencies	:	none
+			KeyWords    	:	array, sort
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+	
+			myArray := ["kab9046 = Kevin"
+			, "bba9485 = Blake"
+			, "kft6512 = Kala"]
+			
+			myArray2 := []
+			For Each, x In myArray
+				myArray2.Push(RegExReplace(x, "(.*?)(\d+)(.*?)", "${2}____${1}____${3}"))
+			sortArray(myArray2)
+			
+			myArray := []
+			For Each, x In myArray2
+			{
+				myTemp := RegExReplace(x, "(\d+)____(.*?)____(.*?)", "${2}${1}${3}")
+				myArray.Push(myTemp)
+				myResult .= myTemp "`n"
+			}
+			MsgBox % myResult
+	
+	*/
+	
+    MaxIndex := ObjMaxIndex(a)
+    If (o = "R") 
+	{
+        count := 0
+        Loop, % MaxIndex
+            ObjInsert( a, ObjRemove( a, MaxIndex - count++))
+        Return
+    }
+    Partitions := "|" ObjMinIndex( a) "," MaxIndex
+    Loop 
+	{
+        comma := InStr( this_partition := SubStr( Partitions, InStr( Partitions, "|", False, 0)+1), ",")
+        spos := pivot := SubStr( this_partition, 1, comma-1) 
+		epos := SubStr( this_partition, comma+1)
+        if (o = "A") 
+		{    
+            Loop, % epos - spos 
+                if (a[pivot] > a[A_Index+spos])
+                    ObjInsert(a, pivot++, ObjRemove( a, A_Index+spos))    
+        } 
+		else 
+            Loop, % epos - spos 
+                if (a[pivot] < a[A_Index+spos])
+                    ObjInsert(a, pivot++, ObjRemove( a, A_Index+spos))    
+        Partitions := SubStr( Partitions, 1, InStr( Partitions, "|", False, 0)-1)
+        if (pivot - spos) > 1    						;if more than one elements
+            Partitions .= "|" spos "," pivot-1      	;the left partition
+        if (epos - pivot) > 1    						;if more than one elements
+            Partitions .= "|" pivot+1 "," epos      	;the right partition
+    } Until !Partitions
+} ;</000008>
+
+
 ;</13.01.01>
 }
 
@@ -16479,10 +16562,10 @@ return StrSplit(list, delimiter)
 
 } 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
-;|   Sort2DArray()								|   SortArray()									|   QuickSort()									|
+;|   Sort2DArray()								|   SortArray()									|   QuickSort()									|   sortArray(4)                              	|
 ;|
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
-;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                         	|    Ansi2Oem()                             	|
+;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                         	|    Ansi2Oem()                             	| 
 ;|   Oem2Ansi()                             	|   Ansi2UTF8()                             	|   UTF82Ansi()                             	|   StringMD5()					             	|
 ;|   CRC32(9)                                 	|
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
@@ -16492,7 +16575,7 @@ return StrSplit(list, delimiter)
 ;|   cleanlines()									|   cleancolon()									|   cleanspace()									|   SplitLine()                                  	|
 ;|   EnsureEndsWith()						|   EnsureStartsWith()						|   StrPutVar()									|
 ;|   RegExSplit()                             	|   StringM()										|   StrCount()                                 	|   SuperInstr()                               	|
-;|   LineDelete()                             	|   GetWordsNumbered()                	|   AddTrailingBackslash()	    			|   CheckQuotes()								|
+;|   LineDelete()                             	|   GetWordsNumbered()                	|   AddTrailingBackslash()	   			|   CheckQuotes()								|
 ;|   ReplaceForbiddenChars()			|
 ; ----------------------------------------------------------------------  #others#  ----------------------------------------------------------------------
 ;|   ExtractFuncTOuserAHK()          	|   PdfToText()                               	|   PdfPageCounter()                     	|   PasteWithIndent()                       	|
