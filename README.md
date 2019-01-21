@@ -39,10 +39,17 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 | **Gdip_AlphaMask32v1()**      | 32bit Gdip-AlphaMask with MCode - one of two builds          |
 | **Gdip_AlphaMask32v2()**      | 32bit Gdip-AlphaMask with MCode  - second of two builds      |
 | **Gdip_AlphaMask64()**        | 64bit Gdip-AlphaMask with MCode                              |
-| **CircleCrop()**              | gdi circlecrop with MCode                                    |
+| **CircleCrop()**              | gdip circlecrop with MCode                                   |
 | **ExploreObj()**              | renewed function to print contents of an object              |
 | **PIDfromAnyID()**            | for easy retreaving of process ID’s (PID)                    |
 | **sortArray()**               | well working function (*with example*)                       |
+| **GetCallStack()**            | retrieves the current callstack                              |
+| **Traceback()**               | get stack trace                                              |
+| **WrapText()**                | basic function to wrap a text to a given width (length)      |
+| **processPriority()**         | retrieves the priority of a process via PID                  |
+| **Array_Gui()**               | shows your array as an interactive TreeView                  |
+|                               |                                                              |
+|                               |                                                              |
 
 
 
@@ -745,7 +752,7 @@ IsWindow(hWnd*) {
 
 + **TimeCode()** - result is a date-time string or only time-string (13.05.2018, 11:35:01.241) - can be useful for any kind of logging
 
-+ **RegRead64(), RegWrite64()** - This script provides **RegRead64()** and **RegWrite64()** functions that do not redirect to Wow6432Node on 64-bit machines. Registry calls from 32 bit applications running on 64 bit machines are normally intercepted by the system and redirected from HKLM\SOFTWARE to HKLM\SOFTWARE\Wow6432Node. 
++ **RegRead64(), RegWrite64()** - This script provides **RegRead64()** and **RegWrite64()** functions that do not redirect to Wow6432Node on 64-bit machines. Registry calls from 32 bit applications running on 64 bit machines are normally intercepted by the system and redirected from HKLM\SOFTWARE to HKLM\SOFTWARE\Wow6432Node. 
 
 + **CreateOpenWithMenu()** - Creates an 'open with' menu for the passed file. a function by just me based on code from qwerty12
 

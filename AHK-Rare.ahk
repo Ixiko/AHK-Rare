@@ -6194,21 +6194,21 @@ LV_GetItemText(item_index, sub_index, ctrl_id, win_id) {												;-- read the
 
 LV_GetText(hListView,iItem,iSubItem,ByRef lpString,nMaxCount) {									;-- get text by item and subitem from a Listview
         ;const
-        NULL = 0
-        PROCESS_ALL_ACCESS = 0x001F0FFF
-        INVALID_HANDLE_VALUE = 0xFFFFFFFF
-        PAGE_READWRITE = 4
-        FILE_MAP_WRITE = 2
-        MEM_COMMIT = 0x1000
-        MEM_RELEASE = 0x8000
-        LV_ITEM_mask = 0
-        LV_ITEM_iItem = 4
-        LV_ITEM_iSubItem = 8
-        LV_ITEM_state = 12
-        LV_ITEM_stateMask = 16
-        LV_ITEM_pszText = 20
-        LV_ITEM_cchTextMax = 24
-        LVIF_TEXT = 1
+        NULL := 0
+        PROCESS_ALL_ACCESS := 0x001F0FFF
+        INVALID_HANDLE_VALUE := 0xFFFFFFFF
+        PAGE_READWRITE := 4
+        FILE_MAP_WRITE := 2
+        MEM_COMMIT := 0x1000
+        MEM_RELEASE := 0x8000
+        LV_ITEM_mask := 0
+        LV_ITEM_iItem := 4
+        LV_ITEM_iSubItem := 8
+        LV_ITEM_state := 12
+        LV_ITEM_stateMask := 16
+        LV_ITEM_pszText := 20
+        LV_ITEM_cchTextMax := 24
+        LVIF_TEXT := 1
         LVM_GETITEM = 0x1005
         SIZEOF_LV_ITEM = 0x28
         SIZEOF_TEXT_BUF = 0x104
@@ -7469,7 +7469,7 @@ AddGraphicButtonPlus(ImgPath, Options="", Text="") {												;-- GDI+ add a g
 
 { ;gui - get informations from windows and screen (67) - baseID: <06.04>
 
-{ ;screen get (2) nextID: <01>
+{ ;screen get (2) <funcID> <01>
 screenDims() {                                                                                                          	;-- returns informations of active screen (size, DPI and orientation)
 
 	W := A_ScreenWidth
@@ -7495,7 +7495,7 @@ DPIFactor() {                                                                   
 
 } 
 
-{ ;control get (23) nextID: <02>
+{ ;control get (23) <funcID> <02>
 ;1
 ControlExists(class) {                                                                                                	;-- true/false for ControlClass
   WinGet, WinList, List  ;gets a list of all windows
@@ -14989,8 +14989,8 @@ ARGBToRGB(ARGB) {																		;-- convert ARGB to RGB.
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Objects (4) - baseID: <12.01>
-
+{ ;Objects (7) - baseID: <12.01>
+;<12.01.00001>
 ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
 
     If !IsObject(OrigObj) || !IsObject(MergingObj)
@@ -15004,9 +15004,8 @@ ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
             ObjInsert(OrigObj.base, k, v)
     }
     Return True
-
-}
-
+} ;</12.01.00001>
+;<12.01.00002>
 evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
 
 	/*											Example
@@ -15042,15 +15041,16 @@ evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
 	out .= "`r`n The final output value is: '" r "'"
 	clipboard := out
 	return r
-}
-;{ sub of evalRPN() 
+} ;</12.01.00002>
+;{ sub of evalRPN()
+;<12.01.00003>
 StackShow(stack){																			;--
 	for each, value in stack
 		out .= A_Space value
 	return subStr(out, 2)
-}
+} ;</12.01.00003>
 ;}
-;<00003>
+;<12.01.00004>
 ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print object function
 , Equal="  =  ", Indent="`t", CurIndent="") {	
 	 
@@ -15105,8 +15105,8 @@ ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print
 		}
     }
 	return RTrim(ToReturn, NewRow)
-} ;</00003>
-;<00004>
+} ;</12.01.00004>
+;<12.01.00005>
 KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
 , IncludeKeys:="", KeyREx:="", IncludeValues:="", ValueREx:="") {
 
@@ -15172,19 +15172,174 @@ KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two
 	}
 
 return merged
-} ;</00004>
+} ;</12.01.00005>
+;<12.01.00006>
+GetCallStack(Report := 0) {                                                                                        	;-- retrieves the current callstack
+	
+		/*    	DESCRIPTION of function 
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	retrieves the current callstack, Similar functions have been posted on the old forum several times. The function seems to be rather useful for "quick debugging"
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?t=1379
+			Author         	:	just me
+			Date             	:	11 Jan 2014, 06:25
+
+			AHK-Version	:	
+			License         	:	
+			Syntax          	:	
+			Parameter(s)	:	The properties of the first object contain the currently executed line and file
+			Return value	:	Returns an array of objects with the following keys:
+	                                	Called	-  the name of the called function/label
+	                                	Caller   -  the name of the function/label which called the function/label
+	                                	Line    	-  the number of the line Called was called from
+	                                	File    	-  the name of the file containing the line
+			Remark(s)    	:	The parameter Report may be set to one of the following values:
+	                                	0      	-  return the stack array silently
+	                                	1      	-  additionally show the values by MsgBox
+	                                	2      	-  additionally send the values to the debugger by OutputDebug
+	                                	3      	-  use both of the report options
+			Dependencies	:	none
+			KeyWords    	:	
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+
+	/*    	EXAMPLE(s)
+	
+			#NoEnv
+			Gui, Margin, 100, 50
+			Gui, Add, Button, gShowCallstack, Show Callstack
+			Gui, Show, , Test
+			Return
+			GuiClose:
+			ExitApp
+			ShowCallstack:
+			   Gosub, Start
+			Return
+			Start:
+			   Func1()
+			Return
+			Func1() {
+			   Func2()
+			}
+			Func2() {
+			   Func3()
+			}
+			Func3() {
+			   GetCallStack(1)
+			}
+	
+	*/
+	
+   Local Stack := [], StackIndex := 0, E, M
+   While (E := Exception("", --StackIndex)).What <> StackIndex {
+      Stack[A_Index] := {Called: E.What, Caller: "Auto-Exec/Event", Line: E.Line, File: E.File}
+      If (A_Index > 1)
+         Stack[A_Index - 1].Caller := E.What
+   }
+   If (Report & 1) { ; MsgBox
+      M := ""
+      For Each, E In Stack
+         M .= E.Called . "  <<  called by " . E.Caller . " at line " . E.Line . " of " . E.File . "`r`n"
+      MsgBox, 0, Callstack, % M
+   }
+   If (Report & 2) ; OutputDebug
+      For Each, E In Stack
+         OutputDebug, %  "`r`n" . E.Called . " called by " . E.Caller . " at line " . E.Line . " of " . E.File
+   Return Stack
+} ;</12.01.00006>
+;<12.01.00007>
+Traceback(actual:=false) {                                                                                          	;-- get stack trace
+	
+		/*    	DESCRIPTION of function 
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	simple function which can be used to inspect/retrieve a stack trace. It must be called from within a function.
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?t=6001
+			Author         	:	Coco
+			Date             	:	18 Jan 2015
+			AHK-Version	:	AHK_L
+			License         	:	
+			Syntax          	:	tb := Traceback( [ actual := false ] )
+										If actual is true, the actual stack trace is returned which includes Traceback() itself
+			Parameter(s)	:
+			Return value	:	This function returns an array of objects representing a stack trace entry. Each object has the following fields:
+                                    	offset 	- negative offset from the top of the call stack.
+                                    	file   	- the script file (I'm not sure if this is equivalent to A_LineFile or if it's the file that contains the function, I suspect the former)
+                                    	line     	- the line number at which the function is called
+                                    	caller 	- function name
+			Remark(s)    	:	
+			Dependencies	:	none
+			KeyWords    	:	stack, trace
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+	
+			#Include Traceback.ahk
+
+			f()
+			return
+
+			a() {
+				b()
+			}
+
+			b() {
+				c()
+			}
+
+			c() {
+				out := "Stack trace:"
+				for i, info in Traceback()
+				{
+					out .= Format("
+					(LTrim Join`r`n
+					`r`n
+					Offset: {}
+					File:   {}
+					Line:   {}
+					Caller: {}
+					)", info.offset, info.file, info.line, info.caller)
+				}
+				ListVars
+				WinWait ahk_id %A_ScriptHwnd%
+				ControlSetText Edit1, %out%
+				WinWaitClose
+			}
+
+			f() {
+				a()
+			}
+	
+	
+	*/
+
+	
+	r := [], i := 0, n := actual ? 0 : A_AhkVersion<"2" ? 1 : 2
+	Loop
+	{
+		e := Exception(".", offset := -(A_Index + n))
+		if (e.What == offset)
+			break
+		r[++i] := { "file": e.file, "line": e.Line, "caller": e.What, "offset": offset + n }
+	}
+	return r
+} ;</12.01.00006>
 
 } 
-;|   ObjMerge()                                	|   evalRPN()                                	|   StackShow()                                 	|   ExploreObj()                            	|
-;|   KeyValueObjectFromLists(4)     	|
+;|   ObjMerge(1)                               	|   evalRPN(2)                              	|   StackShow(3)                                 	|   ExploreObj(4)                            	|
+;|   KeyValueObjectFromLists(5)     	|   GetCallStack(6)                      	|   Traceback(7)                                 	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;String/ Array/Text (46) - baseID: <13.01>
+{ ;String/ Array/Text (46) - <baseID>13;
+;<Name>String/Array/Text</Name><Description></Description>
 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
-{ ;nextID: <13.01.01>
-;<000001>
+{ ;<funcID>13.01;
+;<Name>array sort functions</Name><Description>functions to sort arrays</Description>
+
+
+;<13.01.000001>
 Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArray
 
    ;TDArray : a two dimensional TDArray
@@ -15204,8 +15359,9 @@ Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArr
         }
         lastIndex := prevIndex
     }
-} ;</000001>
-;<000002>
+} ;</13.01.000001>
+
+;<13.01.000002>
 SortArray(Array, Order="A") {															;-- ordered sort: Ascending, Descending, Reverse
 
     ;Order A: Ascending, D: Descending, R: Reverse
@@ -15237,8 +15393,9 @@ SortArray(Array, Order="A") {															;-- ordered sort: Ascending, Descend
         if (epos - pivot) > 1    ;if more than one elements
             Partitions .= "|" pivot+1 "," epos        ;the right partition
     } Until !Partitions
-} ;</000002>
-;<000003>
+} ;</13.01.000002>
+
+;<13.01.000003>
 QuickSort(Arr, Ascend = True, M*) {												;-- Sort array using QuickSort algorithm
 
 	;******************************************************************************
@@ -15375,7 +15532,7 @@ QuickSort(Arr, Ascend = True, M*) {												;-- Sort array using QuickSort al
 	Return Out
 } ;</000004>
 { ; sub start - depending functions for QuickSort
-;<000005>
+;<13.01.000003.001>
 QuickAux(Arr,Ascend, N, LI, NCol) {
 ;=================================================================
 ;                       QuickAux
@@ -15453,8 +15610,8 @@ IF (LI>0) {
 ; BEFORE and AFTER arrays need to be sorted before
 ; N stores the array position to be sorted in the original array
 return Cat(QuickAux(Before,Ascend,N,LI,NCol), Middle, QuickAux(After,Ascend,N,LI+LB+LM,NCol)) ; So Concat the sorted BEFORE, MIDDLE and sorted AFTER arrays
-} ;</000005>
-;</000006>
+} ;</13.01.000003.001>
+;<13.01.000003.002>
 Cat(Vet*) {
 
 	;*************************************************************
@@ -15469,8 +15626,8 @@ Cat(Vet*) {
 			VRes.InsertAt(L,V*)
 	}
 	Return VRes
-} ;</000006>
-;<000007>
+} ;</13.01.000003.002>
+;<13.01.000003.003>
 CatCol(Vet*) {
 
 	;***************************************************************************
@@ -15502,9 +15659,10 @@ CatCol(Vet*) {
 		}
 	}
 	Return VRes
-} ;</000007>
-} ; sub end
-;<000008>
+} ;</13.01.000003.003>
+} ;</13.01.000003>
+
+;<13.01.000004>
 sortArray( a, o := "A") {                                                                   	;-- sorts an array (another way)
 	
 		/*    	DESCRIPTION of function sortArray()
@@ -15577,14 +15735,14 @@ sortArray( a, o := "A") {                                                       
         if (epos - pivot) > 1    						;if more than one elements
             Partitions .= "|" pivot+1 "," epos      	;the right partition
     } Until !Partitions
-} ;</000008>
+} ;</13.01.000004>
 
 
-;</13.01.01>
-}
+
+} ;</funcID>
 
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
-{ ;nextID: <13.01.02>
+{ ;<funcID> <13.02>
 ;<00001>
 StringMD5( ByRef V, L = 0 ) {               											;-- String MD5 Hashing
 
@@ -15692,7 +15850,7 @@ CRC32(ByRef Buffer, Bytes=0, Start=-1) {	                            		;-- CRC32
 }
 
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
-{ ;nextID: <13.01.03>
+{ ;<funcID> <13.03>
 ;15
 ParseJsonStrToArr(json_data) {														;-- Parse Json string to an array
 
@@ -15835,8 +15993,8 @@ sXMLget( xml, node, attr = "" ) {														;-- simple solution to get inform
 }
 
 ; ----------------------------------------------------------------  #String handling#  ------------------------------------------------------------------
-{ ;nextID: <13.01.04>
-;<00001>
+{ ;<funcID> <13.04>
+;<13.01.04.00001>
 cleanlines(ByRef txt) {																		;-- removes all empty lines
 
 	Loop, Parse, txt, `n, `r
@@ -15848,8 +16006,8 @@ cleanlines(ByRef txt) {																		;-- removes all empty lines
 		newtxt .= i "`n"
 	}
 	return newtxt
-} ;</00001>
-;<00002>
+} ;</13.01.04.00001>
+;<13.01.04.00002>
 cleancolon(txt) {																				;-- what for? removes on ':' at beginning of a string
 
 	if substr(txt,1,1)=":" {
@@ -15858,8 +16016,8 @@ cleancolon(txt) {																				;-- what for? removes on ':' at beginning o
 	}
 	return txt
 
-} ;</00002>
-;<00003>
+} ;</13.01.04.00002>
+;<13.01.04.00003>
 cleanspace(ByRef txt) {																	;-- removes all Space chars
 
 	StringReplace txt,txt,`n`n,%A_Space%, All
@@ -15871,8 +16029,8 @@ cleanspace(ByRef txt) {																	;-- removes all Space chars
 			break
 	}
 	return txt
-} ;</00003>
-;<00004>
+} ;</13.01.04.00003>
+;<13.01.04.00004>
 SplitLine(str, Byref key, ByRef val) {                                              	;-- split string to key and value
 	
 	If (p := InStr(str, "=")) {
@@ -15881,23 +16039,23 @@ SplitLine(str, Byref key, ByRef val) {                                          
 		Return True
 	}
 	Return False
-} ;</00004>
-;<00005>
+} ;</13.01.04.00004>
+;<13.01.04.00005>
 EnsureEndsWith(string, char) {  														;-- Ensure that the string given ends with a given char
 
    if ( StringRight(string, strlen(char)) <> char )
       string .= char
 
    return string
-} ;</00005>
-;<00006>
+} ;</13.01.04.00005>
+;<13.01.04.00006>
 EnsureStartsWith(string, char) { 														;-- Ensure that the string given starts with a given char
    if ( StringLeft(string, strlen(char)) <> char )
       string := char . string
 
    return string
-} ;</00006>
-;<00007>
+} ;</13.01.04.00006>
+;<13.01.04.00007>
 StrPutVar(string, ByRef var, encoding) {    										;-- Convert the data to some Enc, like UTF-8, UTF-16, CP1200 and so on
    { ;-------------------------------------------------------------------------------
     ;
@@ -15922,7 +16080,7 @@ StrPutVar(string, ByRef var, encoding) {    										;-- Convert the data to so
         * ((encoding="cp1252"||encoding="utf-16") ? 2 : 1) )
     return StrPut(string, &var, encoding)
 } ;</00007>
-;<00008>
+;<13.01.04.00008>
 RegExSplit(ByRef psText, psRegExPattern, piStartPos:=1) {				;-- split a String by a regular expressin pattern and you will receive an array as a result
 
 	;https://autohotkey.com/board/topic/123708-useful-functions-collection/ - ObiWanKenobi
@@ -15946,9 +16104,9 @@ RegExSplit(ByRef psText, psRegExPattern, piStartPos:=1) {				;-- split a String 
         aRet.Push(sFound)
 	}
 	return aRet
-}
+} ;</13.01.04..000008>
 { ; sub start - depending functions for RegExSplit
-;<00009>
+;<13.01.04.00009>
 ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {
 	if (psText != "")
 	{
@@ -15956,8 +16114,8 @@ ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {
 		return SubStr(psText, piPosStart, piPosEnd-(piPosStart-1))
 	}
 }
-}  ;</00009> </00008>
-;<00010>
+}  ;</13.01.04.00009> </13.01.04.00008>
+;<13.01.04.00010>
 StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
 
     if ( _Option = "Bloat" )
@@ -15996,15 +16154,15 @@ StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String
     }
     return _NewString
 
-} ;</00010>
-;<00011>
+} ;</13.01.04.00010>
+;<13.01.04.00011>
 StrCount(Haystack,Needle) {															;-- a very handy function to count a needle in a Haystack
 	
 	; https://github.com/joedf/AEI.ahk/blob/master/AEI.ahk
 	StringReplace, Haystack, Haystack, %Needle%, %Needle%, UseErrorLevel
 	return ErrorLevel
-} ;</00011>
-;<00012>
+} ;</13.01.04.00011>
+;<13.01.04.00012>
 SuperInstr(Hay, Needles, return_min=true, Case=false,               	;-- Returns min/max position for a | separated values of Needle(s)
 Startpoint=1, Occurrence=1)	{					
 	
@@ -16032,8 +16190,8 @@ Startpoint=1, Occurrence=1)	{
 				pos := var
 	}
 	return pos
-} ;</00012>
-;<00013>
+} ;</13.01.04.00012>
+;<13.01.04.00013>
 LineDelete(V, L, R := "", O := "", ByRef M := "") {                            	;-- deletes a specific line or a range of lines from a variable containing one or more lines of text. No use of any loop!
 	
 	/*    	DESCRIPTION of function 
@@ -16104,8 +16262,8 @@ LineDelete(V, L, R := "", O := "", ByRef M := "") {                            	
 		X := SubStr(S, 1, P - 1) . SubStr(S, P + StrLen(M) + 1), X := SubStr(X, 2, -1)
 	}
 	Return X
-} ;</00013>
-;<00014>
+} ;</13.01.04.00013>
+;<13.01.04.00014>
 GetWordsNumbered(string, conditions) {										;-- gives back an array of words from a string, you can specify the position of the words you want to keep
 
 	/*                              	DESCRIPTION
@@ -16136,16 +16294,16 @@ GetWordsNumbered(string, conditions) {										;-- gives back an array of words
 	}
 
 return word
-} ;</00014>
-;<00015>
+} ;</13.01.04.00014>
+;<13.01.04.00015>
 AddTrailingBackslash(ptext) {															;-- adds a backslash to the beginning of a string if there is none
 
 	if (SubStr(ptext, 0, 1) <> "\")
 		return, ptext . "\"
 	return, ptext
 
-} ;</00015>
-;<00016>
+} ;</13.01.04.00015>
+;<13.01.04.00016>
 CheckQuotes(Path) {																		;--
 
    if (InStr(Path, A_Space, false) <> 0)
@@ -16153,8 +16311,8 @@ CheckQuotes(Path) {																		;--
       Path = "%Path%"
    }
    return, Path
-} ;</00016>
-;<00017>
+} ;</13.01.04.00016>
+;<13.01.04.00017>
 ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {							;-- hopefully working, not tested function, it uses RegExReplace
 
    Replace_RegEx := "im)[\/:*?""<>|]*"
@@ -16165,14 +16323,47 @@ ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {							;-- hopefully working, no
    if (ErrorLevel = 0) and (S_OUT <> "")
       return, S_OUT
 
-} ;</00017>
+} ;</13.01.04.00017>
+;<13.01.04.00018>
+WrapText(Text, LineLength) {                                                        	;-- basic function to wrap a text-string to a given length
+	
+	/*    	DESCRIPTION of function WrapText() 13.01.04.00018
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	basic function to wrap a text-string to a given length
+			Link              	:	https://rosettacode.org/wiki/Word_wrap#AutoHotkey
+			Author         	:	
+			Date             	:	
+			AHK-Version	:	AHK_V1
+			License         	:	
+			Syntax          	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	none
+			KeyWords    	:	string, text, string manipulation
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	/*    	EXAMPLE(s)
+			
+			MsgBox, % "72`n" WrapText(Clipboard, 72) "`n`n80`n" WrapText(Clipboard, 80)
+			return
+	
+	*/
+	
+	StringReplace, Text, Text, `r`n, %A_Space%, All
+	while (p := RegExMatch(Text, "(.{1," LineLength "})(\s|\R+|$)", Match, p ? p + StrLen(Match) : 1))
+		Result .= Match1 ((Match2 = A_Space || Match2 = A_Tab) ? "`n" : Match2)
+	return, Result
+} ;</13.01.04.00018>
 
 ;</13.01.04>
 }
 
 ; ----------------------------------------------------------------------  #others#  ---------------------------------------------------------------------- 
-{ ;nextID: <13.01.05>
-;<00001>	
+{ ;<funcID> <13.05>
+	
+;<13.05.000001>
 ExtractFuncTOuserAHK(data) {                                                     	;-- extract user function and helps to write it to userAhk.api
 		
 	; https://autohotkey.com/board/topic/78781-extract-function-declarations-from-ahk-lib-to-scite4ahk/	
@@ -16292,8 +16483,8 @@ ExtractFuncTOuserAHK(data) {                                                    
 		ToolTip
 
 return
-} ;</00001>	
-;<00002>	
+} ;</13.05.000001>
+;<13.05.000002>
 PdfToText(PdfPath) {																		;-- copies a selected PDF file to memory - it needs xpdf - pdftotext.exe
 	
 	;  This function copies a selected PDF file to memory.  This function was written by kon at AHK forums
@@ -16319,8 +16510,8 @@ PdfToText(PdfPath) {																		;-- copies a selected PDF file to memory -
     while, !objExec.StdOut.AtEndOfStream ; Wait for the program to finish
         strStdOut := objExec.StdOut.ReadAll()
     return strStdOut
-} ;</00002>	
-;<00003>	
+} ;</13.05.000002>	
+;<13.05.000003>
 PdfPageCounter(PathToPdfFile){                                                		;-- counts pages of a pdffile (works with 95% of pdf files)
 	
 	;https://autohotkey.com/board/topic/90560-pdf-page-counter/
@@ -16335,8 +16526,8 @@ PdfPageCounter(PathToPdfFile){                                                		
         while pos  := RegExMatch(FContents, "i)Type\s*/Page[^s/]", m, (pos?pos:1) +StrLen(m))
             PageCount++
     return, PageCount
-} ;</00003>
-;<00004>
+} ;</13.05.000003>
+;<13.05.000004>
 PasteWithIndent(clp, ind="Tab", x=1) {											;-- paste string to an editor with your prefered indent key
 
 	;use Tab or Space for example , x how many times you want to have an indent, clp = can contains many lines (lines must liminated through `n)
@@ -16351,9 +16542,9 @@ PasteWithIndent(clp, ind="Tab", x=1) {											;-- paste string to an editor w
 		}
 		
 return
-} ;</00004>
-;<00005>
-Ask_and_SetbackFocus(AskTitle, AskText) {									;-- by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret
+}  ;</13.05.000004>
+;<13.05.000005>
+Ask_and_SetbackFocus(AskTitle, AskText) {				    		 			;-- by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret
 
 	/*                              	DESCRIPTION
 					
@@ -16399,8 +16590,8 @@ Ask_and_SetbackFocus(AskTitle, AskText) {									;-- by opening a msgbox you lo
 	IfMsgBox, No
 		return 0
 	
-} ;</00005>
-;<00006>
+}  ;</13.05.000005>
+;<13.05.000006>
 CleanLine(Target) {																			;-- Return a line with leading and trailing spaces removed, and tabs converted to spaces
 
 	/*                              	DESCRIPTION of Func: CleanLine
@@ -16421,8 +16612,8 @@ CleanLine(Target) {																			;-- Return a line with leading and trailin
    Work := RegexReplace(Work  , "\s+$", "")
    
    return Work
-} ;</00006>
-;<00007>
+}  ;</13.05.000006>
+;<13.05.000007>
 StrTrim(Target) {																				;-- Remove all leading and trailing whitespace including tabs, spaces, CR and LF
 	
 	/*                              	DESCRIPTION
@@ -16442,8 +16633,8 @@ StrTrim(Target) {																				;-- Remove all leading and trailing whitesp
 	
 	
    return RegexReplace(RegexReplace(Target, "^\s+", ""), "\s+$", "")
-} ;</00007>
-;<00008>
+}  ;</13.05.000007>
+;<13.05.000008>
 StrDiff(str1, str2, maxOffset:=5) {													;-- SIFT3 : Super Fast and Accurate string distance algorithm
 
 	/*                              	DESCRIPTION
@@ -16510,8 +16701,8 @@ StrDiff(str1, str2, maxOffset:=5) {													;-- SIFT3 : Super Fast and Accur
 		mi += 1
 	}
 	return ((n0 + m0)/2 - lcs) / (n0 > m0 ? n0 : m0)
-} ;</00008>
-;<00009>
+}  ;</13.05.000008>
+;<13.05.000009>
 PrintArr(Arr, Option := "w800 h200", GuiNum := 90) {					;-- show values of an array in a listview gui for debugging
     for index, obj in Arr {
         if (A_Index = 1) {
@@ -16552,35 +16743,97 @@ PrintArr(Arr, Option := "w800 h200", GuiNum := 90) {					;-- show values of an a
     loop % LV_GetCount("Column")
         LV_ModifyCol(A_Index, "AutoHdr")
     Gui, %GuiNum%: Show,, Array
-} ;</00009>
-;<00010>
+} ;</13.05.000009>
+;<13.05.000010>
 List2Array(list, delimiter) {								               					;-- function uses StrSplit () to return an array
 return StrSplit(list, delimiter)
-} ;</00010>
-;</13.01.05>
-} ;<13.01>
+}  ;</13.05.000010>
+;<13.05.000011>
+Array_Gui(Array, Parent="") {                                                        	;-- shows your array as an interactive TreeView
 
-} 
+		/*    	DESCRIPTION of function Array_Gui()
+        	-------------------------------------------------------------------------------------------------------------------
+			Description  	:	show your array as an interactive TreeView
+			Link              	:	https://autohotkey.com/boards/viewtopic.php?f=6&t=35124&p=162012#p162012
+			Author         	:	GeekDude
+			Date             	:	28 Jul 2017, 09:43
+			AHK-Version	:	AHK-V1, AHK_L
+			License         	:	
+			Syntax          	:	
+			Parameter(s)	:
+			Return value	:
+			Remark(s)    	:	
+			Dependencies	:	none
+			KeyWords    	:	array, gui, debug, treeview
+        	-------------------------------------------------------------------------------------------------------------------
+	*/
+
+	/*    	EXAMPLE(s)
+	
+			Array_Gui({"Apples":["Red", "Crunchy", "Lumpy"], "Oranges":["Orange", "Squishy", "Spherical"]})
+	
+	*/
+	
+	if !Parent
+	{
+		Gui, +HwndDefault
+		Gui, New, +HwndGuiArray +LabelGuiArray +Resize
+		Gui, Margin, 5, 5
+		Gui, Add, TreeView, w300 h200
+		
+		Item := TV_Add("Array", 0, "+Expand")
+		Array_Gui(Array, Item)
+		
+		Gui, Show,, GuiArray
+		Gui, %Default%:Default
+		
+		WinWait, ahk_id%GuiArray%
+		WinWaitClose, ahk_id%GuiArray%
+		return
+	}
+	
+	For Key, Value in Array
+	{
+		Item := TV_Add(Key, Parent)
+		if (IsObject(Value))
+			Array_Gui(Value, Item)
+		else
+			TV_Add(Value, Item)
+	}
+	return
+	
+	GuiArrayClose:
+	Gui, Destroy
+	return
+	
+	GuiArraySize:
+	GuiControl, Move, SysTreeView321, % "w" A_GuiWidth - 10 " h" A_GuiHeight - 10
+	return
+} ;</13.05.000011>
+
+} ;</13.05>
+
+} ;</baseID> 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
 ;|   Sort2DArray()								|   SortArray()									|   QuickSort()									|   sortArray(4)                              	|
 ;|
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
-;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                         	|    Ansi2Oem()                             	| 
+;|   uriEncode()                              	|   Ansi2Unicode()                         	|   Unicode2Ansi()                         	|   Ansi2Oem()                              	| 
 ;|   Oem2Ansi()                             	|   Ansi2UTF8()                             	|   UTF82Ansi()                             	|   StringMD5()					             	|
 ;|   CRC32(9)                                 	|
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
 ;|   ParseJsonStrToArr()	                	|    parseJSON()                            	|   GetNestedTag()                        	|   GetHTMLbyID()							|
 ;|   GetHTMLbyTag()                     	|   GetXmlElement()                      	|   sXMLget()                                 	|
 ; --------------------------------------------------------------  #String / lists handling#  --------------------------------------------------------------
-;|   cleanlines()									|   cleancolon()									|   cleanspace()									|   SplitLine()                                  	|
-;|   EnsureEndsWith()						|   EnsureStartsWith()						|   StrPutVar()									|
-;|   RegExSplit()                             	|   StringM()										|   StrCount()                                 	|   SuperInstr()                               	|
-;|   LineDelete()                             	|   GetWordsNumbered()                	|   AddTrailingBackslash()	   			|   CheckQuotes()								|
-;|   ReplaceForbiddenChars()			|
+;|   cleanlines(1)								|   cleancolon(2)								|   cleanspace(3)								|   SplitLine(4)                                  	|
+;|   EnsureEndsWith(5)						|   EnsureStartsWith(6)						|   StrPutVar(7)									|
+;|   RegExSplit(8)                             	|   StringM(10)									|   StrCount(11)                               	|   SuperInstr(12)                             	|
+;|   LineDelete(13)                            	|   GetWordsNumbered(14)            	|   AddTrailingBackslash(15)	 			|   CheckQuotes(16)	    					|
+;|   ReplaceForbiddenChars(17)		|   WrapText(18)                             	|
 ; ----------------------------------------------------------------------  #others#  ----------------------------------------------------------------------
-;|   ExtractFuncTOuserAHK()          	|   PdfToText()                               	|   PdfPageCounter()                     	|   PasteWithIndent()                       	|
-;|   Ask_and_SetbackFocus()            	|   CleanLine()                                	|   StrTrim()                                   	|   StrDiff()                                      	|
-;|   PrintArr()                                 	|   List2Array(10)                           	|
+;|   ExtractFuncTOuserAHK(1)          	|   PdfToText(2)                               	|   PdfPageCounter(3)                     	|   PasteWithIndent(4)                     	|
+;|   Ask_and_SetbackFocus(5)           	|   CleanLine(6)                                	|   StrTrim(7)                                   	|   StrDiff(8)                                     	|
+;|   PrintArr(9)                                 	|   List2Array(10)                           	|   Array_Gui(11)                             	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -19896,7 +20149,7 @@ RtlUlongByteSwap64(num) {                                                       
 	,DllCall("MSVCRT.dll\_swab", "ptr", &src+2, "ptr", &dest, "int", 2, "cdecl")
 	return numget(dest,"uint")
 }
-;<00056>
+;<16.01.00056>
 PIDfromAnyID( anyID="" ) {                                                                                           	;-- for easy retreaving of process ID's (PID)
 	
  	/*    	DESCRIPTION of function PIDfromAnyID() ID: 16.01.00056
@@ -19946,8 +20199,11 @@ PIDfromAnyID( anyID="" ) {                                                      
   SetTitleMatchMode, %ATMM%
   
 Return PID ? PID : 0    
-} ;</00056>
-
+} ;</16.01.00056
+;<16.01.00057>
+processPriority(PID) {                                                                                                    	;-- retrieves the priority of a process via PID
+	return dllCall("GetPriorityClass","UInt",dllCall("OpenProcess","Uint",0x400,"Int",0,"UInt",PID)),dllCall("CloseHandle","Uint",hProc)
+} ;</16.01.00056>
 }
 ;|   CreateNamedPipe()                 	|   RestoreCursors()                       	|   SetSystemCursor()                    	|   SystemCursor()                         	|
 ;|   ToggleSystemCursor()             	|   SetTimerF()                              	|   IGlobalVarsScript()                   	|   patternScan()                           	|
@@ -19963,7 +20219,7 @@ Return PID ? PID : 0
 ;|   CompareMemory()                  	|   VirtualAlloc()                            	|   VirtualFree()                             	|   ReduceMem()                           	|
 ;|   GlobalLock()                            	|   LocalFree()                                	|   CreateStreamOnHGlobal()       	|   CoTaskMemFree()                     	|
 ;|   CoTaskMemRealloc()               	|   VarAdjustCapacity()                 	|   DllListExports()                         	|   RtlUlongByteSwap64() x2         	|
-;|   PIDfromAnyID(56)                   	|
+;|   PIDfromAnyID(56)                   	|   processPriority(57)                    	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
