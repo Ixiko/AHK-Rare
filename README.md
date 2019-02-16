@@ -10,7 +10,7 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-*Last modification date*: ***15.12.2018***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
+*Last modification date*: ***02/16/2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
 
 In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does not work". After trying it with [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey). 
 
@@ -20,7 +20,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-## ![Gem](assets/GemSmall.png) [XX-XXXXXXX-XXXX] - XX(new)+564(old) =  XXX
+## ![Gem](assets/GemSmall.png) [February 16, 2019]: 37(new)+564(old) =  601
 
 | **FUNCTION**                  | **DESCRIPTION**                                              |
 | :---------------------------- | :----------------------------------------------------------- |
@@ -48,16 +48,22 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 | **WrapText()**                | basic function to wrap a text to a given width (length)      |
 | **processPriority()**         | retrieves the priority of a process via PID                  |
 | **Array_Gui()**               | shows your array as an interactive TreeView                  |
-|                               |                                                              |
-|                               |                                                              |
+| **MoveMouse_Spiral()**        | move mouse in a spiral                                       |
+| **TV_GetItemText()**          | retrieves the text/name of the specified treeview node       |
+| **WinEnum()**                 | wrapper for Enum(Child)Windows from cocobelgica. a different solution to that one I collected before |
+| **SetHoverText()**            | change control’s text on mouseover                           |
+| **Menu_Show()**               | its an alternative to Menu, Show, which can display menu without blocking monitored messages |
+| **CreateMenu()**              | creates menu from a string in which each item is placed in new line and hierarchy is defined by Tab character on the left (indentation) |
+| **CreateDDMenu()**            | Creates dropdown menu from a string in which each item is placed in new line and hierarchy is defined by Tab character on the left (indentation) |
+| **FormatByteSize()**          | give’s back the given bytes in KB, MB, GB …. (for AHK_V1 and a second function for AHK_V2) |
+| **PathCombine()**             | combine the 2 routes provided in a single absolute path      |
+| **GetParentDir()**            | small RegEx function to get parent dir from a given string   |
+| **DirGetParent()**            | returns a string containing parent dir, it’s possible to set the level of parent dir |
+| **WinWaitProgress()**         | Waits for the progress bar on a window to reach (>=) a given value (a Lexikos function) |
 
 
 
-
-
-
-
-## ![Gem](assets/GemSmall.png)[15-December-2018] - 22(new)+542(old) = 564
+## ![Gem](assets/GemSmall.png)[December 15, 2018] - 22(new)+542(old) = 564
 
 optimized layout, began to assign a number for functions identification, Split topics to find functions faster, each function will get the following description* over time:
 
@@ -109,7 +115,7 @@ optimized layout, began to assign a number for functions identification, Split t
 
 
 
-## ![Gem](assets/GemSmall.png) [30-September-2018] count: 140+402 = 542 functions
+## ![Gem](assets/GemSmall.png) [September 30, 2018]: 140+402 = 542 functions
 
 ### **functions for controls** (10)
 
@@ -427,7 +433,7 @@ optimized layout, began to assign a number for functions identification, Split t
 
 
 
-## ![Gem](assets/GemSmall.png) [15-July-2018] count: 79+323 = 402 functions
+## ![Gem](assets/GemSmall.png) [July 15, 2018]: 79(new)+323(old) = 402 functions
 
 I’ve found a lot function this time. I checked the found functions that these can not actually be found in any library, so that these can really be called "Rare". I added some more descriptions, examples, links and moved some functions to the right category. 
 
@@ -582,7 +588,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **PathInfo()** - splits a given path to return as object
 
 -----
-## ![Gem](assets/GemSmall.png) [13-June-2018] count: 323 functions
+## ![Gem](assets/GemSmall.png) [June 13, 2018]: 323 functions
 
 - **TimedFunction()** - SetTimer functionality for functions
 - **ListGlobalVars()** - ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string
@@ -606,7 +612,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **GetClientSize()** - get size of window without border
 
 ----
-## ![Gem](assets/GemSmall.png) [10-June-2018] count: 303 functions
+## ![Gem](assets/GemSmall.png) [June 10, 2018] count: 303 functions
 
 *minor layout improvement (so I hope, anyway). In the [AHK forum](https://autohotkey.com/boards/) I read that codefolding does not work. After trying with the [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with  [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey).*
 
@@ -622,7 +628,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **SaveHBITMAPToFile()** - saves a HBitmap to a file, depending function of CaptureScreen()
 
 -----
-## ![Gem](assets/GemSmall.png) [02-June-2018] count: 293 functions
+## ![Gem](assets/GemSmall.png) [June 02, 2018] count: 293 functions
 
 ***6 functions removed*** - depending functions not available or the functions are doubled, ***added some links*** to the sources of ***origin*** of the functions. As far as findable some feature ***descriptions and example scripts added***.
 
@@ -648,7 +654,7 @@ I’ve found a lot function this time. I checked the found functions that these 
 - **SaveSetColours()** - Sys colours saving adapted from an approach found in Bertrand Deo's code
 
 -----
-## ![Gem](assets/GemSmall.png) [28-May-2018] count: 280 functions
+## ![Gem](assets/GemSmall.png) [May 28, 2018] count: 280 functions
 
 ***Organized layout***, some functions moved to the right topic, delete duplicate functions, adding more info and examples*
 
@@ -744,7 +750,7 @@ IsWindow(hWnd*) {
 - **TV_Load()** - loads TreeView items from an XML string
 
 -----
-## ![Gem](assets/GemSmall.png) [22-May-2018] count: 240 functions
+## ![Gem](assets/GemSmall.png) [May 22, 2018] count: 240 functions
 
 + **FindChildWindow()** - a very good function to get handles from child windows like MDI childs
 
@@ -763,7 +769,7 @@ IsWindow(hWnd*) {
 + **FrameShadow(HGui)** - Drop Shadow On Borderless Window, (DWM STYLE)
 
 -----
-## ![Gem](assets/GemSmall.png)[06-May-2018] count: 230 functions
+## ![Gem](assets/GemSmall.png)[May 06, 2018] count: 230 functions
 
 - **getByControlName()**  - function uses DllCalls
 - **listAccChildProperty()** - uses COM functionality
@@ -771,7 +777,7 @@ IsWindow(hWnd*) {
 - **TabCtrl_GetCurSel(), TabCtrl_GetItemText()** - the first returns the 1-based index of the currently selected tab, the second returns the tab name
 
 -----
-## ![Gem](assets/GemSmall.png) [01-May-2018] count: 221 functions
+## ![Gem](assets/GemSmall.png) [May 01, 2018] count: 221 functions
 
 - **PIC_GDI_GUI()** - a GDI Gui for showing pictures and more
 - **FullScreenToggleUnderMouse()** - Window to pseudo fullscreen and back
