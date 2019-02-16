@@ -6,7 +6,7 @@ Directory2 = D:\Eigene Dateien\Eigene Dokumente\AutoIt Scripte\GitHub\AHK-Rare
 ;FileSelectFile, file,, %Directory1%
 ;FileDelete, files.txt
 ;Directory = file
-funclist:= listfunc2MD(A_ScriptDir . "\MISC Functions.ahk")
+funclist:= listfunc2MD(A_ScriptDir . "\AHK-Rare.ahk")
 
 today:= A_DD "-" A_MM "-" A_YYYY
 file = %A_ScriptDir%\%today%_MDTable.md
@@ -48,7 +48,7 @@ exitApp
 
 Listfunc2MD(file){																;--list all functions inside a ahk script and write MarkDown Table
 
-	f:=0, s:=0, i:=1
+	f:=0, s:=0, i:=0
 	lst=
 (
 | FNr | Line | name of function and description |
@@ -60,30 +60,27 @@ Listfunc2MD(file){																;--list all functions inside a ahk script and 
 
 	Loop, Parse, z, `n
 	{
+		i++
 		ALF:= A_LoopField
-		;MsgBox, %Alf%
-		If ((s=0) AND (Instr(ALF, ";`{sub"))) {
-			s:=1
-		} else if ((s=1) AND (Instr(ALF, ";}"))) {
+		If RegExMatch(ALF, ";\s?<")
 			s:=0
-		}
+		else If RegExMatch(ALF, ";\s?sub")
+			s:=1
+				
+		If (s=1) 
+			continue
 
-
-		If (s=0) {
-
-			fnp1:= Instr(ALF, "`(")
-			fnp2:= Instr(ALF, "`{")
-			cmt:= Instr(ALF, ";--")+3
-			If ((fnp1 > 0) AND (cmt > 0) AND (fnp1<cmt)) {
+		fnp1:= Instr(ALF, "`(")
+		fnp2:= Instr(ALF, "`{")
+		cmt:= Instr(ALF, ";--")+3
+		If ((fnp1 > 0) AND (cmt > 0) AND (fnp1<cmt)) {
 				f++
 				dsc:= Trim(SubStr(ALF, cmt, StrLen(ALF)-cmt+1))
 				If !(dsc="")
-					dsc:= " - *" . dsc . "*"
+						dsc:= " - *" . dsc . "*"
 				lst.= "| " . SubStr("00000", 1, 3-StrLen(f)) . f . " | " . SubStr("00000", 1, 5-StrLen(i)) . i . " | **" . Trim(SubStr(ALF, 1, fnp1)) . "`)**" . dsc . " |`n"
-			}
 		}
-
-		i++
+		
 
 	}
 
