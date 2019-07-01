@@ -64,7 +64,7 @@ Listfunc2MD(file){																;--list all functions inside a ahk script and 
 		ALF:= A_LoopField
 		If RegExMatch(ALF, ";\s?<")
 			s:=0
-		else If RegExMatch(ALF, ";\s?sub")
+		else If RegExMatch(ALF, ";\s?sub") ;or RegExMatch(Alf
 			s:=1
 				
 		If (s=1) 
