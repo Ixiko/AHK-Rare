@@ -1,6 +1,6 @@
 ﻿;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;                                                                	Collection of rare or very useful functions
-;                                                             	collected by IXIKO =>    last change: 24.04.2019
+;                                                             	collected by IXIKO =>    last change: 07/23/2019
 ;                                    	for description have a look at README.md (it can be found in the same folder)
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -8276,7 +8276,7 @@ OnScroll(wParam, lParam, msg, hwnd) {
 ;|                                                      |                                      SCROLLBAR functions          								|	                                                  	|
 ;|   UpdateScrollBars(1)                   	|
 
-{ ;gui - get informations from windows and screen (78) - 																				baseID: <06.04>
+{ ;gui - get informations from windows and screen (81) - 																				baseID: <06.04>
 
 { ;<06.04.01> screen get 						(02) 
 screenDims() {                                                                                                          	;-- returns informations of active screen (size, DPI and orientation)
@@ -8304,7 +8304,7 @@ DPIFactor() {                                                                   
 
 } 
 
-{ ;<06.04.02> control get 					(28)
+{ ;<06.04.02> control get 					(29)
 ;<06.04.00001>
 ControlExists(class) {                                                                                                	;-- true/false for ControlClass
   WinGet, WinList, List  ;gets a list of all windows
@@ -9166,8 +9166,8 @@ IsCheckboxStyle(style) {                                                        
  ;</06.04.00030>
 } 
 
-{ ;<06.04.03> gui + window get/find 	(41)
-;1
+{ ;<06.04.03> gui + window get/find 	(44)
+;<06.04.03.00001>
 IsOverTitleBar(x, y, hWnd) { 																						;-- WM_NCHITTEST wrapping: what's under a screen point?
 
 	; This function is from http://www.autohotkey.com/forum/topic22178.html
@@ -9176,8 +9176,8 @@ IsOverTitleBar(x, y, hWnd) { 																						;-- WM_NCHITTEST wrapping: wh
       return true
    else
       return false
-}
-;2
+} ;</06.04.03.00001>
+;<06.04.03.00002>
 WinGetPosEx(hWindow,ByRef X="",ByRef Y="",ByRef Width="", 								;-- gets the position, size, and offset of a window
 ByRef Height="", ByRef Offset_X="",ByRef Offset_Y="")  {
 
@@ -9349,58 +9349,56 @@ ByRef Height="", ByRef Offset_X="",ByRef Offset_Y="")  {
     NumPut(Offset_X:=(dpiAdjusted_Width-GWR_Width)//2,RECTPlus,16,"Int")
     NumPut(Offset_Y:=(dpiAdjusted_Height-GWR_Height)//2,RECTPlus,20,"Int")
     Return &RECTPlus
-    }
-;3
+} ;<06.04.03.00002>
+;<06.04.03.00003>
 GetParent(hWnd) {																										;-- get parent win handle of a window
 
 	return DllCall("GetParent", "Ptr", hWnd, "Ptr")
 
-}
-;4
+} ;</06.04.03.00003>
+;<06.04.03.00004>
 GetWindow(hWnd,uCmd) {																							;-- DllCall wrapper for GetWindow function
 
 	return DllCall( "GetWindow", "Ptr", hWnd, "uint", uCmd, "Ptr")
 
-}
-;5
+} ;</06.04.03.00004>
+;<06.04.03.00005>
 GetForegroundWindow() {																							;-- returns handle of the foreground window
-
 	return DllCall("GetForeGroundWindow", "Ptr")
-
-}
-;6
+} ;</06.04.03.00005>
+;<06.04.000006>
 IsWindowVisible(hWnd) {																							;-- self explaining
 	return DllCall("IsWindowVisible", "Ptr", hWnd)
-}
-;7
+} ;</06.04.000006>
+;<06.04.000007>
 IsFullScreen(hwnd) {																									;-- specific window is a fullscreen window?
 
   WinGet, Style, Style, ahk_id %hwnd%
   return !(Style & 0x40000) ; 0x40000 = WS_SIZEBOX
 
-}
-;8
+} ;</06.04.000007>
+;<06.04.000008>
 IsClosed(win, wait) {																										;-- AHK function (WinWaitClose) wrapper
 
 	WinWaitClose, ahk_id %win%,, %wait%
 	return ((ErrorLevel = 1) ? False : True)
 
-}
-;9
+} ;</06.04.000008>
+;<06.04.000009>
 GetClassLong(hWnd, Param) {																					;--
 
     Static GetClassLong := A_PtrSize == 8 ? "GetClassLongPtr" : "GetClassLong"
     Return DllCall(GetClassLong, "Ptr", hWnd, "int", Param)
 
-}
-;10
+} ;</06.04.000009>
+;<06.04.000010>
 GetWindowLong(hWnd, Param) {																				;--
 
     ;GetWindowLong := A_PtrSize == 8 ? "GetWindowLongPtr" : "GetWindowLong"
     Return DllCall("GetWindowLong", "Ptr", hWnd, "int", Param)
 
-}
-;11
+} ;</06.04.000010>
+;<06.04.000011>
 GetClassStyles(Style) {																									;--
 
     Static CS := {0x1: "CS_VREDRAW"
@@ -9426,8 +9424,8 @@ GetClassStyles(Style) {																									;--
 
     Return RTrim(Styles, ", ") . ")"
 
-}
-;12
+} ;</06.04.000011>
+;<06.04.000012>
 GetTabOrderIndex(hWnd) {																						;--
 
     hParent := GetAncestor(hWnd)
@@ -9453,15 +9451,15 @@ GetTabOrderIndex(hWnd) {																						;--
     }
 
     Return 0
-}
-;13
+} ;</06.04.000012>
+;<06.04.000013>
 GetCursor(CursorHandle) {																							;--
 
     Cursor := Cursors[CursorHandle]
     Return (Cursor != "") ? Cursor : CursorHandle
 
-}
-;14
+} ;</06.04.000013>
+;<06.04.000014>
 GetClientCoords(hWnd, ByRef x, ByRef y) {																	;--
     VarSetCapacity(POINT, 8, 0)
     NumPut(x, POINT, 0, "Int")
@@ -9470,23 +9468,23 @@ GetClientCoords(hWnd, ByRef x, ByRef y) {																	;--
     DllCall("ScreenToClient", "Ptr", (hParent == 0 ? hWnd : hParent), "Ptr", &POINT)
     x := NumGet(POINT, 0, "Int")
     y := NumGet(POINT, 4, "Int")
-}
-;15
+} ;</06.04.000014>
+;<06.04.000015>
 GetClientSize(hwnd, ByRef w, ByRef h) {																		;-- get size of window without border
 	; https://autohotkey.com/board/topic/91733-command-to-get-gui-client-areas-sizes/
     VarSetCapacity(rc, 16)
     DllCall("GetClientRect", "uint", hwnd, "uint", &rc)
     w := NumGet(rc, 8, "int")
     h := NumGet(rc, 12, "int")
-}
-;16
+} ;</06.04.000015>
+;<06.04.000016>
 GetWindowCoords(hWnd, ByRef x, ByRef y) {																;--
     hParent := GetParent(hWnd)
     WinGetPos px, py,,, % "ahk_id" . (hParent == 0 ? hWnd : hParent)
     x := x - px
     y := y - py
-}
-;17
+} ;</06.04.000016>
+;<06.04.000017>
 GetWindowPos(hWnd, ByRef X, ByRef Y, ByRef W, ByRef H) {										;--
     VarSetCapacity(RECT, 16, 0)
     DllCall("GetWindowRect", "Ptr", hWnd, "Ptr", &RECT)
@@ -9495,8 +9493,8 @@ GetWindowPos(hWnd, ByRef X, ByRef Y, ByRef W, ByRef H) {										;--
     Y := NumGet(RECT, 4, "Int")
     w := NumGet(RECT, 8, "Int") - X
     H := NumGet(RECT, 12, "Int") - Y
-}
-;18
+} ;</06.04.000017>
+;<06.04.000018>
 GetWindowPlacement(hWnd) {																					;-- Gets window position using workspace coordinates (-> no taskbar), returns an object
     VarSetCapacity(WINDOWPLACEMENT, 44, 0)
     NumPut(44, WINDOWPLACEMENT)
@@ -9509,8 +9507,8 @@ GetWindowPlacement(hWnd) {																					;-- Gets window position using wo
     Result.showCmd := NumGet(WINDOWPLACEMENT, 8, "UInt")
     ; 1 = normal, 2 = minimized, 3 = maximized
     Return Result
-}
-;19
+} ;</06.04.000018>
+;<06.04.000019>
 GetWindowInfo(hWnd) {                                                                                         	;-- returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)
     NumPut(VarSetCapacity(WINDOWINFO, 60, 0), WINDOWINFO)
     DllCall("GetWindowInfo", "Ptr", hWnd, "Ptr", &WINDOWINFO)
@@ -9531,12 +9529,12 @@ GetWindowInfo(hWnd) {                                                           
     wi.Atom    := NumGet(WINDOWINFO, 56, "UShort")
     wi.Version := NumGet(WINDOWINFO, 58, "UShort")
     Return wi
-}
-;20
+} ;</06.04.000019>
+;<06.04.000020>
 GetOwner(hWnd) {                                                                                                  	;--
     Return DllCall("GetWindow", "Ptr", hWnd, "UInt", 4) ; GW_OWNER
-}
-;21
+} ;</06.04.000020>
+;<06.04.000021>
 FindWindow(WinTitle, WinClass:="", WinText:="", ParentTitle:="",                        	;-- Finds the requested window,and return it's ID
 ParentClass:="", DetectHiddenWins:="off", DectectHiddenTexts:="off") {
 
@@ -9591,8 +9589,8 @@ ParentClass:="", DetectHiddenWins:="off", DectectHiddenTexts:="off") {
 	DetectHiddenText, %HTexts%
 
 	return sSelectedWinID
-}
-;22
+} ;</06.04.000021>
+;<06.04.000022>
 FindWindow(title, class="", style="", exstyle="", processname="",                          	;-- Finds the first window matching specific criterias.
 allowempty = false) {									
 	
@@ -9621,21 +9619,21 @@ allowempty = false) {
 		return this_id
 	}
 	return 0
-}
-;23
+} ;</06.04.000022>
+;<06.04.000023>
 ShowWindow(hWnd, nCmdShow := 1) {	                                                                	;-- uses a DllCall to show a window
     DllCall("ShowWindow", "Ptr", hWnd, "Int", nCmdShow)
-}
-;24
+} ;</06.04.000023>
+;<06.04.000024>
 IsWindow(hWnd) {																										;-- wrapper for IsWindow DllCall
     Return DllCall("IsWindow", "Ptr", hWnd)
-}
-;25
+} ;</06.04.000024>
+;<06.04.000025>
 GetClassName(hWnd) {																								;-- wrapper for AHK WinGetClass function
 	WinGetClass Class, ahk_id %hWnd%
     Return Class
-}
-;26
+} ;</06.04.000025>
+;<06.04.000026>
 FindChildWindow(Parent, Child, DetectHiddenWindow="On") {								;--finds childWindow Hwnds of the parent window
 
 /*       	DESCRIPTION of function FindChildWindow		
@@ -9653,7 +9651,7 @@ FindChildWindow(Parent, Child, DetectHiddenWindow="On") {								;--finds childW
 										for child : title, class - is available
 										for further informations look at example(s)
 			return value:		a comma separated list of hwnds or nothing if there's no match
-			Dependencies:		EnumChildWindow(), GetClassNN(), GetClassNN_EnumChildProc() 
+			Dependencies:		EnumChildWindow(06.04.000027), GetClassNN(06.04.000043), GetClassNN_EnumChildProc(06.04.000044) 
 			------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------		
 	
 */
@@ -9698,9 +9696,9 @@ FindChildWindow(Parent, Child, DetectHiddenWindow="On") {								;--finds childW
 		ChildHwnds:= SubStr(ChildHwnds, 1, StrLen(ChildHwnds)-1)
 
 		return ChildHwnds
-}
-;{ sub of FindChildWindow
-EnumChildWindow(hwnd, lParam) { 																												;--sub function of FindChildWindow
+} ;</06.04.000026>
+;<06.04.000027>
+EnumChildWindow(hwnd, lParam) { 																			;-- sub function of FindChildWindow
 
 	global ChildHwnds
 	global SearchChildTitle, SearchChildClass, active_id
@@ -9714,35 +9712,30 @@ EnumChildWindow(hwnd, lParam) { 																												;--sub function of F
 	}
 
     return true  ; Tell EnumWindows() to continue until all windows have been enumerated.
-}
-;}
-;28
+} ;</06.04.000027>
+;<06.04.000028>
 WinGetMinMaxState(hwnd) {																						;-- get state if window ist maximized or minimized
-
 	;; this function is from AHK-Forum: https://autohotkey.com/board/topic/13020-how-to-maximize-a-childdocument-window/
 	;; it returns z for maximized("zoomed") or i for minimized("iconic")
 	;; it's also work on MDI Windows - use hwnd you can get from FindChildWindow()
-
 	; Check if maximized
 	zoomed := DllCall("IsZoomed", "UInt", hwnd)
 	; Check if minimized
 	iconic := DllCall("IsIconic", "UInt", hwnd)
 
 	return (zoomed>iconic) ? "z":"i"
-}
-;29
+} ;</06.04.000028>
+;<06.04.000029>
 GetBgBitMapHandle(hPic)	{																						;-- returns the handle of a background bitmap in a gui
-
 	;found at: https://autohotkey.com/boards/viewtopic.php?t=27128
 	SendMessage, 0x173, 0, 0,, ahk_id %hPic%
 	return ErrorLevel
-
-}
-;30
+} ;</06.04.000029>
+;<06.04.000030>
 GetLastActivePopup(hwnd) {																						;-- passes the handle of the last active pop-up window of a parent window
 	return DLLCall("GetLastActivePopup", "uint", hwnd)
-}
-;31
+} ;</06.04.000030>
+;<06.04.000031>
 GetFreeGuiNum(start, prefix = "") {																				;-- gets a free gui number.
 	/* Group: About
 	o v0.81 by majkinetor.
@@ -9757,16 +9750,16 @@ GetFreeGuiNum(start, prefix = "") {																				;-- gets a free gui numbe
 			return 0
 	}
 	return 0
-}
-;32
+} ;</06.04.000031>
+;<06.04.000032>
 IsWindowUnderCursor(hwnd) {                                                                               	;-- Checks if a specific window is under the cursor.
 	MouseGetPos, , , win
 	if hwnd is number
 		return win = hwnd
 	else
 		return InStr(WinGetClass("ahk_class " win), hwnd)
-}
-;33
+} ;</06.04.000032>
+;<06.04.000033>
 GetCenterCoords(guiW) {                                                                                        	;-- ?center a gui between 2 monitors?
 
 	;https://github.com/number1nub/CreoWindows
@@ -9786,8 +9779,8 @@ GetCenterCoords(guiW) {                                                         
 		}
 	}
 	return { limit: leftMon, left: round((leftMon/2)-(guiW/2)), right: round((leftMon + (rightMon/2))-(guiW/2)) }
-}
-;34
+} ;</06.04.000033>
+;<06.04.000034>
 RMApp_NCHITTEST() {                                                                                            	;-- Determines what part of a window the mouse is currently over
 	
 	/*                         	DESCRIPTON
@@ -9800,8 +9793,8 @@ RMApp_NCHITTEST() {                                                             
 	SendMessage, 0x84, 0, (x&0xFFFF)|(y&0xFFFF)<<16,, ahk_id %z%
 	RegExMatch("ERROR TRANSPARENT NOWHERE CLIENT CAPTION SYSMENU SIZE MENU HSCROLL VSCROLL MINBUTTON MAXBUTTON LEFT RIGHT TOP TOPLEFT TOPRIGHT BOTTOM BOTTOMLEFT BOTTOMRIGHT BORDER OBJECT CLOSE HELP", "(?:\w+\s+){" ErrorLevel+2&0xFFFFFFFF "}(?<AREA>\w+\b)", HT)
 	Return HTAREA
-}
-;35
+} ;</06.04.000034>
+;<06.04.000035>
 GetCPA_file_name( p_hw_target ) {                                                                         	;-- retrieves Control Panel applet icon
 	
    WinGet, pid_target, PID, ahk_id %p_hw_target%
@@ -9832,8 +9825,8 @@ GetCPA_file_name( p_hw_target ) {                                               
       return, CPA_file_name
    else
       return, false
-}
-;36
+} ;</06.04.000035>
+;<06.04.000036>
 WinGetClientPos( Hwnd ) {												        									;-- gives back the coordinates of client area inside a gui/window - with DpiFactor correction
 	
 	/*                         EXAMPLE
@@ -9870,8 +9863,8 @@ WinGetClientPos( Hwnd ) {												        									;-- gives back the coordin
 	w := NumGet( size, 8, "Int" ) // dpifactor
 	h := NumGet( size, 12, "Int" ) // dpifactor
 	return { X: x, Y: y, W: w, H: h }
-}
-;37
+} ;</06.04.000036>
+;<06.04.000037>
 CheckWindowStatus(hwnd, timeout=100) {																;-- check's if a window is responding or not responding (hung or crashed) - 
 
  /* 									Description
@@ -9905,8 +9898,8 @@ CheckWindowStatus(hwnd, timeout=100) {																;-- check's if a window is
 
 	NR_temp =0 ; init
 	return DllCall("SendMessageTimeout", "UInt", hwnd, "UInt", 0x0000, "Int", 0, "Int", 0, "UInt", 0x0002, "UInt", TimeOut, "UInt *", NR_temp)
-}
-;38
+} ;</06.04.000037>
+;<06.04.000038>
 GetWindowOrder(hwnd="",visibleWin=1) {                                                            	;-- determines the window order for a given (parent-)hwnd 
 	if !hwnd
 		hwnd:=winexist("ahk_pid " DllCall("GetCurrentProcessId"))
@@ -9940,8 +9933,8 @@ GetWindowOrder(hwnd="",visibleWin=1) {                                          
 	
 	return {array: arr, index: max+1}
 	
-}
-;39
+} ;</06.04.000038>
+;<06.04.000039>
 EnumWindows(hWnd := 0, HiddenWindows := true, Flags := "") {								;-- Get a list with all the top-level windows on the screen or controls in the window
 	
 	/*                              	DESCRIPTION
@@ -9994,9 +9987,9 @@ EnumWindows(hWnd := 0, HiddenWindows := true, Flags := "") {								;-- Get a li
 			}	} if Data.Flags.HasKey("ProcessId") && (ProcessId != Data.Flags.ProcessId)
 				return true
 	}	} return true, Data.List.Push(hWnd)
-} ;https://msdn.microsoft.com/en-us/library/windows/desktop/ms633493(v=vs.85).aspx
-;<06.04.02.000040>
-WinEnum(hwnd:=0, lParam:=0) {                                                                            	;--  wrapper for Enum(Child)Windows from cocobelgica. a different solution to that one I collected before
+}  ;</06.04.000039> ;https://msdn.microsoft.com/en-us/library/windows/desktop/ms633493(v=vs.85).aspx
+;<06.04.000040>
+WinEnum(hwnd:=0, lParam:=0) {                                                                            	;-- wrapper for Enum(Child)Windows from cocobelgica. a different solution to that one I collected before
 		
 	/* DESCRIPTION of function: WinEnum
 		
@@ -10056,8 +10049,8 @@ WinEnum(hwnd:=0, lParam:=0) {                                                   
 	static ObjPush := Func(A_AhkVersion < "2" ? "ObjInsert" : "ObjPush")
 	%ObjPush%(Object(lParam + 0), hwnd)
 	return true
-}
-;<06.04.02.000041>
+} ;</06.04.000040>
+;<06.04.000041>
 WinWaitProgress(Progress = 100, WinTitle = "", WinText = "", Timeout = "") {     	;-- Waits for the progress bar on a window to reach (>=) a given value (a Lexikos function)
 	
 	/*    	DESCRIPTION of function WinWaitProgress()
@@ -10078,7 +10071,6 @@ WinWaitProgress(Progress = 100, WinTitle = "", WinText = "", Timeout = "") {    
         	-------------------------------------------------------------------------------------------------------------------
 	*/
 
-
 	/*    	EXAMPLE(s)
 	
 			if WinWaitProgress(100, "Piriform CCleaner")
@@ -10090,20 +10082,39 @@ WinWaitProgress(Progress = 100, WinTitle = "", WinText = "", Timeout = "") {    
 	
 	*/
 
-	
 	began_at := A_TickCount
 	While (n := ControlGetProgress("msctls_progress321", WinTitle, WinText)) != "FAIL"
 		&& n < Progress && (Timeout = "" || (A_TickCount-began_at)/1000 < Timeout)
 		Sleep 100
 	return (ErrorLevel + 0) >= Progress
-}
-;{ sub of WinWaitProgress
-ControlGetProgress(Control, WinTitle = "", WinText = "") {
+} ;</06.04.000041>
+;<06.04.000042>
+ControlGetProgress(Control, WinTitle = "", WinText = "") {                                     	;-- sub function of WinWaitProgress
 	SendMessage 0x408,,, %Control%, %WinTitle%, %WinText%
 	return ErrorLevel
-} 
-;}
-
+}  ;</06.04.000042>
+;<06.04.000043>
+GetClassNN(Chwnd, Whwnd) {                                                                               	;-- sub function of FindChildWindow
+	global _GetClassNN := {}
+	_GetClassNN.Hwnd := Chwnd
+	Detect := A_DetectHiddenWindows
+	WinGetClass, Class, ahk_id %Chwnd%
+	_GetClassNN.Class := Class
+	DetectHiddenWindows, On
+	EnumAddress := RegisterCallback("GetClassNN_EnumChildProc")
+	DllCall("EnumChildWindows", "uint",Whwnd, "uint",EnumAddress)
+	DetectHiddenWindows, %Detect%
+	return, _GetClassNN.ClassNN, _GetClassNN:=""
+} ;</06.04.000043>
+;<06.04.000044>
+GetClassNN_EnumChildProc(hwnd, lparam) {                                                         	;-- sub function of FindChildWindow
+	static N
+	global _GetClassNN
+	WinGetClass, Class, ahk_id %hwnd%
+	if _GetClassNN.Class == Class
+		N++
+	return _GetClassNN.Hwnd==hwnd? (0, _GetClassNN.ClassNN:=_GetClassNN.Class N, N:=0):1
+} ;</06.04.000044>
 } 
 
 { ;<06.04.04> gui + miscallaneous 		(06)
@@ -10320,7 +10331,7 @@ GetMouseTaskButton(ByRef hwnd) {                                                
 } 
 
 } 
-;|   screenDims()                           	|   DPIFactor()                               	|
+;|   screenDims(1)                           	|   DPIFactor(2)                               	|
 
 ;|   ControlExists(1)                       	|   GetFocusedControl(2)               	|   GetControls(3)                          	|   GetOtherControl(4)                  	|
 ;|   ListControls(5)                         	|   Control_GetClassNN(6)            	|   ControlGetClassNN(7,8)           	|   GetClassName(9)                     	|
@@ -10339,7 +10350,8 @@ GetMouseTaskButton(ByRef hwnd) {                                                
 ;|   FindChildWindow(26)               	|   WinGetMinMaxState(28)           	|   GetBgBitMapHandle(29)          	|   GetLastActivePopup(30)           	|
 ;|   GetFreeGuiNum(31)                 	|   IsWindowUnderCursor(32)        	|   GetCenterCoords(33)               	|   RMApp_NCHITTEST(34)           	|
 ;|   GetCPA_file_name(35)             	|   WinGetClientPos(36)                	|   CheckWindowStatus(37)          	|   GetWindowOrder(38)               	|
-;|   EnumWindows(39)                  	|   WinEnum(40)                             	|   WinWaitProgress(41)               	|
+;|   EnumWindows(39)                  	|   WinEnum(40)                             	|   WinWaitProgress(41)               	|	ControlGetProgress(42)             	|
+;|	GetClassNN(43)                        	|	GetClassNN_EnumChildProc(44)	|
 
 ;|   ChooseColor(1)                         	|   GetWindowIcon(2)                     	|   GetStatusBarText(3)                   	|   GetAncestor(4)                        		|
 ;|   MinMaxInfo(5)                           	|	GetMouseTaskButton(6)				|

@@ -10,7 +10,7 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-*Last modification date*: ***07/01/2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
+*Last modification date*: ***07/23/2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
 
 In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does not work". After trying it with [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey). 
 
@@ -20,7 +20,16 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-## ![Gem](../../../../../Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/assets/GemSmall.png) [July 01, 2019]: +19 =  633
+## ![Gem](assets/GemSmall.png)[July 23, 2019]: +2 =  635
+
+| **Nr** | FUNCTION                       | DESCRIPTION                            |
+| :----: | ------------------------------ | -------------------------------------- |
+|   01   | **GetClassNN()**               | missing subfunction of FindChildWindow |
+|   02   | **GetClassNN_EnumChildProc()** | missing subfunction of FindChildWindow |
+
+
+
+## ![Gem](assets/GemSmall.png) [July 01, 2019]: +19 =  633
 
 | Nr                | **FUNCTION**                  | **DESCRIPTION**                                              |
 | :---------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -1060,407 +1069,409 @@ IsWindow(hWnd*) {
 | 249 | 09354 | **GetParent()** - *get parent win handle of a window* |
 | 250 | 09360 | **GetWindow()** - *DllCall wrapper for GetWindow function* |
 | 251 | 09366 | **GetForegroundWindow()** - *returns handle of the foreground window* |
-| 252 | 09372 | **IsWindowVisible()** - *self explaining* |
-| 253 | 09376 | **IsFullScreen()** - *specific window is a fullscreen window?* |
-| 254 | 09383 | **IsClosed()** - *AHK function (WinWaitClose) wrapper* |
-| 255 | 09390 | **GetClassLong()** |
-| 256 | 09397 | **GetWindowLong()** |
-| 257 | 09404 | **GetClassStyles()** |
-| 258 | 09431 | **GetTabOrderIndex()** |
-| 259 | 09458 | **GetCursor()** |
-| 260 | 09465 | **GetClientCoords()** |
-| 261 | 09475 | **GetClientSize()** - *get size of window without border* |
-| 262 | 09483 | **GetWindowCoords()** |
-| 263 | 09490 | **GetWindowPos()** |
-| 264 | 09500 | **GetWindowPlacement()** - *Gets window position using workspace coordinates (-> no taskbar), returns an object* |
-| 265 | 09514 | **GetWindowInfo()** - *returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)* |
-| 266 | 09536 | **GetOwner()** |
-| 267 | 09540 | **FindWindow()** - *Finds the requested window,and return it's ID* |
-| 268 | 09596 | **FindWindow()** - *Finds the first window matching specific criterias.* |
-| 269 | 09626 | **ShowWindow()** - *uses a DllCall to show a window* |
-| 270 | 09630 | **IsWindow()** - *wrapper for IsWindow DllCall* |
-| 271 | 09634 | **GetClassName()** - *wrapper for AHK WinGetClass function* |
-| 272 | 09639 | **FindChildWindow()** - *finds childWindow Hwnds of the parent window* |
-| 273 | 09703 | **EnumChildWindow()** - *sub function of FindChildWindow* |
-| 274 | 09720 | **WinGetMinMaxState()** - *get state if window ist maximized or minimized* |
-| 275 | 09734 | **GetBgBitMapHandle()** - *returns the handle of a background bitmap in a gui* |
-| 276 | 09742 | **GetLastActivePopup()** - *passes the handle of the last active pop-up window of a parent window* |
-| 277 | 09746 | **GetFreeGuiNum()** - *gets a free gui number.* |
-| 278 | 09762 | **IsWindowUnderCursor()** - *Checks if a specific window is under the cursor.* |
-| 279 | 09770 | **GetCenterCoords()** - *?center a gui between 2 monitors?* |
-| 280 | 09791 | **RMApp_NCHITTEST()** - *Determines what part of a window the mouse is currently over* |
-| 281 | 09805 | **GetCPA_file_name()** - *retrieves Control Panel applet icon* |
-| 282 | 09837 | **WinGetClientPos()** - *gives back the coordinates of client area inside a gui/window - with DpiFactor correction* |
-| 283 | 09875 | **CheckWindowStatus()** - *check's if a window is responding or not responding (hung or crashed) -* |
-| 284 | 09910 | **GetWindowOrder()** - *determines the window order for a given (parent-)hwnd* |
-| 285 | 09945 | **EnumWindows()** - *Get a list with all the top-level windows on the screen or controls in the window* |
-| 286 | 09999 | **WinEnum()** - *wrapper for Enum(Child)Windows from cocobelgica. a different solution to that one I collected before* |
-| 287 | 10061 | **WinWaitProgress()** - *Waits for the progress bar on a window to reach (>=) a given value (a Lexikos function)* |
-| 288 | 10111 | **ChooseColor()** - *what is this for?* |
-| 289 | 10132 | **GetWindowIcon()** |
-| 290 | 10212 | **GetStatusBarText()** |
-| 291 | 10228 | **GetAncestor()** |
-| 292 | 10233 | **MinMaxInfo()** |
-| 293 | 10246 | **GetMouseTaskButton()** - *Gets the index+1 of the taskbar button which the mouse is hovering over* |
-| 294 | 10351 | **SureControlClick()** - *Window Activation + ControlDelay to -1 + checked if control received the click* |
-| 295 | 10368 | **SureControlCheck()** - *Window Activation + ControlDelay to -1 + Check if the control is really checked now* |
-| 296 | 10389 | **ControlClick2()** - *ControlClick Double Click* |
-| 297 | 10399 | **ControlFromPoint()** - *returns the hwnd of a control at a specific point on the screen* |
-| 298 | 10439 | **EnumChildFindPoint()** - *this function is required by ControlFromPoint* |
-| 299 | 10478 | **ControlDoubleClick()** - *simulates a double click on a control with left/middle or right mousebutton* |
-| 300 | 10498 | **WinWaitForMinimized()** - *waits until the window is minimized* |
-| 301 | 10516 | **CenterWindow()** - *Given a the window's width and height, calculates where to position its upper-left corner so that it is centered EVEN IF the task bar is on the left side or top side of the window* |
-| 302 | 10535 | **GuiCenterButtons()** - *Center and resize a row of buttons automatically* |
-| 303 | 10587 | **CenterControl()** - *Centers one control* |
-| 304 | 10638 | **SetWindowIcon()** |
-| 305 | 10644 | **SetWindowPos()** |
-| 306 | 10648 | **TryKillWin()** |
-| 307 | 10666 | **Win32_SendMessage()** - *Closing a window through sendmessage command* |
-| 308 | 10678 | **Win32_TaskKill()** |
-| 309 | 10687 | **Win32_Terminate()** |
-| 310 | 10698 | **TabActivate()** |
-| 311 | 10706 | **FocuslessScroll()** |
-| 312 | 10807 | **FocuslessScrollHorizontal()** |
-| 313 | 10841 | **Menu_Show()** - *alternate to Menu, Show , which can display menu without blocking monitored messages...* |
-| 314 | 10863 | **CatMull_ControlMove()** - *Moves the mouse through 4 points (without control point "gaps")* |
-| 315 | 10883 | **GUI_AutoHide()** - *Autohide the GUI function* |
-| 316 | 11150 | **SetButtonF()** - *Set a button control to call a function instead of a label subroutine* |
-| 317 | 11244 | **AddToolTip()** - *Add/Update tooltips to GUI controls.* |
-| 318 | 11377 | **NumPut()** - *cbSize* |
-| 319 | 11378 | **NumPut()** - *uFlags* |
-| 320 | 11379 | **NumPut()** - *hwnd* |
-| 321 | 11380 | **NumPut()** - *uId* |
-| 322 | 11430 | **HelpToolTips()** - *To show defined GUI control help tooltips on hover.* |
-| 323 | 11461 | **DisableFadeEffect()** - *disabling fade effect on gui animations* |
-| 324 | 11485 | **SetWindowTransistionDisable()** - *disabling fade effect only the window of choice* |
-| 325 | 11519 | **DisableMinimizeAnim()** - *disables or restores original minimize anim setting* |
-| 326 | 11539 | **DisableCloseButton()** - *to disable/grey out the close button* |
-| 327 | 11548 | **AutoCloseBlockingWindows()** - *close all open popup (childwindows), without knowing their names, of a parent window* |
-| 328 | 11637 | **WinActivateEx()** - *Activate a Window, with extra Error Checking and More Features* |
-| 329 | 11674 | **ClickOK()** - *function that search for any button in a window that might be an 'Ok' button to close a window dialog* |
-| 330 | 11740 | **ControlSelectTab()** - *SendMessage wrapper to select the current tab on a MS Tab Control.* |
-| 331 | 11759 | **SetParentByClass()** - *set parent window by using its window class* |
-| 332 | 11767 | **MoveTogether()** - *move 2 windows together - using DllCall to DeferWindowPos* |
-| 333 | 11853 | **WinWaitCreated()** - *Wait for a window to be created, returns 0 on timeout and ahk_id otherwise* |
-| 334 | 11887 | **closeContextMenu()** - *a smart way to close a context menu* |
-| 335 | 11904 | **SetWindowTheme()** - *set Windows UI Theme by window handle* |
-| 336 | 11920 | **HideFocusBorder()** - *hides the focus border for the given GUI control or GUI and all of its children* |
-| 337 | 11964 | **unmovable()** - *makes Gui unmovable* |
-| 338 | 11975 | **movable()** - *makes Gui movable* |
-| 339 | 11982 | **GuiDisableMove()** - *to fix a gui/window to its coordinates* |
-| 340 | 11988 | **WinInsertAfter()** - *insert a window after a specific window handle* |
-| 341 | 12005 | **CenterWindow()** - *center a window or set position optional by using Top, Left, Right, Bottom or a combination of it* |
-| 342 | 12048 | **SetHoverText()** - *change control's text on mouseover* |
-| 343 | 12129 | **SetTextAndResize()** - *resizes a control to adapt to updated values* |
-| 344 | 12195 | **GetMenu()** - *returns hMenu handle* |
-| 345 | 12200 | **GetSubMenu()** |
-| 346 | 12204 | **GetMenuItemCount()** |
-| 347 | 12208 | **GetMenuItemID()** |
-| 348 | 12212 | **GetMenuString()** |
-| 349 | 12227 | **MenuGetAll()** - *this function and MenuGetAll_sub return all Menu commands from the choosed menu* |
-| 350 | 12236 | **MenuGetAll_sub()** - *described above* |
-| 351 | 12259 | **GetContextMenuState()** - *returns the state of a menu entry* |
-| 352 | 12297 | **GetContextMenuID()** - *returns the ID of a menu entry* |
-| 353 | 12320 | **GetContextMenuText()** - *returns the text of a menu entry (standard windows context menus only!!!)* |
-| 354 | 12379 | **Menu_AssignBitmap()** - *assign bitmap to any item in any AHk menu* |
-| 355 | 12539 | **InvokeVerb()** - *executes the context menu item of the given path* |
-| 356 | 12617 | **Menu_Show()** - *its an alternative to Menu, Show, which can display menu without blocking monitored messages* |
-| 357 | 12647 | **CreateMenu()** - *creates menu from a string in which each item is placed in new line and hierarchy is defined by Tab character on the left (indentation)* |
-| 358 | 12778 | **CreateDDMenu()** - *Creates menu from a string in which each item is placed in new line and hierarchy is defined by Tab character on the left (indentation)* |
-| 359 | 12933 | **ExtractIcon()** - *extract icon from a resource file* |
-| 360 | 13013 | **GetIconSize()** - *determines the size of the icon (Lexikos function)* |
-| 361 | 13049 | **Gdip_GetHICONDimensions()** - *get icon dimensions* |
-| 362 | 13088 | **SetTrayIcon()** - *sets a hex coded icon to as try icon* |
-| 363 | 13130 | **InvokeVerb()** - *Executes the context menu item of the given path* |
-| 364 | 13207 | **Function_Eject()** - *ejects a drive medium* |
-| 365 | 13239 | **FileGetDetail()** - *Get specific file property by index* |
-| 366 | 13250 | **FileGetDetails()** - *Create an array of concrete file properties* |
-| 367 | 13266 | **DirExist()** - *Checks if a directory exists* |
-| 368 | 13270 | **GetDetails()** - *Create an array of possible file properties* |
-| 369 | 13284 | **Start()** - *Start programs or scripts easier* |
-| 370 | 13303 | **IsFileEqual()** - *Returns whether or not two files are equal* |
-| 371 | 13311 | **WatchDirectory()** - *Watches a directory/file for file changes* |
-| 372 | 13460 | **WatchDirectory()** - *it's different from above not tested* |
-| 373 | 13657 | **GetFileIcon()** |
-| 374 | 13670 | **ExtractAssociatedIcon()** - *Extracts the associated icon's index for the file specified in path* |
-| 375 | 13684 | **ExtractAssociatedIconEx()** - *Extracts the associated icon's index and ID for the file specified in path* |
-| 376 | 13697 | **DestroyIcon()** |
-| 377 | 13701 | **listfunc()** - *list all functions inside ahk scripts* |
-| 378 | 13717 | **CreateOpenWithMenu()** - *creates an 'open with' menu for the passed file.* |
-| 379 | 13869 | **FileCount()** - *count matching files in the working directory* |
-| 380 | 13877 | **GetImageTypeW()** - *Identify the image type (UniCode)* |
-| 381 | 13921 | **FileWriteLine()** - *to write data at specified line in a file.* |
-| 382 | 13931 | **FileMD5()** - *file MD5 hashing* |
-| 383 | 13947 | **FileCRC32()** - *computes and returns CRC32 hash for a File passed as parameter* |
-| 384 | 13965 | **FindFreeFileName()** - *Finds a non-existing filename for Filepath by appending a number in brackets to the name* |
-| 385 | 13978 | **CountFilesR()** - *count files recursive in specific folder (uses COM method)* |
-| 386 | 13987 | **CountFiles()** - *count files in specific folder (uses COM method)* |
-| 387 | 13993 | **PathInfo()** - *splits a given path to return as object* |
-| 388 | 13998 | **DriveSpace()** - *retrieves the DriveSpace* |
-| 389 | 14006 | **GetBinaryType()** - *determines the bit architecture of an executable program* |
-| 390 | 14016 | **GetFileAttributes()** - *get attributes of a file or folder* |
-| 391 | 14055 | **SetFileTime()** - *to set the time* |
-| 392 | 14064 | **SetFileAttributes()** - *set attributes of a file or folder* |
-| 393 | 14102 | **FileSetSecurity()** - *set security for the file / folder* |
-| 394 | 14156 | **FileSetOwner()** - *set the owner to file / directory* |
-| 395 | 14176 | **FileGetOwner()** - *get the owner to file / directory* |
-| 396 | 14193 | **GetFileFormat()** - *retreaves the codepage format of a file* |
-| 397 | 14213 | **HashFile()** - *calculate hashes (MD2,MD5,SH1,SHA256, SHA384, SHA512) from file* |
-| 398 | 14324 | **PathCombine()** - *combine the 2 routes provided in a single absolute path* |
-| 399 | 14348 | **GetParentDir()** - *small RegEx function to get parent dir from a given string* |
-| 400 | 14352 | **DirGetParent()** - *returns a string containing parent dir, it's possible to set the level of parent dir* |
-| 401 | 14362 | **SelectFolder()** - *the Common File Dialog lets you add controls to it* |
-| 402 | 14461 | **CreateFont()** - *creates font in memory which can be used with any API function accepting font handles* |
-| 403 | 14514 | **GetHFONT()** - *gets a handle to a font used in a AHK gui for example* |
-| 404 | 14527 | **MsgBoxFont()** - *style your MsgBox with with your prefered font* |
-| 405 | 14541 | **GetFontProperties()** - *to get the current font's width and height* |
-| 406 | 14587 | **FontEnum()** - *enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure* |
-| 407 | 14627 | **GetFontTextDimension()** - *calculate the height and width of the text in the specified font* |
-| 408 | 14682 | **FontClone()** - *backup hFont in memory for further processing* |
-| 409 | 14724 | **GuiDefaultFont()** - *returns the default Fontname & Fontsize* |
-| 410 | 14760 | **StrGetDimAvgCharWidth()** - *average width of a character in pixels* |
-| 411 | 14803 | **CreateFont()** - *creates HFont for use with GDI* |
-| 412 | 14834 | **MeasureText()** - *Measures the single-line width and height of the passed text* |
-| 413 | 14890 | **OnMessageEx()** - *Allows multiple functions to be called automatically when the script receives the specified message* |
-| 414 | 15124 | **ReceiveData()** - *By means of OnMessage(), this function has been set up to be called automatically whenever new data arrives on the connection.* |
-| 415 | 15164 | **HDrop()** - *Drop files to another app* |
-| 416 | 15197 | **WM_MOVE()** - *UpdateLayeredWindow* |
-| 417 | 15210 | **WM_WINDOWPOSCHANGING()** - *two different examples of handling a WM_WINDOWPOSCHANGING* |
-| 418 | 15220 | **WM_WINDOWPOSCHANGING()** - *second examples of handling a WM_WINDOWPOSCHANGING* |
-| 419 | 15238 | **CallNextHookEx()** - *Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this function either before or after processing the hook information* |
-| 420 | 15242 | **WM_DEVICECHANGE()** - *Detects whether a CD has been inserted instead and also outputs the drive - global drv* |
-| 421 | 15281 | **ObjectNameChange()** - *titlebar hook to detect when title changes, (Lexikos' code)* |
-| 422 | 15330 | **DownloadFile()** |
-| 423 | 15353 | **NewLinkMsg()** |
-| 424 | 15369 | **TimeGap()** - *Determine by what amount the local system time differs to that of an ntp server* |
-| 425 | 15379 | **GetSourceURL()** |
-| 426 | 15391 | **DNS_QueryName()** |
-| 427 | 15416 | **GetHTMLFragment()** |
-| 428 | 15436 | **ScrubFragmentIdents()** |
-| 429 | 15447 | **EnumClipFormats()** |
-| 430 | 15456 | **GetClipFormatNames()** |
-| 431 | 15475 | **GoogleTranslate()** |
-| 432 | 15494 | **getText()** - *get text from html* |
-| 433 | 15509 | **getHtmlById()** |
-| 434 | 15514 | **getTextById()** |
-| 435 | 15518 | **getHtmlByTagName()** |
-| 436 | 15526 | **getTextByTagName()** |
-| 437 | 15534 | **CreateGist()** |
-| 438 | 15556 | **GetAllResponseHeaders()** - *gets the values of all HTTP headers* |
-| 439 | 15625 | **NetStat()** - *passes information over network connections similar to the netstat -an CMD command.* |
-| 440 | 15723 | **ExtractTableData()** - *extracts tables from HTML files* |
-| 441 | 15846 | **IsConnected()** - *Returns true if there is an available internet connection* |
-| 442 | 15850 | **HostToIp()** - *gets the IP address for the given host directly using the WinSock 2.0 dll, without using temp files or third party utilities* |
-| 443 | 15953 | **LocalIps()** - *with small changes to HostToIP() this can be used to retrieve all LocalIP's* |
-| 444 | 16022 | **GetAdaptersInfo()** - *GetAdaptersAddresses function & IP_ADAPTER_ADDRESSES structure* |
-| 445 | 16077 | **DNSQuery()** - *retrieve IP adresses or host/domain names from DNS* |
-| 446 | 16195 | **Min()** - *returns the smaller of 2 numbers* |
-| 447 | 16199 | **Max()** - *determines the larger number* |
-| 448 | 16203 | **Mean()** - *returns Average values in comma delimited list* |
-| 449 | 16217 | **Median()** - *returns Median in a set of numbers from a list* |
-| 450 | 16244 | **Mode()** - *returns the mode from a list of numbers* |
-| 451 | 16273 | **Dec2Base()** - *Base to Decimal and* |
-| 452 | 16279 | **Base2Dec()** - *Decimal to Base conversion* |
-| 453 | 16285 | **HexToFloat()** - *Hexadecimal to Float conversion* |
-| 454 | 16289 | **FloatToHex()** - *Float to Hexadecimal conversion* |
-| 455 | 16299 | **CalculateDistance()** - *calculates the distance between two points in a 2D-Space* |
-| 456 | 16303 | **IsInRange()** - *shows if a second variable is in range* |
-| 457 | 16314 | **FormatFileSize()** - *Formats a file size in bytes to a human-readable size string* |
-| 458 | 16322 | **Color_RGBtoHSV()** - *converts beetween color two color spaces: RGB -> HSV* |
-| 459 | 16352 | **Color_HSVtoRGB()** - *converts beetween color two color spaces: HSV -> RGB* |
-| 460 | 16423 | **JEE_HexToBinData()** - *hexadecimal to binary* |
-| 461 | 16433 | **JEE_BinDataToHex()** - *binary to hexadecimal* |
-| 462 | 16444 | **JEE_BinDataToHex2()** - *binary to hexadecimal2* |
-| 463 | 16452 | **RadianToDegree()** - *convert radian (rad) to degree* |
-| 464 | 16465 | **DegreeToRadian()** - *convert degree to radian (rad)* |
-| 465 | 16479 | **RGBToARGB()** - *convert RGB to ARGB* |
-| 466 | 16506 | **ARGBToRGB()** - *convert ARGB to RGB.* |
-| 467 | 16525 | **FormatByteSize()** - *give's back the given bytes in KB, MB, GB .... (for AHK_V1)* |
-| 468 | 16555 | **FormatByteSize()** - *give's back the given bytes in KB, MB, GB ....(for AHK_V2)* |
-| 469 | 16596 | **ObjMerge()** - *merge two objects* |
-| 470 | 16611 | **evalRPN()** - *Parsing/RPN calculator algorithm* |
-| 471 | 16649 | **StackShow()** |
-| 472 | 16656 | **ExploreObj()** - *print object function* |
-| 473 | 16712 | **KeyValueObjectFromLists()** - *merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet* |
-| 474 | 16779 | **GetCallStack()** - *retrieves the current callstack* |
-| 475 | 16853 | **Traceback()** - *get stack trace* |
-| 476 | 16943 | **Sort2DArray()** - *a two dimensional TDArray* |
-| 477 | 16964 | **SortArray()** - *ordered sort: Ascending, Descending, Reverse* |
-| 478 | 16997 | **QuickSort()** - *Sort array using QuickSort algorithm* |
-| 479 | 17263 | **sortArray()** - *sorts an array (another way)* |
-| 480 | 17344 | **StringMD5()** - *String MD5 Hashing* |
-| 481 | 17354 | **uriEncode()** - *a function to escape characters like & for use in URLs.* |
-| 482 | 17369 | **Ansi2Unicode()** - *easy convertion from Ansi to Unicode, you can set prefered codepage* |
-| 483 | 17389 | **Unicode2Ansi()** - *easy convertion from Unicode to Ansi, you can set prefered codepage* |
-| 484 | 17413 | **Ansi2Oem()** - *using Ansi2Unicode and Unicode2Ansi functions* |
-| 485 | 17419 | **Oem2Ansi()** - *using Ansi2Unicode and Unicode2Ansi functions* |
-| 486 | 17425 | **Ansi2UTF8()** - *using Ansi2Unicode and Unicode2Ansi functions* |
-| 487 | 17431 | **UTF82Ansi()** - *using Ansi2Unicode and Unicode2Ansi functions* |
-| 488 | 17437 | **CRC32()** - *CRC32 function, uses MCode* |
-| 489 | 17452 | **ParseJsonStrToArr()** - *Parse Json string to an array* |
-| 490 | 17478 | **parseJSON()** - *Parse Json string to an object* |
-| 491 | 17499 | **GetNestedTag()** |
-| 492 | 17529 | **GetHTMLbyID()** - *uses COM* |
-| 493 | 17544 | **GetHTMLbyTag()** - *uses COM* |
-| 494 | 17559 | **GetXmlElement()** - *RegEx function* |
-| 495 | 17577 | **sXMLget()** - *simple solution to get information out of xml and html* |
-| 496 | 17595 | **cleanlines()** - *removes all empty lines* |
-| 497 | 17608 | **cleancolon()** - *what for? removes on ':' at beginning of a string* |
-| 498 | 17618 | **cleanspace()** - *removes all Space chars* |
-| 499 | 17631 | **SplitLine()** - *split string to key and value* |
-| 500 | 17641 | **EnsureEndsWith()** - *Ensure that the string given ends with a given char* |
-| 501 | 17649 | **EnsureStartsWith()** - *Ensure that the string given starts with a given char* |
-| 502 | 17656 | **StrPutVar()** - *Convert the data to some Enc, like UTF-8, UTF-16, CP1200 and so on* |
-| 503 | 17681 | **RegExSplit()** - *split a String by a regular expressin pattern and you will receive an array as a result* |
-| 504 | 17716 | **StringM()** - *String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)* |
-| 505 | 17756 | **StrCount()** - *a very handy function to count a needle in a Haystack* |
-| 506 | 17763 | **SuperInstr()** - *Returns min/max position for a | separated values of Needle(s)* |
-| 507 | 17792 | **LineDelete()** - *deletes a specific line or a range of lines from a variable containing one or more lines of text. No use of any loop!* |
-| 508 | 17868 | **GetWordsNumbered()** - *gives back an array of words from a string, you can specify the position of the words you want to keep* |
-| 509 | 17900 | **AddTrailingBackslash()** - *adds a backslash to the beginning of a string if there is none* |
-| 510 | 17908 | **CheckQuotes()** |
-| 511 | 17917 | **ReplaceForbiddenChars()** - *hopefully working, not tested function, it uses RegExReplace* |
-| 512 | 17929 | **WrapText()** - *basic function to wrap a text-string to a given length* |
-| 513 | 17967 | **ExtractFuncTOuserAHK()** - *extract user function and helps to write it to userAhk.api* |
-| 514 | 18088 | **PdfToText()** - *copies a selected PDF file to memory - it needs xpdf - pdftotext.exe* |
-| 515 | 18115 | **PdfPageCounter()** - *counts pages of a pdffile (works with 95% of pdf files)* |
-| 516 | 18131 | **PasteWithIndent()** - *paste string to an editor with your prefered indent key* |
-| 517 | 18147 | **Ask_and_SetbackFocus()** - *by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret* |
-| 518 | 18195 | **CleanLine()** - *Return a line with leading and trailing spaces removed, and tabs converted to spaces* |
-| 519 | 18217 | **StrTrim()** - *Remove all leading and trailing whitespace including tabs, spaces, CR and LF* |
-| 520 | 18238 | **StrDiff()** - *SIFT3 : Super Fast and Accurate string distance algorithm* |
-| 521 | 18306 | **PrintArr()** - *show values of an array in a listview gui for debugging* |
-| 522 | 18348 | **List2Array()** - *function uses StrSplit () to return an array* |
-| 523 | 18352 | **Array_Gui()** - *shows your array as an interactive TreeView* |
-| 524 | 18414 | **RandomString()** - *builds a string with random char of specified length* |
-| 525 | 18452 | **DelaySend()** - *Send keystrokes delayed* |
-| 526 | 18498 | **SetLayout()** - *set a keyboard layout* |
-| 527 | 18503 | **GetAllInputChars()** - *Returns a string with input characters* |
-| 528 | 18513 | **ReleaseModifiers()** - *helps to solve the Hotkey stuck problem* |
-| 529 | 18560 | **isaKeyPhysicallyDown()** - *belongs to ReleaseModifiers() function* |
-| 530 | 18573 | **GetText()** - *copies the selected text to a variable while preserving the clipboard.(Ctrl+C method)* |
-| 531 | 18590 | **PutText()** - *Pastes text from a variable while preserving the clipboard. (Ctrl+v method)* |
-| 532 | 18602 | **Hotkeys()** - *a handy function to show all used hotkeys in script* |
-| 533 | 18653 | **BlockKeyboard()** - *block keyboard, and unblock it through usage of keyboard* |
-| 534 | 18705 | **RapidHotkey()** - *Using this function you can send keystrokes or launch a Label by pressing a key several times.* |
-| 535 | 18853 | **hk()** - *Disable all keyboard buttons* |
-| 536 | 18949 | **ShowTrayBalloon()** |
-| 537 | 18975 | **ColoredTooltip()** - *show a tooltip for a given time with a custom color in rgb format (fore and background is supported). This function shows how to obtain the hWnd of the tooltip.* |
-| 538 | 19022 | **AddToolTip()** - *very easy to use function to add a tooltip to a control* |
-| 539 | 19293 | **AddToolTip()** - *add ToolTips to controls - Advanced ToolTip features + Unicode* |
-| 540 | 19888 | **AddToolTip()** - *just a simple add on to allow tooltips to be added to controls without having to monitor the wm_mousemove messages* |
-| 541 | 19959 | **AddToolTip()** - *this is a function from jballi -* |
-| 542 | 20091 | **NumPut()** - *cbSize* |
-| 543 | 20092 | **NumPut()** - *uFlags* |
-| 544 | 20093 | **NumPut()** - *hwnd* |
-| 545 | 20094 | **NumPut()** - *uId* |
-| 546 | 20152 | **CreateNamedPipe()** - *creates an instance of a named pipe and returns a handle for subsequent pipe operations* |
-| 547 | 20157 | **RestoreCursors()** - *for normal cursor at GUI* |
-| 548 | 20162 | **SetSystemCursor()** - *enables an application to customize the system cursors by using a file or by using the system cursor* |
-| 549 | 20243 | **SystemCursor()** - *hiding mouse cursor* |
-| 550 | 20282 | **ToggleSystemCursor()** - *choose a cursor from system cursor list* |
-| 551 | 20361 | **SetTimerF()** - *Starts a timer that can call functions and object methods* |
-| 552 | 20398 | **GlobalVarsScript()** |
-| 553 | 20422 | **patternScan()** - *scan for a pattern in memory* |
-| 554 | 20521 | **scanInBuf()** - *scan for a pattern in memory buffer* |
-| 555 | 20559 | **hexToBinaryBuffer()** |
-| 556 | 20582 | **RegRead64()** - *Provides RegRead64() function that do not redirect to Wow6432Node on 64-bit machines (for ansi- and unicode)* |
-| 557 | 20675 | **RegWrite64()** - *RegWrite64() function that do not redirect to Wow6432Node on 64-bit machines* |
-| 558 | 20748 | **KillProcess()** - *uses DllCalls to end a process* |
-| 559 | 20781 | **LoadScriptResource()** - *loads a resource into memory (e.g. picture, scripts..)* |
-| 560 | 20826 | **HIconFromBuffer()** - *Function provides a HICON handle e.g. from a resource previously loaded into memory (LoadScriptResource)* |
-| 561 | 20841 | **hBMPFromPNGBuffer()** - *Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)* |
-| 562 | 20875 | **SaveSetColours()** - *Sys colours saving adapted from an approach found in Bertrand Deo's code* |
-| 563 | 20909 | **ChangeMacAdress()** - *change MacAdress, it makes changes to the registry!* |
-| 564 | 20964 | **ListAHKStats()** - *Select desired section: ListLines, ListVars, ListHotkeys, KeyHistory* |
-| 565 | 21029 | **MouseExtras()** - *Allows to use subroutines for Holding and Double Clicking a Mouse Button.* |
-| 566 | 21108 | **TimedFunction()** - *SetTimer functionality for functions* |
-| 567 | 21135 | **ListGlobalVars()** - *ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string* |
-| 568 | 21185 | **TaskList()** - *list all running tasks (no use of COM)* |
-| 569 | 21236 | **MouseDpi()** - *Change the current dpi setting of the mouse* |
-| 570 | 21256 | **SendToAHK()** - *Sends strings by using a hidden gui between AHK scripts* |
-| 571 | 21285 | **ReceiveFromAHK()** - *Receiving strings from SendToAHK* |
-| 572 | 21314 | **GetUIntByAddress()** - *get UInt direct from memory. I found this functions only within one script* |
-| 573 | 21328 | **SetUIntByAddress()** - *write UInt direct to memory* |
-| 574 | 21343 | **SetRestrictedDacl()** - *run this in your script to hide it from Task Manager* |
-| 575 | 21430 | **getActiveProcessName()** - *this function finds the process to the 'ForegroundWindow'* |
-| 576 | 21445 | **enumChildCallback()** - *i think this retreave's the child process ID for a known gui hwnd and the main process ID* |
-| 577 | 21452 | **GetDllBase()** |
-| 578 | 21474 | **getProcBaseFromModules()** |
-| 579 | 21531 | **InjectDll()** - *injects a dll to a running process (ahkdll??)* |
-| 580 | 21556 | **getProcessBaseAddress()** - *gives a pointer to the base address of a process for further memory reading* |
-| 581 | 21572 | **LoadFile()** - *Loads a script file as a child process and returns an object* |
-| 582 | 21663 | **ReadProcessMemory()** - *reads data from a memory area in a given process.* |
-| 583 | 21687 | **WriteProcessMemory()** - *writes data to a memory area in a specified process. the entire area to be written must be accessible or the operation will fail* |
-| 584 | 21706 | **CopyMemory()** - *Copy a block of memory from one place to another* |
-| 585 | 21716 | **MoveMemory()** - *moves a block memory from one place to another* |
-| 586 | 21724 | **FillMemory()** - *fills a block of memory with the specified value* |
-| 587 | 21729 | **ZeroMemory()** - *fills a memory block with zeros* |
-| 588 | 21733 | **CompareMemory()** - *compare two memory blocks* |
-| 589 | 21750 | **VirtualAlloc()** - *changes the state of a region of memory within the virtual address space of a specified process. the memory is assigned to zero.AtEOF* |
-| 590 | 21794 | **VirtualFree()** - *release a region of pages within the virtual address space of the specified process* |
-| 591 | 21808 | **ReduceMem()** - *reduces usage of memory from calling script* |
-| 592 | 21829 | **GlobalLock()** - *memory management functions* |
-| 593 | 21847 | **LocalFree()** - *free a locked memory object* |
-| 594 | 21854 | **CreateStreamOnHGlobal()** - *creates a stream object that uses an HGLOBAL memory handle to store the stream contents. This object is the OLE-provided implementation of the IStream interface.* |
-| 595 | 21859 | **CoTaskMemFree()** - *releases a memory block from a previously assigned task through a call to the CoTaskMemAlloc () or CoTaskMemAlloc () function.* |
-| 596 | 21865 | **CoTaskMemAlloc()** - *assign a working memory block* |
-| 597 | 21874 | **CoTaskMemRealloc()** - *change the size of a previously assigned block of working memory* |
-| 598 | 21884 | **VarAdjustCapacity()** - *adjusts the capacity of a variable to its content* |
-| 599 | 21902 | **DllListExports()** - *List of Function exports of a DLL* |
-| 600 | 21942 | **RtlUlongByteSwap64()** - *routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v2)* |
-| 601 | 21966 | **RtlUlongByteSwap64()** - *routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v1)* |
-| 602 | 21994 | **PIDfromAnyID()** - *for easy retreaving of process ID's (PID)* |
-| 603 | 22045 | **processPriority()** - *retrieves the priority of a process via PID* |
-| 604 | 22049 | **GetProcessMemoryInfo()** - *get informations about memory consumption of a process* |
-| 605 | 22082 | **SetTimerEx()** - *Similar to SetTimer, but calls a function, optionally with one or more parameters* |
-| 606 | 22213 | **UserAccountsEnum()** - *list all users with information* |
-| 607 | 22239 | **GetCurrentUserInfo()** - *obtains information from the current user* |
-| 608 | 22260 | **GetHandleInformation()** - *obtain certain properties of a HANDLE* |
-| 609 | 22285 | **SetHandleInformation()** - *establishes the properties of a HANDLE* |
-| 610 | 22300 | **GetPhysicallyInstalledSystemMemory()** - *recovers the amount of RAM in physically installed KB from the SMBIOS (System Management BIOS) firmware tables, WIN_V SP1+* |
-| 611 | 22311 | **GlobalMemoryStatus()** - *retrieves information about the current use of physical and virtual memory of the system* |
-| 612 | 22327 | **GetSystemFileCacheSize()** - *retrieves the current size limits for the working set of the system cache* |
-| 613 | 22339 | **Is64bitProcess()** - *check if a process is running in 64bit* |
-| 614 | 22351 | **getSessionId()** - *this functions finds out ID of current session* |
-| 615 | 22378 | **CreatePropertyCondition()** - *I hope this one works* |
-| 616 | 22394 | **CreatePropertyCondition()** - *I hope this one is better* |
-| 617 | 22427 | **CreatePropertyConditionEx()** |
-| 618 | 22457 | **UIAgetControlNameByHwnd()** |
-| 619 | 22469 | **MouseGetText()** - *get the text in the specified coordinates, function uses Microsoft UIA* |
-| 620 | 22537 | **Acc_Get()** |
-| 621 | 22589 | **Acc_Error()** |
-| 622 | 22594 | **Acc_ChildrenByRole()** |
-| 623 | 22636 | **listAccChildProperty()** |
-| 624 | 22683 | **GetInfoUnderCursor()** - *retreavies ACC-Child under cursor* |
-| 625 | 22691 | **GetAccPath()** - *get the Acc path from (child) handle* |
-| 626 | 22706 | **GetEnumIndex()** - *for Acc child object* |
-| 627 | 22731 | **IEGet()** - *AutoHotkey_L* |
-| 628 | 22739 | **IEGet()** - *AutoHotkey_Basic* |
-| 629 | 22753 | **WBGet()** - *AHK_L: based on ComObjQuery docs* |
-| 630 | 22767 | **WBGet()** - *AHK_Basic: based on Sean's GetWebBrowser function* |
-| 631 | 22781 | **WBGet()** - *based on ComObjQuery docs* |
-| 632 | 22799 | **IE_TabActivateByName()** - *activate a TAB by name in InternetExplorer* |
-| 633 | 22815 | **IE_TabActivateByHandle()** - *activates a tab by hwnd in InternetExplorer* |
-| 634 | 22834 | **IE_TabWinID()** - *find the HWND of an IE window with a given tab name* |
-| 635 | 22854 | **ReadProxy()** - *reads the proxy settings from the windows registry* |
-| 636 | 22862 | **IE_getURL()** - *using shell.application* |
-| 637 | 22875 | **ACCTabActivate()** - *activate a Tab in IE - function uses acc.ahk library* |
-| 638 | 22890 | **TabActivate()** - *a different approach to activate a Tab in IE - function uses acc.ahk library* |
-| 639 | 22908 | **ComVar()** - *Creates an object which can be used to pass a value ByRef.* |
-| 640 | 22925 | **ComVarGet()** - *Called when script accesses an unknown field.* |
-| 641 | 22930 | **ComVarSet()** - *Called when script sets an unknown field.* |
-| 642 | 22935 | **GetScriptVARs()** - *returns a key, value array with all script variables (e.g. for debugging purposes)* |
-| 643 | 22986 | **Valueof()** - *Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables* |
-| 644 | 23041 | **type()** - *Object version: Returns the type of a value: "Integer", "String", "Float" or "Object"* |
-| 645 | 23065 | **type()** - *COM version: Returns the type of a value: "Integer", "String", "Float" or "Object"* |
-| 646 | 23086 | **A_DefaultGui()** - *a nice function to have a possibility to get the number of the default gui* |
-| 647 | 23122 | **MCode_Bin2Hex()** - *By Lexikos, http://goo.gl/LjP9Zq* |
-| 648 | 23156 | **GetCommState()** - *this function retrieves the configuration settings of a given serial port* |
-| 649 | 23270 | **pauseSuspendScript()** - *function to suspend/pause another script* |
-| 650 | 23307 | **RtlGetVersion()** - *retrieves version of installed windows system* |
-| 651 | 23326 | **PostMessageUnderMouse()** - *Post a message to the window underneath the mouse cursor, can be used to do things involving the mouse scroll wheel* |
-| 652 | 23347 | **WM_SETCURSOR()** - *Prevent "sizing arrow" cursor when hovering over window border* |
-| 653 | 23364 | **FoxitInvoke()** - *wm_command wrapper for FoxitReader Version:  9.1* |
-| 654 | 23608 | **MoveMouse_Spiral()** - *move mouse in a spiral* |
-
+| 252 | 09370 | **IsWindowVisible()** - *self explaining* |
+| 253 | 09374 | **IsFullScreen()** - *specific window is a fullscreen window?* |
+| 254 | 09381 | **IsClosed()** - *AHK function (WinWaitClose) wrapper* |
+| 255 | 09388 | **GetClassLong()** |
+| 256 | 09395 | **GetWindowLong()** |
+| 257 | 09402 | **GetClassStyles()** |
+| 258 | 09429 | **GetTabOrderIndex()** |
+| 259 | 09456 | **GetCursor()** |
+| 260 | 09463 | **GetClientCoords()** |
+| 261 | 09473 | **GetClientSize()** - *get size of window without border* |
+| 262 | 09481 | **GetWindowCoords()** |
+| 263 | 09488 | **GetWindowPos()** |
+| 264 | 09498 | **GetWindowPlacement()** - *Gets window position using workspace coordinates (-> no taskbar), returns an object* |
+| 265 | 09512 | **GetWindowInfo()** - *returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)* |
+| 266 | 09534 | **GetOwner()** |
+| 267 | 09538 | **FindWindow()** - *Finds the requested window,and return it's ID* |
+| 268 | 09594 | **FindWindow()** - *Finds the first window matching specific criterias.* |
+| 269 | 09624 | **ShowWindow()** - *uses a DllCall to show a window* |
+| 270 | 09628 | **IsWindow()** - *wrapper for IsWindow DllCall* |
+| 271 | 09632 | **GetClassName()** - *wrapper for AHK WinGetClass function* |
+| 272 | 09637 | **FindChildWindow()** - *finds childWindow Hwnds of the parent window* |
+| 273 | 09701 | **EnumChildWindow()** - *sub function of FindChildWindow* |
+| 274 | 09717 | **WinGetMinMaxState()** - *get state if window ist maximized or minimized* |
+| 275 | 09729 | **GetBgBitMapHandle()** - *returns the handle of a background bitmap in a gui* |
+| 276 | 09735 | **GetLastActivePopup()** - *passes the handle of the last active pop-up window of a parent window* |
+| 277 | 09739 | **GetFreeGuiNum()** - *gets a free gui number.* |
+| 278 | 09755 | **IsWindowUnderCursor()** - *Checks if a specific window is under the cursor.* |
+| 279 | 09763 | **GetCenterCoords()** - *?center a gui between 2 monitors?* |
+| 280 | 09784 | **RMApp_NCHITTEST()** - *Determines what part of a window the mouse is currently over* |
+| 281 | 09798 | **GetCPA_file_name()** - *retrieves Control Panel applet icon* |
+| 282 | 09830 | **WinGetClientPos()** - *gives back the coordinates of client area inside a gui/window - with DpiFactor correction* |
+| 283 | 09868 | **CheckWindowStatus()** - *check's if a window is responding or not responding (hung or crashed) -* |
+| 284 | 09903 | **GetWindowOrder()** - *determines the window order for a given (parent-)hwnd* |
+| 285 | 09938 | **EnumWindows()** - *Get a list with all the top-level windows on the screen or controls in the window* |
+| 286 | 09992 | **WinEnum()** - *wrapper for Enum(Child)Windows from cocobelgica. a different solution to that one I collected before* |
+| 287 | 10054 | **WinWaitProgress()** - *Waits for the progress bar on a window to reach (>=) a given value (a Lexikos function)* |
+| 288 | 10092 | **ControlGetProgress()** - *sub function of WinWaitProgress* |
+| 289 | 10097 | **GetClassNN()** - *sub function of FindChildWindow* |
+| 290 | 10110 | **GetClassNN_EnumChildProc()** - *sub function of FindChildWindow* |
+| 291 | 10122 | **ChooseColor()** - *what is this for?* |
+| 292 | 10143 | **GetWindowIcon()** |
+| 293 | 10223 | **GetStatusBarText()** |
+| 294 | 10239 | **GetAncestor()** |
+| 295 | 10244 | **MinMaxInfo()** |
+| 296 | 10257 | **GetMouseTaskButton()** - *Gets the index+1 of the taskbar button which the mouse is hovering over* |
+| 297 | 10363 | **SureControlClick()** - *Window Activation + ControlDelay to -1 + checked if control received the click* |
+| 298 | 10380 | **SureControlCheck()** - *Window Activation + ControlDelay to -1 + Check if the control is really checked now* |
+| 299 | 10401 | **ControlClick2()** - *ControlClick Double Click* |
+| 300 | 10411 | **ControlFromPoint()** - *returns the hwnd of a control at a specific point on the screen* |
+| 301 | 10451 | **EnumChildFindPoint()** - *this function is required by ControlFromPoint* |
+| 302 | 10490 | **ControlDoubleClick()** - *simulates a double click on a control with left/middle or right mousebutton* |
+| 303 | 10510 | **WinWaitForMinimized()** - *waits until the window is minimized* |
+| 304 | 10528 | **CenterWindow()** - *Given a the window's width and height, calculates where to position its upper-left corner so that it is centered EVEN IF the task bar is on the left side or top side of the window* |
+| 305 | 10547 | **GuiCenterButtons()** - *Center and resize a row of buttons automatically* |
+| 306 | 10599 | **CenterControl()** - *Centers one control* |
+| 307 | 10650 | **SetWindowIcon()** |
+| 308 | 10656 | **SetWindowPos()** |
+| 309 | 10660 | **TryKillWin()** |
+| 310 | 10678 | **Win32_SendMessage()** - *Closing a window through sendmessage command* |
+| 311 | 10690 | **Win32_TaskKill()** |
+| 312 | 10699 | **Win32_Terminate()** |
+| 313 | 10710 | **TabActivate()** |
+| 314 | 10718 | **FocuslessScroll()** |
+| 315 | 10819 | **FocuslessScrollHorizontal()** |
+| 316 | 10853 | **Menu_Show()** - *alternate to Menu, Show , which can display menu without blocking monitored messages...* |
+| 317 | 10875 | **CatMull_ControlMove()** - *Moves the mouse through 4 points (without control point "gaps")* |
+| 318 | 10895 | **GUI_AutoHide()** - *Autohide the GUI function* |
+| 319 | 11162 | **SetButtonF()** - *Set a button control to call a function instead of a label subroutine* |
+| 320 | 11256 | **AddToolTip()** - *Add/Update tooltips to GUI controls.* |
+| 321 | 11389 | **NumPut()** - *cbSize* |
+| 322 | 11390 | **NumPut()** - *uFlags* |
+| 323 | 11391 | **NumPut()** - *hwnd* |
+| 324 | 11392 | **NumPut()** - *uId* |
+| 325 | 11442 | **HelpToolTips()** - *To show defined GUI control help tooltips on hover.* |
+| 326 | 11473 | **DisableFadeEffect()** - *disabling fade effect on gui animations* |
+| 327 | 11497 | **SetWindowTransistionDisable()** - *disabling fade effect only the window of choice* |
+| 328 | 11531 | **DisableMinimizeAnim()** - *disables or restores original minimize anim setting* |
+| 329 | 11551 | **DisableCloseButton()** - *to disable/grey out the close button* |
+| 330 | 11560 | **AutoCloseBlockingWindows()** - *close all open popup (childwindows), without knowing their names, of a parent window* |
+| 331 | 11649 | **WinActivateEx()** - *Activate a Window, with extra Error Checking and More Features* |
+| 332 | 11686 | **ClickOK()** - *function that search for any button in a window that might be an 'Ok' button to close a window dialog* |
+| 333 | 11752 | **ControlSelectTab()** - *SendMessage wrapper to select the current tab on a MS Tab Control.* |
+| 334 | 11771 | **SetParentByClass()** - *set parent window by using its window class* |
+| 335 | 11779 | **MoveTogether()** - *move 2 windows together - using DllCall to DeferWindowPos* |
+| 336 | 11865 | **WinWaitCreated()** - *Wait for a window to be created, returns 0 on timeout and ahk_id otherwise* |
+| 337 | 11899 | **closeContextMenu()** - *a smart way to close a context menu* |
+| 338 | 11916 | **SetWindowTheme()** - *set Windows UI Theme by window handle* |
+| 339 | 11932 | **HideFocusBorder()** - *hides the focus border for the given GUI control or GUI and all of its children* |
+| 340 | 11976 | **unmovable()** - *makes Gui unmovable* |
+| 341 | 11987 | **movable()** - *makes Gui movable* |
+| 342 | 11994 | **GuiDisableMove()** - *to fix a gui/window to its coordinates* |
+| 343 | 12000 | **WinInsertAfter()** - *insert a window after a specific window handle* |
+| 344 | 12017 | **CenterWindow()** - *center a window or set position optional by using Top, Left, Right, Bottom or a combination of it* |
+| 345 | 12060 | **SetHoverText()** - *change control's text on mouseover* |
+| 346 | 12141 | **SetTextAndResize()** - *resizes a control to adapt to updated values* |
+| 347 | 12207 | **GetMenu()** - *returns hMenu handle* |
+| 348 | 12212 | **GetSubMenu()** |
+| 349 | 12216 | **GetMenuItemCount()** |
+| 350 | 12220 | **GetMenuItemID()** |
+| 351 | 12224 | **GetMenuString()** |
+| 352 | 12239 | **MenuGetAll()** - *this function and MenuGetAll_sub return all Menu commands from the choosed menu* |
+| 353 | 12248 | **MenuGetAll_sub()** - *described above* |
+| 354 | 12271 | **GetContextMenuState()** - *returns the state of a menu entry* |
+| 355 | 12309 | **GetContextMenuID()** - *returns the ID of a menu entry* |
+| 356 | 12332 | **GetContextMenuText()** - *returns the text of a menu entry (standard windows context menus only!!!)* |
+| 357 | 12391 | **Menu_AssignBitmap()** - *assign bitmap to any item in any AHk menu* |
+| 358 | 12551 | **InvokeVerb()** - *executes the context menu item of the given path* |
+| 359 | 12629 | **Menu_Show()** - *its an alternative to Menu, Show, which can display menu without blocking monitored messages* |
+| 360 | 12659 | **CreateMenu()** - *creates menu from a string in which each item is placed in new line and hierarchy is defined by Tab character on the left (indentation)* |
+| 361 | 12790 | **CreateDDMenu()** - *Creates menu from a string in which each item is placed in new line and hierarchy is defined by Tab character on the left (indentation)* |
+| 362 | 12945 | **ExtractIcon()** - *extract icon from a resource file* |
+| 363 | 13025 | **GetIconSize()** - *determines the size of the icon (Lexikos function)* |
+| 364 | 13061 | **Gdip_GetHICONDimensions()** - *get icon dimensions* |
+| 365 | 13100 | **SetTrayIcon()** - *sets a hex coded icon to as try icon* |
+| 366 | 13142 | **InvokeVerb()** - *Executes the context menu item of the given path* |
+| 367 | 13219 | **Function_Eject()** - *ejects a drive medium* |
+| 368 | 13251 | **FileGetDetail()** - *Get specific file property by index* |
+| 369 | 13262 | **FileGetDetails()** - *Create an array of concrete file properties* |
+| 370 | 13278 | **DirExist()** - *Checks if a directory exists* |
+| 371 | 13282 | **GetDetails()** - *Create an array of possible file properties* |
+| 372 | 13296 | **Start()** - *Start programs or scripts easier* |
+| 373 | 13315 | **IsFileEqual()** - *Returns whether or not two files are equal* |
+| 374 | 13323 | **WatchDirectory()** - *Watches a directory/file for file changes* |
+| 375 | 13472 | **WatchDirectory()** - *it's different from above not tested* |
+| 376 | 13669 | **GetFileIcon()** |
+| 377 | 13682 | **ExtractAssociatedIcon()** - *Extracts the associated icon's index for the file specified in path* |
+| 378 | 13696 | **ExtractAssociatedIconEx()** - *Extracts the associated icon's index and ID for the file specified in path* |
+| 379 | 13709 | **DestroyIcon()** |
+| 380 | 13713 | **listfunc()** - *list all functions inside ahk scripts* |
+| 381 | 13729 | **CreateOpenWithMenu()** - *creates an 'open with' menu for the passed file.* |
+| 382 | 13881 | **FileCount()** - *count matching files in the working directory* |
+| 383 | 13889 | **GetImageTypeW()** - *Identify the image type (UniCode)* |
+| 384 | 13933 | **FileWriteLine()** - *to write data at specified line in a file.* |
+| 385 | 13943 | **FileMD5()** - *file MD5 hashing* |
+| 386 | 13959 | **FileCRC32()** - *computes and returns CRC32 hash for a File passed as parameter* |
+| 387 | 13977 | **FindFreeFileName()** - *Finds a non-existing filename for Filepath by appending a number in brackets to the name* |
+| 388 | 13990 | **CountFilesR()** - *count files recursive in specific folder (uses COM method)* |
+| 389 | 13999 | **CountFiles()** - *count files in specific folder (uses COM method)* |
+| 390 | 14005 | **PathInfo()** - *splits a given path to return as object* |
+| 391 | 14010 | **DriveSpace()** - *retrieves the DriveSpace* |
+| 392 | 14018 | **GetBinaryType()** - *determines the bit architecture of an executable program* |
+| 393 | 14028 | **GetFileAttributes()** - *get attributes of a file or folder* |
+| 394 | 14067 | **SetFileTime()** - *to set the time* |
+| 395 | 14076 | **SetFileAttributes()** - *set attributes of a file or folder* |
+| 396 | 14114 | **FileSetSecurity()** - *set security for the file / folder* |
+| 397 | 14168 | **FileSetOwner()** - *set the owner to file / directory* |
+| 398 | 14188 | **FileGetOwner()** - *get the owner to file / directory* |
+| 399 | 14205 | **GetFileFormat()** - *retreaves the codepage format of a file* |
+| 400 | 14225 | **HashFile()** - *calculate hashes (MD2,MD5,SH1,SHA256, SHA384, SHA512) from file* |
+| 401 | 14336 | **PathCombine()** - *combine the 2 routes provided in a single absolute path* |
+| 402 | 14360 | **GetParentDir()** - *small RegEx function to get parent dir from a given string* |
+| 403 | 14364 | **DirGetParent()** - *returns a string containing parent dir, it's possible to set the level of parent dir* |
+| 404 | 14374 | **SelectFolder()** - *the Common File Dialog lets you add controls to it* |
+| 405 | 14473 | **CreateFont()** - *creates font in memory which can be used with any API function accepting font handles* |
+| 406 | 14526 | **GetHFONT()** - *gets a handle to a font used in a AHK gui for example* |
+| 407 | 14539 | **MsgBoxFont()** - *style your MsgBox with with your prefered font* |
+| 408 | 14553 | **GetFontProperties()** - *to get the current font's width and height* |
+| 409 | 14599 | **FontEnum()** - *enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure* |
+| 410 | 14639 | **GetFontTextDimension()** - *calculate the height and width of the text in the specified font* |
+| 411 | 14694 | **FontClone()** - *backup hFont in memory for further processing* |
+| 412 | 14736 | **GuiDefaultFont()** - *returns the default Fontname & Fontsize* |
+| 413 | 14772 | **StrGetDimAvgCharWidth()** - *average width of a character in pixels* |
+| 414 | 14815 | **CreateFont()** - *creates HFont for use with GDI* |
+| 415 | 14846 | **MeasureText()** - *Measures the single-line width and height of the passed text* |
+| 416 | 14902 | **OnMessageEx()** - *Allows multiple functions to be called automatically when the script receives the specified message* |
+| 417 | 15136 | **ReceiveData()** - *By means of OnMessage(), this function has been set up to be called automatically whenever new data arrives on the connection.* |
+| 418 | 15176 | **HDrop()** - *Drop files to another app* |
+| 419 | 15209 | **WM_MOVE()** - *UpdateLayeredWindow* |
+| 420 | 15222 | **WM_WINDOWPOSCHANGING()** - *two different examples of handling a WM_WINDOWPOSCHANGING* |
+| 421 | 15232 | **WM_WINDOWPOSCHANGING()** - *second examples of handling a WM_WINDOWPOSCHANGING* |
+| 422 | 15250 | **CallNextHookEx()** - *Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this function either before or after processing the hook information* |
+| 423 | 15254 | **WM_DEVICECHANGE()** - *Detects whether a CD has been inserted instead and also outputs the drive - global drv* |
+| 424 | 15293 | **ObjectNameChange()** - *titlebar hook to detect when title changes, (Lexikos' code)* |
+| 425 | 15342 | **DownloadFile()** |
+| 426 | 15365 | **NewLinkMsg()** |
+| 427 | 15381 | **TimeGap()** - *Determine by what amount the local system time differs to that of an ntp server* |
+| 428 | 15391 | **GetSourceURL()** |
+| 429 | 15403 | **DNS_QueryName()** |
+| 430 | 15428 | **GetHTMLFragment()** |
+| 431 | 15448 | **ScrubFragmentIdents()** |
+| 432 | 15459 | **EnumClipFormats()** |
+| 433 | 15468 | **GetClipFormatNames()** |
+| 434 | 15487 | **GoogleTranslate()** |
+| 435 | 15506 | **getText()** - *get text from html* |
+| 436 | 15521 | **getHtmlById()** |
+| 437 | 15526 | **getTextById()** |
+| 438 | 15530 | **getHtmlByTagName()** |
+| 439 | 15538 | **getTextByTagName()** |
+| 440 | 15546 | **CreateGist()** |
+| 441 | 15568 | **GetAllResponseHeaders()** - *gets the values of all HTTP headers* |
+| 442 | 15637 | **NetStat()** - *passes information over network connections similar to the netstat -an CMD command.* |
+| 443 | 15735 | **ExtractTableData()** - *extracts tables from HTML files* |
+| 444 | 15858 | **IsConnected()** - *Returns true if there is an available internet connection* |
+| 445 | 15862 | **HostToIp()** - *gets the IP address for the given host directly using the WinSock 2.0 dll, without using temp files or third party utilities* |
+| 446 | 15965 | **LocalIps()** - *with small changes to HostToIP() this can be used to retrieve all LocalIP's* |
+| 447 | 16034 | **GetAdaptersInfo()** - *GetAdaptersAddresses function & IP_ADAPTER_ADDRESSES structure* |
+| 448 | 16089 | **DNSQuery()** - *retrieve IP adresses or host/domain names from DNS* |
+| 449 | 16207 | **Min()** - *returns the smaller of 2 numbers* |
+| 450 | 16211 | **Max()** - *determines the larger number* |
+| 451 | 16215 | **Mean()** - *returns Average values in comma delimited list* |
+| 452 | 16229 | **Median()** - *returns Median in a set of numbers from a list* |
+| 453 | 16256 | **Mode()** - *returns the mode from a list of numbers* |
+| 454 | 16285 | **Dec2Base()** - *Base to Decimal and* |
+| 455 | 16291 | **Base2Dec()** - *Decimal to Base conversion* |
+| 456 | 16297 | **HexToFloat()** - *Hexadecimal to Float conversion* |
+| 457 | 16301 | **FloatToHex()** - *Float to Hexadecimal conversion* |
+| 458 | 16311 | **CalculateDistance()** - *calculates the distance between two points in a 2D-Space* |
+| 459 | 16315 | **IsInRange()** - *shows if a second variable is in range* |
+| 460 | 16326 | **FormatFileSize()** - *Formats a file size in bytes to a human-readable size string* |
+| 461 | 16334 | **Color_RGBtoHSV()** - *converts beetween color two color spaces: RGB -> HSV* |
+| 462 | 16364 | **Color_HSVtoRGB()** - *converts beetween color two color spaces: HSV -> RGB* |
+| 463 | 16435 | **JEE_HexToBinData()** - *hexadecimal to binary* |
+| 464 | 16445 | **JEE_BinDataToHex()** - *binary to hexadecimal* |
+| 465 | 16456 | **JEE_BinDataToHex2()** - *binary to hexadecimal2* |
+| 466 | 16464 | **RadianToDegree()** - *convert radian (rad) to degree* |
+| 467 | 16477 | **DegreeToRadian()** - *convert degree to radian (rad)* |
+| 468 | 16491 | **RGBToARGB()** - *convert RGB to ARGB* |
+| 469 | 16518 | **ARGBToRGB()** - *convert ARGB to RGB.* |
+| 470 | 16537 | **FormatByteSize()** - *give's back the given bytes in KB, MB, GB .... (for AHK_V1)* |
+| 471 | 16567 | **FormatByteSize()** - *give's back the given bytes in KB, MB, GB ....(for AHK_V2)* |
+| 472 | 16608 | **ObjMerge()** - *merge two objects* |
+| 473 | 16623 | **evalRPN()** - *Parsing/RPN calculator algorithm* |
+| 474 | 16661 | **StackShow()** |
+| 475 | 16668 | **ExploreObj()** - *print object function* |
+| 476 | 16724 | **KeyValueObjectFromLists()** - *merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet* |
+| 477 | 16791 | **GetCallStack()** - *retrieves the current callstack* |
+| 478 | 16865 | **Traceback()** - *get stack trace* |
+| 479 | 16955 | **Sort2DArray()** - *a two dimensional TDArray* |
+| 480 | 16976 | **SortArray()** - *ordered sort: Ascending, Descending, Reverse* |
+| 481 | 17009 | **QuickSort()** - *Sort array using QuickSort algorithm* |
+| 482 | 17275 | **sortArray()** - *sorts an array (another way)* |
+| 483 | 17356 | **StringMD5()** - *String MD5 Hashing* |
+| 484 | 17366 | **uriEncode()** - *a function to escape characters like & for use in URLs.* |
+| 485 | 17381 | **Ansi2Unicode()** - *easy convertion from Ansi to Unicode, you can set prefered codepage* |
+| 486 | 17401 | **Unicode2Ansi()** - *easy convertion from Unicode to Ansi, you can set prefered codepage* |
+| 487 | 17425 | **Ansi2Oem()** - *using Ansi2Unicode and Unicode2Ansi functions* |
+| 488 | 17431 | **Oem2Ansi()** - *using Ansi2Unicode and Unicode2Ansi functions* |
+| 489 | 17437 | **Ansi2UTF8()** - *using Ansi2Unicode and Unicode2Ansi functions* |
+| 490 | 17443 | **UTF82Ansi()** - *using Ansi2Unicode and Unicode2Ansi functions* |
+| 491 | 17449 | **CRC32()** - *CRC32 function, uses MCode* |
+| 492 | 17464 | **ParseJsonStrToArr()** - *Parse Json string to an array* |
+| 493 | 17490 | **parseJSON()** - *Parse Json string to an object* |
+| 494 | 17511 | **GetNestedTag()** |
+| 495 | 17541 | **GetHTMLbyID()** - *uses COM* |
+| 496 | 17556 | **GetHTMLbyTag()** - *uses COM* |
+| 497 | 17571 | **GetXmlElement()** - *RegEx function* |
+| 498 | 17589 | **sXMLget()** - *simple solution to get information out of xml and html* |
+| 499 | 17607 | **cleanlines()** - *removes all empty lines* |
+| 500 | 17620 | **cleancolon()** - *what for? removes on ':' at beginning of a string* |
+| 501 | 17630 | **cleanspace()** - *removes all Space chars* |
+| 502 | 17643 | **SplitLine()** - *split string to key and value* |
+| 503 | 17653 | **EnsureEndsWith()** - *Ensure that the string given ends with a given char* |
+| 504 | 17661 | **EnsureStartsWith()** - *Ensure that the string given starts with a given char* |
+| 505 | 17668 | **StrPutVar()** - *Convert the data to some Enc, like UTF-8, UTF-16, CP1200 and so on* |
+| 506 | 17693 | **RegExSplit()** - *split a String by a regular expressin pattern and you will receive an array as a result* |
+| 507 | 17728 | **StringM()** - *String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)* |
+| 508 | 17768 | **StrCount()** - *a very handy function to count a needle in a Haystack* |
+| 509 | 17775 | **SuperInstr()** - *Returns min/max position for a | separated values of Needle(s)* |
+| 510 | 17804 | **LineDelete()** - *deletes a specific line or a range of lines from a variable containing one or more lines of text. No use of any loop!* |
+| 511 | 17880 | **GetWordsNumbered()** - *gives back an array of words from a string, you can specify the position of the words you want to keep* |
+| 512 | 17912 | **AddTrailingBackslash()** - *adds a backslash to the beginning of a string if there is none* |
+| 513 | 17920 | **CheckQuotes()** |
+| 514 | 17929 | **ReplaceForbiddenChars()** - *hopefully working, not tested function, it uses RegExReplace* |
+| 515 | 17941 | **WrapText()** - *basic function to wrap a text-string to a given length* |
+| 516 | 17979 | **ExtractFuncTOuserAHK()** - *extract user function and helps to write it to userAhk.api* |
+| 517 | 18100 | **PdfToText()** - *copies a selected PDF file to memory - it needs xpdf - pdftotext.exe* |
+| 518 | 18127 | **PdfPageCounter()** - *counts pages of a pdffile (works with 95% of pdf files)* |
+| 519 | 18143 | **PasteWithIndent()** - *paste string to an editor with your prefered indent key* |
+| 520 | 18159 | **Ask_and_SetbackFocus()** - *by opening a msgbox you lost focus and caret pos in any editor - this func will restore the previous positions of the caret* |
+| 521 | 18207 | **CleanLine()** - *Return a line with leading and trailing spaces removed, and tabs converted to spaces* |
+| 522 | 18229 | **StrTrim()** - *Remove all leading and trailing whitespace including tabs, spaces, CR and LF* |
+| 523 | 18250 | **StrDiff()** - *SIFT3 : Super Fast and Accurate string distance algorithm* |
+| 524 | 18318 | **PrintArr()** - *show values of an array in a listview gui for debugging* |
+| 525 | 18360 | **List2Array()** - *function uses StrSplit () to return an array* |
+| 526 | 18364 | **Array_Gui()** - *shows your array as an interactive TreeView* |
+| 527 | 18426 | **RandomString()** - *builds a string with random char of specified length* |
+| 528 | 18464 | **DelaySend()** - *Send keystrokes delayed* |
+| 529 | 18510 | **SetLayout()** - *set a keyboard layout* |
+| 530 | 18515 | **GetAllInputChars()** - *Returns a string with input characters* |
+| 531 | 18525 | **ReleaseModifiers()** - *helps to solve the Hotkey stuck problem* |
+| 532 | 18572 | **isaKeyPhysicallyDown()** - *belongs to ReleaseModifiers() function* |
+| 533 | 18585 | **GetText()** - *copies the selected text to a variable while preserving the clipboard.(Ctrl+C method)* |
+| 534 | 18602 | **PutText()** - *Pastes text from a variable while preserving the clipboard. (Ctrl+v method)* |
+| 535 | 18614 | **Hotkeys()** - *a handy function to show all used hotkeys in script* |
+| 536 | 18665 | **BlockKeyboard()** - *block keyboard, and unblock it through usage of keyboard* |
+| 537 | 18717 | **RapidHotkey()** - *Using this function you can send keystrokes or launch a Label by pressing a key several times.* |
+| 538 | 18865 | **hk()** - *Disable all keyboard buttons* |
+| 539 | 18961 | **ShowTrayBalloon()** |
+| 540 | 18987 | **ColoredTooltip()** - *show a tooltip for a given time with a custom color in rgb format (fore and background is supported). This function shows how to obtain the hWnd of the tooltip.* |
+| 541 | 19034 | **AddToolTip()** - *very easy to use function to add a tooltip to a control* |
+| 542 | 19305 | **AddToolTip()** - *add ToolTips to controls - Advanced ToolTip features + Unicode* |
+| 543 | 19900 | **AddToolTip()** - *just a simple add on to allow tooltips to be added to controls without having to monitor the wm_mousemove messages* |
+| 544 | 19971 | **AddToolTip()** - *this is a function from jballi -* |
+| 545 | 20103 | **NumPut()** - *cbSize* |
+| 546 | 20104 | **NumPut()** - *uFlags* |
+| 547 | 20105 | **NumPut()** - *hwnd* |
+| 548 | 20106 | **NumPut()** - *uId* |
+| 549 | 20164 | **CreateNamedPipe()** - *creates an instance of a named pipe and returns a handle for subsequent pipe operations* |
+| 550 | 20169 | **RestoreCursors()** - *for normal cursor at GUI* |
+| 551 | 20174 | **SetSystemCursor()** - *enables an application to customize the system cursors by using a file or by using the system cursor* |
+| 552 | 20255 | **SystemCursor()** - *hiding mouse cursor* |
+| 553 | 20294 | **ToggleSystemCursor()** - *choose a cursor from system cursor list* |
+| 554 | 20373 | **SetTimerF()** - *Starts a timer that can call functions and object methods* |
+| 555 | 20410 | **GlobalVarsScript()** |
+| 556 | 20434 | **patternScan()** - *scan for a pattern in memory* |
+| 557 | 20533 | **scanInBuf()** - *scan for a pattern in memory buffer* |
+| 558 | 20571 | **hexToBinaryBuffer()** |
+| 559 | 20594 | **RegRead64()** - *Provides RegRead64() function that do not redirect to Wow6432Node on 64-bit machines (for ansi- and unicode)* |
+| 560 | 20687 | **RegWrite64()** - *RegWrite64() function that do not redirect to Wow6432Node on 64-bit machines* |
+| 561 | 20760 | **KillProcess()** - *uses DllCalls to end a process* |
+| 562 | 20793 | **LoadScriptResource()** - *loads a resource into memory (e.g. picture, scripts..)* |
+| 563 | 20838 | **HIconFromBuffer()** - *Function provides a HICON handle e.g. from a resource previously loaded into memory (LoadScriptResource)* |
+| 564 | 20853 | **hBMPFromPNGBuffer()** - *Function provides a hBitmap handle e.g. from a resource previously loaded into memory (LoadScriptResource)* |
+| 565 | 20887 | **SaveSetColours()** - *Sys colours saving adapted from an approach found in Bertrand Deo's code* |
+| 566 | 20921 | **ChangeMacAdress()** - *change MacAdress, it makes changes to the registry!* |
+| 567 | 20976 | **ListAHKStats()** - *Select desired section: ListLines, ListVars, ListHotkeys, KeyHistory* |
+| 568 | 21041 | **MouseExtras()** - *Allows to use subroutines for Holding and Double Clicking a Mouse Button.* |
+| 569 | 21120 | **TimedFunction()** - *SetTimer functionality for functions* |
+| 570 | 21147 | **ListGlobalVars()** - *ListGlobalVars() neither shows nor activates the AutoHotkey main window, it returns a string* |
+| 571 | 21197 | **TaskList()** - *list all running tasks (no use of COM)* |
+| 572 | 21248 | **MouseDpi()** - *Change the current dpi setting of the mouse* |
+| 573 | 21268 | **SendToAHK()** - *Sends strings by using a hidden gui between AHK scripts* |
+| 574 | 21297 | **ReceiveFromAHK()** - *Receiving strings from SendToAHK* |
+| 575 | 21326 | **GetUIntByAddress()** - *get UInt direct from memory. I found this functions only within one script* |
+| 576 | 21340 | **SetUIntByAddress()** - *write UInt direct to memory* |
+| 577 | 21355 | **SetRestrictedDacl()** - *run this in your script to hide it from Task Manager* |
+| 578 | 21442 | **getActiveProcessName()** - *this function finds the process to the 'ForegroundWindow'* |
+| 579 | 21457 | **enumChildCallback()** - *i think this retreave's the child process ID for a known gui hwnd and the main process ID* |
+| 580 | 21464 | **GetDllBase()** |
+| 581 | 21486 | **getProcBaseFromModules()** |
+| 582 | 21543 | **InjectDll()** - *injects a dll to a running process (ahkdll??)* |
+| 583 | 21568 | **getProcessBaseAddress()** - *gives a pointer to the base address of a process for further memory reading* |
+| 584 | 21584 | **LoadFile()** - *Loads a script file as a child process and returns an object* |
+| 585 | 21675 | **ReadProcessMemory()** - *reads data from a memory area in a given process.* |
+| 586 | 21699 | **WriteProcessMemory()** - *writes data to a memory area in a specified process. the entire area to be written must be accessible or the operation will fail* |
+| 587 | 21718 | **CopyMemory()** - *Copy a block of memory from one place to another* |
+| 588 | 21728 | **MoveMemory()** - *moves a block memory from one place to another* |
+| 589 | 21736 | **FillMemory()** - *fills a block of memory with the specified value* |
+| 590 | 21741 | **ZeroMemory()** - *fills a memory block with zeros* |
+| 591 | 21745 | **CompareMemory()** - *compare two memory blocks* |
+| 592 | 21762 | **VirtualAlloc()** - *changes the state of a region of memory within the virtual address space of a specified process. the memory is assigned to zero.AtEOF* |
+| 593 | 21806 | **VirtualFree()** - *release a region of pages within the virtual address space of the specified process* |
+| 594 | 21820 | **ReduceMem()** - *reduces usage of memory from calling script* |
+| 595 | 21841 | **GlobalLock()** - *memory management functions* |
+| 596 | 21859 | **LocalFree()** - *free a locked memory object* |
+| 597 | 21866 | **CreateStreamOnHGlobal()** - *creates a stream object that uses an HGLOBAL memory handle to store the stream contents. This object is the OLE-provided implementation of the IStream interface.* |
+| 598 | 21871 | **CoTaskMemFree()** - *releases a memory block from a previously assigned task through a call to the CoTaskMemAlloc () or CoTaskMemAlloc () function.* |
+| 599 | 21877 | **CoTaskMemAlloc()** - *assign a working memory block* |
+| 600 | 21886 | **CoTaskMemRealloc()** - *change the size of a previously assigned block of working memory* |
+| 601 | 21896 | **VarAdjustCapacity()** - *adjusts the capacity of a variable to its content* |
+| 602 | 21914 | **DllListExports()** - *List of Function exports of a DLL* |
+| 603 | 21954 | **RtlUlongByteSwap64()** - *routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v2)* |
+| 604 | 21978 | **RtlUlongByteSwap64()** - *routine reverses the ordering of the four bytes in a 32-bit unsigned integer value (AHK v1)* |
+| 605 | 22006 | **PIDfromAnyID()** - *for easy retreaving of process ID's (PID)* |
+| 606 | 22057 | **processPriority()** - *retrieves the priority of a process via PID* |
+| 607 | 22061 | **GetProcessMemoryInfo()** - *get informations about memory consumption of a process* |
+| 608 | 22094 | **SetTimerEx()** - *Similar to SetTimer, but calls a function, optionally with one or more parameters* |
+| 609 | 22225 | **UserAccountsEnum()** - *list all users with information* |
+| 610 | 22251 | **GetCurrentUserInfo()** - *obtains information from the current user* |
+| 611 | 22272 | **GetHandleInformation()** - *obtain certain properties of a HANDLE* |
+| 612 | 22297 | **SetHandleInformation()** - *establishes the properties of a HANDLE* |
+| 613 | 22312 | **GetPhysicallyInstalledSystemMemory()** - *recovers the amount of RAM in physically installed KB from the SMBIOS (System Management BIOS) firmware tables, WIN_V SP1+* |
+| 614 | 22323 | **GlobalMemoryStatus()** - *retrieves information about the current use of physical and virtual memory of the system* |
+| 615 | 22339 | **GetSystemFileCacheSize()** - *retrieves the current size limits for the working set of the system cache* |
+| 616 | 22351 | **Is64bitProcess()** - *check if a process is running in 64bit* |
+| 617 | 22363 | **getSessionId()** - *this functions finds out ID of current session* |
+| 618 | 22390 | **CreatePropertyCondition()** - *I hope this one works* |
+| 619 | 22406 | **CreatePropertyCondition()** - *I hope this one is better* |
+| 620 | 22439 | **CreatePropertyConditionEx()** |
+| 621 | 22469 | **UIAgetControlNameByHwnd()** |
+| 622 | 22481 | **MouseGetText()** - *get the text in the specified coordinates, function uses Microsoft UIA* |
+| 623 | 22549 | **Acc_Get()** |
+| 624 | 22601 | **Acc_Error()** |
+| 625 | 22606 | **Acc_ChildrenByRole()** |
+| 626 | 22648 | **listAccChildProperty()** |
+| 627 | 22695 | **GetInfoUnderCursor()** - *retreavies ACC-Child under cursor* |
+| 628 | 22703 | **GetAccPath()** - *get the Acc path from (child) handle* |
+| 629 | 22718 | **GetEnumIndex()** - *for Acc child object* |
+| 630 | 22743 | **IEGet()** - *AutoHotkey_L* |
+| 631 | 22751 | **IEGet()** - *AutoHotkey_Basic* |
+| 632 | 22765 | **WBGet()** - *AHK_L: based on ComObjQuery docs* |
+| 633 | 22779 | **WBGet()** - *AHK_Basic: based on Sean's GetWebBrowser function* |
+| 634 | 22793 | **WBGet()** - *based on ComObjQuery docs* |
+| 635 | 22811 | **IE_TabActivateByName()** - *activate a TAB by name in InternetExplorer* |
+| 636 | 22827 | **IE_TabActivateByHandle()** - *activates a tab by hwnd in InternetExplorer* |
+| 637 | 22846 | **IE_TabWinID()** - *find the HWND of an IE window with a given tab name* |
+| 638 | 22866 | **ReadProxy()** - *reads the proxy settings from the windows registry* |
+| 639 | 22874 | **IE_getURL()** - *using shell.application* |
+| 640 | 22887 | **ACCTabActivate()** - *activate a Tab in IE - function uses acc.ahk library* |
+| 641 | 22902 | **TabActivate()** - *a different approach to activate a Tab in IE - function uses acc.ahk library* |
+| 642 | 22920 | **ComVar()** - *Creates an object which can be used to pass a value ByRef.* |
+| 643 | 22937 | **ComVarGet()** - *Called when script accesses an unknown field.* |
+| 644 | 22942 | **ComVarSet()** - *Called when script sets an unknown field.* |
+| 645 | 22947 | **GetScriptVARs()** - *returns a key, value array with all script variables (e.g. for debugging purposes)* |
+| 646 | 22998 | **Valueof()** - *Super Variables processor by Avi Aryan, overcomes the limitation of a single level ( return %var% ) in nesting variables* |
+| 647 | 23053 | **type()** - *Object version: Returns the type of a value: "Integer", "String", "Float" or "Object"* |
+| 648 | 23077 | **type()** - *COM version: Returns the type of a value: "Integer", "String", "Float" or "Object"* |
+| 649 | 23098 | **A_DefaultGui()** - *a nice function to have a possibility to get the number of the default gui* |
+| 650 | 23134 | **MCode_Bin2Hex()** - *By Lexikos, http://goo.gl/LjP9Zq* |
+| 651 | 23168 | **GetCommState()** - *this function retrieves the configuration settings of a given serial port* |
+| 652 | 23282 | **pauseSuspendScript()** - *function to suspend/pause another script* |
+| 653 | 23319 | **RtlGetVersion()** - *retrieves version of installed windows system* |
+| 654 | 23338 | **PostMessageUnderMouse()** - *Post a message to the window underneath the mouse cursor, can be used to do things involving the mouse scroll wheel* |
+| 655 | 23359 | **WM_SETCURSOR()** - *Prevent "sizing arrow" cursor when hovering over window border* |
+| 656 | 23376 | **FoxitInvoke()** - *wm_command wrapper for FoxitReader Version:  9.1* |
+| 657 | 23620 | **MoveMouse_Spiral()** - *move mouse in a spiral* |
