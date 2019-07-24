@@ -12,7 +12,7 @@ ClipboardGetDropEffect() {																				;-- Clipboard function. Retrieves 
 	
 	/*                              	DESCRIPTION
 	
-			Parameter:		explorer copy = 5, explorer cut = 2
+			Parameters	:		explorer copy = 5, explorer cut = 2
 			
 	*/
 	
@@ -294,12 +294,11 @@ AppendToClipboard( files, cut=0) { 																;-- Appends files to CF_HDROP
 	return
 } ;</01.01.000009>
 
-; </01.01>
 }
 ;|                                                   	|                                                       |                                                   	|                                                   	|
-;|   ClipboardGetDropEffect()        	|   ClipboardSetFiles()                   	|   CopyFilesToClipboard()            	|   FileToClipboard()                     	|
-;|   FileToClipboard()                     	|   1.ImageToClipboard()              	|   2.Gdip_ImageToClipboard()     	|   3.Gdip_ImageToClipboard()     	|
-;|   AppendToClipboard()              	|
+;|   ClipboardGetDropEffect(01)       	|   ClipboardSetFiles(02)                  	|   CopyFilesToClipboard(03)           	|   FileToClipboard(04)                    	|
+;|   FileToClipboard(05)                    	|   1.ImageToClipboard(06)             	|   2.Gdip_ImageToClipboard(07)    	|   3.Gdip_ImageToClipboard(08)    	|
+;|   AppendToClipboard(09)             	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -469,18 +468,45 @@ ConsoleSend(text, WinTitle="", WinText="", ExcludeTitle="", ExcludeText="") {   
         DllCall("FreeConsole")
     return
 } ;</02.01.000002>
-{ ;sub for ConsoleSend
 ;<02.01.000003>
-ScanCode( wParam, lParam ) {                                                                                        	;--  sub for ConsoleSend
+ScanCode( wParam, lParam ) {                                                                                        	;--  subfunction for ConsoleSend
  Clipboard := "SC" SubStr((((lParam>>16) & 0xFF)+0xF000),-2)
  GuiControl,, SC, %Clipboard%
 } ;</02.01.000003>
-} ;sub end
 ;<02.01.000004>
 StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {                 		;-- Store command line output in autohotkey variable. Supports both x86 and x64.
 
-	; Modified  :  maz-1 https://gist.github.com/maz-1/768bf7938e533907d54bff276db80904
-  Static StrGet := "StrGet"           ; Modified  :  SKAN 31-Aug-2013 http://goo.gl/j8XJXY
+	/*				DESCRIPTION FOR UTF-8 support of xpftotext.exe
+
+				Link:							https://autohotkey.com/boards/viewtopic.php?f=5&t=25004&hilit=embedded+pdf
+				Description:				I haven't studied your whole script, but I see that you have a variable called XpdfPath that is assigned the value pdftotext.exe in A_ScriptDir. 
+												That's a good approach (although I'd call the var XpdfEXE). Extend the idea as follows:
+
+												(1) Define another variable called xpdfrcFile in the same folder and assign it the value xpdfrc.ini.
+												(2) Create a plain text file called xpdfrc.ini with these lines in it:
+
+												unicodeMap Latin1fixed "D:\path\Latin1.unicodeMap"
+												textEncoding Latin1fixed
+
+												where D:\path\ is the script folder. Of course, you may put xpdfrc.ini (and Latin1.unicodeMap) wherever you want, 
+												but I think the script folder is fine. My scripts always create xpdfrc.ini via FileAppend so I have programmatic control over 
+												its location and contents, but if you want to keep things simple, hard-code it.
+
+												(3) Put the Latin1.unicodeMap file in the proper place, i.e., D:\path\, as discussed above.
+												(4) Call PDFtoText with this additional param:
+
+												-cfg "%xpdfrcFile%"
+
+												That should do it. Works perfectly here in many scripts. Here's an actual call from one of my working scripts.
+				Modified:             	maz-1 https://gist.github.com/maz-1/768bf7938e533907d54bff276db80904
+												SKAN 31-Aug-2013 http://goo.gl/j8XJXY
+												
+				EXAMPLE: 				xpdftotext.exe
+												RunWait,%PDFtoTextEXE% -f 1 -l 1 %ConversionType% -cfg "%xpdfrcFile%" "%SourceFolder%%FileNameCurrent%" "%DestFolder%%FileNameCurrentTXT%",,Hide
+
+	*/
+
+  Static StrGet := "StrGet"         
                                       ; Thanks to :  HotKeyIt         http://goo.gl/IsH1zs
                                       ; Original  :  Sean 20-Feb-2007 http://goo.gl/mxCdn
   tcWrk := WorkingDir=0 ? "Int" : "Str"
@@ -488,12 +514,12 @@ StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {        
   DllCall( "SetHandleInformation", UInt,hPipeWrite, UInt,1, UInt,1 )
   If A_PtrSize = 8
   {
-    VarSetCapacity( STARTUPINFO, 104, 0  )      ; STARTUPINFO          ;  http://goo.gl/fZf24
-    NumPut( 68,         STARTUPINFO,  0 )      ; cbSize
-    NumPut( 0x100,      STARTUPINFO, 60 )      ; dwFlags    =>  STARTF_USESTDHANDLES = 0x100
-    NumPut( hPipeWrite, STARTUPINFO, 88 )      ; hStdOutput
-    NumPut( hPipeWrite, STARTUPINFO, 96 )      ; hStdError
-    VarSetCapacity( PROCESS_INFORMATION, 24 )  ; PROCESS_INFORMATION  ;  http://goo.gl/b9BaI
+    VarSetCapacity( STARTUPINFO, 104, 0  )           	; STARTUPINFO          ;  http://goo.gl/fZf24
+    NumPut( 68,         STARTUPINFO,  0 )              	; cbSize
+    NumPut( 0x100,      STARTUPINFO, 60 )           	; dwFlags    =>  STARTF_USESTDHANDLES = 0x100
+    NumPut( hPipeWrite, STARTUPINFO, 88 )         	; hStdOutput
+    NumPut( hPipeWrite, STARTUPINFO, 96 )        	; hStdError
+    VarSetCapacity( PROCESS_INFORMATION, 24 )	; PROCESS_INFORMATION  ;  http://goo.gl/b9BaI
   }
   Else
   {
@@ -580,8 +606,7 @@ StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {        
 	*/
 
   If ! DllCall( "CreateProcess", UInt,0, UInt,&sCmd, UInt,0, UInt,0 ;  http://goo.gl/USC5a
-              , UInt,1, UInt,0x08000000, UInt,0, tcWrk, WorkingDir
-              , UInt,&STARTUPINFO, UInt,&PROCESS_INFORMATION )
+              , UInt,1, UInt,0x08000000, UInt,0, tcWrk, WorkingDir, UInt,&STARTUPINFO, UInt,&PROCESS_INFORMATION )
    {
     DllCall( "CloseHandle", UInt,hPipeWrite )
     DllCall( "CloseHandle", UInt,hPipeRead )
@@ -617,37 +642,6 @@ StdOutStream( sCmd, Callback := "", WorkingDir:=0, ByRef ProcessID:=0) {        
 
 Return Isfunc( Callback ) ? %Callback%( "", 0 ) : sOutput
 } ;</02.01.000004>
-;functions end
-{ ;Parameter examples 
-
-/*				DESCRIPTION FOR UTF-8 support of xpftotext.exe
-
-				Link:							https://autohotkey.com/boards/viewtopic.php?f=5&t=25004&hilit=embedded+pdf
-				Description				I haven't studied your whole script, but I see that you have a variable called XpdfPath that is assigned the value pdftotext.exe in A_ScriptDir. 
-												That's a good approach (although I'd call the var XpdfEXE). Extend the idea as follows:
-
-												(1) Define another variable called xpdfrcFile in the same folder and assign it the value xpdfrc.ini.
-												(2) Create a plain text file called xpdfrc.ini with these lines in it:
-
-												unicodeMap Latin1fixed "D:\path\Latin1.unicodeMap"
-												textEncoding Latin1fixed
-
-												where D:\path\ is the script folder. Of course, you may put xpdfrc.ini (and Latin1.unicodeMap) wherever you want, 
-												but I think the script folder is fine. My scripts always create xpdfrc.ini via FileAppend so I have programmatic control over 
-												its location and contents, but if you want to keep things simple, hard-code it.
-
-												(3) Put the Latin1.unicodeMap file in the proper place, i.e., D:\path\, as discussed above.
-												(4) Call PDFtoText with this additional param:
-
-												-cfg "%xpdfrcFile%"
-
-												That should do it. Works perfectly here in many scripts. Here's an actual call from one of my working scripts:
-
-*/
-xpdftotext.exe
-RunWait,%PDFtoTextEXE% -f 1 -l 1 %ConversionType% -cfg "%xpdfrcFile%" "%SourceFolder%%FileNameCurrent%" "%DestFolder%%FileNameCurrentTXT%",,Hide
-
-}
 ;<02.01.000005>
 StdoutToVar_CreateProcess(sCmd, sEncoding:="CP0", sDir:="", ByRef nExitCode:=0) {	;-- Runs a command line program and returns its output
 	
@@ -1024,7 +1018,7 @@ DateDiff(fnTimeUnits,fnStartDate,fnEndDate) {                                   
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Varius get (22) -- functions for retreaving informations - missing something - see Gui/Window - 				baseID: <04>
+{ ;Varius get (22) -- functions for retreaving informations - missing something - see Gui/Window --				baseID: <04>
 ;<04.01.000001>
 GetProcesses() {                                                                                                	;-- get the name of all running processes
 
@@ -1065,7 +1059,7 @@ GetProcesses() {                                                                
    Sort, l, C  ; uncomment this line to sort the list alphabetically
    ;MsgBox, 0, %c% Processes, %l%
    return l
-}
+} ;</04.01.000001>
 ;<04.01.000002>
 getProcesses(ignoreSelf := True, searchNames := "") {                                 		;-- get running processes with search using comma separated list
 
@@ -1116,7 +1110,7 @@ getProcesses(ignoreSelf := True, searchNames := "") {                           
 	}
 	DllCall("FreeLibrary", "Ptr", hModule)  ; unload the library to free memory
 	return array
-}
+} ;</04.01.000002>
 ;<04.01.000003>
 GetProcessWorkingDir(PID) {																				;-- like the name explains
 
@@ -1147,9 +1141,9 @@ GetProcessWorkingDir(PID) {																				;-- like the name explains
 
 	return nDir
 
-}
+} ;</04.01.000003>
 ;<04.01.000004>
-GetTextSize(pStr, pSize, pFont, pWeight = 400, pHeight = false) {						;-- precalcute the Textsize (Width & Height)
+GetTextSize(pStr, pSize, pFont, pWeight:= 400, pHeight:= false) {						;-- precalcute the Textsize (Width & Height)
 
   Gui, 55: Font, s%pSize% w%pWeight%, %pFont%
   Gui, 55: Add, Text, R1, %pStr%
@@ -1157,7 +1151,7 @@ GetTextSize(pStr, pSize, pFont, pWeight = 400, pHeight = false) {						;-- preca
   Gui, 55: Destroy
   Return pHeight ? TW "," TH : TW
 
-}
+} ;</04.01.000004>
 ;<04.01.000005>
 GetTextSize(pStr, pFont="", pHeight=false, pAdd=0) {										;-- different function to the above one
 	
@@ -1233,7 +1227,7 @@ GetTextSize(pStr, pFont="", pHeight=false, pAdd=0) {										;-- different func
 		resW = W%resW% H%resH%
 
 	return	%resW%
-}
+} ;</04.01.000005>
 ;<04.01.000006>
 MeasureText(hwnd,text,Font,size, layout) {                                                     	;-- alternative to other functions which calculate the text size before display on the screen
     
@@ -1272,7 +1266,7 @@ MeasureText(hwnd,text,Font,size, layout) {                                      
     
    Gdip_Shutdown(pToken) 
    Return, Width 
-} 
+} ;</04.01.000006>
 ;<04.01.000007>
 monitorInfo() {																										;-- shows infos about your monitors
 	sysget,monitorCount,monitorCount
@@ -1289,7 +1283,7 @@ monitorInfo() {																										;-- shows infos about your monitors
 	for k,v in sorted
 		arr2.insert(arr[v])
 	return arr2
-}
+} ;</04.01.000008>
 ;<04.01.000008>
 whichMonitor(x="",y="",byref monitorInfo="") { 												;-- return [current monitor, monitor count]
 	CoordMode,mouse,screen
@@ -1301,9 +1295,9 @@ whichMonitor(x="",y="",byref monitorInfo="") { 												;-- return [current m
 	for k,v in monitorInfo
 		if (x>=v.l&&x<=v.r&&y>=v.t&&y<=v.b)
 			return [k,monitorInfo.maxIndex()]
-}
+} ;</04.01.000008>
 ;<04.01.000009>
-IsOfficeFile(FileName, Extensions = "doc,docx,xls,xlsx,ppt,pptx") { 					;-- checks if a file is an Office file
+IsOfficeFile(FileName, Extensions:= "doc,docx,xls,xlsx,ppt,pptx") { 					;-- checks if a file is an Office file
 
 	;  Last update: 2014-4-23
 
@@ -1369,7 +1363,7 @@ IsOfficeFile(FileName, Extensions = "doc,docx,xls,xlsx,ppt,pptx") { 					;-- che
 	Loop, Parse, Extensions, CSV, %A_Space%%A_Tab%
 		If (  InStr(hex, %A_LoopField%)  )
 			Return A_LoopField
-}
+} ;</04.01.000009>
 ;<04.01.000010>
 DeskIcons(coords="") {																						;-- i think its for showing all desktop icons
 
@@ -1412,7 +1406,7 @@ DeskIcons(coords="") {																						;-- i think its for showing all desk
    }
    DllCall("CloseHandle", "UInt", hProcess)
    return ret
-}
+} ;</04.01.000010>
 ;<04.01.000011>
 GetFuncDefs(scriptPath) {                                                                                	;-- get function definitions from a script
 
@@ -1454,7 +1448,7 @@ GetFuncDefs(scriptPath) {                                                       
 	} until !foundPos
 	
 	return defs
-}
+} ;</04.01.000011>
 ;<04.01.000012>
 IndexOfIconResource(Filename, ID) {                                                              	;-- function is used to convert an icon resource id (as those used in the registry) to icon index(as used by ahk)
 	
@@ -1476,10 +1470,9 @@ IndexOfIconResource(Filename, ID) {                                             
         DllCall("FreeLibrary", "PTR", hmod)
     
     return NumGet(param,8) ? NumGet(param,4) : 0
-}
-{ ;belongs to IndexOfIconResource()
+} ;</04.01.000012>
 ;<04.01.000013>
-IndexOfIconResource_EnumIconResources(hModule, lpszType, lpszName, lParam) {  ;-- sub of IndexOfIconResource()
+IndexOfIconResource_EnumIconResources(hModule, lpszType, lpszName, lParam) {  ;-- subfunction of IndexOfIconResource()
 	
 	;By Lexikos http://www.autohotkey.com/community/viewtopic.php?p=168951
     NumPut(NumGet(lParam+4)+1, lParam+4)
@@ -1490,8 +1483,7 @@ IndexOfIconResource_EnumIconResources(hModule, lpszType, lpszName, lParam) {  ;-
         return false    ; break
     }
     return true
-}
-} ;belong end
+} ;</04.01.000013>
 ;<04.01.000014>
 GetIconforext(ext) {                                                                                         	;-- Gets default registered icon for an extension
 	
@@ -1513,7 +1505,7 @@ GetIconforext(ext) {                                                            
 			Regread, DefaultIcon, HKCR, %Application%\DefaultIcon
 	}
     Return DefaultIcon
-}
+} ;</04.01.000014>
 ;<04.01.000015>
 GetImageType(PID) {																							;-- returns whether a process is 32bit or 64bit
 
@@ -1533,13 +1525,13 @@ GetImageType(PID) {																							;-- returns whether a process is 32bit
     DllCall("CloseHandle", "Ptr", hProc)
 
     Return (Is32Bit) ? "32-bit" : "64-bit"
-}
+} ;</04.01.000015>
 ;<04.01.000016>
 GetProcessName(hwnd) {																					;-- Gets the process name from a window handle.
 	
 	WinGet, ProcessName, processname, ahk_id %hwnd%
 	return ProcessName
-}
+} ;</04.01.000016>
 ;<04.01.000017>
 GetDisplayOrientation() {																					;-- working function to get the orientation of screen
 	
@@ -1555,7 +1547,7 @@ GetDisplayOrientation() {																					;-- working function to get the or
 			dmDisplayOrientation := NumGet(DEVMODE, 84, "UInt")
 	VarSetCapacity(DEVMODE, 0)
 	Return dmDisplayOrientation
-}
+} ;</04.01.000018>
 ;<04.01.000018>
 GetSysErrorText(errNr) { 																						;-- method to get meaningful data out of the error codes
 
@@ -1571,7 +1563,7 @@ GetSysErrorText(errNr) { 																						;-- method to get meaningful data
      , "UInt", bufferSize
      , "UInt", 0)
   Return buffer
-}
+} ;</04.01.000018>
 ;<04.01.000019>
 getSysLocale() { 																									;-- gets the system language 
 
@@ -1586,7 +1578,7 @@ getSysLocale() { 																									;-- gets the system language
 			,"Int",LOCALE_SISO3166CTRYNAME:=90
 			,"Str",buf_b,"Int",9)
 	return buf_a "-" buf_b
-}
+} ;</04.01.000019>
 ;<04.01.000020>
 GetThreadStartAddr(ProcessID) {                                                                     	;-- returns start adresses from all threads of a process
 	
@@ -1629,7 +1621,7 @@ GetThreadStartAddr(ProcessID) {                                                 
     }
 
     return Addr, DllCall("CloseHandle", "ptr", hSnapshot) && DllCall("FreeLibrary", "ptr", hModule)
-}
+} ;</04.01.000020>
 ;<04.01.000021>
 ScriptExist(scriptname) {                                                                                     	;-- true oder false if Script is running or not
 
@@ -1689,10 +1681,9 @@ GetStartupWindowState() {                                                       
     if state := states[wShowWindow]
         return state
     return wShowWindow
-} ;</04.01.000021>
-
+} ;</04.01.000022>
 } 
-;|   GetProcesses()                         	|   GetProcessWorkingDir()           	|   GetTextSize()                            	|   GetTextSize()                            	|
+;|   GetProcesses(01)                        	|   GetProcessWorkingDir(02)          	|   GetTextSize(03)                           	|   GetTextSize(04)                           	|
 ;|   MeasureText()                           	|   monitorInfo()                           	|   whichMonitor()                        	|   IsOfficeFile()                             	|
 ;|   DeskIcons()                              	|   GetFuncDefs()                          	|   IndexOfIconResource()             	|   GetIconforext()                         	|
 ;|   GetImageType()                       	|   GetProcessName()                   	|   GetDisplayOrientation()           	|   GetSysErrorText()                     	|
@@ -1702,7 +1693,7 @@ GetStartupWindowState() {                                                       
 
 { ;graphic (61) - 																																				baseID: <05>
 ;<05.01.000001>
-LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="",         		;--Loads a picture and returns an HBITMAP or HICON to the caller
+LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="",       		;-- Loads a picture and returns an HBITMAP or HICON to the caller
 aIconNumber:=0, aUseGDIPlusIfAvailable:=1) {
 
 	; Returns NULL on failure.
@@ -2291,24 +2282,23 @@ CreateSurface(monitor := 0, window := 0) {															;-- creates a drawing G
 
 	return DrawSurface_Hwnd
 }
-{ ;belongs to CreateSurface
 ;<05.01.000007>
-ShowSurface() {                                                                                                   	;-- sub for CreateSurface
+ShowSurface() {                                                                                                   	;-- subfunction for CreateSurface
 	WinGet, active_win, ID, A
 	Gui DrawSurface:Show
 	WinActivate, ahk_id %active_win%
 }
 ;<05.01.000008>
-HideSurface() {                                                                                                     	;-- sub for CreateSurface
+HideSurface() {                                                                                                     	;-- subfunction for CreateSurface
 	Gui DrawSurface:Submit
 }
 ;<05.01.000009>
-WipeSurface(hwnd) {                                                                                              	;-- sub for CreateSurface
+WipeSurface(hwnd) {                                                                                              	;-- subfunction for CreateSurface
 	DllCall("InvalidateRect", UInt, hwnd, UInt, 0, Int, 1)
     DllCall("UpdateWindow", UInt, hwnd)
 }
 ;<05.01.000010>
-StartDraw(wipe := true) {                                                                                        	;-- sub for CreateSurface
+StartDraw(wipe := true) {                                                                                        	;-- subfunction for CreateSurface
 
 	global DrawSurface_Hwnd
 
@@ -2320,12 +2310,12 @@ StartDraw(wipe := true) {                                                       
     return HDC
 }
 ;<05.01.000011>
-EndDraw(hdc) {                                                                                                    	;-- sub for CreateSurface
+EndDraw(hdc) {                                                                                                    	;-- subfunction for CreateSurface
 	global DrawSurface_Hwnd
 	DllCall("ReleaseDC", Int, DrawSurface_Hwnd, Int, hdc)
 }
 ;<05.01.000012>
-SetPen(color, thickness, hdc) {                                                                               	;-- sub for CreateSurface
+SetPen(color, thickness, hdc) {                                                                               	;-- subfunction for CreateSurface
 
 	global DrawSurface_Hwnd
 
@@ -2340,7 +2330,6 @@ SetPen(color, thickness, hdc) {                                                 
     DllCall("SelectObject", Int, hdc, Int, pen)
 
 }
-} ;belongs end
 ;<05.01.000013>
 DrawLine(hdc, rX1, rY1, rX2, rY2) {																			;-- used DLLCall to draw a line
 
@@ -2693,14 +2682,14 @@ CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "") {         
 	CaptureScreen("100, 100, 200, 200")
 	CaptureScreen("100, 100, 200, 200, 400, 400")   ; Zoomed
 
-	related functions:			can be found in library
-			   Unicode4Ansi	-			CoHelper.ahk
-	 		   Ansi4Unicode	-			CoHelper.ahk
-				    	Zoomer	-			this library or ScreenCapture.ahk
-	 	 CreateDIBSection	-			Gdip_all.ahk
-	  SaveHBITMAPToFile	-			this library or ScreenCapture.ahk
-		 SetClipboardData	-			Gdip_all.ahk
-						Convert	-			this library
+	related functions:			can be found in the following librari
+											Unicode4Ansi          	-		CoHelper.ahk
+			                            	Ansi4Unicode          	-		CoHelper.ahk
+                                         	Zoomer                    	-		this library or ScreenCapture.ahk
+	                                		CreateDIBSection    	-		Gdip_all.ahk
+                                    		SaveHBITMAPToFile	-		this library or ScreenCapture.ahk
+	                                		SetClipboardData    	-		Gdip_all.ahk
+											Convert                    	-			this library
 	*/
 
 	If (!aRect) {
@@ -2754,9 +2743,8 @@ CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "") {         
 	Else Convert(hBM, sFile, nQuality), DllCall("DeleteObject", "Uint", hBM)
 
 }
-{ ;belongs to CaptureScreen()
 ;<05.01.000025>
-CaptureCursor(hDC, nL, nT) {																					;-- sub for CaptureScreen() - this captures the cursor
+CaptureCursor(hDC, nL, nT) {																					;-- subfunction for CaptureScreen() - this captures the cursor
 
 	VarSetCapacity(mi, 20, 0)
 	mi := Chr(20)
@@ -2782,7 +2770,7 @@ CaptureCursor(hDC, nL, nT) {																					;-- sub for CaptureScreen() - t
 
 }
 ;<05.01.000026>
-Zoomer(hBM, nW, nH, znW, znH) {																			;-- sub for CaptureScreen() - zooms a HBitmap, depending function of CaptureScreen()
+Zoomer(hBM, nW, nH, znW, znH) {																			;-- subfunction for CaptureScreen() - zooms a HBitmap, depending function of CaptureScreen()
 
 	mDC1 := DllCall("CreateCompatibleDC", "Uint", 0)
 	mDC2 := DllCall("CreateCompatibleDC", "Uint", 0)
@@ -2800,7 +2788,7 @@ Zoomer(hBM, nW, nH, znW, znH) {																			;-- sub for CaptureScreen() - 
 
 }
 ;<05.01.000027>
-Convert(sFileFr = "", sFileTo = "", nQuality = "") {													;-- sub for CaptureScreen() - converts from one picture format to another one, depending on Gdip restriction only .bmp, .jpg, .png is possible
+Convert(sFileFr = "", sFileTo = "", nQuality = "") {													;-- subfunction for CaptureScreen() - converts from one picture format to another one, depending on Gdip restriction only .bmp, .jpg, .png is possible
 
 	/*			DESCRIPTION AND DEPENDING FUNCTIONS
 
@@ -2866,7 +2854,7 @@ Convert(sFileFr = "", sFileTo = "", nQuality = "") {													;-- sub for Cap
 	DllCall("FreeLibrary", "Uint", hGdiPlus)
 }
 ;<05.01.000028>
-SaveHBITMAPToFile(hBitmap, sFile) {																		;-- sub for CaptureScreen() - saves a HBitmap to a file
+SaveHBITMAPToFile(hBitmap, sFile) {																		;-- subfunction for CaptureScreen() - saves a HBitmap to a file
 
 	DllCall("GetObject", "Uint", hBitmap, "int", VarSetCapacity(oi,84,0), "Uint", &oi)
 	hFile:=	DllCall("CreateFile", "Uint", &sFile, "Uint", 0x40000000, "Uint", 0, "Uint", 0, "Uint", 2, "Uint", 0, "Uint", 0)
@@ -2876,7 +2864,6 @@ SaveHBITMAPToFile(hBitmap, sFile) {																		;-- sub for CaptureScreen()
 	DllCall("WriteFile", "Uint", hFile, "Uint", NumGet(oi,20), "Uint", NumGet(oi,44), "UintP", 0, "Uint", 0)
 	DllCall("CloseHandle", "Uint", hFile)
 }
-} ;belongs end
 ;<05.01.000029>
 RGBRange(x, y=0, c=0, delim=",") {                                                                     	;-- returns an array for a color transition from x to y
 
@@ -3157,7 +3144,6 @@ CreateBMPGradient(File, RGB1, RGB2, Vertical=1) {                               
 	   DllCall("CloseHandle", "Uint", Handle)
 
 }
-{ ;belongs to CreateBMPGradient()
 ;<05.01.000034>
 BGR(RGB) {																									        	;-- BGR() subfunction from CreateBMPGradient()
 
@@ -3165,7 +3151,6 @@ BGR(RGB) {																									        	;-- BGR() subfunction from CreateBMP
 		Return SubStr(RGB,-1) . SubStr(RGB,-3,2) . SubStr(RGB,-5,2)
 
 }
-} ;belongs end
 ;<05.01.000035>
 CreatePatternBrushFrom(hbm, x, y, w, h) {                                                          	;-- as it says
 
@@ -3359,21 +3344,19 @@ xPos:="center",yPos:="center",guiId:=1) {
     Gdip_SetCompositingMode(G, 1)
     Return {hwnd:hwnd, hdc:hdc, obm:obm, hbm:hbm, pen:pen, G:G, diameter: diameter, thickness:thickness, xPos:xPos, yPos:yPos, width:width, height:height}
 }
-{ ; belongs for CreateCircleProgress
 ;<05.01.000038>
-UpdateCircleProgress(circleObj,percent) {                                                          	;-- sub for CreateCircleProgress
+UpdateCircleProgress(circleObj,percent) {                                                          	;-- subfunction for CreateCircleProgress
     Gdip_Drawarc(circleObj.G, circleObj.pen, circleObj.thickness, circleObj.thickness, circleObj.diameter, circleObj.diameter, 270, 360/100*percent)
     UpdateLayeredWindow(circleObj.hwnd, circleObj.hdc, circleObj.xPos, circleObj.yPos, circleObj.width, circleObj.height)
 }
 ;<05.01.000039>
-DestroyCircleProgress(circleObj) {                                                                       	;-- sub for CreateCircleProgress
+DestroyCircleProgress(circleObj) {                                                                       	;-- subfunction for CreateCircleProgress
     Gui % circleObj.hwnd ":Destroy"
     SelectObject(circleObj.hdc, circleObj.obm)
     DeleteObject(circleObj.hbm)
     DeleteDC(circleObj.hdc)
     Gdip_DeleteGraphics(circleObj.G)
 }
-} ;belongs end
 ;<05.01.000040>
 RGBrightnessToHex(r := 0, g := 0, b := 0, brightness := 1) {                               	;-- transform rbg (with brightness) values to hex 
 	;https://autohotkey.com/boards/viewtopic.php?f=6&p=191294
@@ -3514,7 +3497,6 @@ Convert_BlackWhite(InputImage, OutputImage) {                                   
 
     return
 }
-{ ;belongs to Convert_BlackWhite
 ;<05.01.000047>
  BlackWhite(pBitmap, ByRef pBitmapOut, Width, Height)       {                           	;-- sub from Convert_BlackWhite
            global blackwhite
@@ -3524,7 +3506,6 @@ Convert_BlackWhite(InputImage, OutputImage) {                                   
            Gdip_UnlockBits(pBitmap, BitmapData1), Gdip_UnlockBits(pBitmapOut, BitmapData2)
            return (R)
         }
-} ;belongs end
 ;<05.01.000048>
 getHBMinfo( hBM ) {                                                                                           	;--
 Local SzBITMAP := ( A_PtrSize = 8 ? 32 : 24 ),  BITMAP := VarSetCapacity( BITMAP, SzBITMAP )       
@@ -4142,18 +4123,15 @@ get_png_image_info(filename) {                                                  
 		   , interlace: interlace
 		   , filename: filename }
 }
-;{ sub of get_png_image_info()
-byte_swap_32(x) {	;-- sub of get_png_image_info(), change endian-ness for 32-bit integer
+byte_swap_32(x) {                                                                                                	;-- subfunction of get_png_image_info(), change endian-ness for 32-bit integer
 	return ((x >> 24) & 0xff)
 		 | ((x <<  8) & 0xff0000)
 		 | ((x >>  8) & 0xff00)
 		 | ((x << 24) & 0xff000000)
 }
-
-print_line(str) { ;-- sub of get_png_image_info(),  output line to STDOUT for debugging in my text editor (sublime)
+print_line(str) {                                                                                                       	;-- subfunction of get_png_image_info(),  output line to STDOUT for debugging in my text editor (sublime)
 	FileAppend, %str%`n, *
-}
-;}
+} ;</05.01.000060>
 ;<05.01.000061>
 GetBitmapFromAnything(Anything) {                                                                 	;-- Supports paths, icon handles and hBitmaps
 	
@@ -4220,178 +4198,175 @@ Image_TextBox(Text:="", FilePath:="", SavePath:="", Options*) {                 
 	-------------------------------------------------------------------------------------------------------------------
 	|	EXAMPLE(s)
 	-------------------------------------------------------------------------------------------------------------------
-	
-	Image_TextBox("Example Text","Image_Test.PNG",, "FontSize=48", "Weight=6", "Margin=10", "Style=Bold",  "Align=Right vCenter", "BoxSize=200,100", "Pos=-20,-.20", "BoxColor=55000000", "Render=5")
+	Example1:
+			Image_TextBox("Example Text","Image_Test.PNG",, "FontSize=48", "Weight=6", "Margin=10", "Style=Bold",  "Align=Right vCenter", "BoxSize=200,100", "Pos=-20,-.20", "BoxColor=55000000", "Render=5")
+			
+	Example2:
+				; Default Options
+			FontSize:=24, Font:="Arial",  Style:="Regular", Align:="Center vCenter", Margin:=0, TextColor:="ffffffff", BoxColor:="ff000000", BorderColor:="ffff0000", Weight:="2", Render:=0, Pos:="Bottom Left", Quality:=75, BoxSize:="Auto"
+			; Options as Named Parameters
+			for key, Option in Options
+			{
+				Opt := StrSplit(Option, "=")
+				var := Opt.1, val := Opt.2
+				%var% := val
+			}
+			; Startup Gdip
+			if !pToken
+			{
+				If !pToken := Gdip_Startup()
+				{
+				   MsgBox, 48, Gdip+ Error!, Gdip+ failed to start. Please ensure you have Gdip+ on your system.
+				   ExitApp
+				}
+				else
+				{
+					OnExit, Exit_Image_TextBox
+					If !Gdip_FontFamilyCreate(Font)
+					{
+					   MsgBox, 48, Font Error!, The font you have specified does not exist on the system.
+					   ExitApp
+					}
+				}
+			}
+			; Get Bitmap, Graphics, Pen, and Brush
+			if FilePath
+				pBitmapFile := Gdip_CreateBitmapFromFile(FilePath)
+			else
+				pBitmapFile := Gdip_CreateBitmapFromClipboard()
+			pG := Gdip_GraphicsFromImage(pBitmapFile)
+			Gdip_SetSmoothingMode(pG, 4)
+			pPen := Gdip_CreatePen("0x" BorderColor, Weight)
+			pBrush := Gdip_BrushCreateSolid("0x" BoxColor)
+			; Get Width and Height of components
+			Width := Gdip_GetImageWidth(pBitmapFile)
+			Height := Gdip_GetImageHeight(pBitmapFile)
+			if (!BoxSize or BoxSize="Auto")
+			{
+				Options :=  "c" TextColor " s" FontSize " r" Render " " Style " " Align
+				Measure := StrSplit(Gdip_TextToGraphics(pG, Text, Options, Font,,,true), "|")
+				Box_Width := Measure.3 + (Weight * 2) + (Margin * 2)
+				Box_Height := Measure.4 + (Weight * 2) + (Margin * 2)
+			}
+			else
+			{
+				XY := StrSplit(BoxSize, ",")
+				Box_Width := XY.1, Box_Height := XY.2
+			}
+			; Process Number Box Position Options
+			if InStr(Pos, ",")
+			{
+				XY := StrSplit(Pos, ",")
+				if (0 < XY.1 and XY.1 < 1)
+					Box_X := Width * XY.1
+				else if (-1 < XY.1 and XY.1 < 0)
+					Box_X := Width + (Width * XY.1) - Box_Width - 1
+				else if (XY.1 < 0)
+					Box_X := Width + XY.1 - Box_Width  - 1 
+				else
+					Box_X := XY.1
+				if (0 < XY.2 and XY.2 < 1)
+					Box_Y := Height * XY.2
+				else if (-1 < XY.2 and XY.2 < 0)
+					Box_Y := Height + (Height * XY.2) - Box_Height - 1
+				else if (XY.2 < 0)
+					Box_Y := Height + XY.2 - Box_Height - 1
+				else
+					Box_Y := XY.2
+				Pos := XY.3
+			}
+			; Process Word Box Position Options
+			if InStr(Pos, "Left")
+				Box_X := 0
+			else if InStr(Pos, "Right")
+				Box_X := Width - Box_Width - 1
+			else if (Pos ~= "(?<!v)Center")
+				Box_X := (Width - Box_Width) / 2 - 1
+			if InStr(Pos, "Bottom")
+				Box_Y := Height - Box_Height - 1
+			else if InStr(Pos, "Top")
+				Box_Y := 0
+			else if InStr(Pos, "vCenter")
+				Box_Y := (Height - Box_Height) / 2 - 1
+			Border_X := Box_X + Weight / 2, Border_Y := Box_Y + Weight / 2
+			Border_Width := Box_Width - Weight, Border_Height := Box_Height - Weight
+			; Text X, Y, Width, Height
+			Padding := Margin + Weight
+			Text_X := Box_X + Padding - 1, Text_Y := Box_Y + Padding - 1
+			Text_Width := Box_Width - (Padding * 2), Text_Height := Box_Height - (Padding * 2)
+			; Draw Box, Border, and Text
+			Gdip_FillRectangle(pG, pBrush, Box_X, Box_Y, Box_Width, Box_Height)
+			if Weight
+				Gdip_DrawRectangle(pG, pPen, Border_X, Border_Y, Border_Width, Border_Height)
+			Options := "c" TextColor " s" FontSize " r" Render " " Style " " Align " x" Text_X " y" Text_Y 
+			Gdip_TextToGraphics(pG, Text, Options, Font, Text_Width, Text_Height)
+			; Process Result
+			if  SavePath
+				Gdip_SaveBitmapToFile(pBitmapFile, SavePath, Quality)
+			else
+				Gdip_SetBitmapToClipboard(pBitmapFile)
+			; Destroy Pen, Brush, Bitmap, and Graphic
+			Gdip_DeletePen(pPen)
+			Gdip_DeleteBrush(pBrush)
+			Gdip_DisposeImage(pBitmapFile)
+			Gdip_DeleteGraphics(pG)
+			return
+			; On Exit, make sure all Pointers Destroyed and Gdip Shutdown
+			Exit_Image_TextBox:
+				Gdip_DeletePen(pPen)
+				Gdip_DeleteBrush(pBrush)
+				Gdip_DisposeImage(pBitmapFile)
+				Gdip_DeleteGraphics(pG)
+				Gdip_Shutdown(pToken)
+				ExitApp
+			return
+		}
+		{ ;#Include [Function] Image_TextBox.ahk
+
+		F1::
+			send !{PrintScreen} ; get an image of current window on the clipboard for testing
+			Sleep 500
+			Comment = Default Bottom Left`nSize to Fit`nCenter Text
+			Image_TextBox(Comment)
+			DisplayClipboardInGui()
+		return
+
+		F2::
+			send !{PrintScreen} ; get an image of current window on the clipboard for testing
+			Sleep 500
+			Comment = Bigger Font with Style`nPostion 30 from Left`n150 from Bottom
+			Image_TextBox(Comment,,, "FontSize=36", "Weight=6", "Margin=10", "Style=Bold",  "Pos=30,-150")
+			DisplayClipboardInGui()
+		return
+
+		F3::
+			send !{PrintScreen} ; get an image of current window on the clipboard for testing
+			Sleep 500
+			Comment = Bigger Font with Style`nText Aligned Right with Vertical Center Text Wrap`nSpecific Box Size`nPostion 15`% from Right`n10`% from Top`nColor Fill with Transparent
+			Image_TextBox(Comment,,, "FontSize=36", "Weight=6", "Margin=10", "Style=Bold",  "Align=Right vCenter", "BoxSize=515,400", "Pos=-.15,.10", "BoxColor=55ff0000", "Render=5")
+			DisplayClipboardInGui()
+		return
+		
+		; display modified image on clipboard in GUI
+		DisplayClipboardInGui() {
+			
+			static
+			Gui, Destroy
+			if DllCall("OpenClipboard", "uint", 0) {
+				if DllCall("IsClipboardFormatAvailable", "uint", 8) {
+					hBitmap := DllCall("GetClipboardData", "uint", 2)
+				}
+				DllCall("CloseClipboard")
+			}
+			Gui, Add, Pic, vPic, % "HBITMAP:*" hBitmap
+			Gui, Show
+		}
+
+		Esc::ExitApp
 	
 	*/
-	
-	; Default Options
-	FontSize:=24, Font:="Arial",  Style:="Regular", Align:="Center vCenter", Margin:=0, TextColor:="ffffffff", BoxColor:="ff000000", BorderColor:="ffff0000", Weight:="2", Render:=0, Pos:="Bottom Left", Quality:=75, BoxSize:="Auto"
-	; Options as Named Parameters
-	for key, Option in Options
-	{
-		Opt := StrSplit(Option, "=")
-		var := Opt.1, val := Opt.2
-		%var% := val
-	}
-	; Startup Gdip
-	if !pToken
-	{
-		If !pToken := Gdip_Startup()
-		{
-		   MsgBox, 48, Gdip+ Error!, Gdip+ failed to start. Please ensure you have Gdip+ on your system.
-		   ExitApp
-		}
-		else
-		{
-			OnExit, Exit_Image_TextBox
-			If !Gdip_FontFamilyCreate(Font)
-			{
-			   MsgBox, 48, Font Error!, The font you have specified does not exist on the system.
-			   ExitApp
-			}
-		}
-	}
-	; Get Bitmap, Graphics, Pen, and Brush
-	if FilePath
-		pBitmapFile := Gdip_CreateBitmapFromFile(FilePath)
-	else
-		pBitmapFile := Gdip_CreateBitmapFromClipboard()
-	pG := Gdip_GraphicsFromImage(pBitmapFile)
-	Gdip_SetSmoothingMode(pG, 4)
-	pPen := Gdip_CreatePen("0x" BorderColor, Weight)
-	pBrush := Gdip_BrushCreateSolid("0x" BoxColor)
-	; Get Width and Height of components
-	Width := Gdip_GetImageWidth(pBitmapFile)
-	Height := Gdip_GetImageHeight(pBitmapFile)
-	if (!BoxSize or BoxSize="Auto")
-	{
-		Options :=  "c" TextColor " s" FontSize " r" Render " " Style " " Align
-		Measure := StrSplit(Gdip_TextToGraphics(pG, Text, Options, Font,,,true), "|")
-		Box_Width := Measure.3 + (Weight * 2) + (Margin * 2)
-		Box_Height := Measure.4 + (Weight * 2) + (Margin * 2)
-	}
-	else
-	{
-		XY := StrSplit(BoxSize, ",")
-		Box_Width := XY.1, Box_Height := XY.2
-	}
-	; Process Number Box Position Options
-	if InStr(Pos, ",")
-	{
-		XY := StrSplit(Pos, ",")
-		if (0 < XY.1 and XY.1 < 1)
-			Box_X := Width * XY.1
-		else if (-1 < XY.1 and XY.1 < 0)
-			Box_X := Width + (Width * XY.1) - Box_Width - 1
-		else if (XY.1 < 0)
-			Box_X := Width + XY.1 - Box_Width  - 1 
-		else
-			Box_X := XY.1
-		if (0 < XY.2 and XY.2 < 1)
-			Box_Y := Height * XY.2
-		else if (-1 < XY.2 and XY.2 < 0)
-			Box_Y := Height + (Height * XY.2) - Box_Height - 1
-		else if (XY.2 < 0)
-			Box_Y := Height + XY.2 - Box_Height - 1
-		else
-			Box_Y := XY.2
-		Pos := XY.3
-	}
-	; Process Word Box Position Options
-	if InStr(Pos, "Left")
-		Box_X := 0
-	else if InStr(Pos, "Right")
-		Box_X := Width - Box_Width - 1
-	else if (Pos ~= "(?<!v)Center")
-		Box_X := (Width - Box_Width) / 2 - 1
-	if InStr(Pos, "Bottom")
-		Box_Y := Height - Box_Height - 1
-	else if InStr(Pos, "Top")
-		Box_Y := 0
-	else if InStr(Pos, "vCenter")
-		Box_Y := (Height - Box_Height) / 2 - 1
-	Border_X := Box_X + Weight / 2, Border_Y := Box_Y + Weight / 2
-	Border_Width := Box_Width - Weight, Border_Height := Box_Height - Weight
-	; Text X, Y, Width, Height
-	Padding := Margin + Weight
-	Text_X := Box_X + Padding - 1, Text_Y := Box_Y + Padding - 1
-	Text_Width := Box_Width - (Padding * 2), Text_Height := Box_Height - (Padding * 2)
-	; Draw Box, Border, and Text
-	Gdip_FillRectangle(pG, pBrush, Box_X, Box_Y, Box_Width, Box_Height)
-	if Weight
-		Gdip_DrawRectangle(pG, pPen, Border_X, Border_Y, Border_Width, Border_Height)
-	Options := "c" TextColor " s" FontSize " r" Render " " Style " " Align " x" Text_X " y" Text_Y 
-	Gdip_TextToGraphics(pG, Text, Options, Font, Text_Width, Text_Height)
-	; Process Result
-	if  SavePath
-		Gdip_SaveBitmapToFile(pBitmapFile, SavePath, Quality)
-	else
-		Gdip_SetBitmapToClipboard(pBitmapFile)
-	; Destroy Pen, Brush, Bitmap, and Graphic
-	Gdip_DeletePen(pPen)
-	Gdip_DeleteBrush(pBrush)
-	Gdip_DisposeImage(pBitmapFile)
-	Gdip_DeleteGraphics(pG)
-	return
-	; On Exit, make sure all Pointers Destroyed and Gdip Shutdown
-	Exit_Image_TextBox:
-		Gdip_DeletePen(pPen)
-		Gdip_DeleteBrush(pBrush)
-		Gdip_DisposeImage(pBitmapFile)
-		Gdip_DeleteGraphics(pG)
-		Gdip_Shutdown(pToken)
-		ExitApp
-	return
-}
-{ ;#Include [Function] Image_TextBox.ahk
-
-F1::
-	send !{PrintScreen} ; get an image of current window on the clipboard for testing
-	Sleep 500
-	Comment = Default Bottom Left`nSize to Fit`nCenter Text
-	Image_TextBox(Comment)
-	DisplayClipboardInGui()
-return
-
-F2::
-	send !{PrintScreen} ; get an image of current window on the clipboard for testing
-	Sleep 500
-	Comment = Bigger Font with Style`nPostion 30 from Left`n150 from Bottom
-	Image_TextBox(Comment,,, "FontSize=36", "Weight=6", "Margin=10", "Style=Bold",  "Pos=30,-150")
-	DisplayClipboardInGui()
-return
-
-F3::
-	send !{PrintScreen} ; get an image of current window on the clipboard for testing
-	Sleep 500
-	Comment = Bigger Font with Style`nText Aligned Right with Vertical Center Text Wrap`nSpecific Box Size`nPostion 15`% from Right`n10`% from Top`nColor Fill with Transparent
-	Image_TextBox(Comment,,, "FontSize=36", "Weight=6", "Margin=10", "Style=Bold",  "Align=Right vCenter", "BoxSize=515,400", "Pos=-.15,.10", "BoxColor=55ff0000", "Render=5")
-	DisplayClipboardInGui()
-return
-
-; display modified image on clipboard in GUI
-DisplayClipboardInGui() {
-	
-	static
-	Gui, Destroy
-	if DllCall("OpenClipboard", "uint", 0) {
-		if DllCall("IsClipboardFormatAvailable", "uint", 8) {
-			hBitmap := DllCall("GetClipboardData", "uint", 2)
-		}
-		DllCall("CloseClipboard")
-	}
-	Gui, Add, Pic, vPic, % "HBITMAP:*" hBitmap
-	Gui, Show
-}
-
-Esc::ExitApp
 } ;</05.01.000062>
-;<05.01.000063>
 
- ;</05.01.000063>
-
-;</05.01>
 } 
 ;|   LoadPicture(01)                       	|   GetImageDimensionProperty(02)	|   GetImageDimensions(03)         	|   Gdip_FillRoundedRectangle(04)	|
 ;|   Redraw(hwnd=0)                    	|   CreateSurface()                        	|   ShowSurface()                          	|   HideSurface()                           	|
@@ -4411,7 +4386,7 @@ Esc::ExitApp
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;gui customize (22) -- full gui functions, custom gui elements - 																	baseID: <06.01>
+{ ;gui - customize (22) -- full gui functions, custom gui elements -- 																baseID: <06.01>
 ;<06.01.000001>
 HtmlBox(Html, Title="", Timeout=0, Permanent=False,                            				;-- Gui with ActiveX - Internet Explorer - Control
 GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="W400 H300", Margin=10, Hotkey=True) {
@@ -5220,14 +5195,14 @@ URLPrefGui(p_w, p_l, p_m, p_hw)   {                                             
 	
 			     Thanks to shimanov for this function
 				 
-			     Details under http://www.autohotkey.com/forum/viewtopic.php?p=37805 <-- link is dead
-			     a bit different but uses the same function: https://autohotkey.com/board/topic/5896-gui-hyperlink/ 
-			     p_w             : WPARAM value
-			     p_l             : LPARAM value
-			     p_m             : message number
-			     p_hw            : window handle HWND
+			     Link         	:  	http://www.autohotkey.com/forum/viewtopic.php?p=37805 <-- link is dead
+										a bit different but uses the same function: https://autohotkey.com/board/topic/5896-gui-hyperlink/ 
+			     Parameter	:  	p_w            	: WPARAM value
+										p_l             	: LPARAM value
+										p_m          	: message number
+										p_hw          	: window handle HWND
 			    
-			     Further details can be found in the documentation for 'OnMessage()'
+			     Remark(s)	:	Further details can be found in the documentation for 'OnMessage()'
 				 
 	*/
 	/*                              	EXAMPLE(s)
@@ -5471,14 +5446,11 @@ TT_Console(msg, keys, x="", y="", fontops=""                                    
 	/*			DESCRIPTION
 			TT_Console() v0.03
 				Use Tooltip as a User Interface
-			By:
-				Avi Aryan
-			Info:
-				keys - stores space separated values of keys that are prompted for a user input
-				font_options - Font options as in Gui ( eg -> s8 bold underline )
-				font_face - Font face names. Separate them by a | to set prority
-			Returns >
-				The key which has been pressed
+			By:				Avi Aryan
+			Info:				keys - stores space separated values of keys that are prompted for a user input
+			            		font_options - Font options as in Gui ( eg -> s8 bold underline )
+			            		font_face - Font face names. Separate them by a | to set prority
+			Returns:   	The key which has been pressed
 	*/
 
 	/*			EXAMPLE
@@ -5748,7 +5720,7 @@ SafeInput(Title, Prompt, Default = "") {     ;-- makes sure the same window stay
 ;|   ToolTipEx()                                	|   SafeInput()                                 	|   DisableCloseButton()               	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;gui - to change (19) -- change position, fading, remove - 																			baseID: <06.02>
+{ ;gui - to change (21) -- change position, fading, remove -- 																			baseID: <06.02>
 ;<06.02.000001>
 FadeGui(guihwnd, fading_time, inout) {                                                                    	;-- used DllCall to Animate (Fade in/out) a window
 
@@ -5761,7 +5733,7 @@ FadeGui(guihwnd, fading_time, inout) {                                          
 		DllCall("user32\AnimateWindow", "ptr", guihwnd, "uint", fading_time, "uint", AW_BLEND)    ; Fade In
 
 return
-}
+} ;</06.02.000001>
 ;<06.02.000002>
 WinFadeToggle(WinTitle, Duration := 1, Hide := false) {	                                        	;-- smooth fading in out a window
 
@@ -5823,7 +5795,7 @@ WinFadeToggle(WinTitle, Duration := 1, Hide := false) {	                        
 		}
 
 		Return ErrorMessage
-	}
+} ;</06.02.000002>
 ;<06.02.000003>
 winfade(w:="",t:=128,i:=1,d:=10) {                                                                           	;-- another winfade function
 	
@@ -5840,13 +5812,13 @@ winfade(w:="",t:=128,i:=1,d:=10) {                                              
 		WinSet,Transparent,%s%,%w%
 		sleep %d%
 	}
-}
+} ;</06.02.000001>
 ;<06.02.000004>
 ShadowBorder(handle) {                                                                                          	;-- used DllCall to draw a shadow around a gui
 
     DllCall("user32.dll\SetClassLongPtr", "ptr", handle, "int", -26, "ptr", DllCall("user32.dll\GetClassLongPtr", "ptr", handle, "int", -26, "uptr") | 0x20000)
 
-}
+} ;</06.02.000004>
 ;<06.02.000005>
 FrameShadow(handle) {																				            	;-- FrameShadow1
     DllCall("dwmapi.dll\DwmIsCompositionEnabled", "int*", DwmEnabled)
@@ -5857,7 +5829,7 @@ FrameShadow(handle) {																				            	;-- FrameShadow1
         DllCall("dwmapi.dll\DwmSetWindowAttribute", "ptr", handle, "uint", 2, "ptr*", 2, "uint", 4)
         DllCall("dwmapi.dll\DwmExtendFrameIntoClientArea", "ptr", handle, "ptr", &MARGINS)
     }
-}
+} ;</06.02.000005>
 ;<06.02.000006>
 FrameShadow(HGui) {																					            	;-- FrameShadow(): Drop Shadow On Borderless Window, (DWM STYLE)
 
@@ -5921,14 +5893,12 @@ RemoveWindowFromTaskbar(WinTitle) {															    	;-- remove the active win
     return
 
 }
-{ ;sub of RemoveWindowFromTaskbar()
-vtable(ptr, n) {																												;-- sub of RemoveWindowFromTaskbar(), ; NumGet(ptr+0) returns the address of the object's virtual function
+vtable(ptr, n) {																												;-- subfunction of RemoveWindowFromTaskbar(), ; NumGet(ptr+0) returns the address of the object's virtual function
     ; NumGet(ptr+0) returns the address of the object's virtual function
     ; table (vtable for short). The remainder of the expression retrieves
     ; the address of the nth function's address from the vtable.
     return NumGet(NumGet(ptr+0), n*A_PtrSize)
-}
-} ; end sub
+} ;</06.02.000007>
 ;<06.02.000008>
 ToggleTitleMenuBar(ahkid:=0, bHideTitle:=1, bHideMenuBar:=0) {				         	;-- show or hide Titlemenubar
 
@@ -5942,7 +5912,7 @@ ToggleTitleMenuBar(ahkid:=0, bHideTitle:=1, bHideMenuBar:=0) {				         	;-- 
         WinSet, Style, ^0x40000, ahk_id %ahkid%      ; menubar toggle
     }
 
-}
+} ;</06.02.000008>
 ;<06.02.000009>
 ToggleFakeFullscreen() {																				            	;-- sets styles to a window to look like a fullscreen
 
@@ -6072,7 +6042,6 @@ SetTaskbarProgress(State, hWnd := "") { 														        	;-- modified func
 						
 	*/
 
-
 	/*		EXAMPLE
 
 		Gui, Font, s15
@@ -6118,7 +6087,6 @@ SetTaskbarProgress(State, hWnd := "") { 														        	;-- modified func
 		return DllCall(NumGet(NumGet(ppv+0)+10*A_PtrSize), "Ptr", ppv, "Ptr", hWnd, "UInt", s%State%)
 	return DllCall(NumGet(NumGet(ppv+0)+9*A_PtrSize), "Ptr", ppv, "Ptr", hWnd, "Int64", State * 10, "Int64", 1000)
 }
-{ ; belongs to SetTaskbarProgress
 ;<06.02.000014>
 InVar(Haystack, Needle, Delimiter := ",", OmitChars := "") {										;-- sub of SetTaskbarProgress, parsing list search
 	Loop, Parse, % Needle, %Delimiter%, %OmitChars%
@@ -6133,7 +6101,6 @@ IsWindow(hWnd*) {																										;-- sub of SetTaskbarProgress, differ
 	return i := DllCall("User32.dll\IsWindow", "Ptr", hWnd[1] )
 		, ErrorLevel := !i
 }
-} ;belongs end
 ;<06.02.000016>
 WinSetPlacement(hwnd, x="",y="",w="",h="",state="") {											;-- Sets window position using workspace coordinates (-> no taskbar)
 	
@@ -6287,445 +6254,442 @@ SetGuiClassStyle(HGUI, Style) {                                                 
 ;   GetGuiClassStyle(21)                  	|   SetGuiClassStyle(22)                  	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;gui control type (57) -- specialized functions for controls - 																			baseID: <06.03>
+{ ;gui - control type (57) -- specialized functions for controls -- 																		baseID: <06.03>
 
-		{ ;01: ComboBox 			(1)
-			
-				;<06.03.01.000001>
-				GetComboBoxChoice(TheList, TheCurrent) {																	;-- Combobox function
-
-	; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
-	TheValue := -1
-
-	Loop % TheList.Length() {
-		If (TheCurrent == TheList[A_Index]) {
-			TheValue := A_Index
-			Break
-		}
-	}
-	TheList := JoinArray(TheList, "|")
-
-	Return {"Index": TheValue, "Choices": TheList}
-}
-
-		} 
-
-		{ ;02: Edit and HEdit 	(7)
-			
-				;<06.03.02.000001>
-				Edit_Standard_Params(ByRef Control, ByRef WinTitle) {  								;-- these are helper functions to use with edit controls
-					if (Control="A" && WinTitle="") { ; Control is "A", use focused control.
-						ControlGetFocus, Control, A
-						WinTitle = A
-					} else if (Control+0!="" && WinTitle="") {  ; Control is numeric, assume its a ahk_id.
-						WinTitle := "ahk_id " . Control
-						Control =
-					}
-				}
-				;<06.03.02.000002>
-				Edit_TextIsSelected(Control="", WinTitle="") {												;-- returns bool if text is selected in an edit control
-					; Returns true if text is selected, otherwise false.
-				;
-					Edit_Standard_Params(Control, WinTitle)
-					return Edit_GetSelection(start, end, Control, WinTitle) and (start!=end)
-				}
-				;<06.03.02.000003>
-				Edit_GetSelection(ByRef start, ByRef end, Control="", WinTitle="") {				;-- get selected text in an edit control
-					; Gets the start and end offset of the current selection.
-				;
-					Edit_Standard_Params(Control, WinTitle)
-					VarSetCapacity(start, 4), VarSetCapacity(end, 4)
-					SendMessage, 0xB0, &start, &end, %Control%, %WinTitle%  ; EM_GETSEL
-					if (ErrorLevel="FAIL")
-						return false
-					start := NumGet(start), end := NumGet(end)
-					return true
-				}
-				;<06.03.02.000004>
-				Edit_Select(start=0, end=-1, Control="", WinTitle="") {									;-- selects text inside in an edit control
-					; Selects text in a text box, given absolute character positions (starting at 0.)
-					;
-					; start:    Starting character offset, or -1 to deselect.
-					; end:      Ending character offset, or -1 for "end of text."
-					;
-
-					Edit_Standard_Params(Control, WinTitle)
-					SendMessage, 0xB1, start, end, %Control%, %WinTitle%  ; EM_SETSEL
-					return (ErrorLevel != "FAIL")
-				}
-				;<06.03.02.000005>
-				Edit_SelectLine(line=0, include_newline=false, Control="", WinTitle="") {		;-- selects one line in an edit control
-						; Selects a line of text.
-					;
-					; line:             One-based line number, or 0 to select the current line.
-					; include_newline:  Whether to also select the line terminator (`r`n).
-					;
-
-					Edit_Standard_Params(Control, WinTitle)
-
-					ControlGet, hwnd, Hwnd,, %Control%, %WinTitle%
-					if (!WinExist("ahk_id " hwnd))
-						return false
-
-					if (line<1)
-						ControlGet, line, CurrentLine
-
-					SendMessage, 0xBB, line-1, 0  ; EM_LINEINDEX
-					offset := ErrorLevel
-
-					SendMessage, 0xC1, offset, 0  ; EM_LINELENGTH
-					lineLen := ErrorLevel
-
-					if (include_newline) {
-						WinGetClass, class
-						lineLen += (class="Edit") ? 2 : 1 ; `r`n : `n
-					}
-
-					; Select the line.
-					SendMessage, 0xB1, offset, offset+lineLen  ; EM_SETSEL
-					return (ErrorLevel != "FAIL")
-				}
-				;<06.03.02.000006>
-				Edit_DeleteLine(line=0, Control="", WinTitle="") {											;-- delete one line in an edit control
-						; Deletes a line of text.
-				;
-				; line:     One-based line number, or 0 to delete current line.
-				;
-
-					Edit_Standard_Params(Control, WinTitle)
-					; Select the line.
-					if (Edit_SelectLine(line, true, Control, WinTitle))
-					{   ; Delete it.
-						ControlSend, %Control%, {Delete}, %WinTitle%
-						return true
-					}
-					return false
-				}
-				;<06.03.02.000007>
-				Edit_VCenter(HEDIT) {																						;-- Vertically Align Text for edit controls
-
-					; by just me, http://ahkscript.org/boards/viewtopic.php?f=5&t=4673#p44099
-					; the Edit control must have the ES_MULTILINE style (0x0004 \ +Multi)!
-					; EM_GETRECT := 0x00B2 <- msdn.microsoft.com/en-us/library/bb761596(v=vs.85).aspx
-					; EM_SETRECT := 0x00B3 <- msdn.microsoft.com/en-us/library/bb761657(v=vs.85).aspx
-
-					VarSetCapacity(RC, 16, 0)
-					DllCall("User32.dll\GetClientRect", "Ptr", HEDIT, "Ptr", &RC)
-					CLHeight := NumGet(RC, 12, "Int")
-					SendMessage, 0x0031, 0, 0, , ahk_id %HEDIT% ; WM_GETFONT
-					HFONT := ErrorLevel
-					HDC := DllCall("GetDC", "Ptr", HEDIT, "UPtr")
-					DllCall("SelectObject", "Ptr", HDC, "Ptr", HFONT)
-					VarSetCapacity(RC, 16, 0)
-					DTH := DllCall("DrawText", "Ptr", HDC, "Str", "W", "Int", 1, "Ptr", &RC, "UInt", 0x2400)
-					DllCall("ReleaseDC", "Ptr", HEDIT, "Ptr", HDC)
-					SendMessage, 0x00BA, 0, 0, , ahk_id %HEDIT% ; EM_GETLINECOUNT
-					TXHeight := DTH * ErrorLevel
-					If (TXHeight > CLHeight)
-							Return False
-					VarSetCapacity(RC, 16, 0)
-					SendMessage, 0x00B2, 0, &RC, , ahk_id %HEDIT%
-					DY := (CLHeight - TXHeight) // 2
-					NumPut(DY, RC, 4, "Int")
-					NumPut(TXHeight + DY, RC, 12, "Int")
-					SendMessage, 0x00B3, 0, &RC, , ahk_id %HEDIT%
-
-				}
-
-		} 
-
-		{ ;03: ImageList 			(2)
-			
-				;<06.03.03.000001>
-				IL_LoadIcon(FullFilePath, IconNumber := 1, LargeIcon := 1) {										;-- no description
-	HIL := IL_Create(1, 1, !!LargeIcon)
-	IL_Add(HIL, FullFilePath, IconNumber)
-	HICON := DllCall("Comctl32.dll\ImageList_GetIcon", "Ptr", HIL, "Int", 0, "UInt", 0, "UPtr")
-	IL_Destroy(HIL)
-	return HICON
-}
-				;<06.03.03.000002>
-				IL_GuiButtonIcon(Handle, File, Index := 1, Options := "") {											;-- no description
-
-	RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
-	RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
-	RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
-	RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
-	RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
-	RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
-	RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
-	RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
-	Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
-	VarSetCapacity( button_il, 20 + Psz, 0 )
-	NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )   ; Width & Height
-	NumPut( L, button_il, 0 + Psz, DW )     ; Left Margin
-	NumPut( T, button_il, 4 + Psz, DW )     ; Top Margin
-	NumPut( R, button_il, 8 + Psz, DW )     ; Right Margin
-	NumPut( B, button_il, 12 + Psz, DW )    ; Bottom Margin
-	NumPut( A, button_il, 16 + Psz, DW )    ; Alignment
-	SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
-	return IL_Add( normal_il, File, Index )
-
-}
-
-		} 
-
-		{ ;04: Listbox 				(3)
-			
-				;<06.03.04.000001>
-				LB_AdjustItemHeight(HListBox, Adjust) {																	;-- Listbox function
-	; https://autohotkey.com/board/topic/89793-set-height-of-listbox-rows/
-	; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
-	Return LB_SetItemHeight(HListBox, LB_GetItemHeight(HListBox) + Adjust)
-}
-				;<06.03.04.000002>
-				LB_GetItemHeight(HListBox) {																						;-- Listbox function
-	; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
-	Static LB_GETITEMHEIGHT := 0x01A1
-	SendMessage, %LB_GETITEMHEIGHT%, 0, 0, , ahk_id %HListBox%
-	Return ErrorLevel
-}
-				;<06.03.04.000003>
-				LB_SetItemHeight(HListBox, NewHeight) {																	;-- Listbox function
-	; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
-	Static LB_SETITEMHEIGHT := 0x01A0
-	SendMessage, %LB_SETITEMHEIGHT%, 0, %NewHeight%, , ahk_id %HListBox%
-	WinSet, Redraw, , ahk_id %HListBox%
-	Return ErrorLevel
-}
-
-		} 
-
-		{ ;05: Listview 				(36)
-			
-				;<06.03.05.000001>
-				LV_GetCount(hLV) {																											;-- get current count of notes in from any listview 
-
-	;https://autohotkey.com/boards/viewtopic.php?t=26317
-	;hLV - Listview handle
-
-	c := DllCall("SendMessage", "uint", hLV, "uint", 0x18B) ; LB_GETCOUNT
-	return c
-
-}
-				;<06.03.05.000002>
-				LV_SetSelColors(HLV, BkgClr := "", TxtClr := "", Dummy := "") {										;-- sets the colors for selected rows in a listView.
-
-	; ==================================================================================================================================
-	; Sets the colors for selected rows in a ListView.
-	; Parameters:
-	;     HLV      -  handle (HWND) of the ListView control.
-	;     BkgClr   -  background color as RGB integer value (0xRRGGBB).
-	;                 If omitted or empty the ListViews's background color will be used.
-	;     TxtClr   -  text color as RGB integer value (0xRRGGBB).
-	;                 If omitted or empty the ListView's text color will be used.
-	;                 If both BkgColor and TxtColor are omitted or empty the control will be reset to use the default colors.
-	;     Dummy    -  must be omitted or empty!!!
-	; Return value:
-	;     No return value.
-	; Remarks:
-	;     The function adds a handler for WM_NOTIFY messages to the chain of existing handlers.
-	; ==================================================================================================================================
-
-   Static OffCode := A_PtrSize * 2              ; offset of code        (NMHDR)
-        , OffStage := A_PtrSize * 3             ; offset of dwDrawStage (NMCUSTOMDRAW)
-        , OffItem := (A_PtrSize * 5) + 16       ; offset of dwItemSpec  (NMCUSTOMDRAW)
-        , OffItemState := OffItem + A_PtrSize   ; offset of uItemState  (NMCUSTOMDRAW)
-        , OffClrText := (A_PtrSize * 8) + 16    ; offset of clrText     (NMLVCUSTOMDRAW)
-        , OffClrTextBk := OffClrText + 4        ; offset of clrTextBk   (NMLVCUSTOMDRAW)
-        , Controls := {}
-        , MsgFunc := Func("LV_SetSelColors")
-        , IsActive := False
-   Local Item, H, LV, Stage
-   If (Dummy = "") { ; user call ------------------------------------------------------------------------------------------------------
-      If (BkgClr = "") && (TxtClr = "")
-         Controls.Delete(HLV)
-      Else {
-         If (BkgClr <> "")
-            Controls[HLV, "B"] := ((BkgClr & 0xFF0000) >> 16) | (BkgClr & 0x00FF00) | ((BkgClr & 0x0000FF) << 16) ; RGB -> BGR
-         If (TxtClr <> "")
-            Controls[HLV, "T"] := ((TxtClr & 0xFF0000) >> 16) | (TxtClr & 0x00FF00) | ((TxtClr & 0x0000FF) << 16) ; RGB -> BGR
-      }
-
-      If (Controls.MaxIndex() = "") {
-         If (IsActive) {
-            OnMessage(0x004E, MsgFunc, 0)
-            IsActive := False
-      }  } Else If !(IsActive) {
-         OnMessage(0x004E, MsgFunc)
-         IsActive := True
-   }  }
-   Else { ; system call ------------------------------------------------------------------------------------------------------------
-      ; HLV : wParam, BkgClr : lParam, TxtClr : uMsg, Dummy : hWnd
-      H := NumGet(BkgClr + 0, "UPtr")
-      If (LV := Controls[H]) && (NumGet(BkgClr + OffCode, "Int") = -12) { ; NM_CUSTOMDRAW
-         Stage := NumGet(BkgClr + OffStage, "UInt")
-         If (Stage = 0x00010001) { ; CDDS_ITEMPREPAINT
-            Item := NumGet(BkgClr + OffItem, "UPtr")
-            If DllCall("SendMessage", "Ptr", H, "UInt", 0x102C, "Ptr", Item, "Ptr", 0x0002, "UInt") { ; LVM_GETITEMSTATE, LVIS_SELECTED
-               ; The trick: remove the CDIS_SELECTED (0x0001) and CDIS_FOCUS (0x0010) states from uItemState and set the colors.
-               NumPut(NumGet(BkgClr + OffItemState, "UInt") & ~0x0011, BkgClr + OffItemState, "UInt")
-               If (LV.B <> "")
-                  NumPut(LV.B, BkgClr + OffClrTextBk, "UInt")
-               If (LV.T <> "")
-                  NumPut(LV.T, BkgClr + OffClrText, "UInt")
-               Return 0x02 ; CDRF_NEWFONT
-         }  }
-         Else If (Stage = 0x00000001) ; CDDS_PREPAINT
-            Return 0x20 ; CDRF_NOTIFYITEMDRAW
-         Return 0x00 ; CDRF_DODEFAULT
-}  }  }
-				;<06.03.05.000003>
-				LV_Select(r:=1, Control:="", WinTitle:="") {																		;-- select/deselect 1 to all rows of a listview
-
-	; Modified from http://www.autohotkey.com/board/topic/54752-listview-select-alldeselect-all/?p=343662
-	; Examples: LVSel(1 , "SysListView321", "Win Title")   ; Select row 1. (or use +1)
-	;           LVSel(-1, "SysListView321", "Win Title")   ; Deselect row 1
-	;           LVSel(+0, "SysListView321", "Win Title")   ; Select all
-	;           LVSel(-0, "SysListView321", "Win Title")   ; Deselect all
-	;           LVSel(+0,                 , "ahk_id " HLV) ; Use listview's hwnd
-
-	VarSetCapacity(LVITEM, 4*15, 0) ;Do *13 if you're not on Vista or Win 7 (see MSDN)
-
-	state := InStr(r, "-") ? 0x00000000 : 0x00000002
-	NumPut(0x00000008, LVITEM, 4*0) ;mask = LVIF_STATE
-	NumPut(state,      LVITEM, 4*3) ;state = <second LSB must be 1>
-	NumPut(0x0002,     LVITEM, 4*4) ;stateMask = LVIS_SELECTED
-
-	;LVM_SETITEMSTATE = LVM_FIRST + 43
-	r := RegExReplace(r, "\D") - 1
-	SendMessage, 0x1000 + 43, r, &LVITEM, %Control%, %WinTitle%
-
-}
-				;<06.03.05.000004>
-				LV_GetItemText(item_index, sub_index, ctrl_id, win_id) {												;-- read the text from an item in a ListView
-
-		; https://autohotkey.com/board/topic/18299-reading-listview-of-another-app/
-		; code from Tigerite
-
-		/* 			Example
-
-			F4::
-			pList = ahk_class TPlayerListForm
-			WinGet, active_id, ID, %pList%
-			;WinGet, active_id, ID, ahk_class TPlayerListForm
-			;MsgBox, The active window's ID is "%a_id%".
-
-			p0 := LV_GetItemText((0, 2, "TListView1", active_id)
-			p1 := LV_GetItemText((1, 2, "TListView1", active_id)
-			p2 := LV_GetItemText((2, 2, "TListView1", active_id)
-			p3 := LV_GetItemText((3, 2, "TListView1", active_id)
-			p4 := LV_GetItemText((4, 2, "TListView1", active_id)
-			p5 := LV_GetItemText((5, 2, "TListView1", active_id)
-			MsgBox %p0%`n %p1%`n %p2%`n %p3%`n %p4%`n %p5%
-			Return
-
-		*/
-
-        ;const
-        MAX_TEXT = 260
-
-        VarSetCapacity(szText, MAX_TEXT, 0)
-        VarSetCapacity(szClass, MAX_TEXT, 0)
-        ControlGet, hListView, Hwnd, , %ctrl_id%, ahk_id %win_id%
-        DllCall("GetClassName", UInt,hListView, Str,szClass, Int,MAX_TEXT)
-        if (DllCall("lstrcmpi", Str,szClass, Str,"SysListView32") == 0 || DllCall("lstrcmpi", Str,szClass, Str,"TListView") == 0)
-        {
-            LVGet_Text(hListView, item_index, sub_index, szText, MAX_TEXT)
-        }
-
-        return %szText%
-    }
-				;<06.03.05.000005>
-				LV_GetText(hListView,iItem,iSubItem,ByRef lpString,nMaxCount) {									;-- get text by item and subitem from a Listview
-        ;const
-        NULL := 0
-        PROCESS_ALL_ACCESS := 0x001F0FFF
-        INVALID_HANDLE_VALUE := 0xFFFFFFFF
-        PAGE_READWRITE := 4
-        FILE_MAP_WRITE := 2
-        MEM_COMMIT := 0x1000
-        MEM_RELEASE := 0x8000
-        LV_ITEM_mask := 0
-        LV_ITEM_iItem := 4
-        LV_ITEM_iSubItem := 8
-        LV_ITEM_state := 12
-        LV_ITEM_stateMask := 16
-        LV_ITEM_pszText := 20
-        LV_ITEM_cchTextMax := 24
-        LVIF_TEXT := 1
-        LVM_GETITEM = 0x1005
-        SIZEOF_LV_ITEM = 0x28
-        SIZEOF_TEXT_BUF = 0x104
-        SIZEOF_BUF = 0x120
-        SIZEOF_INT = 4
-        SIZEOF_POINTER = 4
-
-        ;var
-        result := 0
-        hProcess := NULL
-        dwProcessId := 0
-
-        if lpString <> NULL && nMaxCount > 0
-        {
-            DllCall("lstrcpy", Str,lpString, Str,"")
-            DllCall("GetWindowThreadProcessId", UInt,hListView, UIntP,dwProcessId)
-            hProcess := DllCall("OpenProcess", UInt,PROCESS_ALL_ACCESS, Int,false, UInt,dwProcessId)
-            if hProcess <> NULL
-            {
-                ;var
-                lpProcessBuf := NULL
-                hMap := NULL
-                hKernel := DllCall("GetModuleHandle", Str,"kernel32.dll", UInt)
-                pVirtualAllocEx := DllCall("GetProcAddress", UInt,hKernel, Str,"VirtualAllocEx", UInt)
-
-                if pVirtualAllocEx == NULL
-                {
-                    hMap := DllCall("CreateFileMapping", UInt,INVALID_HANDLE_VALUE, Int,NULL, UInt,PAGE_READWRITE, UInt,0, UInt,SIZEOF_BUF, UInt)
-                    if hMap <> NULL
-                        lpProcessBuf := DllCall("MapViewOfFile", UInt,hMap, UInt,FILE_MAP_WRITE, UInt,0, UInt,0, UInt,0, UInt)
-                }
-                else
-                {
-                    lpProcessBuf := DllCall("VirtualAllocEx", UInt,hProcess, UInt,NULL, UInt,SIZEOF_BUF, UInt,MEM_COMMIT, UInt,PAGE_READWRITE)
-                }
-
-                if lpProcessBuf <> NULL
-                {
-                    ;var
-                    VarSetCapacity(buf, SIZEOF_BUF, 0)
-
-                    InsertInteger(LVIF_TEXT, buf, LV_ITEM_mask, SIZEOF_INT)
-                    InsertInteger(iItem, buf, LV_ITEM_iItem, SIZEOF_INT)
-                    InsertInteger(iSubItem, buf, LV_ITEM_iSubItem, SIZEOF_INT)
-                    InsertInteger(lpProcessBuf + SIZEOF_LV_ITEM, buf, LV_ITEM_pszText, SIZEOF_POINTER)
-                    InsertInteger(SIZEOF_TEXT_BUF, buf, LV_ITEM_cchTextMax, SIZEOF_INT)
-
-                    if DllCall("WriteProcessMemory", UInt,hProcess, UInt,lpProcessBuf, UInt,&buf, UInt,SIZEOF_BUF, UInt,NULL) <> 0
-                        if DllCall("SendMessage", UInt,hListView, UInt,LVM_GETITEM, Int,0, Int,lpProcessBuf) <> 0
-                            if DllCall("ReadProcessMemory", UInt,hProcess, UInt,lpProcessBuf, UInt,&buf, UInt,SIZEOF_BUF, UInt,NULL) <> 0
-                            {
-                                DllCall("lstrcpyn", Str,lpString, UInt,&buf + SIZEOF_LV_ITEM, Int,nMaxCount)
-                                result := DllCall("lstrlen", Str,lpString)
-                            }
-                }
-
-                if lpProcessBuf <> NULL
-                    if pVirtualAllocEx <> NULL
-                        DllCall("VirtualFreeEx", UInt,hProcess, UInt,lpProcessBuf, UInt,0, UInt,MEM_RELEASE)
-                    else
-                        DllCall("UnmapViewOfFile", UInt,lpProcessBuf)
-
-                if hMap <> NULL
-                    DllCall("CloseHandle", UInt,hMap)
-
-                DllCall("CloseHandle", UInt,hProcess)
-            }
-        }
-        return result
-    }
-				{ ;Sub of LV_GetItemText and LV_GetText
+{ ;<06.03.01>: ComboBox 		(1)
 	
+		;<06.03.01.000001>
+		GetComboBoxChoice(TheList, TheCurrent) {																	;-- Combobox function
+			; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
+			TheValue := -1
+
+			Loop % TheList.Length() {
+				If (TheCurrent == TheList[A_Index]) {
+					TheValue := A_Index
+					Break
+				}
+			}
+			TheList := JoinArray(TheList, "|")
+
+			Return {"Index": TheValue, "Choices": TheList}
+		}
+
+} 
+
+{ ;<06.03.02>: Edit and HEdit 	(7)
+	
+		;<06.03.02.000001>
+		Edit_Standard_Params(ByRef Control, ByRef WinTitle) {  								;-- these are helper functions to use with edit controls
+			if (Control="A" && WinTitle="") { ; Control is "A", use focused control.
+				ControlGetFocus, Control, A
+				WinTitle = A
+			} else if (Control+0!="" && WinTitle="") {  ; Control is numeric, assume its a ahk_id.
+				WinTitle := "ahk_id " . Control
+				Control =
+			}
+		}
+		;<06.03.02.000002>
+		Edit_TextIsSelected(Control="", WinTitle="") {												;-- returns bool if text is selected in an edit control
+			; Returns true if text is selected, otherwise false.
+		;
+			Edit_Standard_Params(Control, WinTitle)
+			return Edit_GetSelection(start, end, Control, WinTitle) and (start!=end)
+		}
+		;<06.03.02.000003>
+		Edit_GetSelection(ByRef start, ByRef end, Control="", WinTitle="") {				;-- get selected text in an edit control
+			; Gets the start and end offset of the current selection.
+		;
+			Edit_Standard_Params(Control, WinTitle)
+			VarSetCapacity(start, 4), VarSetCapacity(end, 4)
+			SendMessage, 0xB0, &start, &end, %Control%, %WinTitle%  ; EM_GETSEL
+			if (ErrorLevel="FAIL")
+				return false
+			start := NumGet(start), end := NumGet(end)
+			return true
+		}
+		;<06.03.02.000004>
+		Edit_Select(start=0, end=-1, Control="", WinTitle="") {									;-- selects text inside in an edit control
+			; Selects text in a text box, given absolute character positions (starting at 0.)
+			;
+			; start:    Starting character offset, or -1 to deselect.
+			; end:      Ending character offset, or -1 for "end of text."
+			;
+
+			Edit_Standard_Params(Control, WinTitle)
+			SendMessage, 0xB1, start, end, %Control%, %WinTitle%  ; EM_SETSEL
+			return (ErrorLevel != "FAIL")
+		}
+		;<06.03.02.000005>
+		Edit_SelectLine(line=0, include_newline=false, Control="", WinTitle="") {		;-- selects one line in an edit control
+				; Selects a line of text.
+			;
+			; line:             One-based line number, or 0 to select the current line.
+			; include_newline:  Whether to also select the line terminator (`r`n).
+			;
+
+			Edit_Standard_Params(Control, WinTitle)
+
+			ControlGet, hwnd, Hwnd,, %Control%, %WinTitle%
+			if (!WinExist("ahk_id " hwnd))
+				return false
+
+			if (line<1)
+				ControlGet, line, CurrentLine
+
+			SendMessage, 0xBB, line-1, 0  ; EM_LINEINDEX
+			offset := ErrorLevel
+
+			SendMessage, 0xC1, offset, 0  ; EM_LINELENGTH
+			lineLen := ErrorLevel
+
+			if (include_newline) {
+				WinGetClass, class
+				lineLen += (class="Edit") ? 2 : 1 ; `r`n : `n
+			}
+
+			; Select the line.
+			SendMessage, 0xB1, offset, offset+lineLen  ; EM_SETSEL
+			return (ErrorLevel != "FAIL")
+		}
+		;<06.03.02.000006>
+		Edit_DeleteLine(line=0, Control="", WinTitle="") {											;-- delete one line in an edit control
+				; Deletes a line of text.
+		;
+		; line:     One-based line number, or 0 to delete current line.
+		;
+
+			Edit_Standard_Params(Control, WinTitle)
+			; Select the line.
+			if (Edit_SelectLine(line, true, Control, WinTitle))
+			{   ; Delete it.
+				ControlSend, %Control%, {Delete}, %WinTitle%
+				return true
+			}
+			return false
+		}
+		;<06.03.02.000007>
+		Edit_VCenter(HEDIT) {																						;-- Vertically Align Text for edit controls
+
+			; by just me, http://ahkscript.org/boards/viewtopic.php?f=5&t=4673#p44099
+			; the Edit control must have the ES_MULTILINE style (0x0004 \ +Multi)!
+			; EM_GETRECT := 0x00B2 <- msdn.microsoft.com/en-us/library/bb761596(v=vs.85).aspx
+			; EM_SETRECT := 0x00B3 <- msdn.microsoft.com/en-us/library/bb761657(v=vs.85).aspx
+
+			VarSetCapacity(RC, 16, 0)
+			DllCall("User32.dll\GetClientRect", "Ptr", HEDIT, "Ptr", &RC)
+			CLHeight := NumGet(RC, 12, "Int")
+			SendMessage, 0x0031, 0, 0, , ahk_id %HEDIT% ; WM_GETFONT
+			HFONT := ErrorLevel
+			HDC := DllCall("GetDC", "Ptr", HEDIT, "UPtr")
+			DllCall("SelectObject", "Ptr", HDC, "Ptr", HFONT)
+			VarSetCapacity(RC, 16, 0)
+			DTH := DllCall("DrawText", "Ptr", HDC, "Str", "W", "Int", 1, "Ptr", &RC, "UInt", 0x2400)
+			DllCall("ReleaseDC", "Ptr", HEDIT, "Ptr", HDC)
+			SendMessage, 0x00BA, 0, 0, , ahk_id %HEDIT% ; EM_GETLINECOUNT
+			TXHeight := DTH * ErrorLevel
+			If (TXHeight > CLHeight)
+					Return False
+			VarSetCapacity(RC, 16, 0)
+			SendMessage, 0x00B2, 0, &RC, , ahk_id %HEDIT%
+			DY := (CLHeight - TXHeight) // 2
+			NumPut(DY, RC, 4, "Int")
+			NumPut(TXHeight + DY, RC, 12, "Int")
+			SendMessage, 0x00B3, 0, &RC, , ahk_id %HEDIT%
+
+		}
+
+} 
+
+{ ;<06.03.03>: ImageList 			(2)
+	
+		;<06.03.03.000001>
+		IL_LoadIcon(FullFilePath, IconNumber := 1, LargeIcon := 1) {										;-- no description
+			HIL := IL_Create(1, 1, !!LargeIcon)
+			IL_Add(HIL, FullFilePath, IconNumber)
+			HICON := DllCall("Comctl32.dll\ImageList_GetIcon", "Ptr", HIL, "Int", 0, "UInt", 0, "UPtr")
+			IL_Destroy(HIL)
+			return HICON
+		}
+		;<06.03.03.000002>
+		IL_GuiButtonIcon(Handle, File, Index := 1, Options := "") {											;-- no description
+			RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
+			RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
+			RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
+			RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
+			RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
+			RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
+			RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
+			RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
+			Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
+			VarSetCapacity( button_il, 20 + Psz, 0 )
+			NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )   ; Width & Height
+			NumPut( L, button_il, 0 + Psz, DW )     ; Left Margin
+			NumPut( T, button_il, 4 + Psz, DW )     ; Top Margin
+			NumPut( R, button_il, 8 + Psz, DW )     ; Right Margin
+			NumPut( B, button_il, 12 + Psz, DW )    ; Bottom Margin
+			NumPut( A, button_il, 16 + Psz, DW )    ; Alignment
+			SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
+			return IL_Add( normal_il, File, Index )
+		}
+
+} 
+
+{ ;<06.03.04>: Listbox 				(3)
+	
+		;<06.03.04.000001>
+		LB_AdjustItemHeight(HListBox, Adjust) {																	;-- Listbox function
+			; https://autohotkey.com/board/topic/89793-set-height-of-listbox-rows/
+			; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
+			Return LB_SetItemHeight(HListBox, LB_GetItemHeight(HListBox) + Adjust)
+		}
+		;<06.03.04.000002>
+		LB_GetItemHeight(HListBox) {																						;-- Listbox function
+			; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
+			Static LB_GETITEMHEIGHT := 0x01A1
+			SendMessage, %LB_GETITEMHEIGHT%, 0, 0, , ahk_id %HListBox%
+			Return ErrorLevel
+		}
+		;<06.03.04.000003>
+		LB_SetItemHeight(HListBox, NewHeight) {																	;-- Listbox function
+			; https://github.com/altbdoor/ahk-hs-chara/blob/master/utility.ahk
+			Static LB_SETITEMHEIGHT := 0x01A0
+			SendMessage, %LB_SETITEMHEIGHT%, 0, %NewHeight%, , ahk_id %HListBox%
+			WinSet, Redraw, , ahk_id %HListBox%
+			Return ErrorLevel
+		}
+
+} 
+
+{ ;<06.03.05>: Listview 			(36)
+	
+		;<06.03.05.000001>
+		LV_GetCount(hLV) {																											;-- get current count of notes in from any listview 
+
+;https://autohotkey.com/boards/viewtopic.php?t=26317
+;hLV - Listview handle
+
+c := DllCall("SendMessage", "uint", hLV, "uint", 0x18B) ; LB_GETCOUNT
+return c
+
+}
+		;<06.03.05.000002>
+		LV_SetSelColors(HLV, BkgClr := "", TxtClr := "", Dummy := "") {										;-- sets the colors for selected rows in a listView.
+
+; ==================================================================================================================================
+; Sets the colors for selected rows in a ListView.
+; Parameters:
+;     HLV      -  handle (HWND) of the ListView control.
+;     BkgClr   -  background color as RGB integer value (0xRRGGBB).
+;                 If omitted or empty the ListViews's background color will be used.
+;     TxtClr   -  text color as RGB integer value (0xRRGGBB).
+;                 If omitted or empty the ListView's text color will be used.
+;                 If both BkgColor and TxtColor are omitted or empty the control will be reset to use the default colors.
+;     Dummy    -  must be omitted or empty!!!
+; Return value:
+;     No return value.
+; Remarks:
+;     The function adds a handler for WM_NOTIFY messages to the chain of existing handlers.
+; ==================================================================================================================================
+
+Static OffCode := A_PtrSize * 2              ; offset of code        (NMHDR)
+, OffStage := A_PtrSize * 3             ; offset of dwDrawStage (NMCUSTOMDRAW)
+, OffItem := (A_PtrSize * 5) + 16       ; offset of dwItemSpec  (NMCUSTOMDRAW)
+, OffItemState := OffItem + A_PtrSize   ; offset of uItemState  (NMCUSTOMDRAW)
+, OffClrText := (A_PtrSize * 8) + 16    ; offset of clrText     (NMLVCUSTOMDRAW)
+, OffClrTextBk := OffClrText + 4        ; offset of clrTextBk   (NMLVCUSTOMDRAW)
+, Controls := {}
+, MsgFunc := Func("LV_SetSelColors")
+, IsActive := False
+Local Item, H, LV, Stage
+If (Dummy = "") { ; user call ------------------------------------------------------------------------------------------------------
+If (BkgClr = "") && (TxtClr = "")
+ Controls.Delete(HLV)
+Else {
+ If (BkgClr <> "")
+	Controls[HLV, "B"] := ((BkgClr & 0xFF0000) >> 16) | (BkgClr & 0x00FF00) | ((BkgClr & 0x0000FF) << 16) ; RGB -> BGR
+ If (TxtClr <> "")
+	Controls[HLV, "T"] := ((TxtClr & 0xFF0000) >> 16) | (TxtClr & 0x00FF00) | ((TxtClr & 0x0000FF) << 16) ; RGB -> BGR
+}
+
+If (Controls.MaxIndex() = "") {
+ If (IsActive) {
+	OnMessage(0x004E, MsgFunc, 0)
+	IsActive := False
+}  } Else If !(IsActive) {
+ OnMessage(0x004E, MsgFunc)
+ IsActive := True
+}  }
+Else { ; system call ------------------------------------------------------------------------------------------------------------
+; HLV : wParam, BkgClr : lParam, TxtClr : uMsg, Dummy : hWnd
+H := NumGet(BkgClr + 0, "UPtr")
+If (LV := Controls[H]) && (NumGet(BkgClr + OffCode, "Int") = -12) { ; NM_CUSTOMDRAW
+ Stage := NumGet(BkgClr + OffStage, "UInt")
+ If (Stage = 0x00010001) { ; CDDS_ITEMPREPAINT
+	Item := NumGet(BkgClr + OffItem, "UPtr")
+	If DllCall("SendMessage", "Ptr", H, "UInt", 0x102C, "Ptr", Item, "Ptr", 0x0002, "UInt") { ; LVM_GETITEMSTATE, LVIS_SELECTED
+	   ; The trick: remove the CDIS_SELECTED (0x0001) and CDIS_FOCUS (0x0010) states from uItemState and set the colors.
+	   NumPut(NumGet(BkgClr + OffItemState, "UInt") & ~0x0011, BkgClr + OffItemState, "UInt")
+	   If (LV.B <> "")
+		  NumPut(LV.B, BkgClr + OffClrTextBk, "UInt")
+	   If (LV.T <> "")
+		  NumPut(LV.T, BkgClr + OffClrText, "UInt")
+	   Return 0x02 ; CDRF_NEWFONT
+ }  }
+ Else If (Stage = 0x00000001) ; CDDS_PREPAINT
+	Return 0x20 ; CDRF_NOTIFYITEMDRAW
+ Return 0x00 ; CDRF_DODEFAULT
+}  }  }
+		;<06.03.05.000003>
+		LV_Select(r:=1, Control:="", WinTitle:="") {																		;-- select/deselect 1 to all rows of a listview
+
+; Modified from http://www.autohotkey.com/board/topic/54752-listview-select-alldeselect-all/?p=343662
+; Examples: LVSel(1 , "SysListView321", "Win Title")   ; Select row 1. (or use +1)
+;           LVSel(-1, "SysListView321", "Win Title")   ; Deselect row 1
+;           LVSel(+0, "SysListView321", "Win Title")   ; Select all
+;           LVSel(-0, "SysListView321", "Win Title")   ; Deselect all
+;           LVSel(+0,                 , "ahk_id " HLV) ; Use listview's hwnd
+
+VarSetCapacity(LVITEM, 4*15, 0) ;Do *13 if you're not on Vista or Win 7 (see MSDN)
+
+state := InStr(r, "-") ? 0x00000000 : 0x00000002
+NumPut(0x00000008, LVITEM, 4*0) ;mask = LVIF_STATE
+NumPut(state,      LVITEM, 4*3) ;state = <second LSB must be 1>
+NumPut(0x0002,     LVITEM, 4*4) ;stateMask = LVIS_SELECTED
+
+;LVM_SETITEMSTATE = LVM_FIRST + 43
+r := RegExReplace(r, "\D") - 1
+SendMessage, 0x1000 + 43, r, &LVITEM, %Control%, %WinTitle%
+
+}
+		;<06.03.05.000004>
+		LV_GetItemText(item_index, sub_index, ctrl_id, win_id) {												;-- read the text from an item in a ListView
+
+; https://autohotkey.com/board/topic/18299-reading-listview-of-another-app/
+; code from Tigerite
+
+/* 			Example
+
+	F4::
+	pList = ahk_class TPlayerListForm
+	WinGet, active_id, ID, %pList%
+	;WinGet, active_id, ID, ahk_class TPlayerListForm
+	;MsgBox, The active window's ID is "%a_id%".
+
+	p0 := LV_GetItemText((0, 2, "TListView1", active_id)
+	p1 := LV_GetItemText((1, 2, "TListView1", active_id)
+	p2 := LV_GetItemText((2, 2, "TListView1", active_id)
+	p3 := LV_GetItemText((3, 2, "TListView1", active_id)
+	p4 := LV_GetItemText((4, 2, "TListView1", active_id)
+	p5 := LV_GetItemText((5, 2, "TListView1", active_id)
+	MsgBox %p0%`n %p1%`n %p2%`n %p3%`n %p4%`n %p5%
+	Return
+
+*/
+
+;const
+MAX_TEXT = 260
+
+VarSetCapacity(szText, MAX_TEXT, 0)
+VarSetCapacity(szClass, MAX_TEXT, 0)
+ControlGet, hListView, Hwnd, , %ctrl_id%, ahk_id %win_id%
+DllCall("GetClassName", UInt,hListView, Str,szClass, Int,MAX_TEXT)
+if (DllCall("lstrcmpi", Str,szClass, Str,"SysListView32") == 0 || DllCall("lstrcmpi", Str,szClass, Str,"TListView") == 0)
+{
+	LVGet_Text(hListView, item_index, sub_index, szText, MAX_TEXT)
+}
+
+return %szText%
+}
+		;<06.03.05.000005>
+		LV_GetText(hListView,iItem,iSubItem,ByRef lpString,nMaxCount) {									;-- get text by item and subitem from a Listview
+;const
+NULL := 0
+PROCESS_ALL_ACCESS := 0x001F0FFF
+INVALID_HANDLE_VALUE := 0xFFFFFFFF
+PAGE_READWRITE := 4
+FILE_MAP_WRITE := 2
+MEM_COMMIT := 0x1000
+MEM_RELEASE := 0x8000
+LV_ITEM_mask := 0
+LV_ITEM_iItem := 4
+LV_ITEM_iSubItem := 8
+LV_ITEM_state := 12
+LV_ITEM_stateMask := 16
+LV_ITEM_pszText := 20
+LV_ITEM_cchTextMax := 24
+LVIF_TEXT := 1
+LVM_GETITEM = 0x1005
+SIZEOF_LV_ITEM = 0x28
+SIZEOF_TEXT_BUF = 0x104
+SIZEOF_BUF = 0x120
+SIZEOF_INT = 4
+SIZEOF_POINTER = 4
+
+;var
+result := 0
+hProcess := NULL
+dwProcessId := 0
+
+if lpString <> NULL && nMaxCount > 0
+{
+	DllCall("lstrcpy", Str,lpString, Str,"")
+	DllCall("GetWindowThreadProcessId", UInt,hListView, UIntP,dwProcessId)
+	hProcess := DllCall("OpenProcess", UInt,PROCESS_ALL_ACCESS, Int,false, UInt,dwProcessId)
+	if hProcess <> NULL
+	{
+		;var
+		lpProcessBuf := NULL
+		hMap := NULL
+		hKernel := DllCall("GetModuleHandle", Str,"kernel32.dll", UInt)
+		pVirtualAllocEx := DllCall("GetProcAddress", UInt,hKernel, Str,"VirtualAllocEx", UInt)
+
+		if pVirtualAllocEx == NULL
+		{
+			hMap := DllCall("CreateFileMapping", UInt,INVALID_HANDLE_VALUE, Int,NULL, UInt,PAGE_READWRITE, UInt,0, UInt,SIZEOF_BUF, UInt)
+			if hMap <> NULL
+				lpProcessBuf := DllCall("MapViewOfFile", UInt,hMap, UInt,FILE_MAP_WRITE, UInt,0, UInt,0, UInt,0, UInt)
+		}
+		else
+		{
+			lpProcessBuf := DllCall("VirtualAllocEx", UInt,hProcess, UInt,NULL, UInt,SIZEOF_BUF, UInt,MEM_COMMIT, UInt,PAGE_READWRITE)
+		}
+
+		if lpProcessBuf <> NULL
+		{
+			;var
+			VarSetCapacity(buf, SIZEOF_BUF, 0)
+
+			InsertInteger(LVIF_TEXT, buf, LV_ITEM_mask, SIZEOF_INT)
+			InsertInteger(iItem, buf, LV_ITEM_iItem, SIZEOF_INT)
+			InsertInteger(iSubItem, buf, LV_ITEM_iSubItem, SIZEOF_INT)
+			InsertInteger(lpProcessBuf + SIZEOF_LV_ITEM, buf, LV_ITEM_pszText, SIZEOF_POINTER)
+			InsertInteger(SIZEOF_TEXT_BUF, buf, LV_ITEM_cchTextMax, SIZEOF_INT)
+
+			if DllCall("WriteProcessMemory", UInt,hProcess, UInt,lpProcessBuf, UInt,&buf, UInt,SIZEOF_BUF, UInt,NULL) <> 0
+				if DllCall("SendMessage", UInt,hListView, UInt,LVM_GETITEM, Int,0, Int,lpProcessBuf) <> 0
+					if DllCall("ReadProcessMemory", UInt,hProcess, UInt,lpProcessBuf, UInt,&buf, UInt,SIZEOF_BUF, UInt,NULL) <> 0
+					{
+						DllCall("lstrcpyn", Str,lpString, UInt,&buf + SIZEOF_LV_ITEM, Int,nMaxCount)
+						result := DllCall("lstrlen", Str,lpString)
+					}
+		}
+
+		if lpProcessBuf <> NULL
+			if pVirtualAllocEx <> NULL
+				DllCall("VirtualFreeEx", UInt,hProcess, UInt,lpProcessBuf, UInt,0, UInt,MEM_RELEASE)
+			else
+				DllCall("UnmapViewOfFile", UInt,lpProcessBuf)
+
+		if hMap <> NULL
+			DllCall("CloseHandle", UInt,hMap)
+
+		DllCall("CloseHandle", UInt,hProcess)
+	}
+}
+return result
+}
+		{ ;Sub of LV_GetItemText and LV_GetText
+
 ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) {					;-- Sub of LV_GetItemText and LV_GetText
 
 ; Original versions of ExtractInteger and InsertInteger provided by Chris
@@ -6737,1516 +6701,1516 @@ ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) {					;
 ; pSource must be ByRef to avoid corruption during the formal-to-actual copying process
 ; (since pSource might contain valid data beyond its first binary zero).
 
-   SourceAddress := &pSource + pOffset  ; Get address and apply the caller's offset.
-   result := 0  ; Init prior to accumulation in the loop.
-   Loop %pSize%  ; For each byte in the integer:
-   {
-      result := result | (*SourceAddress << 8 * (A_Index - 1))  ; Build the integer from its bytes.
-      SourceAddress += 1  ; Move on to the next byte.
-   }
-   if (!pIsSigned OR pSize > 4 OR result < 0x80000000)
-      return result  ; Signed vs. unsigned doesn't matter in these cases.
-   ; Otherwise, convert the value (now known to be 32-bit) to its signed counterpart:
-   return -(0xFFFFFFFF - result + 1)
+SourceAddress := &pSource + pOffset  ; Get address and apply the caller's offset.
+result := 0  ; Init prior to accumulation in the loop.
+Loop %pSize%  ; For each byte in the integer:
+{
+result := result | (*SourceAddress << 8 * (A_Index - 1))  ; Build the integer from its bytes.
+SourceAddress += 1  ; Move on to the next byte.
+}
+if (!pIsSigned OR pSize > 4 OR result < 0x80000000)
+return result  ; Signed vs. unsigned doesn't matter in these cases.
+; Otherwise, convert the value (now known to be 32-bit) to its signed counterpart:
+return -(0xFFFFFFFF - result + 1)
 }
 
 InsertInteger(pInteger, ByRef pDest, pOffset = 0, pSize = 4) {										;-- Sub of LV_GetItemText and LV_GetText
 ; To preserve any existing contents in pDest, only pSize number of bytes starting at pOffset
 ; are altered in it. The caller must ensure that pDest has sufficient capacity.
 
-   mask := 0xFF  ; This serves to isolate each byte, one by one.
-   Loop %pSize%  ; Copy each byte in the integer into the structure as raw binary data.
-   {
-      DllCall("RtlFillMemory", UInt, &pDest + pOffset + A_Index - 1, UInt, 1  ; Write one byte.
-         , UChar, (pInteger & mask) >> 8 * (A_Index - 1))  ; This line is auto-merged with above at load-time.
-      mask := mask << 8  ; Set it up for isolation of the next byte.
-   }
+mask := 0xFF  ; This serves to isolate each byte, one by one.
+Loop %pSize%  ; Copy each byte in the integer into the structure as raw binary data.
+{
+DllCall("RtlFillMemory", UInt, &pDest + pOffset + A_Index - 1, UInt, 1  ; Write one byte.
+ , UChar, (pInteger & mask) >> 8 * (A_Index - 1))  ; This line is auto-merged with above at load-time.
+mask := mask << 8  ; Set it up for isolation of the next byte.
+}
 }
 } 
-				;<06.03.05.000006>
-				LV_SetBackgroundURL(URL, ControlID) {																		;-- set a ListView's background image - please pay attention to the description
+		;<06.03.05.000006>
+		LV_SetBackgroundURL(URL, ControlID) {																		;-- set a ListView's background image - please pay attention to the description
 
-	/*											Function: LV_SetBackgroundURL
+/*											Function: LV_SetBackgroundURL
 
-		Origin 	: https://autohotkey.com/board/topic/20588-adding-pictures-to-controls-eg-as-background/#entry135365
-		Author	: Lexikos
+Origin 	: https://autohotkey.com/board/topic/20588-adding-pictures-to-controls-eg-as-background/#entry135365
+Author	: Lexikos
 
-		The function below tiles the background, since the only alternative is to attach it to the top-left of the very first item (in which
-		case it scrolls with the ListView's contents.)
+The function below tiles the background, since the only alternative is to attach it to the top-left of the very first item (in which
+case it scrolls with the ListView's contents.)
 
-		Since LVM_SETBKIMAGE (internally) uses COM, CoInitialize() must be called when the script starts:
+Since LVM_SETBKIMAGE (internally) uses COM, CoInitialize() must be called when the script starts:
 
-		DllCall("ole32\CoInitialize", "uint", 0)
+DllCall("ole32\CoInitialize", "uint", 0)
 
-		..and CoUninitialize() when the script exits:
+..and CoUninitialize() when the script exits:
 
-		DllCall("ole32\CoUninitialize")Important: The ListView/GUI should be destroyed before calling CoUninitialize(),
-		otherwise the script will crash on exit for some versions of Windows.
+DllCall("ole32\CoUninitialize")Important: The ListView/GUI should be destroyed before calling CoUninitialize(),
+otherwise the script will crash on exit for some versions of Windows.
 
-		LVM_SETBKIMAGE can be made to accept a bitmap handle, so it would be possible to manually stretch an image to fit the
-		ListView rather than tiling it. (Search MSDN for LVM_SETBKIMAGE.)
+LVM_SETBKIMAGE can be made to accept a bitmap handle, so it would be possible to manually stretch an image to fit the
+ListView rather than tiling it. (Search MSDN for LVM_SETBKIMAGE.)
 
-	*/
+*/
 
-	/*											Example
+/*											Example
 
-		LV_SetBackgroundURL("http://www.autohotkey.com/docs/images/AutoHotkey_logo.gif", "SysListView321")
+LV_SetBackgroundURL("http://www.autohotkey.com/docs/images/AutoHotkey_logo.gif", "SysListView321")
 
-		If the ListView has an associated variable, its name can be used in place of SysListView321.
-		Don't forget CoInitialize() and CoUninitialize().
+If the ListView has an associated variable, its name can be used in place of SysListView321.
+Don't forget CoInitialize() and CoUninitialize().
 
-		Edit: Added line to set text background to transparent. Also added note about destroying GUI before CoUninitialize().
+Edit: Added line to set text background to transparent. Also added note about destroying GUI before CoUninitialize().
 
-	*/
+*/
 
-	; URL:          URL or file path (absolute, not relative)
-	; ControlID:    ClassNN or associated variable of a ListView on the default GUI.
+; URL:          URL or file path (absolute, not relative)
+; ControlID:    ClassNN or associated variable of a ListView on the default GUI.
 
-    GuiControlGet, hwnd, Hwnd, %ControlID%
-    VarSetCapacity(bki, 24, 0)
-    NumPut(0x2|0x10, bki, 0)  ; LVBKIF_SOURCE_URL | LVBKIF_STYLE_TILE
-    NumPut(&URL, bki, 8)
-    SendMessage, 0x1044, 0, &bki,, ahk_id %hwnd%  ; LVM_SETBKIMAGE
-    SendMessage, 0x1026, 0, -1,, ahk_id %ControlID%  ; LVM_SETTEXTBKCOLOR,, CLR_NONE
+GuiControlGet, hwnd, Hwnd, %ControlID%
+VarSetCapacity(bki, 24, 0)
+NumPut(0x2|0x10, bki, 0)  ; LVBKIF_SOURCE_URL | LVBKIF_STYLE_TILE
+NumPut(&URL, bki, 8)
+SendMessage, 0x1044, 0, &bki,, ahk_id %hwnd%  ; LVM_SETBKIMAGE
+SendMessage, 0x1026, 0, -1,, ahk_id %ControlID%  ; LVM_SETTEXTBKCOLOR,, CLR_NONE
 }
-				;<06.03.05.000007>
-				LV_MoveRow(up=true) {																									;-- moves a listview row up or down
+		;<06.03.05.000007>
+		LV_MoveRow(up=true) {																									;-- moves a listview row up or down
 
-	if (up && LV_GetNext() == 1)
-	|| (!up && LV_GetNext() == LV_GetCount())
-	|| (LV_GetNext() == 0)
-		return
+if (up && LV_GetNext() == 1)
+|| (!up && LV_GetNext() == LV_GetCount())
+|| (LV_GetNext() == 0)
+return
 
-	pos := LV_GetNext()
-	, xpos := up ? pos-1 : pos+1
+pos := LV_GetNext()
+, xpos := up ? pos-1 : pos+1
 
-	Loop,% LV_GetCount("Col") {
-		LV_GetText(a, pos, A_Index)
-		LV_GetText(b, xpos, A_Index)
-		LV_Modify(pos, "Col" A_Index, b)
-		LV_Modify(xpos, "Col" A_Index, a)
-	}
-	LV_Modify(pos, "-Select -Focus")
-	, LV_Modify(xpos, "Select Focus")
+Loop,% LV_GetCount("Col") {
+LV_GetText(a, pos, A_Index)
+LV_GetText(b, xpos, A_Index)
+LV_Modify(pos, "Col" A_Index, b)
+LV_Modify(xpos, "Col" A_Index, a)
 }
-				;<06.03.05.000008>
-				LV_MoveRow(moveup = true) {																						;-- the same like above, but slightly different. With integrated script example.
-
-	/*			Example with Gui and key support
-
-				Gui, Add, Listview, w260 h200 vmylistview, test|test2|test3|test4
-			   LV_Modifycol(1, 60)
-			   LV_Modifycol(2, 60)
-			   LV_Modifycol(3, 60)
-			   LV_Modifycol(4, 60)
-
-			Loop, 10
-			   LV_Add("", A_Index, "-" A_Index, (10 - A_Index), "x" A_Index)
-
-			Gui, Show, Center AutoSize, TestGUI
-			Return
-
-			GuiClose:
-			GuiEscape:
-			ExitApp
-
-			PgUp::LV_MoveRow()
-			PgDn::LV_MoveRow(false)
-	*/
-
-   ; Original by diebagger (Guest) from:
-   ; http://de.autohotkey.com/forum/viewtopic.php?p=58526#58526
-   ; Slightly Modifyed by Obi-Wahn
-   ; http://ahkscript.org/germans/forums/viewtopic.php?t=7285
-   If moveup not in 1,0
-      Return   ; If direction not up or down (true or false)
-   while x := LV_GetNext(x)   ; Get selected lines
-      i := A_Index, i%i% := x
-   If (!i) || ((i1 < 2) && moveup) || ((i%i% = LV_GetCount()) && !moveup)
-      Return   ; Break Function if: nothing selected, (first selected < 2 AND moveup = true) [header bug]
-            ; OR (last selected = LV_GetCount() AND moveup = false) [delete bug]
-   cc := LV_GetCount("Col"), fr := LV_GetNext(0, "Focused"), d := moveup ? -1 : 1
-   ; Count Columns, Query Line Number of next selected, set direction math.
-   Loop, %i% {   ; Loop selected lines
-      r := moveup ? A_Index : i - A_Index + 1, ro := i%r%, rn := ro + d
-      ; Calculate row up or down, ro (current row), rn (target row)
-      Loop, %cc% {   ; Loop through header count
-         LV_GetText(to, ro, A_Index), LV_GetText(tn, rn, A_Index)
-         ; Query Text from Current and Targetrow
-         LV_Modify(rn, "Col" A_Index, to), LV_Modify(ro, "Col" A_Index, tn)
-         ; Modify Rows (switch text)
-      }
-      LV_Modify(ro, "-select -focus"), LV_Modify(rn, "select vis")
-      If (ro = fr)
-         LV_Modify(rn, "Focus")
-   }
+LV_Modify(pos, "-Select -Focus")
+, LV_Modify(xpos, "Select Focus")
 }
-				;<06.03.05.000009>
-				LV_Find( lvhwnd, str, start = 0 ) { 	        																		;-- I think it's usefull to find an item position a listview
-	
-	;Copyright © 2013 VxE. All rights reserved.
-	Static LVFI_STRING := 2, LVFI_SUBSTRING := 4
-	LVM_FINDITEM := A_IsUnicode = 1 ? 0x1053 : 0x100D
-	oel := ErrorLevel
-	start |= 0
-	If ( partial := ( SubStr( str, 0 ) = "*" ? LVFI_SUBSTRING : 0 ) )
-		StringTrimRight str, str, 1
-	VarSetCapacity( LVFINDINFO, 12 + 3 * ( A_PtrSize = 8 ? 8 : 4 ), 0 )
-	NumPut( LVFI_STRING | partial, LVFINDINFO, 0, "UInt" )
-	NumPut( &str, LVFINDINFO, 4 )
-	SendMessage, LVM_FINDITEM, % start < 0 ? -1 : start - 1, &LVFINDINFO,, Ahk_ID %lvhwnd%
-	Return ( ErrorLevel & 0xFFFFFFFF ) + 1, ErrorLevel := oel
+		;<06.03.05.000008>
+		LV_MoveRow(moveup = true) {																						;-- the same like above, but slightly different. With integrated script example.
+
+/*			Example with Gui and key support
+
+		Gui, Add, Listview, w260 h200 vmylistview, test|test2|test3|test4
+	   LV_Modifycol(1, 60)
+	   LV_Modifycol(2, 60)
+	   LV_Modifycol(3, 60)
+	   LV_Modifycol(4, 60)
+
+	Loop, 10
+	   LV_Add("", A_Index, "-" A_Index, (10 - A_Index), "x" A_Index)
+
+	Gui, Show, Center AutoSize, TestGUI
+	Return
+
+	GuiClose:
+	GuiEscape:
+	ExitApp
+
+	PgUp::LV_MoveRow()
+	PgDn::LV_MoveRow(false)
+*/
+
+; Original by diebagger (Guest) from:
+; http://de.autohotkey.com/forum/viewtopic.php?p=58526#58526
+; Slightly Modifyed by Obi-Wahn
+; http://ahkscript.org/germans/forums/viewtopic.php?t=7285
+If moveup not in 1,0
+Return   ; If direction not up or down (true or false)
+while x := LV_GetNext(x)   ; Get selected lines
+i := A_Index, i%i% := x
+If (!i) || ((i1 < 2) && moveup) || ((i%i% = LV_GetCount()) && !moveup)
+Return   ; Break Function if: nothing selected, (first selected < 2 AND moveup = true) [header bug]
+	; OR (last selected = LV_GetCount() AND moveup = false) [delete bug]
+cc := LV_GetCount("Col"), fr := LV_GetNext(0, "Focused"), d := moveup ? -1 : 1
+; Count Columns, Query Line Number of next selected, set direction math.
+Loop, %i% {   ; Loop selected lines
+r := moveup ? A_Index : i - A_Index + 1, ro := i%r%, rn := ro + d
+; Calculate row up or down, ro (current row), rn (target row)
+Loop, %cc% {   ; Loop through header count
+ LV_GetText(to, ro, A_Index), LV_GetText(tn, rn, A_Index)
+ ; Query Text from Current and Targetrow
+ LV_Modify(rn, "Col" A_Index, to), LV_Modify(ro, "Col" A_Index, tn)
+ ; Modify Rows (switch text)
 }
-				;<06.03.05.000010>
-				LV_GetSelectedText(FromColumns="",ColumnsDelimiter="`t",RowsDelimiter= "`n") { ;-- Returns text from selected rows in ListView (in a user friendly way IMO.)
+LV_Modify(ro, "-select -focus"), LV_Modify(rn, "select vis")
+If (ro = fr)
+ LV_Modify(rn, "Focus")
+}
+}
+		;<06.03.05.000009>
+		LV_Find( lvhwnd, str, start = 0 ) { 	        																		;-- I think it's usefull to find an item position a listview
 
-		; by Learning one,	https://autohotkey.com/board/topic/61750-lv-getselectedtext/
-		/*                                         	EXAMPLE
-			Gui 1: Add, ListView, x5 y5 w250 h300, First name|Last name|Occupation
-			LV_Add("","Jim","Tucker","Driver")
-			LV_Add("","Jill","Lochte","Artist")
-			LV_Add("","Jessica","Hickman","Student")
-			LV_Add("","Mary","Jones","Teacher")
-			LV_Add("","Tony","Jackman","Surfer")
-			Gui 1: Show, w260 h310
-			return
+;Copyright © 2013 VxE. All rights reserved.
+Static LVFI_STRING := 2, LVFI_SUBSTRING := 4
+LVM_FINDITEM := A_IsUnicode = 1 ? 0x1053 : 0x100D
+oel := ErrorLevel
+start |= 0
+If ( partial := ( SubStr( str, 0 ) = "*" ? LVFI_SUBSTRING : 0 ) )
+StringTrimRight str, str, 1
+VarSetCapacity( LVFINDINFO, 12 + 3 * ( A_PtrSize = 8 ? 8 : 4 ), 0 )
+NumPut( LVFI_STRING | partial, LVFINDINFO, 0, "UInt" )
+NumPut( &str, LVFINDINFO, 4 )
+SendMessage, LVM_FINDITEM, % start < 0 ? -1 : start - 1, &LVFINDINFO,, Ahk_ID %lvhwnd%
+Return ( ErrorLevel & 0xFFFFFFFF ) + 1, ErrorLevel := oel
+}
+		;<06.03.05.000010>
+		LV_GetSelectedText(FromColumns="",ColumnsDelimiter="`t",RowsDelimiter= "`n") { ;-- Returns text from selected rows in ListView (in a user friendly way IMO.)
 
-			F1::MsgBox % LV_GetSelectedText() ; get text from selected rows
-			F2::MsgBox % LV_GetSelectedText("1|3") ; get text from selected rows, but only from 1. and 3. column
-			F3::MsgBox % LV_GetSelectedText("1|3","|","#") ; same as above but use custom delimiters in returning string
-		*/
+; by Learning one,	https://autohotkey.com/board/topic/61750-lv-getselectedtext/
+/*                                         	EXAMPLE
+	Gui 1: Add, ListView, x5 y5 w250 h300, First name|Last name|Occupation
+	LV_Add("","Jim","Tucker","Driver")
+	LV_Add("","Jill","Lochte","Artist")
+	LV_Add("","Jessica","Hickman","Student")
+	LV_Add("","Mary","Jones","Teacher")
+	LV_Add("","Tony","Jackman","Surfer")
+	Gui 1: Show, w260 h310
+	return
+
+	F1::MsgBox % LV_GetSelectedText() ; get text from selected rows
+	F2::MsgBox % LV_GetSelectedText("1|3") ; get text from selected rows, but only from 1. and 3. column
+	F3::MsgBox % LV_GetSelectedText("1|3","|","#") ; same as above but use custom delimiters in returning string
+*/
+
+
+if FromColumns = ; than get text from all columns
+{
+		Loop, % LV_GetCount("Column") ; total number of columns in LV
+		FromColumns .= A_Index "|"
+}
+if (SubStr(FromColumns,0) = "|")
+		StringTrimRight, FromColumns, FromColumns, 1
+Loop
+{
+		RowNumber := LV_GetNext(RowNumber)
+		if !RowNumber
+				break
 		
-		
-		if FromColumns = ; than get text from all columns
+		Loop, parse, FromColumns, |
 		{
-				Loop, % LV_GetCount("Column") ; total number of columns in LV
-				FromColumns .= A_Index "|"
-		}
-		if (SubStr(FromColumns,0) = "|")
-				StringTrimRight, FromColumns, FromColumns, 1
-		Loop
-		{
-				RowNumber := LV_GetNext(RowNumber)
-				if !RowNumber
-						break
-				
-				Loop, parse, FromColumns, |
-				{
-						LV_GetText(FieldText, RowNumber, A_LoopField)
-						Selected .= FieldText ColumnsDelimiter
-				}
-				
-				if (SubStr(Selected,0) = ColumnsDelimiter)
-						StringTrimRight, Selected, Selected, 1
-						
-				Selected .= RowsDelimiter
+				LV_GetText(FieldText, RowNumber, A_LoopField)
+				Selected .= FieldText ColumnsDelimiter
 		}
 		
-		if (SubStr(Selected,0) = RowsDelimiter)
+		if (SubStr(Selected,0) = ColumnsDelimiter)
 				StringTrimRight, Selected, Selected, 1
-		
-		return Selected
+				
+		Selected .= RowsDelimiter
+}
+
+if (SubStr(Selected,0) = RowsDelimiter)
+		StringTrimRight, Selected, Selected, 1
+
+return Selected
 
 }
-				;<06.03.05.000011>
-				LV_Notification(WParam, LParam, msg, hwnd) {                                                         	;-- easy function for showing notifications by hovering over a listview
-	
-	;http://ahkscript.org/germans/forums/viewtopic.php?t=8225&sid=35ddff584bfe8d4e4c44a0789b388655
-   ; this line for autoexec: OnMessage(WM_NOTIFY, "Notification")    
-   
-   Global lvx, toggle, HLV1, HLV2 
-   Static LVN_ITEMCHANGING := -100 
-   Static LVIS_STATEIMAGEMASK := 0xF000 ; checked 
+		;<06.03.05.000011>
+		LV_Notification(WParam, LParam, msg, hwnd) {                                                         	;-- easy function for showing notifications by hovering over a listview
 
-   ;---THX an "ich" für diese Routine, um check/-uncheck zu verhindern 
-   If (toggle = 0) ;0, dann keinen check/-Uncheck zulassen 
-   If (NumGet(LParam+0) = HLV1) OR (NumGet(LParam+0) = HLV2) ; NMHDR -> hwndFrom 
-      If (NumGet(LParam+0, 8, "Int") = LVN_ITEMCHANGING) ; NMHDR -> code 
-         If (NumGet(LParam+0, 24) & LVIS_STATEIMAGEMASK) ; NMLISTVIEW -> uChanged 
-            Return True ; True verhindert die Änderung 
+;http://ahkscript.org/germans/forums/viewtopic.php?t=8225&sid=35ddff584bfe8d4e4c44a0789b388655
+; this line for autoexec: OnMessage(WM_NOTIFY, "Notification")    
 
-    ;---from Titan für Color-Rows             
-    If (NumGet(LParam + 0) == NumGet(lvx)) 
-       Return, LVX_Notify(WParam, LParam, msg) 
+Global lvx, toggle, HLV1, HLV2 
+Static LVN_ITEMCHANGING := -100 
+Static LVIS_STATEIMAGEMASK := 0xF000 ; checked 
 
-   ;---verhindert das Ändern der Spaltenbreite 
-   If (Code:=(~NumGet(LParam+0,8))+1) 
-         Return,Code=306||Code=326 ? True:"" 
+;---THX an "ich" für diese Routine, um check/-uncheck zu verhindern 
+If (toggle = 0) ;0, dann keinen check/-Uncheck zulassen 
+If (NumGet(LParam+0) = HLV1) OR (NumGet(LParam+0) = HLV2) ; NMHDR -> hwndFrom 
+If (NumGet(LParam+0, 8, "Int") = LVN_ITEMCHANGING) ; NMHDR -> code 
+ If (NumGet(LParam+0, 24) & LVIS_STATEIMAGEMASK) ; NMLISTVIEW -> uChanged 
+	Return True ; True verhindert die Änderung 
+
+;---from Titan für Color-Rows             
+If (NumGet(LParam + 0) == NumGet(lvx)) 
+Return, LVX_Notify(WParam, LParam, msg) 
+
+;---verhindert das Ändern der Spaltenbreite 
+If (Code:=(~NumGet(LParam+0,8))+1) 
+ Return,Code=306||Code=326 ? True:"" 
 } 
-				;<06.03.05.000012>
-				LV_IsChecked( lvhwnd, nRow ) {                                                                                  	;-- alternate method to find out if a particular row number is checked
-	;https://autohotkey.com/docs/commands/ListView.htm#ColN
-	SendMessage, 4140, nRow - 1, 0xF000, ahk_id %lvhwnd%  	; 4140 is LVM_GETITEMSTATE. 0xF000 is LVIS_STATEIMAGEMASK.
-	IsChecked := (ErrorLevel >> 12) - 1                                 	; This sets IsChecked to true if RowNumber is checked or false otherwise.
-	return IsChecked
+		;<06.03.05.000012>
+		LV_IsChecked( lvhwnd, nRow ) {                                                                                  	;-- alternate method to find out if a particular row number is checked
+;https://autohotkey.com/docs/commands/ListView.htm#ColN
+SendMessage, 4140, nRow - 1, 0xF000, ahk_id %lvhwnd%  	; 4140 is LVM_GETITEMSTATE. 0xF000 is LVIS_STATEIMAGEMASK.
+IsChecked := (ErrorLevel >> 12) - 1                                 	; This sets IsChecked to true if RowNumber is checked or false otherwise.
+return IsChecked
 }
-				;<06.03.05.000013>
-				LV_HeaderFontSet(p_hwndlv="", p_fontstyle="", p_fontname="") {				         		;-- sets a different font to a Listview header (it's need CreateFont() function)
-	
-	;//******************* Functions *******************
-	;//Sun, Jul 13, 2008 --- 7/13/08, 7:19:19pm
-	;//Function: ListView_HeaderFontSet
-	;//Params...
-	;//		p_hwndlv    = ListView hwnd
-	;//		p_fontstyle = [b[old]] [i[talic]] [u[nderline]] [s[trike]]
-	;//		p_fontname  = <any single valid font name = Arial, Tahoma, Trebuchet MS>
-	; dependings: no (changed 24.06.2018)
-	
-	static hFont1stBkp
-	method:="CreateFont"
-	;//method="CreateFontIndirect"
-	WM_SETFONT:=0x0030
-	WM_GETFONT:=0x0031
+		;<06.03.05.000013>
+		LV_HeaderFontSet(p_hwndlv="", p_fontstyle="", p_fontname="") {				         		;-- sets a different font to a Listview header (it's need CreateFont() function)
 
-	LVM_FIRST:=0x1000
-	LVM_GETHEADER:=LVM_FIRST+31
+;//******************* Functions *******************
+;//Sun, Jul 13, 2008 --- 7/13/08, 7:19:19pm
+;//Function: ListView_HeaderFontSet
+;//Params...
+;//		p_hwndlv    = ListView hwnd
+;//		p_fontstyle = [b[old]] [i[talic]] [u[nderline]] [s[trike]]
+;//		p_fontname  = <any single valid font name = Arial, Tahoma, Trebuchet MS>
+; dependings: no (changed 24.06.2018)
 
-	;// /* Font Weights */
-	FW_DONTCARE:=0
-	FW_THIN:=100
-	FW_EXTRALIGHT:=200
-	FW_LIGHT:=300
-	FW_NORMAL:=400
-	FW_MEDIUM:=500
-	FW_SEMIBOLD:=600
-	FW_BOLD:=700
-	FW_EXTRABOLD:=800
-	FW_HEAVY:=900
+static hFont1stBkp
+method:="CreateFont"
+;//method="CreateFontIndirect"
+WM_SETFONT:=0x0030
+WM_GETFONT:=0x0031
 
-	FW_ULTRALIGHT:=FW_EXTRALIGHT
-	FW_REGULAR:=FW_NORMAL
-	FW_DEMIBOLD:=FW_SEMIBOLD
-	FW_ULTRABOLD:=FW_EXTRABOLD
-	FW_BLACK:=FW_HEAVY
-	/*
-	parse p_fontstyle for...
-		cBlue	color	*** Note *** OMG can't set ListView/SysHeader32 font/text color??? ***
-		s19		size
-		b		bold
-		w500	weight?
-	*/
-	;//*** Note *** yes I will allow mixed types later!...this was quick n dirty...
-	;//*** Note *** ...it now supports bold italic underline & strike-thru...all at once
-	style:=p_fontstyle
-	;//*** Note *** change RegExReplace to RegExMatch
-	style:=RegExReplace(style, "i)\s*\b(?:I|U|S)*B(?:old)?(?:I|U|S)*\b\s*", "", style_bold)
-	style:=RegExReplace(style, "i)\s*\b(?:B|U|S)*I(?:talic)?(?:B|U|S)*\b\s*", "", style_italic)
-	style:=RegExReplace(style, "i)\s*\b(?:B|I|S)*U(?:nderline)?(?:B|I|S)*\b\s*", "", style_underline)
-	style:=RegExReplace(style, "i)\s*\b(?:B|I|U)*S(?:trike)?(?:B|I|U)*\b\s*", "", style_strike)
-	;//style:=RegExReplace(style, "i)\s*\bW(?:eight)(\d+)\b\s*", "", style_weight)
-	if (style_bold)
-		fnWeight:=FW_BOLD
-	if (style_italic)
-		fdwItalic:=1
-	if (style_underline)
-		fdwUnderline:=1
-	if (style_strike)
-		fdwStrikeOut:=1
-	;//if (mweight)
-	;//	fnWeight:=mweight
-	lpszFace:=p_fontname
+LVM_FIRST:=0x1000
+LVM_GETHEADER:=LVM_FIRST+31
 
-	ret:=hHeader:= DllCall("SendMessage", "UInt", p_hwndlv, "UInt", LVM_GETHEADER, "UInt", 0, "UInt", 0)
+;// /* Font Weights */
+FW_DONTCARE:=0
+FW_THIN:=100
+FW_EXTRALIGHT:=200
+FW_LIGHT:=300
+FW_NORMAL:=400
+FW_MEDIUM:=500
+FW_SEMIBOLD:=600
+FW_BOLD:=700
+FW_EXTRABOLD:=800
+FW_HEAVY:=900
+
+FW_ULTRALIGHT:=FW_EXTRALIGHT
+FW_REGULAR:=FW_NORMAL
+FW_DEMIBOLD:=FW_SEMIBOLD
+FW_ULTRABOLD:=FW_EXTRABOLD
+FW_BLACK:=FW_HEAVY
+/*
+parse p_fontstyle for...
+cBlue	color	*** Note *** OMG can't set ListView/SysHeader32 font/text color??? ***
+s19		size
+b		bold
+w500	weight?
+*/
+;//*** Note *** yes I will allow mixed types later!...this was quick n dirty...
+;//*** Note *** ...it now supports bold italic underline & strike-thru...all at once
+style:=p_fontstyle
+;//*** Note *** change RegExReplace to RegExMatch
+style:=RegExReplace(style, "i)\s*\b(?:I|U|S)*B(?:old)?(?:I|U|S)*\b\s*", "", style_bold)
+style:=RegExReplace(style, "i)\s*\b(?:B|U|S)*I(?:talic)?(?:B|U|S)*\b\s*", "", style_italic)
+style:=RegExReplace(style, "i)\s*\b(?:B|I|S)*U(?:nderline)?(?:B|I|S)*\b\s*", "", style_underline)
+style:=RegExReplace(style, "i)\s*\b(?:B|I|U)*S(?:trike)?(?:B|I|U)*\b\s*", "", style_strike)
+;//style:=RegExReplace(style, "i)\s*\bW(?:eight)(\d+)\b\s*", "", style_weight)
+if (style_bold)
+fnWeight:=FW_BOLD
+if (style_italic)
+fdwItalic:=1
+if (style_underline)
+fdwUnderline:=1
+if (style_strike)
+fdwStrikeOut:=1
+;//if (mweight)
+;//	fnWeight:=mweight
+lpszFace:=p_fontname
+
+ret:=hHeader:= DllCall("SendMessage", "UInt", p_hwndlv, "UInt", LVM_GETHEADER, "UInt", 0, "UInt", 0)
+el:=Errorlevel
+le:=A_LastError
+;//msgbox, 64, , SendMessage LVM_GETHEADER: ret(%ret%) el(%el%) le(%le%)
+
+ret:= hFontCurr:= DllCall("SendMessage", "UInt", hHeader, "UInt", WM_GETFont, "UInt", 0, "UInt", 0)
+el:=Errorlevel
+le:=A_LastError
+;//msgbox, 64, , SendMessage WM_GETFONT: ret(%ret%) el(%el%) le(%le%)
+if (!hFont1stBkp) {
+hFont1stBkp:=hFontCurr
+}
+
+if (method="CreateFont") {
+if (p_fontstyle!="" || p_fontname!="") {
+	ret:=hFontHeader:=CreateFont(nHeight, nWidth, nEscapement, nOrientation
+								, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut
+								, fdwCharSet, fdwOutputPrecision, fdwClipPrecision
+								, fdwQuality, fdwPitchAndFamily, lpszFace)
 	el:=Errorlevel
 	le:=A_LastError
-	;//msgbox, 64, , SendMessage LVM_GETHEADER: ret(%ret%) el(%el%) le(%le%)
+} else hFontHeader:=hFont1stBkp
+		ret:= DllCall("SendMessage", "UInt", hHeader, "UInt", WM_SETFONT, "UInt", hFontHeader, "UInt", 1)
+		el:=Errorlevel
+		le:=A_LastError
 
-	ret:= hFontCurr:= DllCall("SendMessage", "UInt", hHeader, "UInt", WM_GETFont, "UInt", 0, "UInt", 0)
-	el:=Errorlevel
-	le:=A_LastError
-	;//msgbox, 64, , SendMessage WM_GETFONT: ret(%ret%) el(%el%) le(%le%)
-	if (!hFont1stBkp) {
-		hFont1stBkp:=hFontCurr
-	}
+}
+}
+		;<06.03.05.000014>
+		LV_SetCheckState(hLV,p_Item,p_Checked) {                                                                	;-- check (add check mark to) or uncheck (remove the check mark from) an item in the ListView control
+/*                              	DESCRIPTION
 
-	if (method="CreateFont") {
-		if (p_fontstyle!="" || p_fontname!="") {
-			ret:=hFontHeader:=CreateFont(nHeight, nWidth, nEscapement, nOrientation
-										, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut
-										, fdwCharSet, fdwOutputPrecision, fdwClipPrecision
-										, fdwQuality, fdwPitchAndFamily, lpszFace)
-			el:=Errorlevel
-			le:=A_LastError
-		} else hFontHeader:=hFont1stBkp
-				ret:= DllCall("SendMessage", "UInt", hHeader, "UInt", WM_SETFONT, "UInt", hFontHeader, "UInt", 1)
-				el:=Errorlevel
-				le:=A_LastError
-		
-	}
-}
-				;<06.03.05.000014>
-				LV_SetCheckState(hLV,p_Item,p_Checked) {                                                                	;-- check (add check mark to) or uncheck (remove the check mark from) an item in the ListView control
-	/*                              	DESCRIPTION
+	 Function: 								LVM_SetCheckState
+				
+	 Description:						   Check (add check mark to) or uncheck (remove the check mark from) an item in
+													the ListView control.
+				
+	 Parameters:						   p_Item - Zero-based index of the item.  Set to -1 to change all items.
+													p_Checked - Set to TRUE to check item FALSE to uncheck.
+				
+	 Returns:								   TRUE if successful, otherwise FALSE.
 	
-			 Function: 								LVM_SetCheckState
-						
-			 Description:						   Check (add check mark to) or uncheck (remove the check mark from) an item in
-															the ListView control.
-						
-			 Parameters:						   p_Item - Zero-based index of the item.  Set to -1 to change all items.
-															p_Checked - Set to TRUE to check item FALSE to uncheck.
-						
-			 Returns:								   TRUE if successful, otherwise FALSE.
-			
-			 Calls To Other Functions:		 * <LVM_SetItemState>
-			
-			 Remarks:									 * This function should only be used on a ListView control with the
-															LVS_EX_CHECKBOXES style.
-															* This function emulates the ListView_SetCheckState macro.
-			
-			From:										jballi
-			
-			Link:											https://autohotkey.com/board/topic/86149-checkuncheck-checkbox-in-listview-using-sendmessage/
-	*/
+	 Calls To Other Functions:		 * <LVM_SetItemState>
 	
-    Static LVIS_UNCHECKED     :=0x1000
-          ,LVIS_CHECKED       :=0x2000
-          ,LVIS_STATEIMAGEMASK:=0xF000
+	 Remarks:									 * This function should only be used on a ListView control with the
+													LVS_EX_CHECKBOXES style.
+													* This function emulates the ListView_SetCheckState macro.
+	
+	From:										jballi
+	
+	Link:											https://autohotkey.com/board/topic/86149-checkuncheck-checkbox-in-listview-using-sendmessage/
+*/
 
-    Return LVM_SetItemState(hLV,p_Item,p_Checked ? LVIS_CHECKED:LVIS_UNCHECKED,LVIS_STATEIMAGEMASK)
-    }
-				;<06.03.05.000015>
-				LV_SetItemState(hLV,p_Item,p_State,p_StateMask) {                                                   	;-- with this function you can set all avaible states to a listview item
-	
-	/*                              	DESCRIPTION
-	
-			 Function: LVM_SetItemState
-			
-			 Description:			   	Changes the state of an item in a ListView control.
-			
-			 Parameters:			   	p_Item - Zero-based index of the item. If set to -1, the state change is
-												applied to all items.
-			
-												p_State, p_StateMask - p_stateMask specifies which state bits to change and
-												p_State contains the new values for those bits.  The other state membersare ignored.
-			
-			 Returns:					   TRUE if successful, otherwise FALSE.
-			
-			From:							jballi
-			
-			Link:								https://autohotkey.com/board/topic/86149-checkuncheck-checkbox-in-listview-using-sendmessage/
-	*/
-	 Static Dummy7168
+Static LVIS_UNCHECKED     :=0x1000
+  ,LVIS_CHECKED       :=0x2000
+  ,LVIS_STATEIMAGEMASK:=0xF000
 
-          ;-- State flags
-          ,LVIF_STATE         :=0x8
-          ,LVIS_FOCUSED       :=0x1
-          ,LVIS_SELECTED      :=0x2
-          ,LVIS_CUT           :=0x4
-          ,LVIS_DROPHILITED   :=0x8
-          ,LVIS_OVERLAYMASK   :=0xF00
-          ,LVIS_UNCHECKED     :=0x1000
-          ,LVIS_CHECKED       :=0x2000
-          ,LVIS_STATEIMAGEMASK:=0xF000
+Return LVM_SetItemState(hLV,p_Item,p_Checked ? LVIS_CHECKED:LVIS_UNCHECKED,LVIS_STATEIMAGEMASK)
+}
+		;<06.03.05.000015>
+		LV_SetItemState(hLV,p_Item,p_State,p_StateMask) {                                                   	;-- with this function you can set all avaible states to a listview item
 
-          ;-- Message
-          ,LVM_SETITEMSTATE   :=0x102B                  ;-- LVM_FIRST + 43
+/*                              	DESCRIPTION
 
-    ;-- Define/Populate LVITEM Structure
-    VarSetCapacity(LVITEM,20,0)
-    NumPut(LVIF_STATE, LVITEM,0,"UInt")                 ;-- mask
-    NumPut(p_Item,     LVITEM,4,"Int")                 	 ;-- iItem
-    NumPut(p_State,    LVITEM,12,"UInt")                	;-- state
-    NumPut(p_StateMask,LVITEM,16,"UInt")            ;-- stateMask
+	 Function: LVM_SetItemState
+	
+	 Description:			   	Changes the state of an item in a ListView control.
+	
+	 Parameters:			   	p_Item - Zero-based index of the item. If set to -1, the state change is
+										applied to all items.
+	
+										p_State, p_StateMask - p_stateMask specifies which state bits to change and
+										p_State contains the new values for those bits.  The other state membersare ignored.
+	
+	 Returns:					   TRUE if successful, otherwise FALSE.
+	
+	From:							jballi
+	
+	Link:								https://autohotkey.com/board/topic/86149-checkuncheck-checkbox-in-listview-using-sendmessage/
+*/
+Static Dummy7168
 
-    ;-- Set state
-    SendMessage LVM_SETITEMSTATE,p_Item,&LVITEM,,ahk_id %hLV%
-    Return ErrorLevel
-    }
-				;<06.03.05.000016>
-				LV_SubitemHitTest(HLV) {																								;-- get's clicked column in listview
+  ;-- State flags
+  ,LVIF_STATE         :=0x8
+  ,LVIS_FOCUSED       :=0x1
+  ,LVIS_SELECTED      :=0x2
+  ,LVIS_CUT           :=0x4
+  ,LVIS_DROPHILITED   :=0x8
+  ,LVIS_OVERLAYMASK   :=0xF00
+  ,LVIS_UNCHECKED     :=0x1000
+  ,LVIS_CHECKED       :=0x2000
+  ,LVIS_STATEIMAGEMASK:=0xF000
+
+  ;-- Message
+  ,LVM_SETITEMSTATE   :=0x102B                  ;-- LVM_FIRST + 43
+
+;-- Define/Populate LVITEM Structure
+VarSetCapacity(LVITEM,20,0)
+NumPut(LVIF_STATE, LVITEM,0,"UInt")                 ;-- mask
+NumPut(p_Item,     LVITEM,4,"Int")                 	 ;-- iItem
+NumPut(p_State,    LVITEM,12,"UInt")                	;-- state
+NumPut(p_StateMask,LVITEM,16,"UInt")            ;-- stateMask
+
+;-- Set state
+SendMessage LVM_SETITEMSTATE,p_Item,&LVITEM,,ahk_id %hLV%
+Return ErrorLevel
+}
+		;<06.03.05.000016>
+		LV_SubitemHitTest(HLV) {																								;-- get's clicked column in listview
+
+/*                              	EXAMPLE(s)
+
+	NoEnv
+	Gui, Margin, 20, 20
+	Gui, Add, ListView, w400 r9 Grid HwndHLV1 gSubLV AltSubmit, Column 1|Column 2|Column 3
+	Loop, 9
+	   LV_Add("", A_Index, A_Index, A_Index)
+	Loop, 3
+	   LV_ModifyCol(A_Index, "AutoHdr")
+	Gui, Show, , ListView
+	Return
+	; ----------------------------------------------------------------------------------------------------------------------
+	GuiCLose:
+	ExitApp
+	; ----------------------------------------------------------------------------------------------------------------------
+	SubLV:
+	   If (A_GuiEvent = "Normal") 
+		  Row := A_EventInfo
+		  Column := LV_SubItemHitTest(HLV1)
+						  SetTimer, KillToolTip, -1500
+	   
+	Return
+	; ----------------------------------------------------------------------------------------------------------------------
+	KillToolTip:
+	   ToolTip
+	Return
 	
-	/*                              	EXAMPLE(s)
+*/
+
+; To run this with AHK_Basic change all DllCall types "Ptr" to "UInt", please.
+; HLV - ListView's HWND
+Static LVM_SUBITEMHITTEST := 0x1039
+VarSetCapacity(POINT, 8, 0)
+; Get the current cursor position in screen coordinates
+DllCall("User32.dll\GetCursorPos", "Ptr", &POINT)
+; Convert them to client coordinates related to the ListView
+DllCall("User32.dll\ScreenToClient", "Ptr", HLV, "Ptr", &POINT)
+; Create a LVHITTESTINFO structure (see below)
+VarSetCapacity(LVHITTESTINFO, 24, 0)
+; Store the relative mouse coordinates
+NumPut(NumGet(POINT, 0, "Int"), LVHITTESTINFO, 0, "Int")
+NumPut(NumGet(POINT, 4, "Int"), LVHITTESTINFO, 4, "Int")
+; Send a LVM_SUBITEMHITTEST to the ListView
+SendMessage, LVM_SUBITEMHITTEST, 0, &LVHITTESTINFO, , ahk_id %HLV%
+; If no item was found on this position, the return value is -1
+If (ErrorLevel = -1)
+Return 0
+; Get the corresponding subitem (column)
+Subitem := NumGet(LVHITTESTINFO, 16, "Int") + 1
+Return Subitem
+}
+		;<06.03.05.000017>
+		LV_EX_FindString(HLV, Str, Start := 0, Partial := False) {													;-- find an item in any listview , function works with ANSI and UNICODE (tested)
+; LVM_FINDITEM -> http://msdn.microsoft.com/en-us/library/bb774903(v=vs.85).aspx
+Static LVM_FINDITEM := A_IsUnicode ? 0x1053 : 0x100D ; LVM_FINDITEMW : LVM_FINDITEMA
+Static LVFISize := 40
+VarSetCapacity(LVFI, LVFISize, 0) ; LVFINDINFO
+Flags := 0x0002 ; LVFI_STRING
+If (Partial)
+Flags |= 0x0008 ; LVFI_PARTIAL
+NumPut(Flags, LVFI, 0, "UInt")
+NumPut(&Str,  LVFI, A_PtrSize, "Ptr")
+SendMessage, % LVM_FINDITEM, % (Start - 1), % &LVFI, , % "ahk_id " . HLV
+Return (ErrorLevel > 0x7FFFFFFF ? 0 : ErrorLevel + 1)
+}
+		;<06.03.05.000018>
+		LV_RemoveSelBorder(HLV, a*) {																						;-- remove the listview's selection border
+
+;https://autohotkey.com/boards/viewtopic.php?p=49507#p49507
+;https://stackoverflow.com/questions/2691726/how-can-i-remove-the-selection-border-on-a-listviewitem
+Static WM_CHANGEUISTATE := 0x127
+ , WM_UPDATEUISTATE := 0x128
+ , UIS_SET := 1
+ , UISF_HIDEFOCUS := 0x1
+ , wParam := (UIS_SET << 16) | (UISF_HIDEFOCUS & 0xffff) ; MakeLong
+ , _ := OnMessage(WM_UPDATEUISTATE, "LV_RemoveSelBorder")
+If (a.2 = WM_UPDATEUISTATE)
+Return 0 ; Prevent alt key from restoring the selection border
+PostMessage, WM_CHANGEUISTATE, wParam, 0,, % "ahk_id " . HLV
+}
+		;<06.03.05.000019>
+		LV_SetExplorerTheme(HCTL) { 																						;-- set 'Explorer' theme for ListViews & TreeViews on Vista+
+; HCTL : handle of a ListView or TreeView control
+If (DllCall("GetVersion", "UChar") > 5) {
+VarSetCapacity(ClassName, 1024, 0)
+If DllCall("GetClassName", "Ptr", HCTL, "Str", ClassName, "Int", 512, "Int")
+ If (ClassName = "SysListView32") || (ClassName = "SysTreeView32")
+	Return !DllCall("UxTheme.dll\SetWindowTheme", "Ptr", HCTL, "WStr", "Explorer", "Ptr", 0)
+}
+Return False
+}
+		;<06.03.05.000020>
+		LV_Update(hWnd, Item) {																								;-- update one listview item
+return SendMessage(hWnd, 0x1000+42, "Int", Item-1)
+}
+		;<06.03.05.000021>
+		LV_RedrawItem(hWnd, ItemFirst := 0, ItemLast := "") {													;-- this one redraws on listview item
+If (ItemFirst > 0)
+ItemLast := ItemLast=""?ItemFirst:ItemLast
+else ItemLast := (ItemFirst:=SendMessage(hWnd, 0x1027))+SendMessage(hWnd, 0x1028)
+return SendMessage(hWnd, 0x1000+21, "Int", ItemFirst-1, "Int", ItemLast-1), DllCall("User32.dll\UpdateWindow", "Ptr", hWnd)
+}
+		;<06.03.05.000022>
+		LV_SetExStyle(hWnd, ExStyle) {																						;-- set / remove / alternate extended styles to the listview control
+/*                              	DESCRIPTION
+
+	; set / remove / alternate extended styles to the window.
+	; Syntax: LV_SetExStyle ([hWnd], [ - Styles])
+	; STYLES: https://msdn.microsoft.com/en-us/library/windows/desktop/bb774732(v=vs.85).aspx
+	; 0x010000 = drawing via double buffer, which reduces flicker
+	; 0x00000004 = activate the checkboxes for the elements (checkbox)
+	; 0x00000001 = shows grid lines around the elements and sub-elements (grid)
 	
-			NoEnv
-			Gui, Margin, 20, 20
-			Gui, Add, ListView, w400 r9 Grid HwndHLV1 gSubLV AltSubmit, Column 1|Column 2|Column 3
-			Loop, 9
-			   LV_Add("", A_Index, A_Index, A_Index)
-			Loop, 3
-			   LV_ModifyCol(A_Index, "AutoHdr")
-			Gui, Show, , ListView
-			Return
-			; ----------------------------------------------------------------------------------------------------------------------
-			GuiCLose:
-			ExitApp
-			; ----------------------------------------------------------------------------------------------------------------------
-			SubLV:
-			   If (A_GuiEvent = "Normal") 
-			      Row := A_EventInfo
-			      Column := LV_SubItemHitTest(HLV1)
-							      SetTimer, KillToolTip, -1500
-			   
-			Return
-			; ----------------------------------------------------------------------------------------------------------------------
-			KillToolTip:
-			   ToolTip
-			Return
-			
-	*/
-		
-   ; To run this with AHK_Basic change all DllCall types "Ptr" to "UInt", please.
-   ; HLV - ListView's HWND
-   Static LVM_SUBITEMHITTEST := 0x1039
-   VarSetCapacity(POINT, 8, 0)
-   ; Get the current cursor position in screen coordinates
-   DllCall("User32.dll\GetCursorPos", "Ptr", &POINT)
-   ; Convert them to client coordinates related to the ListView
-   DllCall("User32.dll\ScreenToClient", "Ptr", HLV, "Ptr", &POINT)
-   ; Create a LVHITTESTINFO structure (see below)
-   VarSetCapacity(LVHITTESTINFO, 24, 0)
-   ; Store the relative mouse coordinates
-   NumPut(NumGet(POINT, 0, "Int"), LVHITTESTINFO, 0, "Int")
-   NumPut(NumGet(POINT, 4, "Int"), LVHITTESTINFO, 4, "Int")
-   ; Send a LVM_SUBITEMHITTEST to the ListView
-   SendMessage, LVM_SUBITEMHITTEST, 0, &LVHITTESTINFO, , ahk_id %HLV%
-   ; If no item was found on this position, the return value is -1
-   If (ErrorLevel = -1)
-      Return 0
-   ; Get the corresponding subitem (column)
-   Subitem := NumGet(LVHITTESTINFO, 16, "Int") + 1
-   Return Subitem
-}
-				;<06.03.05.000017>
-				LV_EX_FindString(HLV, Str, Start := 0, Partial := False) {													;-- find an item in any listview , function works with ANSI and UNICODE (tested)
-   ; LVM_FINDITEM -> http://msdn.microsoft.com/en-us/library/bb774903(v=vs.85).aspx
-   Static LVM_FINDITEM := A_IsUnicode ? 0x1053 : 0x100D ; LVM_FINDITEMW : LVM_FINDITEMA
-   Static LVFISize := 40
-   VarSetCapacity(LVFI, LVFISize, 0) ; LVFINDINFO
-   Flags := 0x0002 ; LVFI_STRING
-   If (Partial)
-      Flags |= 0x0008 ; LVFI_PARTIAL
-   NumPut(Flags, LVFI, 0, "UInt")
-   NumPut(&Str,  LVFI, A_PtrSize, "Ptr")
-   SendMessage, % LVM_FINDITEM, % (Start - 1), % &LVFI, , % "ahk_id " . HLV
-   Return (ErrorLevel > 0x7FFFFFFF ? 0 : ErrorLevel + 1)
-}
-				;<06.03.05.000018>
-				LV_RemoveSelBorder(HLV, a*) {																						;-- remove the listview's selection border
-	
-	;https://autohotkey.com/boards/viewtopic.php?p=49507#p49507
-	;https://stackoverflow.com/questions/2691726/how-can-i-remove-the-selection-border-on-a-listviewitem
-	Static WM_CHANGEUISTATE := 0x127
-	     , WM_UPDATEUISTATE := 0x128
-	     , UIS_SET := 1
-	     , UISF_HIDEFOCUS := 0x1
-	     , wParam := (UIS_SET << 16) | (UISF_HIDEFOCUS & 0xffff) ; MakeLong
-	     , _ := OnMessage(WM_UPDATEUISTATE, "LV_RemoveSelBorder")
-	If (a.2 = WM_UPDATEUISTATE)
-		Return 0 ; Prevent alt key from restoring the selection border
-	PostMessage, WM_CHANGEUISTATE, wParam, 0,, % "ahk_id " . HLV
-}
-				;<06.03.05.000019>
-				LV_SetExplorerTheme(HCTL) { 																						;-- set 'Explorer' theme for ListViews & TreeViews on Vista+
-	; HCTL : handle of a ListView or TreeView control
-   If (DllCall("GetVersion", "UChar") > 5) {
-      VarSetCapacity(ClassName, 1024, 0)
-      If DllCall("GetClassName", "Ptr", HCTL, "Str", ClassName, "Int", 512, "Int")
-         If (ClassName = "SysListView32") || (ClassName = "SysTreeView32")
-            Return !DllCall("UxTheme.dll\SetWindowTheme", "Ptr", HCTL, "WStr", "Explorer", "Ptr", 0)
-   }
-   Return False
-}
-				;<06.03.05.000020>
-				LV_Update(hWnd, Item) {																								;-- update one listview item
-	return SendMessage(hWnd, 0x1000+42, "Int", Item-1)
-}
-				;<06.03.05.000021>
-				LV_RedrawItem(hWnd, ItemFirst := 0, ItemLast := "") {													;-- this one redraws on listview item
-	If (ItemFirst > 0)
-		ItemLast := ItemLast=""?ItemFirst:ItemLast
-	else ItemLast := (ItemFirst:=SendMessage(hWnd, 0x1027))+SendMessage(hWnd, 0x1028)
-	return SendMessage(hWnd, 0x1000+21, "Int", ItemFirst-1, "Int", ItemLast-1), DllCall("User32.dll\UpdateWindow", "Ptr", hWnd)
-}
-				;<06.03.05.000022>
-				LV_SetExStyle(hWnd, ExStyle) {																						;-- set / remove / alternate extended styles to the listview control
-	/*                              	DESCRIPTION
-	
-			; set / remove / alternate extended styles to the window.
-			; Syntax: LV_SetExStyle ([hWnd], [ - Styles])
-			; STYLES: https://msdn.microsoft.com/en-us/library/windows/desktop/bb774732(v=vs.85).aspx
-			; 0x010000 = drawing via double buffer, which reduces flicker
-			; 0x00000004 = activate the checkboxes for the elements (checkbox)
-			; 0x00000001 = shows grid lines around the elements and sub-elements (grid)
-			
-	*/
-		
-	Key := SubStr(ExStyle:=Trim(ExStyle), 1, 1), ExStyle := (Key="+"||Key="-"||Key="^")?SubStr(ExStyle, 2):ExStyle
-	if (Key="-")
-		return SendMessage(hWnd, 0x1036, "UInt", ExStyle)
-	if (Key="^")
-		return LV_SetExStyle(hWnd, ((LV_GetExStyle(hWnd)&ExStyle)?"-":"") ExStyle)
-	return SendMessage(hWnd, 0x1036, "UInt", ExStyle, "UInt", ExStyle)
+*/
+
+Key := SubStr(ExStyle:=Trim(ExStyle), 1, 1), ExStyle := (Key="+"||Key="-"||Key="^")?SubStr(ExStyle, 2):ExStyle
+if (Key="-")
+return SendMessage(hWnd, 0x1036, "UInt", ExStyle)
+if (Key="^")
+return LV_SetExStyle(hWnd, ((LV_GetExStyle(hWnd)&ExStyle)?"-":"") ExStyle)
+return SendMessage(hWnd, 0x1036, "UInt", ExStyle, "UInt", ExStyle)
 } ;https://msdn.microsoft.com/en-us/library/windows/desktop/bb761165%28v=vs.85%29.aspx
-				;<06.03.05.000023>
-				LV_GetExStyle(hWnd) {																									;-- get / remove / alternate extended styles to the listview control
-	return SendMessage(hWnd, 0x1037,,,,, "UInt")
+		;<06.03.05.000023>
+		LV_GetExStyle(hWnd) {																									;-- get / remove / alternate extended styles to the listview control
+return SendMessage(hWnd, 0x1037,,,,, "UInt")
 }
-				;<06.03.05.000024>
-				LV_IsItemVisible(hWnd, Item) {																						;-- determines if a listview item is visible
-	return SendMessage(hWnd, 0x10B6, "Int", Item-1)
+		;<06.03.05.000024>
+		LV_IsItemVisible(hWnd, Item) {																						;-- determines if a listview item is visible
+return SendMessage(hWnd, 0x10B6, "Int", Item-1)
 }
-				;<06.03.05.000025>
-				LV_SetIconSpacing(hWnd, cx, cy) {																					;-- Sets the space between icons in the icon view
-	/*                              	DESCRIPTION
+		;<06.03.05.000025>
+		LV_SetIconSpacing(hWnd, cx, cy) {																					;-- Sets the space between icons in the icon view
+/*                              	DESCRIPTION
+
+	; Sets the space between icons in the icon view.
+	; Syntax: LV_SetIconSpacing ([ID], [x-axis, distance in pixels], [y-axis, distance in pixels])
 	
-			; Sets the space between icons in the icon view.
-			; Syntax: LV_SetIconSpacing ([ID], [x-axis, distance in pixels], [y-axis, distance in pixels])
-			
-	*/
-	
-	
-	cx := ((cx<4)&&(cx!=-1))?4:cx, cy := ((cy<4)&&(cy!=-1))?4:cy
-	return SendMessage(hWnd, 0x1035,,,, LOWORD(cx)+HIWORD(cy, false))
+*/
+
+
+cx := ((cx<4)&&(cx!=-1))?4:cx, cy := ((cy<4)&&(cy!=-1))?4:cy
+return SendMessage(hWnd, 0x1035,,,, LOWORD(cx)+HIWORD(cy, false))
 }
-				;<06.03.05.000026>
-				LV_GetIconSpacing(hWnd, ByRef cx := "", ByRef cy := "") {												;-- Get the space between icons in the icon view
-	/*                              	DESCRIPTION
+		;<06.03.05.000026>
+		LV_GetIconSpacing(hWnd, ByRef cx := "", ByRef cy := "") {												;-- Get the space between icons in the icon view
+/*                              	DESCRIPTION
+
+	Get the space between icons in the icon view.
+	; Syntax: LV_GetIconSpacing ([ID], [x-axis, distance in pixels (output)], [y-axis, distance in pixels (output)])
 	
-			Get the space between icons in the icon view.
-			; Syntax: LV_GetIconSpacing ([ID], [x-axis, distance in pixels (output)], [y-axis, distance in pixels (output)])
-			
-	*/
-		
-	IcSp := SendMessage(hWnd, 0x1033)
-   return [cx:=(IcSp & 0xFFFF), cy:=(IcSp >> 16)]
+*/
+
+IcSp := SendMessage(hWnd, 0x1033)
+return [cx:=(IcSp & 0xFFFF), cy:=(IcSp >> 16)]
 }
-				;<06.03.05.000027>
-				LV_GetItemPos(hWnd, Item, ByRef x := "", ByRef y := "") {												;-- obtains the position of an item
-	/*                              	DESCRIPTION
+		;<06.03.05.000027>
+		LV_GetItemPos(hWnd, Item, ByRef x := "", ByRef y := "") {												;-- obtains the position of an item
+/*                              	DESCRIPTION
+
+	; get position of an item
+	; Syntax: LV_GetItemPos ([ID], [item], [x (output)], [y (output)])
+	; Note: returns an Array with the position xy.
 	
-			; get position of an item
-			; Syntax: LV_GetItemPos ([ID], [item], [x (output)], [y (output)])
-			; Note: returns an Array with the position xy.
-			
-	*/
-	
-	
-	VarSetCapacity(POINT, A_PtrSize*2, 0), SendMessage(hWnd, 0x1010,, Item-1,, &POINT)
-	return [x:=NumGet(POINT, 0, "Int"), y:=NumGet(POINT, 4, "Int")]
+*/
+
+
+VarSetCapacity(POINT, A_PtrSize*2, 0), SendMessage(hWnd, 0x1010,, Item-1,, &POINT)
+return [x:=NumGet(POINT, 0, "Int"), y:=NumGet(POINT, 4, "Int")]
 } LV_GetItemPosEx(hWnd, Item, ByRef x := "", ByRef y := "", ByRef ProcessId := "") {
-	ProcessId := ProcessId?ProcessId:WinGetPid(hWnd), hProcess := OpenProcess(ProcessId, 0x0008|0x0010|0x0020)
-	, pAddress := VirtualAlloc(hProcess,, 0x00001000), SendMessage(hWnd, 0x1000+16, "Int", Item-1,, pAddress)
-	, VarSetCapacity(RECT, 16, 0), ReadProcessMemory(hProcess, pAddress, &RECT, 16)
-	return [x:=NumGet(RECT, 0, "Int"), y:=NumGet(RECT, 4, "Int")], VirtualFree(hProcess, pAddress), CloseHandle(hProcess)
+ProcessId := ProcessId?ProcessId:WinGetPid(hWnd), hProcess := OpenProcess(ProcessId, 0x0008|0x0010|0x0020)
+, pAddress := VirtualAlloc(hProcess,, 0x00001000), SendMessage(hWnd, 0x1000+16, "Int", Item-1,, pAddress)
+, VarSetCapacity(RECT, 16, 0), ReadProcessMemory(hProcess, pAddress, &RECT, 16)
+return [x:=NumGet(RECT, 0, "Int"), y:=NumGet(RECT, 4, "Int")], VirtualFree(hProcess, pAddress), CloseHandle(hProcess)
 } ;http://www.autohotkey.com/board/topic/9760-lvm-geticonposition/
-				;<06.03.05.000028>
-				LV_SetItemPos(hWnd, Item, x := "", y := "") {																	;-- set the position of an item
-	/*                              	DESCRIPTION
+		;<06.03.05.000028>
+		LV_SetItemPos(hWnd, Item, x := "", y := "") {																	;-- set the position of an item
+/*                              	DESCRIPTION
+
+	set the position of an item
+	Syntax: LV_SetItemPos ([ID], [item], [x], [y])
 	
-			set the position of an item
-			Syntax: LV_SetItemPos ([ID], [item], [x], [y])
-			
-	*/
-	
-	
-	if (x="") || (y="")
-		LV_GetItemPos(hWnd, Item, _x, _y)
-	return SendMessage(hWnd, 0x100F,, Item-1,, LOWORD(x=""?_x:x)+HIWORD(y=""?_y:y, false))
+*/
+
+
+if (x="") || (y="")
+LV_GetItemPos(hWnd, Item, _x, _y)
+return SendMessage(hWnd, 0x100F,, Item-1,, LOWORD(x=""?_x:x)+HIWORD(y=""?_y:y, false))
 } LV_SetItemPosEx(hWnd, Item, x := "", y := "", ProcessId := "") {
-	if (x="") || (y="")
-		LV_GetItemPosEx(hWnd, Item, _x, _y, ProcessId)
-	return SendMessage(hWnd, 0x100F,, Item-1,, LOWORD(x=""?_x:x)+HIWORD(y=""?_y:y, false))
+if (x="") || (y="")
+LV_GetItemPosEx(hWnd, Item, _x, _y, ProcessId)
+return SendMessage(hWnd, 0x100F,, Item-1,, LOWORD(x=""?_x:x)+HIWORD(y=""?_y:y, false))
 }
-				;<06.03.05.000029>
-				LV_MouseGetCellPos(ByRef LV_CurrRow, ByRef LV_CurrCol, LV_LView) {						;-- returns the number (row, col) of a cell in a listview at present mouseposition  
+		;<06.03.05.000029>
+		LV_MouseGetCellPos(ByRef LV_CurrRow, ByRef LV_CurrCol, LV_LView) {						;-- returns the number (row, col) of a cell in a listview at present mouseposition  
+
+LVIR_LABEL = 0x0002					;LVM_GETSUBITEMRECT constant - get label info
+LVM_GETITEMCOUNT = 4100			;gets total number of rows
+LVM_SCROLL = 4116						;scrolls the listview
+LVM_GETTOPINDEX = 4135			;gets the first displayed row
+LVM_GETCOUNTPERPAGE = 4136	;gets number of displayed rows
+LVM_GETSUBITEMRECT = 4152		;gets cell width,height,x,y
+ControlGetPos, LV_lx, LV_ly, LV_lw, LV_lh, , ahk_id %LV_LView%	;get info on listview
+
+SendMessage, LVM_GETITEMCOUNT, 0, 0, , ahk_id %LV_LView%
+LV_TotalNumOfRows := ErrorLevel	;get total number of rows
+SendMessage, LVM_GETCOUNTPERPAGE, 0, 0, , ahk_id %LV_LView%
+LV_NumOfRows := ErrorLevel	;get number of displayed rows
+SendMessage, LVM_GETTOPINDEX, 0, 0, , ahk_id %LV_LView%
+LV_topIndex := ErrorLevel	;get first displayed row
+
+CoordMode, MOUSE, RELATIVE
+MouseGetPos, LV_mx, LV_my
+LV_mx -= LV_lx, LV_my -= LV_ly
+
+VarSetCapacity(LV_XYstruct, 16, 0)	;create struct
+Loop,% LV_NumOfRows + 1	;gets the current row and cell Y,H
+{	LV_which := LV_topIndex + A_Index - 1	;loop through each displayed row
+NumPut(LVIR_LABEL, LV_XYstruct, 0)	;get label info constant
+NumPut(A_Index - 1, LV_XYstruct, 4)	;subitem index
+SendMessage, LVM_GETSUBITEMRECT, %LV_which%, &LV_XYstruct, , ahk_id %LV_LView%	;get cell coords
+LV_RowY := NumGet(LV_XYstruct,4)	;row upperleft y
+LV_RowY2 := NumGet(LV_XYstruct,12)	;row bottomright y2
+LV_currColHeight := LV_RowY2 - LV_RowY ;get cell height
+if (LV_my <= LV_RowY + LV_currColHeight)	;if mouse Y pos less than row pos + height
+{	LV_currRow  := LV_which + 1	;1-based current row
+	LV_currRow0 := LV_which		;0-based current row, if needed
+	;LV_currCol is not needed here, so I didn't do it! It will always be 0. See my ListviewInCellEditing function for details on finding LV_currCol if needed.
+	LV_currCol=0
+	Break
+}
+}
+}
+		;<06.03.05.000030>
+		LV_GetColOrderLocal(hCtl, vSep:="") {																			;-- returns the order of listview columns for a local listview
+
+/*                              	DESCRIPTION
+
+	warning: such functions can potentially crash programs, save any work before testing
 	
-	LVIR_LABEL = 0x0002					;LVM_GETSUBITEMRECT constant - get label info
-	LVM_GETITEMCOUNT = 4100			;gets total number of rows
-	LVM_SCROLL = 4116						;scrolls the listview
-	LVM_GETTOPINDEX = 4135			;gets the first displayed row
-	LVM_GETCOUNTPERPAGE = 4136	;gets number of displayed rows
-	LVM_GETSUBITEMRECT = 4152		;gets cell width,height,x,y
-	ControlGetPos, LV_lx, LV_ly, LV_lw, LV_lh, , ahk_id %LV_LView%	;get info on listview
-
-	SendMessage, LVM_GETITEMCOUNT, 0, 0, , ahk_id %LV_LView%
-	LV_TotalNumOfRows := ErrorLevel	;get total number of rows
-	SendMessage, LVM_GETCOUNTPERPAGE, 0, 0, , ahk_id %LV_LView%
-	LV_NumOfRows := ErrorLevel	;get number of displayed rows
-	SendMessage, LVM_GETTOPINDEX, 0, 0, , ahk_id %LV_LView%
-	LV_topIndex := ErrorLevel	;get first displayed row
-
-	CoordMode, MOUSE, RELATIVE
-	MouseGetPos, LV_mx, LV_my
-	LV_mx -= LV_lx, LV_my -= LV_ly
-
-	VarSetCapacity(LV_XYstruct, 16, 0)	;create struct
-	Loop,% LV_NumOfRows + 1	;gets the current row and cell Y,H
-	{	LV_which := LV_topIndex + A_Index - 1	;loop through each displayed row
-		NumPut(LVIR_LABEL, LV_XYstruct, 0)	;get label info constant
-		NumPut(A_Index - 1, LV_XYstruct, 4)	;subitem index
-		SendMessage, LVM_GETSUBITEMRECT, %LV_which%, &LV_XYstruct, , ahk_id %LV_LView%	;get cell coords
-		LV_RowY := NumGet(LV_XYstruct,4)	;row upperleft y
-		LV_RowY2 := NumGet(LV_XYstruct,12)	;row bottomright y2
-		LV_currColHeight := LV_RowY2 - LV_RowY ;get cell height
-		if (LV_my <= LV_RowY + LV_currColHeight)	;if mouse Y pos less than row pos + height
-		{	LV_currRow  := LV_which + 1	;1-based current row
-			LV_currRow0 := LV_which		;0-based current row, if needed
-			;LV_currCol is not needed here, so I didn't do it! It will always be 0. See my ListviewInCellEditing function for details on finding LV_currCol if needed.
-			LV_currCol=0
-			Break
-		}
-	}
-}
-				;<06.03.05.000030>
-				LV_GetColOrderLocal(hCtl, vSep:="") {																			;-- returns the order of listview columns for a local listview
+	[need functions from here:]
+	GUIs via DllCall: get/set internal/external control text - AutoHotkey Community
+	https://autohotkey.com/boards/viewtopic.php?f=6&t=40514
+	https://autohotkey.com/boards/viewtopic.php?t=52945
 	
-	/*                              	DESCRIPTION
+	pass listview hWnd (not listview header hWnd)
+	for local controls only
 	
-			warning: such functions can potentially crash programs, save any work before testing
-			
-			[need functions from here:]
-			GUIs via DllCall: get/set internal/external control text - AutoHotkey Community
-			https://autohotkey.com/boards/viewtopic.php?f=6&t=40514
-			https://autohotkey.com/boards/viewtopic.php?t=52945
-			
-			pass listview hWnd (not listview header hWnd)
-			for local controls only
-			
-	*/
-	
-	
-	hLVH := SendMessage(0x101F,,,, "ahk_id " hCtl) ;LVM_GETHEADER := 0x101F
-	vCountCol := SendMessage(0x1200,,,, "ahk_id " hLVH) ;HDM_GETITEMCOUNT := 0x1200
-	vData := ""
-	VarSetCapacity(vData, vCountCol*4, 0)
-	SendMessage(0x103B, vCountCol, &vData,, "ahk_id " hCtl) ;LVM_GETCOLUMNORDERARRAY := 0x103B
-	if (vSep = "")
-	{
-		oOutput := []
-		Loop, % vCountCol
-			oOutput.Push(NumGet(&vData, A_Index*4-4, "Int")+1)
-		return oOutput
-	}
-	else
-	{
-		vOutput := ""
-		Loop, % vCountCol
-			vOutput .= NumGet(&vData, A_Index*4-4, "Int")+1 vSep
-		return SubStr(vOutput, 1, -StrLen(vSep))
-	}
+*/
+
+
+hLVH := SendMessage(0x101F,,,, "ahk_id " hCtl) ;LVM_GETHEADER := 0x101F
+vCountCol := SendMessage(0x1200,,,, "ahk_id " hLVH) ;HDM_GETITEMCOUNT := 0x1200
+vData := ""
+VarSetCapacity(vData, vCountCol*4, 0)
+SendMessage(0x103B, vCountCol, &vData,, "ahk_id " hCtl) ;LVM_GETCOLUMNORDERARRAY := 0x103B
+if (vSep = "")
+{
+oOutput := []
+Loop, % vCountCol
+	oOutput.Push(NumGet(&vData, A_Index*4-4, "Int")+1)
+return oOutput
 }
-				;<06.03.05.000031>
-				LV_GetColOrder(hCtl, vSep:="") {																					;-- returns the order of listview columns for a listview
-	;pass listview hWnd (not listview header hWnd)
-	vErr := A_PtrSize=8 && JEE_WinIs64Bit(hCtl) ? -1 : 0xFFFFFFFF
-	vScriptPID := DllCall("kernel32\GetCurrentProcessId", UInt)
-	vPID := WinGetPID("ahk_id " hCtl)
-	if (vPID = vScriptPID)
-		vIsLocal := 1, vPIs64 := (A_PtrSize=8)
-
-	if !hLVH := SendMessage(0x101F,,,, "ahk_id " hCtl) ;LVM_GETHEADER := 0x101F
-		return
-	if !vCountCol := SendMessage(0x1200,,,, "ahk_id " hLVH) ;HDM_GETITEMCOUNT := 0x1200
-		return
-	if (vCountCol = vErr) ;-1
-		return
-
-	if !vIsLocal
-	{
-		if !hProc := JEE_DCOpenProcess(0x438, 0, vPID)
-			return
-		if A_Is64bitOS && !DllCall("kernel32\IsWow64Process", Ptr,hProc, PtrP,vIsWow64Process)
-			return
-		vPIs64 := !vIsWow64Process
-	}
-
-	vPtrType := vPIs64?"Int64":"Int"
-	vSize := vCountCol*4
-	VarSetCapacity(vData, vSize, 0)
-
-	if !vIsLocal
-	{
-		if !pBuf := JEE_DCVirtualAllocEx(hProc, 0, vSize, 0x3000, 0x4)
-			return
-	}
-	else
-		pBuf := &vData
-
-	SendMessage(0x103B, vCountCol, pBuf,, "ahk_id " hCtl) ;LVM_GETCOLUMNORDERARRAY := 0x103B
-	if !vIsLocal
-	{
-		JEE_DCReadProcessMemory(hProc, pBuf, &vData, vSize, 0)
-		JEE_DCVirtualFreeEx(hProc, pBuf, 0, 0x8000)
-		JEE_DCCloseHandle(hProc)
-	}
-	if (vSep = "")
-	{
-		oOutput := []
-		Loop, % vCountCol
-			oOutput.Push(NumGet(&vData, A_Index*4-4, "Int")+1)
-		return oOutput
-	}
-	else
-	{
-		vOutput := ""
-		Loop, % vCountCol
-			vOutput .= NumGet(&vData, A_Index*4-4, "Int")+1 vSep
-		return SubStr(vOutput, 1, -StrLen(vSep))
-	}
+else
+{
+vOutput := ""
+Loop, % vCountCol
+	vOutput .= NumGet(&vData, A_Index*4-4, "Int")+1 vSep
+return SubStr(vOutput, 1, -StrLen(vSep))
 }
-				;<06.03.05.000032>
-				LV_SetColOrderLocal(hCtl, oList, vSep:="") {																	;-- pass listview hWnd (not listview header hWnd)
-	
-	;for local controls only
-	if !IsObject(oList)
-		oList := StrSplit(oList, vSep)
-	if !(vCountCol := oList.Length())
-		return
-	VarSetCapacity(vData, vCountCol*4)
-	for _, vValue in oList
-		NumPut(vValue-1, &vData, A_Index*4-4, "Int")
-	SendMessage(0x103A, vCountCol, &vArray,, "ahk_id " hCtl) ;LVM_SETCOLUMNORDERARRAY := 0x103A
 }
-				;<06.03.05.000033>
-				LV_SetColOrder(hCtl, oList, vSep:="") {																			;-- pass listview hWnd (not listview header hWnd)
-	if !IsObject(oList)
-		oList := StrSplit(oList, vSep)
-	if !(vCountCol := oList.Length())
-		return
+		;<06.03.05.000031>
+		LV_GetColOrder(hCtl, vSep:="") {																					;-- returns the order of listview columns for a listview
+;pass listview hWnd (not listview header hWnd)
+vErr := A_PtrSize=8 && JEE_WinIs64Bit(hCtl) ? -1 : 0xFFFFFFFF
+vScriptPID := DllCall("kernel32\GetCurrentProcessId", UInt)
+vPID := WinGetPID("ahk_id " hCtl)
+if (vPID = vScriptPID)
+vIsLocal := 1, vPIs64 := (A_PtrSize=8)
 
-	vErr := A_PtrSize=8 && JEE_WinIs64Bit(hCtl) ? -1 : 0xFFFFFFFF
-	vScriptPID := DllCall("kernel32\GetCurrentProcessId", UInt)
-	vPID := WinGetPID("ahk_id " hCtl)
-	if (vPID = vScriptPID)
-		vIsLocal := 1, vPIs64 := (A_PtrSize=8)
+if !hLVH := SendMessage(0x101F,,,, "ahk_id " hCtl) ;LVM_GETHEADER := 0x101F
+return
+if !vCountCol := SendMessage(0x1200,,,, "ahk_id " hLVH) ;HDM_GETITEMCOUNT := 0x1200
+return
+if (vCountCol = vErr) ;-1
+return
 
-	if !hLVH := SendMessage(0x101F,,,, "ahk_id " hCtl) ;LVM_GETHEADER := 0x101F
-		return
-	if !vCountCol := SendMessage(0x1200,,,, "ahk_id " hLVH) ;HDM_GETITEMCOUNT := 0x1200
-		return
-	if (vCountCol = vErr) ;-1
-		return
-
-	if !vIsLocal
-	{
-		if !hProc := JEE_DCOpenProcess(0x438, 0, vPID)
-			return
-		if A_Is64bitOS && !DllCall("kernel32\IsWow64Process", Ptr,hProc, PtrP,vIsWow64Process)
-			return
-		vPIs64 := !vIsWow64Process
-	}
-
-	vPtrType := vPIs64?"Int64":"Int"
-	vSize := vCountCol*4
-	VarSetCapacity(vData, vCountCol*4)
-	for _, vValue in oList
-		NumPut(vValue-1, &vData, A_Index*4-4, "Int")
-
-	if !vIsLocal
-	{
-		if !pBuf := JEE_DCVirtualAllocEx(hProc, 0, vSize, 0x3000, 0x4)
-			return
-		JEE_DCWriteProcessMemory(hProc, pBuf, &vData, vSize, 0)
-	}
-	else
-		pBuf := &vData
-
-	SendMessage(0x103A, vCountCol, pBuf,, "ahk_id " hCtl) ;LVM_SETCOLUMNORDERARRAY := 0x103A
-
-	if !vIsLocal
-	{
-		JEE_DCVirtualFreeEx(hProc, pBuf, 0, 0x8000)
-		JEE_DCCloseHandle(hProc)
-	}
+if !vIsLocal
+{
+if !hProc := JEE_DCOpenProcess(0x438, 0, vPID)
+	return
+if A_Is64bitOS && !DllCall("kernel32\IsWow64Process", Ptr,hProc, PtrP,vIsWow64Process)
+	return
+vPIs64 := !vIsWow64Process
 }
-				;<06.03.05.000034>
-				LV_GetCheckedItems(cN,wN) {																						;-- Returns a list of checked items from a standard ListView Control
-    ;https://gist.github.com/TLMcode/4757894
-	ControlGet, LVItems, List,, % cN, % wN
-    Item:=Object()
-    While Pos
-        Pos:=RegExMatch(LVItems,"`am)(^.*?$)",_,!Pos?(Pos:=1):Pos+StrLen(_)),mCnt:=A_Index-1,Item[mCnt]:=_1
-    Loop % mCnt {
-        SendMessage, 0x102c, A_Index-1, 0x2000, % cN, % wN
-        ChkItems.=(ErrorLevel ? Item[A_Index-1] "`n" : "")
-    }
-    Return ChkItems
+
+vPtrType := vPIs64?"Int64":"Int"
+vSize := vCountCol*4
+VarSetCapacity(vData, vSize, 0)
+
+if !vIsLocal
+{
+if !pBuf := JEE_DCVirtualAllocEx(hProc, 0, vSize, 0x3000, 0x4)
+	return
 }
-				;<06.03.05.000035>
-				LV_ClickRow(HLV, Row) { 																								;-- simulates a left mousebutton click on a specific row in a listview
+else
+pBuf := &vData
 
-	; just me -> http://www.autohotkey.com/board/topic/86490-click-listview-row/#entry550767
-   ; HLV : ListView's HWND, Row : 1-based row number
+SendMessage(0x103B, vCountCol, pBuf,, "ahk_id " hCtl) ;LVM_GETCOLUMNORDERARRAY := 0x103B
+if !vIsLocal
+{
+JEE_DCReadProcessMemory(hProc, pBuf, &vData, vSize, 0)
+JEE_DCVirtualFreeEx(hProc, pBuf, 0, 0x8000)
+JEE_DCCloseHandle(hProc)
+}
+if (vSep = "")
+{
+oOutput := []
+Loop, % vCountCol
+	oOutput.Push(NumGet(&vData, A_Index*4-4, "Int")+1)
+return oOutput
+}
+else
+{
+vOutput := ""
+Loop, % vCountCol
+	vOutput .= NumGet(&vData, A_Index*4-4, "Int")+1 vSep
+return SubStr(vOutput, 1, -StrLen(vSep))
+}
+}
+		;<06.03.05.000032>
+		LV_SetColOrderLocal(hCtl, oList, vSep:="") {																	;-- pass listview hWnd (not listview header hWnd)
 
-   VarSetCapacity(RECT, 16, 0)
-   SendMessage, 0x100E, Row - 1, &RECT, , ahk_id %HLV% ; LVM_GETITEMRECT
-   POINT := NumGet(RECT, 0, "Short") | (NumGet(RECT, 4, "Short") << 16)
-   PostMessage, 0x0201, 0, POINT, , ahk_id %HLV% ; WM_LBUTTONDOWN
-   PostMessage, 0x0202, 0, POINT, , ahk_id %HLV% ; WM_LBUTTONUP
+;for local controls only
+if !IsObject(oList)
+oList := StrSplit(oList, vSep)
+if !(vCountCol := oList.Length())
+return
+VarSetCapacity(vData, vCountCol*4)
+for _, vValue in oList
+NumPut(vValue-1, &vData, A_Index*4-4, "Int")
+SendMessage(0x103A, vCountCol, &vArray,, "ahk_id " hCtl) ;LVM_SETCOLUMNORDERARRAY := 0x103A
+}
+		;<06.03.05.000033>
+		LV_SetColOrder(hCtl, oList, vSep:="") {																			;-- pass listview hWnd (not listview header hWnd)
+if !IsObject(oList)
+oList := StrSplit(oList, vSep)
+if !(vCountCol := oList.Length())
+return
+
+vErr := A_PtrSize=8 && JEE_WinIs64Bit(hCtl) ? -1 : 0xFFFFFFFF
+vScriptPID := DllCall("kernel32\GetCurrentProcessId", UInt)
+vPID := WinGetPID("ahk_id " hCtl)
+if (vPID = vScriptPID)
+vIsLocal := 1, vPIs64 := (A_PtrSize=8)
+
+if !hLVH := SendMessage(0x101F,,,, "ahk_id " hCtl) ;LVM_GETHEADER := 0x101F
+return
+if !vCountCol := SendMessage(0x1200,,,, "ahk_id " hLVH) ;HDM_GETITEMCOUNT := 0x1200
+return
+if (vCountCol = vErr) ;-1
+return
+
+if !vIsLocal
+{
+if !hProc := JEE_DCOpenProcess(0x438, 0, vPID)
+	return
+if A_Is64bitOS && !DllCall("kernel32\IsWow64Process", Ptr,hProc, PtrP,vIsWow64Process)
+	return
+vPIs64 := !vIsWow64Process
+}
+
+vPtrType := vPIs64?"Int64":"Int"
+vSize := vCountCol*4
+VarSetCapacity(vData, vCountCol*4)
+for _, vValue in oList
+NumPut(vValue-1, &vData, A_Index*4-4, "Int")
+
+if !vIsLocal
+{
+if !pBuf := JEE_DCVirtualAllocEx(hProc, 0, vSize, 0x3000, 0x4)
+	return
+JEE_DCWriteProcessMemory(hProc, pBuf, &vData, vSize, 0)
+}
+else
+pBuf := &vData
+
+SendMessage(0x103A, vCountCol, pBuf,, "ahk_id " hCtl) ;LVM_SETCOLUMNORDERARRAY := 0x103A
+
+if !vIsLocal
+{
+JEE_DCVirtualFreeEx(hProc, pBuf, 0, 0x8000)
+JEE_DCCloseHandle(hProc)
+}
+}
+		;<06.03.05.000034>
+		LV_GetCheckedItems(cN,wN) {																						;-- Returns a list of checked items from a standard ListView Control
+;https://gist.github.com/TLMcode/4757894
+ControlGet, LVItems, List,, % cN, % wN
+Item:=Object()
+While Pos
+Pos:=RegExMatch(LVItems,"`am)(^.*?$)",_,!Pos?(Pos:=1):Pos+StrLen(_)),mCnt:=A_Index-1,Item[mCnt]:=_1
+Loop % mCnt {
+SendMessage, 0x102c, A_Index-1, 0x2000, % cN, % wN
+ChkItems.=(ErrorLevel ? Item[A_Index-1] "`n" : "")
+}
+Return ChkItems
+}
+		;<06.03.05.000035>
+		LV_ClickRow(HLV, Row) { 																								;-- simulates a left mousebutton click on a specific row in a listview
+
+; just me -> http://www.autohotkey.com/board/topic/86490-click-listview-row/#entry550767
+; HLV : ListView's HWND, Row : 1-based row number
+
+VarSetCapacity(RECT, 16, 0)
+SendMessage, 0x100E, Row - 1, &RECT, , ahk_id %HLV% ; LVM_GETITEMRECT
+POINT := NumGet(RECT, 0, "Short") | (NumGet(RECT, 4, "Short") << 16)
+PostMessage, 0x0201, 0, POINT, , ahk_id %HLV% ; WM_LBUTTONDOWN
+PostMessage, 0x0202, 0, POINT, , ahk_id %HLV% ; WM_LBUTTONUP
 
 } ;</06.03.05.000035>
-				;<06.03.05.000036>
-				LV_HeaderFontSet(p_hwndlv="", p_fontstyle="", p_fontname="") {                              	;-- sets font for listview headers 
-				/******************* Functions *******************
-				;//Sun, Jul 13, 2008 --- 7/13/08, 7:19:19pm
-				;//Function: ListView_HeaderFontSet
-				;//Params...
-				;//		p_hwndlv    = ListView hwnd
-				;//		p_fontstyle = [b[old]] [i[talic]] [u[nderline]] [s[trike]]
-				;//		p_fontname  = <any single valid font name = Arial, Tahoma, Trebuchet MS>
-				*/
-				
-				static hFont1stBkp
-				method:="CreateFont"
-				;//method="CreateFontIndirect"
-				WM_SETFONT			:=0x0030
-				WM_GETFONT			:=0x0031
-				LVM_FIRST				:=0x1000
-				LVM_GETHEADER	:=LVM_FIRST+31
-				;// /* Font Weights */
-				FW_DONTCARE		:=0
-				FW_THIN					:=100
-				FW_EXTRALIGHT		:=200
-				FW_LIGHT				:=300
-				FW_NORMAL			:=400
-				FW_MEDIUM			:=500
-				FW_SEMIBOLD		:=600
-				FW_BOLD				:=700
-				FW_EXTRABOLD		:=800
-				FW_HEAVY				:=900
-				FW_ULTRALIGHT		:=FW_EXTRALIGHT
-				FW_REGULAR			:=FW_NORMAL
-				FW_DEMIBOLD		:=FW_SEMIBOLD
-				FW_ULTRABOLD		:=FW_EXTRABOLD
-				FW_BLACK				:=FW_HEAVY
-				/*
-				parse p_fontstyle for...
-					cBlue	color	*** Note *** OMG can't set ListView/SysHeader32 font/text color??? ***
-					s19		size
-					b		bold
-					w500	weight?
-				*/
-				;//*** Note *** yes I will allow mixed types later!...this was quick n dirty...
-				;//*** Note *** ...it now supports bold italic underline & strike-thru...all at once
-				style:=p_fontstyle
-				;//*** Note *** change RegExReplace to RegExMatch
-				style:=RegExReplace(style, "i)\s*\b(?:I|U|S)*B(?:old)?(?:I|U|S)*\b\s*", "", style_bold)
-				style:=RegExReplace(style, "i)\s*\b(?:B|U|S)*I(?:talic)?(?:B|U|S)*\b\s*", "", style_italic)
-				style:=RegExReplace(style, "i)\s*\b(?:B|I|S)*U(?:nderline)?(?:B|I|S)*\b\s*", "", style_underline)
-				style:=RegExReplace(style, "i)\s*\b(?:B|I|U)*S(?:trike)?(?:B|I|U)*\b\s*", "", style_strike)
-				;//style:=RegExReplace(style, "i)\s*\bW(?:eight)(\d+)\b\s*", "", style_weight)
-				if (style_bold)
-					fnWeight:=FW_BOLD
-				if (style_italic)
-					fdwItalic:=1
-				if (style_underline)
-					fdwUnderline:=1
-				if (style_strike)
-					fdwStrikeOut:=1
-				;//if (mweight)
-				;//	fnWeight:=mweight
-				lpszFace:=p_fontname
+		;<06.03.05.000036>
+		LV_HeaderFontSet(p_hwndlv="", p_fontstyle="", p_fontname="") {                              	;-- sets font for listview headers 
+		/******************* Functions *******************
+		;//Sun, Jul 13, 2008 --- 7/13/08, 7:19:19pm
+		;//Function: ListView_HeaderFontSet
+		;//Params...
+		;//		p_hwndlv    = ListView hwnd
+		;//		p_fontstyle = [b[old]] [i[talic]] [u[nderline]] [s[trike]]
+		;//		p_fontname  = <any single valid font name = Arial, Tahoma, Trebuchet MS>
+		*/
+		
+		static hFont1stBkp
+		method:="CreateFont"
+		;//method="CreateFontIndirect"
+		WM_SETFONT			:=0x0030
+		WM_GETFONT			:=0x0031
+		LVM_FIRST				:=0x1000
+		LVM_GETHEADER	:=LVM_FIRST+31
+		;// /* Font Weights */
+		FW_DONTCARE		:=0
+		FW_THIN					:=100
+		FW_EXTRALIGHT		:=200
+		FW_LIGHT				:=300
+		FW_NORMAL			:=400
+		FW_MEDIUM			:=500
+		FW_SEMIBOLD		:=600
+		FW_BOLD				:=700
+		FW_EXTRABOLD		:=800
+		FW_HEAVY				:=900
+		FW_ULTRALIGHT		:=FW_EXTRALIGHT
+		FW_REGULAR			:=FW_NORMAL
+		FW_DEMIBOLD		:=FW_SEMIBOLD
+		FW_ULTRABOLD		:=FW_EXTRABOLD
+		FW_BLACK				:=FW_HEAVY
+		/*
+		parse p_fontstyle for...
+			cBlue	color	*** Note *** OMG can't set ListView/SysHeader32 font/text color??? ***
+			s19		size
+			b		bold
+			w500	weight?
+		*/
+		;//*** Note *** yes I will allow mixed types later!...this was quick n dirty...
+		;//*** Note *** ...it now supports bold italic underline & strike-thru...all at once
+		style:=p_fontstyle
+		;//*** Note *** change RegExReplace to RegExMatch
+		style:=RegExReplace(style, "i)\s*\b(?:I|U|S)*B(?:old)?(?:I|U|S)*\b\s*", "", style_bold)
+		style:=RegExReplace(style, "i)\s*\b(?:B|U|S)*I(?:talic)?(?:B|U|S)*\b\s*", "", style_italic)
+		style:=RegExReplace(style, "i)\s*\b(?:B|I|S)*U(?:nderline)?(?:B|I|S)*\b\s*", "", style_underline)
+		style:=RegExReplace(style, "i)\s*\b(?:B|I|U)*S(?:trike)?(?:B|I|U)*\b\s*", "", style_strike)
+		;//style:=RegExReplace(style, "i)\s*\bW(?:eight)(\d+)\b\s*", "", style_weight)
+		if (style_bold)
+			fnWeight:=FW_BOLD
+		if (style_italic)
+			fdwItalic:=1
+		if (style_underline)
+			fdwUnderline:=1
+		if (style_strike)
+			fdwStrikeOut:=1
+		;//if (mweight)
+		;//	fnWeight:=mweight
+		lpszFace:=p_fontname
 
-				ret:=hHeader:=SendMessage(p_hwndlv, LVM_GETHEADER, 0, 0)
+		ret:=hHeader:=SendMessage(p_hwndlv, LVM_GETHEADER, 0, 0)
+		el:=Errorlevel
+		le:=A_LastError
+		;//msgbox, 64, , SendMessage LVM_GETHEADER: ret(%ret%) el(%el%) le(%le%)
+
+		ret:=hFontCurr:=SendMessage(hHeader, WM_GETFONT, 0, 0)
+		el:=Errorlevel
+		le:=A_LastError
+		;//msgbox, 64, , SendMessage WM_GETFONT: ret(%ret%) el(%el%) le(%le%)
+		if (!hFont1stBkp) {
+			hFont1stBkp:=hFontCurr
+		}
+
+		if (method="CreateFont") {
+			if (p_fontstyle!="" || p_fontname!="") {
+				ret:=hFontHeader:=CreateFont(nHeight, nWidth, nEscapement, nOrientation
+											, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut
+											, fdwCharSet, fdwOutputPrecision, fdwClipPrecision
+											, fdwQuality, fdwPitchAndFamily, lpszFace)
 				el:=Errorlevel
 				le:=A_LastError
-				;//msgbox, 64, , SendMessage LVM_GETHEADER: ret(%ret%) el(%el%) le(%le%)
-
-				ret:=hFontCurr:=SendMessage(hHeader, WM_GETFONT, 0, 0)
-				el:=Errorlevel
-				le:=A_LastError
-				;//msgbox, 64, , SendMessage WM_GETFONT: ret(%ret%) el(%el%) le(%le%)
-				if (!hFont1stBkp) {
-					hFont1stBkp:=hFontCurr
-				}
-
-				if (method="CreateFont") {
-					if (p_fontstyle!="" || p_fontname!="") {
-						ret:=hFontHeader:=CreateFont(nHeight, nWidth, nEscapement, nOrientation
-													, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut
-													, fdwCharSet, fdwOutputPrecision, fdwClipPrecision
-													, fdwQuality, fdwPitchAndFamily, lpszFace)
-						el:=Errorlevel
-						le:=A_LastError
-						;//msgbox, 64, , CreateFont: ret(%ret%) el(%el%) le(%le%)
-					} else hFontHeader:=hFont1stBkp
-					ret:=SendMessage(hHeader, WM_SETFONT, hFontHeader, 1)
-					;//ret:=SendMessage(hHeader, WM_SETFONT, hFontHeader, 0)
-					;//ret:=SendMessage(hHeader, WM_SETFONT, &0, 1)
-					el:=Errorlevel
-					le:=A_LastError
-					;//msgbox, 64, , SendMessage WM_SETFONT: ret(%ret%) el(%el%) le(%le%)
-				}
-			} ;</06.03.05.000036>
-		    	;<06.03.05.000037>                             
-				LV_SetSI(hList, iItem, iSubItem, iImage) {                                                                       	;-- set icon for row "subItem" within Listview
-				/*	DESCRIPTION OF FUNCTION: -- LV_SetSI() --
-					-------------------------------------------------------------------------------------------------------------------
-					Description  	:	set icon for row "subItem" within Listview
-					Link              	:	https://gist.github.com/hoppfrosch/11242617
-					Author         	:	Tseug (http://www.autohotkey.com/board/topic/72072-listview-icons-in-more-than-first-column-example/)
-					Date             	:	
-					AHK-Version	:	ANSI AHK_L
-					License         	:	
-					Syntax          	:	
-					Parameter(s)	:	
-					Return value	:	
-					Remark(s)    	:	
-					Dependencies	:	
-					KeyWords    	:	Listview, gui, icon
-					-------------------------------------------------------------------------------------------------------------------
-					|	EXAMPLE(s)
-					-------------------------------------------------------------------------------------------------------------------
-					; example for adding icons to listview columns > the first
-					; after Drugwash: http://www.autohotkey.com/forum/post-234198.html#234198
-					
-					Gui, add, ListView,	w600 h400		+LV0x2 HwndHLV, Name|Size|Ext
-					ImageListID := IL_Create(10)
-					LV_SetImageList(ImageListID)
-					Loop 10
-						IL_Add(ImageListID, "shell32.dll", A_Index) 
-
-					Loop, %A_WinDir%\*.*				; fill Listview
-					{	if a_Index > 100
-							break
-						i := Mod(a_index,10)+1			; since I only added 10 icons
-						LV_Add("icon" i, A_LoopFileName, A_LoopFileSize, A_LoopFileExt)
-						LV_SetSI(hLV, A_Index, 3, i)	; now add icons (i) to the rows of the third column
-								; can also call function later for individual cells
-					}
-					LV_ModifyCol()
-
-					Gui, Show,	, Icons in more than 1 Listview column
-					return
-
-					GuiClose:
-					ExitApp
-				*/
-					VarSetCapacity(LVITEM, 60, 0)
-					LVM_SETITEM := 0x1006 , mask := 2   ; LVIF_IMAGE := 0x2
-					iItem-- , iSubItem-- , iImage--		; Note first column (iSubItem) is #ZERO, hence adjustment
-					NumPut(mask, LVITEM, 0, "UInt")
-					NumPut(iItem, LVITEM, 4, "Int")
-					NumPut(iSubItem, LVITEM, 8, "Int")
-					NumPut(iImage, LVITEM, 28, "Int")
-					result := DllCall("SendMessageA", UInt, hList, UInt, LVM_SETITEM, UInt, 0, UInt, &LVITEM)
-					return result
-				} ;</06.03.05.000037>
-		    	;<06.03.05.000038>
+				;//msgbox, 64, , CreateFont: ret(%ret%) el(%el%) le(%le%)
+			} else hFontHeader:=hFont1stBkp
+			ret:=SendMessage(hHeader, WM_SETFONT, hFontHeader, 1)
+			;//ret:=SendMessage(hHeader, WM_SETFONT, hFontHeader, 0)
+			;//ret:=SendMessage(hHeader, WM_SETFONT, &0, 1)
+			el:=Errorlevel
+			le:=A_LastError
+			;//msgbox, 64, , SendMessage WM_SETFONT: ret(%ret%) el(%el%) le(%le%)
+		}
+	} ;</06.03.05.000036>
+		;<06.03.05.000037>                             
+		LV_SetSI(hList, iItem, iSubItem, iImage) {                                                                       	;-- set icon for row "subItem" within Listview
+		/*	DESCRIPTION OF FUNCTION: -- LV_SetSI() --
+			-------------------------------------------------------------------------------------------------------------------
+			Description  	:	set icon for row "subItem" within Listview
+			Link              	:	https://gist.github.com/hoppfrosch/11242617
+			Author         	:	Tseug (http://www.autohotkey.com/board/topic/72072-listview-icons-in-more-than-first-column-example/)
+			Date             	:	
+			AHK-Version	:	ANSI AHK_L
+			License         	:	
+			Syntax          	:	
+			Parameter(s)	:	
+			Return value	:	
+			Remark(s)    	:	
+			Dependencies	:	
+			KeyWords    	:	Listview, gui, icon
+			-------------------------------------------------------------------------------------------------------------------
+			|	EXAMPLE(s)
+			-------------------------------------------------------------------------------------------------------------------
+			; example for adding icons to listview columns > the first
+			; after Drugwash: http://www.autohotkey.com/forum/post-234198.html#234198
 			
-		    	 ;</06.03.05.000038>
-		} ;</06.03.05.>
+			Gui, add, ListView,	w600 h400		+LV0x2 HwndHLV, Name|Size|Ext
+			ImageListID := IL_Create(10)
+			LV_SetImageList(ImageListID)
+			Loop 10
+				IL_Add(ImageListID, "shell32.dll", A_Index) 
 
-		{ ;06: TabControl 			(2)
+			Loop, %A_WinDir%\*.*				; fill Listview
+			{	if a_Index > 100
+					break
+				i := Mod(a_index,10)+1			; since I only added 10 icons
+				LV_Add("icon" i, A_LoopFileName, A_LoopFileSize, A_LoopFileExt)
+				LV_SetSI(hLV, A_Index, 3, i)	; now add icons (i) to the rows of the third column
+						; can also call function later for individual cells
+			}
+			LV_ModifyCol()
+
+			Gui, Show,	, Icons in more than 1 Listview column
+			return
+
+			GuiClose:
+			ExitApp
+		*/
+			VarSetCapacity(LVITEM, 60, 0)
+			LVM_SETITEM := 0x1006 , mask := 2   ; LVIF_IMAGE := 0x2
+			iItem-- , iSubItem-- , iImage--		; Note first column (iSubItem) is #ZERO, hence adjustment
+			NumPut(mask, LVITEM, 0, "UInt")
+			NumPut(iItem, LVITEM, 4, "Int")
+			NumPut(iSubItem, LVITEM, 8, "Int")
+			NumPut(iImage, LVITEM, 28, "Int")
+			result := DllCall("SendMessageA", UInt, hList, UInt, LVM_SETITEM, UInt, 0, UInt, &LVITEM)
+			return result
+		} ;</06.03.05.000037>
+		;<06.03.05.000038>
+	
+		 ;</06.03.05.000038>
+} ;</06.03.05.>
+
+{ ;<06.03.06>: TabControl		(2)
 
 TabCtrl_GetCurSel(HWND) { 																						;-- Indexnumber of active tab in a gui
-	; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
-   ; Returns the 1-based index of the currently selected tab
-   Static TCM_GETCURSEL := 0x130B
-   SendMessage, TCM_GETCURSEL, 0, 0, , ahk_id %HWND%
-   Return (ErrorLevel + 1)
+; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
+; Returns the 1-based index of the currently selected tab
+Static TCM_GETCURSEL := 0x130B
+SendMessage, TCM_GETCURSEL, 0, 0, , ahk_id %HWND%
+Return (ErrorLevel + 1)
 }
 
 TabCtrl_GetItemText(HWND, Index = 0) {																	;-- returns text of a tab
-	; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
+; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
 
-   Static TCM_GETITEM  := A_IsUnicode ? 0x133C : 0x1305 ; TCM_GETITEMW : TCM_GETITEMA
-   Static TCIF_TEXT := 0x0001
-   Static TCTXTP := (3 * 4) + (A_PtrSize - 4)
-   Static TCTXLP := TCTXTP + A_PtrSize
-   ErrorLevel := 0
-   If (Index = 0)
-      Index := TabCtrl_GetCurSel(HWND)
-   If (Index = 0)
-      Return SetError(1, "")
-   VarSetCapacity(TCTEXT, 256 * SizeT, 0)
-   ; typedef struct {
-   ;   UINT   mask;           4
-   ;   DWORD  dwState;        4
-   ;   DWORD  dwStateMask;    4 + 4 bytes padding on 64-bit systems
-   ;   LPTSTR pszText;        4 / 8 (32-bit / 64-bit)
-   ;   int    cchTextMax;     4
-   ;   int    iImage;         4
-   ;   LPARAM lParam;         4 / 8
-   ; } TCITEM, *LPTCITEM;
-   VarSetCapacity(TCITEM, (5 * 4) + (2 * A_PtrSize) + (A_PtrSize - 4), 0)
-   NumPut(TCIF_TEXT, TCITEM, 0, "UInt")
-   NumPut(&TCTEXT, TCITEM, TCTXTP, "Ptr")
-   NumPut(256, TCITEM, TCTXLP, "Int")
-   SendMessage, TCM_GETITEM, --Index, &TCITEM, , ahk_id %HWND%
-   If !(ErrorLevel)
-      Return SetError(1, "")
-   Else
-      Return SetError(0, StrGet(NumGet(TCITEM, TCTXTP, "UPtr")))
+Static TCM_GETITEM  := A_IsUnicode ? 0x133C : 0x1305 ; TCM_GETITEMW : TCM_GETITEMA
+Static TCIF_TEXT := 0x0001
+Static TCTXTP := (3 * 4) + (A_PtrSize - 4)
+Static TCTXLP := TCTXTP + A_PtrSize
+ErrorLevel := 0
+If (Index = 0)
+Index := TabCtrl_GetCurSel(HWND)
+If (Index = 0)
+Return SetError(1, "")
+VarSetCapacity(TCTEXT, 256 * SizeT, 0)
+; typedef struct {
+;   UINT   mask;           4
+;   DWORD  dwState;        4
+;   DWORD  dwStateMask;    4 + 4 bytes padding on 64-bit systems
+;   LPTSTR pszText;        4 / 8 (32-bit / 64-bit)
+;   int    cchTextMax;     4
+;   int    iImage;         4
+;   LPARAM lParam;         4 / 8
+; } TCITEM, *LPTCITEM;
+VarSetCapacity(TCITEM, (5 * 4) + (2 * A_PtrSize) + (A_PtrSize - 4), 0)
+NumPut(TCIF_TEXT, TCITEM, 0, "UInt")
+NumPut(&TCTEXT, TCITEM, TCTXTP, "Ptr")
+NumPut(256, TCITEM, TCTXLP, "Int")
+SendMessage, TCM_GETITEM, --Index, &TCITEM, , ahk_id %HWND%
+If !(ErrorLevel)
+Return SetError(1, "")
+Else
+Return SetError(0, StrGet(NumGet(TCITEM, TCTXTP, "UPtr")))
 }
 { ;sub of TabCtrl functions
-	
+
 SetError(ErrorValue, ReturnValue) {																				;-- sub of TabCtrl functions
 
-	;; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
-   ErrorLevel := ErrorValue
-   Return ReturnValue
+;; a function by: "just me" found on https://autohotkey.com/board/topic/79783-how-to-get-the-current-tab-name/
+ErrorLevel := ErrorValue
+Return ReturnValue
 }
 } ;end sub
 
-		} 
+} 
 
-		{ ;07: Treeview 				(3)
+{ ;<06.03.07>: Treeview 			(3)
 ;<06.03.07.000001>
 TV_Find(VarText) {																										;-- returns the ID of an item based on the text of the item
 
-	Loop {
-		ItemID := TV_GetNext(ItemID, "Full")
-		if not ItemID
-			break
-		TV_GetText(ItemText, ItemID)
-		If (ItemText=VarText)
-			Return ItemID
-	}
+Loop {
+ItemID := TV_GetNext(ItemID, "Full")
+if not ItemID
+	break
+TV_GetText(ItemText, ItemID)
+If (ItemText=VarText)
+	Return ItemID
+}
 
 Return
 } ;</06.03.07.000001>
 ;<06.03.07.000002>
 TV_Load(src, p:=0, recurse:=false) {											     								;-- loads TreeView items from an XML string
 
-	/*	Description
+/*	Description
 
-	a function by Coco found at https://autohotkey.com/boards/viewtopic.php?t=91
+a function by Coco found at https://autohotkey.com/boards/viewtopic.php?t=91
 
-	This function loads TreeView items from an XML string. By using XPath expressions, the user can instruct the function on how to process/parse
-	the XML source and on how the items are to be added.
+This function loads TreeView items from an XML string. By using XPath expressions, the user can instruct the function on how to process/parse
+the XML source and on how the items are to be added.
 
-	--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	A. The XML structure
+A. The XML structure
 
-	This function is versatile enough to accept any user-defined XML string. Parsing instructions are defined as XPath expressions assigned as values
-	to the root element's attribute(s). The following attribute names should be used(strictly applies to the root element only):
+This function is versatile enough to accept any user-defined XML string. Parsing instructions are defined as XPath expressions assigned as values
+to the root element's attribute(s). The following attribute names should be used(strictly applies to the root element only):
 
-	name - 		specify an XPath expression, query must resolve to either of the following nodeTypes: element, attribute, text, cdatasection, comment.
-					The selection is applied to the element node that is defined as a TreeView item. If not defined, the element node's tagName property
-					is used as the TreeView's item's name.
+name - 		specify an XPath expression, query must resolve to either of the following nodeTypes: element, attribute, text, cdatasection, comment.
+			The selection is applied to the element node that is defined as a TreeView item. If not defined, the element node's tagName property
+			is used as the TreeView's item's name.
 
-	options - 	same as above
+options - 	same as above
 
-	global - 	An XPath expression. This attribute defines global TreeView item options to be applied to all TreeView items that are to be added.
-					Selection is applied to the root node.
+global - 	An XPath expression. This attribute defines global TreeView item options to be applied to all TreeView items that are to be added.
+			Selection is applied to the root node.
 
-	exclude - An XPath expression. Specifies which nodes(element) are not to be added as TreeView items. Selection is applied to the root node.
+exclude - An XPath expression. Specifies which nodes(element) are not to be added as TreeView items. Selection is applied to the root node.
 
-	match - An XPath expression. Specifies which element nodes are to be added as TreeView items. By default all element nodes(except the root
-				node) are added as items to the TreeView. Selection is applied to the root node.
+match - An XPath expression. Specifies which element nodes are to be added as TreeView items. By default all element nodes(except the root
+		node) are added as items to the TreeView. Selection is applied to the root node.
 
-	Note: Only element nodes are added as TreeView items.
+Note: Only element nodes are added as TreeView items.
 
-	--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	B. Function parameters
+B. Function parameters
 
-		src - an XML string
-		p - parentItem's ID. Defaults to '0' - top item of the TreeView
+src - an XML string
+p - parentItem's ID. Defaults to '0' - top item of the TreeView
 
-	*/
+*/
 
-	/* Example
+/* Example
 
-		#Include TV_Load.ahk ;or Copy-Paste fucntion in script
+#Include TV_Load.ahk ;or Copy-Paste fucntion in script
 
-		tv1 := "
-		(Join
-		<TREEVIEW name='@n' options='@o' match='//i' global='bold'>
-		 <i n='AutoHotkey' o='expand'>
-		  <i n='Hello World'/>
-		 </i>
-		 <i n='TreeView Item'/>
-		 <i n='Another Item' o='-bold expand'>
-		  <excluded>
-		   <i n='The quick brown fox'/>
-		  </excluded>
-		  <i n='Child Item'>
-		   <i n='Descendant'/>
-		  </i>
-		  <i n='Sibling Item' o='-bold'/>
-		 </i>
-		</TREEVIEW>
-		)"
+tv1 := "
+(Join
+<TREEVIEW name='@n' options='@o' match='//i' global='bold'>
+ <i n='AutoHotkey' o='expand'>
+  <i n='Hello World'/>
+ </i>
+ <i n='TreeView Item'/>
+ <i n='Another Item' o='-bold expand'>
+  <excluded>
+   <i n='The quick brown fox'/>
+  </excluded>
+  <i n='Child Item'>
+   <i n='Descendant'/>
+  </i>
+  <i n='Sibling Item' o='-bold'/>
+ </i>
+</TREEVIEW>
+)"
 
-		tv2 := "
-		(Join
-		<TREEVIEW name='name/text()' options='options/text()' match='//i' global='expand'>
-		 <i>
-		  <name><![CDATA[AutoHotkey]]></name>
-		  <options>bold</options>
-		  <i>
-		   <name><![CDATA[Child Item]]></name>
-		   <options/>
-		  </i>
-		 </i>
-		 <i>
-		  <name><![CDATA[<XML STRING/>]]></name>
-		  <options/>
-		 </i>
-		 <i>
-		  <name><![CDATA[Sibling Item]]></name>
-		  <options>check</options>
-		  <i>
-		   <name><![CDATA[Hello World]]></name>
-		   <options/>
-		   <i>
-			<name><![CDATA[Descendant]]></name>
-			<options>check</options>
-		   </i>
-		  </i>
-		 </i>
-		 <i>
-		  <name><![CDATA[Items automatcially expanded]]></name>
-		  <options/>
-		 </i>
-		</TREEVIEW>
-		)"
+tv2 := "
+(Join
+<TREEVIEW name='name/text()' options='options/text()' match='//i' global='expand'>
+ <i>
+  <name><![CDATA[AutoHotkey]]></name>
+  <options>bold</options>
+  <i>
+   <name><![CDATA[Child Item]]></name>
+   <options/>
+  </i>
+ </i>
+ <i>
+  <name><![CDATA[<XML STRING/>]]></name>
+  <options/>
+ </i>
+ <i>
+  <name><![CDATA[Sibling Item]]></name>
+  <options>check</options>
+  <i>
+   <name><![CDATA[Hello World]]></name>
+   <options/>
+   <i>
+	<name><![CDATA[Descendant]]></name>
+	<options>check</options>
+   </i>
+  </i>
+ </i>
+ <i>
+  <name><![CDATA[Items automatcially expanded]]></name>
+  <options/>
+ </i>
+</TREEVIEW>
+)"
 
-		Gui, Margin, 0, 0
-		Gui, Font, s9, Consolas
-		Gui, Add, TreeView, w250 r15
-		TV_Load(tv1)
-		Gui, Add, TreeView, x+5 yp w250 r15 Checked
-		TV_Load(tv2)
-		Gui, Show
-		return
-		GuiClose:
-		ExitApp
+Gui, Margin, 0, 0
+Gui, Font, s9, Consolas
+Gui, Add, TreeView, w250 r15
+TV_Load(tv1)
+Gui, Add, TreeView, x+5 yp w250 r15 Checked
+TV_Load(tv2)
+Gui, Show
+return
+GuiClose:
+ExitApp
 
-	*/
+*/
 
-	;recurse is an internal parameter
-	static xpr , root
-	static TVL_NAME , TVL_OPTIONS , TVL_GLOBAL , TVL_EXCLUDE , TVL_MATCH
+;recurse is an internal parameter
+static xpr , root
+static TVL_NAME , TVL_OPTIONS , TVL_GLOBAL , TVL_EXCLUDE , TVL_MATCH
 
-	if !xpr
-		xpr := {TVL_NAME:"@*[translate(name(), 'NAME', 'name')='name']"
-		    ,   TVL_OPTIONS:"@*[translate(name(), 'OPTIONS', 'options')='options']"
-		    ,   TVL_GLOBAL:"@*[translate(name(), 'GLOBAL', 'global')='global']"
-		    ,   TVL_EXCLUDE:"@*[translate(name(), 'EXCLUDE', 'exclude')='exclude']"
-		    ,   TVL_MATCH:"@*[translate(name(), 'MATCH', 'match')='match']"}
+if !xpr
+xpr := {TVL_NAME:"@*[translate(name(), 'NAME', 'name')='name']"
+	,   TVL_OPTIONS:"@*[translate(name(), 'OPTIONS', 'options')='options']"
+	,   TVL_GLOBAL:"@*[translate(name(), 'GLOBAL', 'global')='global']"
+	,   TVL_EXCLUDE:"@*[translate(name(), 'EXCLUDE', 'exclude')='exclude']"
+	,   TVL_MATCH:"@*[translate(name(), 'MATCH', 'match')='match']"}
 
-	if !IsObject(src)
-		x := ComObjCreate("MSXML2.DOMDocument.6.0")
-		, x.setProperty("SelectionLanguage", "XPath") ;redundant
-		, x.async := false , x.loadXML(src)
-		, src := x.documentElement
+if !IsObject(src)
+x := ComObjCreate("MSXML2.DOMDocument.6.0")
+, x.setProperty("SelectionLanguage", "XPath") ;redundant
+, x.async := false , x.loadXML(src)
+, src := x.documentElement
 
-	if !recurse {
-		root := src.selectSingleNode("/*") ;src.ownerDocument.documentElement
+if !recurse {
+root := src.selectSingleNode("/*") ;src.ownerDocument.documentElement
 
-		for var, xp in xpr
-			if (var ~= "^TVL_(NAME|OPTIONS|GLOBAL)$")
-				%var% := (_:=root.selectSingleNode(xp))
-				      ? _.value
-				      : (var="TVL_NAME" ? "." : "")
+for var, xp in xpr
+	if (var ~= "^TVL_(NAME|OPTIONS|GLOBAL)$")
+		%var% := (_:=root.selectSingleNode(xp))
+			  ? _.value
+			  : (var="TVL_NAME" ? "." : "")
 
-			else if (var ~= "^TVL_(EXCLUDE|MATCH)$")
-				%var% := (_:=root.selectSingleNode(xp))
-				      ? (_.value<>"" ? root.selectNodes(_.value) : "")
-				      : ""
+	else if (var ~= "^TVL_(EXCLUDE|MATCH)$")
+		%var% := (_:=root.selectSingleNode(xp))
+			  ? (_.value<>"" ? root.selectNodes(_.value) : "")
+			  : ""
+}
+
+for e in src.childNodes {
+if (e.nodeTypeString <> "element")
+	continue
+if (TVL_EXCLUDE && TVL_EXCLUDE.matches(e))
+	continue
+if (TVL_MATCH && !TVL_MATCH.matches(e))
+	continue
+
+for k, v in {name:TVL_NAME, options:TVL_OPTIONS}
+	%k% := (n:=e.selectSingleNode(v))[(n.nodeType>1 ? "nodeValue" : "nodeName")]
+
+if (TVL_GLOBAL <> "") {
+	go := TVL_GLOBAL
+	Loop, Parse, options, % " `t", % " `t"
+	{
+		if ((alf:=A_LoopField) == "")
+			continue
+		if InStr(go, m:=RegExReplace(alf, "i)[^a-z]+", ""))
+			go := RegExReplace(go, "i)\S*" m "\S*", alf)
+		else (go .=  " " . alf)
 	}
 
-	for e in src.childNodes {
-		if (e.nodeTypeString <> "element")
-			continue
-		if (TVL_EXCLUDE && TVL_EXCLUDE.matches(e))
-			continue
-		if (TVL_MATCH && !TVL_MATCH.matches(e))
-			continue
+} else go := options
 
-		for k, v in {name:TVL_NAME, options:TVL_OPTIONS}
-			%k% := (n:=e.selectSingleNode(v))[(n.nodeType>1 ? "nodeValue" : "nodeName")]
-
-		if (TVL_GLOBAL <> "") {
-			go := TVL_GLOBAL
-			Loop, Parse, options, % " `t", % " `t"
-			{
-				if ((alf:=A_LoopField) == "")
-					continue
-				if InStr(go, m:=RegExReplace(alf, "i)[^a-z]+", ""))
-					go := RegExReplace(go, "i)\S*" m "\S*", alf)
-				else (go .=  " " . alf)
-			}
-
-		} else go := options
-
-		id := TV_Add(name, p, go)
-		if e.hasChildNodes()
-			TV_Load(e, id, true)
-	}
-	;Empty/reset static vars
-	if !recurse
-		root := ""
-		, TVL_NAME := ""
-		, TVL_OPTIONS := ""
-		, TVL_GLOBAL := ""
-		, TVL_EXCLUDE := ""
-		, TVL_MATCH := ""
+id := TV_Add(name, p, go)
+if e.hasChildNodes()
+	TV_Load(e, id, true)
+}
+;Empty/reset static vars
+if !recurse
+root := ""
+, TVL_NAME := ""
+, TVL_OPTIONS := ""
+, TVL_GLOBAL := ""
+, TVL_EXCLUDE := ""
+, TVL_MATCH := ""
 
 } ;</06.03.08.000002>
 ;<06.03.07.000003>
 TV_GetItemText(pItem) {                                                                                            	;-- retrieves the text/name of the specified treeview node +
-	
-	/*    	DESCRIPTION
-	
-    		Link: 			https://autohotkey.com/boards/viewtopic.php?t=4998
-    		Author: 		just me
-    		Method: 		GetText
-    	             			Retrieves the text/name of the specified node
-    	    Parameters: pItem         - Handle to the item
-    	    Returns: 		The text/name of the specified Item. If the text is longer than 127, only the first 127 characters are retrieved.
-			    				
-	*/
-	
-        TVM_GETITEM := A_IsUnicode ? TVM_GETITEMW : TVM_GETITEMA
 
-        WinGet ProcessId, pid, % "ahk_id " this.TVHnd
-        hProcess := OpenProcess(PROCESS_VM_OPERATION|PROCESS_VM_READ
-                               |PROCESS_VM_WRITE|PROCESS_QUERY_INFORMATION
-                               , false, ProcessId)
+/*    	DESCRIPTION
 
-        ; Size := 28 + 3 * A_PtrSize      ; Size of a TVITEM structure
-        Size := 40 + 5 * A_PtrSize      ; Size of a TVITEMEX structure
+	Link: 			https://autohotkey.com/boards/viewtopic.php?t=4998
+	Author: 		just me
+	Method: 		GetText
+						Retrieves the text/name of the specified node
+	Parameters: pItem         - Handle to the item
+	Returns: 		The text/name of the specified Item. If the text is longer than 127, only the first 127 characters are retrieved.
+						
+*/
 
-        _tvi := VirtualAllocEx(hProcess, 0, Size, MEM_COMMIT, PAGE_READWRITE)
-        _txt := VirtualAllocEx(hProcess, 0, 256,  MEM_COMMIT, PAGE_READWRITE)
+TVM_GETITEM := A_IsUnicode ? TVM_GETITEMW : TVM_GETITEMA
 
-        ; TVITEMEX Structure
-        VarSetCapacity(tvi, Size, 0)
-        NumPut(TVIF_TEXT|TVIF_HANDLE, tvi, 0, "UInt")
-        ; NumPut(pItem, tvi, 4, "Ptr")
-        NumPut(pItem, tvi, A_PtrSize, "Ptr")
-        ; NumPut(_txt, tvi, 12 + A_PtrSize, "Ptr")
-        NumPut(_txt, tvi, 8 + (A_PtrSize * 2), "Ptr")
-        ; NumPut(127, tvi, 12 + 2 * A_PtrSize, "Uint")
-        NumPut(127, tvi, 8 + (A_PtrSize * 3), "Uint")
+WinGet ProcessId, pid, % "ahk_id " this.TVHnd
+hProcess := OpenProcess(PROCESS_VM_OPERATION|PROCESS_VM_READ
+					   |PROCESS_VM_WRITE|PROCESS_QUERY_INFORMATION
+					   , false, ProcessId)
 
-        VarSetCapacity(txt, 256, 0)
-        WriteProcessMemory(hProcess, _tvi, &tvi, Size)
-        SendMessage TVM_GETITEM, 0, _tvi, ,  % "ahk_id " this.TVHnd
-        ReadProcessMemory(hProcess, _txt, txt, 256)
+; Size := 28 + 3 * A_PtrSize      ; Size of a TVITEM structure
+Size := 40 + 5 * A_PtrSize      ; Size of a TVITEMEX structure
 
-        VirtualFreeEx(hProcess, _txt, 0, MEM_RELEASE)
-        VirtualFreeEx(hProcess, _tvi, 0, MEM_RELEASE)
-        CloseHandle(hProcess)
+_tvi := VirtualAllocEx(hProcess, 0, Size, MEM_COMMIT, PAGE_READWRITE)
+_txt := VirtualAllocEx(hProcess, 0, 256,  MEM_COMMIT, PAGE_READWRITE)
 
-        return txt
+; TVITEMEX Structure
+VarSetCapacity(tvi, Size, 0)
+NumPut(TVIF_TEXT|TVIF_HANDLE, tvi, 0, "UInt")
+; NumPut(pItem, tvi, 4, "Ptr")
+NumPut(pItem, tvi, A_PtrSize, "Ptr")
+; NumPut(_txt, tvi, 12 + A_PtrSize, "Ptr")
+NumPut(_txt, tvi, 8 + (A_PtrSize * 2), "Ptr")
+; NumPut(127, tvi, 12 + 2 * A_PtrSize, "Uint")
+NumPut(127, tvi, 8 + (A_PtrSize * 3), "Uint")
+
+VarSetCapacity(txt, 256, 0)
+WriteProcessMemory(hProcess, _tvi, &tvi, Size)
+SendMessage TVM_GETITEM, 0, _tvi, ,  % "ahk_id " this.TVHnd
+ReadProcessMemory(hProcess, _txt, txt, 256)
+
+VirtualFreeEx(hProcess, _txt, 0, MEM_RELEASE)
+VirtualFreeEx(hProcess, _tvi, 0, MEM_RELEASE)
+CloseHandle(hProcess)
+
+return txt
 } ;</06.03.08.000003>
 
-		} 
+} 
 
-		{ ;08: GDIControl 			(2)
+{ ;<06.03.08>: GDIControl		(2)
 ;<06.03.08.000001>
 ControlCreateGradient(Handle, Colors*) {																	;-- draws a gradient as background picture
 
-   GuiControlGet, C, Pos, %Handle%
-   ColorCnt := Colors.Length()
-   Size := ColorCnt * 2 * 4
-   VarSetCapacity(Bits, Size, 0)
-   Addr := &Bits
-   For Each, Color In Colors
-      Addr := Numput(Color, NumPut(Color, Addr + 0, "UInt"), "UInt")
-    HBMP := DllCall("CreateBitmap", "Int", 2, "Int", ColorCnt, "UInt", 1, "UInt", 32, "Ptr", 0, "Ptr")
-    HBMP := DllCall("CopyImage", "Ptr", HBMP, "UInt", 0, "Int", 0, "Int", 0, "UInt", 0x2008, "Ptr")
-    DllCall("SetBitmapBits", "Ptr", HBMP, "UInt", Size, "Ptr", &Bits)
-    HBMP := DllCall("CopyImage", "Ptr", HBMP, "UInt", 0, "Int", CW, "Int", CH, "UInt", 0x2008, "Ptr")
-    DllCall("SendMessage", "Ptr", Handle, "UInt", 0x0172, "Ptr", 0, "Ptr", HBMP, "Ptr")
-    Return True
+GuiControlGet, C, Pos, %Handle%
+ColorCnt := Colors.Length()
+Size := ColorCnt * 2 * 4
+VarSetCapacity(Bits, Size, 0)
+Addr := &Bits
+For Each, Color In Colors
+Addr := Numput(Color, NumPut(Color, Addr + 0, "UInt"), "UInt")
+HBMP := DllCall("CreateBitmap", "Int", 2, "Int", ColorCnt, "UInt", 1, "UInt", 32, "Ptr", 0, "Ptr")
+HBMP := DllCall("CopyImage", "Ptr", HBMP, "UInt", 0, "Int", 0, "Int", 0, "UInt", 0x2008, "Ptr")
+DllCall("SetBitmapBits", "Ptr", HBMP, "UInt", Size, "Ptr", &Bits)
+HBMP := DllCall("CopyImage", "Ptr", HBMP, "UInt", 0, "Int", CW, "Int", CH, "UInt", 0x2008, "Ptr")
+DllCall("SendMessage", "Ptr", Handle, "UInt", 0x0172, "Ptr", 0, "Ptr", HBMP, "Ptr")
+Return True
 
 } ;</06.03.08.000001>
 ;<06.03.08.000002>
 AddGraphicButtonPlus(ImgPath, Options="", Text="") {											;-- GDI+ add a graphic button to a gui
 
-    hGdiPlus := DllCall("LoadLibrary", "Str", "gdiplus.dll")
-    VarSetCapacity(si, 16, 0), si := Chr(1)
-    DllCall("gdiplus\GdiplusStartup", "UIntP", pToken, "UInt", &si, "UInt", 0)
-    VarSetCapacity(wFile, StrLen(ImgPath)*2+2)
-    DllCall("kernel32\MultiByteToWideChar", "UInt", 0, "UInt", 0, "Str", ImgPath, "Int", -1, "UInt", &wFile, "Int", VarSetCapacity(wFile)//2)
-    DllCall("gdiplus\GdipCreateBitmapFromFile", "UInt", &wFile, "UIntP", pBitmap)
-    if (pBitmap) {
-        DllCall("gdiplus\GdipCreateHBITMAPFromBitmap", "UInt", pBitmap, "UIntP", hBM, "UInt", 0)
-        DllCall("gdiplus\GdipDisposeImage", "Uint", pBitmap)
-    }
-    DllCall("gdiplus\GdiplusShutdown" , "UInt", pToken)
-    DllCall("FreeLibrary", "UInt", hGdiPlus)
+hGdiPlus := DllCall("LoadLibrary", "Str", "gdiplus.dll")
+VarSetCapacity(si, 16, 0), si := Chr(1)
+DllCall("gdiplus\GdiplusStartup", "UIntP", pToken, "UInt", &si, "UInt", 0)
+VarSetCapacity(wFile, StrLen(ImgPath)*2+2)
+DllCall("kernel32\MultiByteToWideChar", "UInt", 0, "UInt", 0, "Str", ImgPath, "Int", -1, "UInt", &wFile, "Int", VarSetCapacity(wFile)//2)
+DllCall("gdiplus\GdipCreateBitmapFromFile", "UInt", &wFile, "UIntP", pBitmap)
+if (pBitmap) {
+DllCall("gdiplus\GdipCreateHBITMAPFromBitmap", "UInt", pBitmap, "UIntP", hBM, "UInt", 0)
+DllCall("gdiplus\GdipDisposeImage", "Uint", pBitmap)
+}
+DllCall("gdiplus\GdiplusShutdown" , "UInt", pToken)
+DllCall("FreeLibrary", "UInt", hGdiPlus)
 
-    if Text =
-    {
-        VarSetCapacity(oBM, 24)
-        DllCall("GetObject","uint",hBM,"int",24,"uint",&oBM)
-        Options := "W" NumGet(oBM,4,"int") " H" NumGet(oBM,8,"int") " +128 " Options
-    }
+if Text =
+{
+VarSetCapacity(oBM, 24)
+DllCall("GetObject","uint",hBM,"int",24,"uint",&oBM)
+Options := "W" NumGet(oBM,4,"int") " H" NumGet(oBM,8,"int") " +128 " Options
+}
 
-    Gui, Add, Button, %Options% hwndhwnd, %Text%
+Gui, Add, Button, %Options% hwndhwnd, %Text%
 
-    SendMessage, 0xF7, 0, hBM,, ahk_id %hwnd%  ; BM_SETIMAGE
-    if ErrorLevel ; delete previous image
-        DllCall("DeleteObject", "uint", ErrorLevel)
+SendMessage, 0xF7, 0, hBM,, ahk_id %hwnd%  ; BM_SETIMAGE
+if ErrorLevel ; delete previous image
+DllCall("DeleteObject", "uint", ErrorLevel)
 
-    return hBM
+return hBM
 } ;</06.03.08.000002>
 
-		} 
+} 
 
-		{ ;09: Scrollbars			(1)
+{ ;<06.03.09>: Scrollbars			(1)
 ;<06.03.09.000001>
 UpdateScrollBars(GuiNum, GuiWidth, GuiHeight) {                                                 	;-- immediate update of the window content when using a scrollbar
-	
-	/*	DESCRIPTION OF FUNCTION: -- UpdateScrollBars --
-	-------------------------------------------------------------------------------------------------------------------
-	Description  	:	immediate update of the window content when using a scrollbar
-	Link              	:	https://autohotkey.com/board/topic/95488-help-with-gui-window-scrollingresizing/
-	Author         	:	Lexikos
-	Date             	:	07/13/2013
-	AHK-Version	:	AHK_L
-	License         	:	
-	Syntax          	:	
-	Parameter(s)	:	
-	Return value	:	
-	Remark(s)    	:	there are libraries can do the same like Scroller.ahk
-	Dependencies	:	OnScroll
-	KeyWords    	:	gui,scrollbar,OnMessage
-	-------------------------------------------------------------------------------------------------------------------
-	|	EXAMPLE(s)
-	-------------------------------------------------------------------------------------------------------------------
-	#NoEnv
- 
-	OnMessage(0x115, "OnScroll") ; WM_VSCROLL
-	OnMessage(0x114, "OnScroll") ; WM_HSCROLL
-	 
-	Gui, +Resize +MaxSize420x675 +0x300000 ; WS_VSCROLL | WS_HSCROLL
-	 
-	Loop 8
-		Gui, Add, Edit, R5 W400, Edit %A_Index%
-	Gui, Add, Button,, Do absolutely nothing
-	Gui, Show, W200 H200
-	 
-	Gui, +LastFound
-	GroupAdd, MyGui, % "ahk_id " . WinExist()
-	 return
-	 
-	GuiSize:
-		UpdateScrollBars(A_Gui, A_GuiWidth, A_GuiHeight)
-	return
-	 
-	GuiClose:
-	ExitApp
-	 
-	#IfWinActive ahk_group MyGui
-		WheelUp::
-		WheelDown::
-		+WheelUp::
-		+WheelDown::
-			; SB_LINEDOWN=1, SB_LINEUP=0, WM_HSCROLL=0x114, WM_VSCROLL=0x115
-			OnScroll(InStr(A_ThisHotkey,"Down") ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, WinExist())
-		return
-	#IfWinActive
-	
-	*/
-	
-    static SIF_RANGE=0x1, SIF_PAGE=0x2, SIF_DISABLENOSCROLL=0x8, SB_HORZ=0, SB_VERT=1
-    
-    Gui, %GuiNum%:Default
-    Gui, +LastFound
-    
-    ; Calculate scrolling area.
-    Left := Top := 9999
-    Right := Bottom := 0
-    WinGet, ControlList, ControlList
-    Loop, Parse, ControlList, `n
-    {
-        GuiControlGet, c, Pos, %A_LoopField%
-        if (cX < Left)
-            Left := cX
-        if (cY < Top)
-            Top := cY
-        if (cX + cW > Right)
-            Right := cX + cW
-        if (cY + cH > Bottom)
-            Bottom := cY + cH
-    }
-    Left -= 8
-    Top -= 8
-    Right += 8
-    Bottom += 8
-    ScrollWidth := Right-Left
-    ScrollHeight := Bottom-Top
-    
-    ; Initialize SCROLLINFO.
-    VarSetCapacity(si, 28, 0)
-    NumPut(28, si) ; cbSize
-    NumPut(SIF_RANGE | SIF_PAGE, si, 4) ; fMask
-    
-    ; Update horizontal scroll bar.
-    NumPut(ScrollWidth, si, 12) ; nMax
-    NumPut(GuiWidth, si, 16) ; nPage
-    DllCall("SetScrollInfo", "uint", WinExist(), "uint", SB_HORZ, "uint", &si, "int", 1)
-    
-    ; Update vertical scroll bar.
+
+/*	DESCRIPTION OF FUNCTION: -- UpdateScrollBars --
+-------------------------------------------------------------------------------------------------------------------
+Description  	:	immediate update of the window content when using a scrollbar
+Link              	:	https://autohotkey.com/board/topic/95488-help-with-gui-window-scrollingresizing/
+Author         	:	Lexikos
+Date             	:	07/13/2013
+AHK-Version	:	AHK_L
+License         	:	
+Syntax          	:	
+Parameter(s)	:	
+Return value	:	
+Remark(s)    	:	there are libraries can do the same like Scroller.ahk
+Dependencies	:	OnScroll
+KeyWords    	:	gui,scrollbar,OnMessage
+-------------------------------------------------------------------------------------------------------------------
+|	EXAMPLE(s)
+-------------------------------------------------------------------------------------------------------------------
+#NoEnv
+
+OnMessage(0x115, "OnScroll") ; WM_VSCROLL
+OnMessage(0x114, "OnScroll") ; WM_HSCROLL
+
+Gui, +Resize +MaxSize420x675 +0x300000 ; WS_VSCROLL | WS_HSCROLL
+
+Loop 8
+Gui, Add, Edit, R5 W400, Edit %A_Index%
+Gui, Add, Button,, Do absolutely nothing
+Gui, Show, W200 H200
+
+Gui, +LastFound
+GroupAdd, MyGui, % "ahk_id " . WinExist()
+return
+
+GuiSize:
+UpdateScrollBars(A_Gui, A_GuiWidth, A_GuiHeight)
+return
+
+GuiClose:
+ExitApp
+
+#IfWinActive ahk_group MyGui
+WheelUp::
+WheelDown::
++WheelUp::
++WheelDown::
+	; SB_LINEDOWN=1, SB_LINEUP=0, WM_HSCROLL=0x114, WM_VSCROLL=0x115
+	OnScroll(InStr(A_ThisHotkey,"Down") ? 1 : 0, 0, GetKeyState("Shift") ? 0x114 : 0x115, WinExist())
+return
+#IfWinActive
+
+*/
+
+static SIF_RANGE=0x1, SIF_PAGE=0x2, SIF_DISABLENOSCROLL=0x8, SB_HORZ=0, SB_VERT=1
+
+Gui, %GuiNum%:Default
+Gui, +LastFound
+
+; Calculate scrolling area.
+Left := Top := 9999
+Right := Bottom := 0
+WinGet, ControlList, ControlList
+Loop, Parse, ControlList, `n
+{
+GuiControlGet, c, Pos, %A_LoopField%
+if (cX < Left)
+	Left := cX
+if (cY < Top)
+	Top := cY
+if (cX + cW > Right)
+	Right := cX + cW
+if (cY + cH > Bottom)
+	Bottom := cY + cH
+}
+Left -= 8
+Top -= 8
+Right += 8
+Bottom += 8
+ScrollWidth := Right-Left
+ScrollHeight := Bottom-Top
+
+; Initialize SCROLLINFO.
+VarSetCapacity(si, 28, 0)
+NumPut(28, si) ; cbSize
+NumPut(SIF_RANGE | SIF_PAGE, si, 4) ; fMask
+
+; Update horizontal scroll bar.
+NumPut(ScrollWidth, si, 12) ; nMax
+NumPut(GuiWidth, si, 16) ; nPage
+DllCall("SetScrollInfo", "uint", WinExist(), "uint", SB_HORZ, "uint", &si, "int", 1)
+
+; Update vertical scroll bar.
 ;     NumPut(SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL, si, 4) ; fMask
-    NumPut(ScrollHeight, si, 12) ; nMax
-    NumPut(GuiHeight, si, 16) ; nPage
-    DllCall("SetScrollInfo", "uint", WinExist(), "uint", SB_VERT, "uint", &si, "int", 1)
-    
-    if (Left < 0 && Right < GuiWidth)
-        x := Abs(Left) > GuiWidth-Right ? GuiWidth-Right : Abs(Left)
-    if (Top < 0 && Bottom < GuiHeight)
-        y := Abs(Top) > GuiHeight-Bottom ? GuiHeight-Bottom : Abs(Top)
-    if (x || y)
-        DllCall("ScrollWindow", "uint", WinExist(), "int", x, "int", y, "uint", 0, "uint", 0)
+NumPut(ScrollHeight, si, 12) ; nMax
+NumPut(GuiHeight, si, 16) ; nPage
+DllCall("SetScrollInfo", "uint", WinExist(), "uint", SB_VERT, "uint", &si, "int", 1)
+
+if (Left < 0 && Right < GuiWidth)
+x := Abs(Left) > GuiWidth-Right ? GuiWidth-Right : Abs(Left)
+if (Top < 0 && Bottom < GuiHeight)
+y := Abs(Top) > GuiHeight-Bottom ? GuiHeight-Bottom : Abs(Top)
+if (x || y)
+DllCall("ScrollWindow", "uint", WinExist(), "int", x, "int", y, "uint", 0, "uint", 0)
 }
 { ;sub
 OnScroll(wParam, lParam, msg, hwnd) {
-    static SIF_ALL=0x17, SCROLL_STEP=10
-    
-    bar := msg=0x115 ; SB_HORZ=0, SB_VERT=1
-    
-    VarSetCapacity(si, 28, 0)
-    NumPut(28, si) ; cbSize
-    NumPut(SIF_ALL, si, 4) ; fMask
-    if !DllCall("GetScrollInfo", "uint", hwnd, "int", bar, "uint", &si)
-        return
-    
-    VarSetCapacity(rect, 16)
-    DllCall("GetClientRect", "uint", hwnd, "uint", &rect)
-    
-    new_pos := NumGet(si, 20) ; nPos
-    
-    action := wParam & 0xFFFF
-    if action = 0 ; SB_LINEUP
-        new_pos -= SCROLL_STEP
-    else if action = 1 ; SB_LINEDOWN
-        new_pos += SCROLL_STEP
-    else if action = 2 ; SB_PAGEUP
-        new_pos -= NumGet(rect, 12, "int") - SCROLL_STEP
-    else if action = 3 ; SB_PAGEDOWN
-        new_pos += NumGet(rect, 12, "int") - SCROLL_STEP
-    else if (action = 5 || action = 4) ; SB_THUMBTRACK || SB_THUMBPOSITION
-        new_pos := wParam>>16
-    else if action = 6 ; SB_TOP
-        new_pos := NumGet(si, 8, "int") ; nMin
-    else if action = 7 ; SB_BOTTOM
-        new_pos := NumGet(si, 12, "int") ; nMax
-    else
-        return
-    
-    min := NumGet(si, 8, "int") ; nMin
-    max := NumGet(si, 12, "int") - NumGet(si, 16) ; nMax-nPage
-    new_pos := new_pos > max ? max : new_pos
-    new_pos := new_pos < min ? min : new_pos
-    
-    old_pos := NumGet(si, 20, "int") ; nPos
-    
-    x := y := 0
-    if bar = 0 ; SB_HORZ
-        x := old_pos-new_pos
-    else
-        y := old_pos-new_pos
-    ; Scroll contents of window and invalidate uncovered area.
-    DllCall("ScrollWindow", "uint", hwnd, "int", x, "int", y, "uint", 0, "uint", 0)
-    
-    ; Update scroll bar.
-    NumPut(new_pos, si, 20, "int") ; nPos
-    DllCall("SetScrollInfo", "uint", hwnd, "int", bar, "uint", &si, "int", 1)
+static SIF_ALL=0x17, SCROLL_STEP=10
+
+bar := msg=0x115 ; SB_HORZ=0, SB_VERT=1
+
+VarSetCapacity(si, 28, 0)
+NumPut(28, si) ; cbSize
+NumPut(SIF_ALL, si, 4) ; fMask
+if !DllCall("GetScrollInfo", "uint", hwnd, "int", bar, "uint", &si)
+return
+
+VarSetCapacity(rect, 16)
+DllCall("GetClientRect", "uint", hwnd, "uint", &rect)
+
+new_pos := NumGet(si, 20) ; nPos
+
+action := wParam & 0xFFFF
+if action = 0 ; SB_LINEUP
+new_pos -= SCROLL_STEP
+else if action = 1 ; SB_LINEDOWN
+new_pos += SCROLL_STEP
+else if action = 2 ; SB_PAGEUP
+new_pos -= NumGet(rect, 12, "int") - SCROLL_STEP
+else if action = 3 ; SB_PAGEDOWN
+new_pos += NumGet(rect, 12, "int") - SCROLL_STEP
+else if (action = 5 || action = 4) ; SB_THUMBTRACK || SB_THUMBPOSITION
+new_pos := wParam>>16
+else if action = 6 ; SB_TOP
+new_pos := NumGet(si, 8, "int") ; nMin
+else if action = 7 ; SB_BOTTOM
+new_pos := NumGet(si, 12, "int") ; nMax
+else
+return
+
+min := NumGet(si, 8, "int") ; nMin
+max := NumGet(si, 12, "int") - NumGet(si, 16) ; nMax-nPage
+new_pos := new_pos > max ? max : new_pos
+new_pos := new_pos < min ? min : new_pos
+
+old_pos := NumGet(si, 20, "int") ; nPos
+
+x := y := 0
+if bar = 0 ; SB_HORZ
+x := old_pos-new_pos
+else
+y := old_pos-new_pos
+; Scroll contents of window and invalidate uncovered area.
+DllCall("ScrollWindow", "uint", hwnd, "int", x, "int", y, "uint", 0, "uint", 0)
+
+; Update scroll bar.
+NumPut(new_pos, si, 20, "int") ; nPos
+DllCall("SetScrollInfo", "uint", hwnd, "int", bar, "uint", &si, "int", 1)
 }		
 } ;</06.03.08.000001>
 
-		}
+}
 	}
 ;|                                                                                      COMBOBOX CONTROL functions                                                                                  	|
 ;|   GetComboBoxChoice()            	|   LB_GetItemHeight()                  	|   LB_SetItemHeight()                  	|
@@ -9642,7 +9606,7 @@ FindChildWindow(Parent, Child, DetectHiddenWindow="On") {								;--finds childW
 			Description:			finds childWindow handles from a parent window by using Name and/or class or only the WinID of the parentWindow
 			Link: 					https://autohotkey.com/board/topic/46786-enumchildwindows/
 			Author: 				mickey 
-			2-Author:				modified by IXIKO on 
+			second Author:	modified by IXIKO  
 			Date:					May 09, 2018 
 			last change: 		27.10.2018 - if there was no title or text for the childwindow the returned value was empty, so this function can handle now a new search parameter  -Class or ClassNN-, 
 															 therefore the child parameter becomes an object
@@ -9656,14 +9620,16 @@ FindChildWindow(Parent, Child, DetectHiddenWindow="On") {								;--finds childW
 	
 */
 
-/*		EXAMPLE(s)																																																														
-					hMdi:= FindChildWindow({Class: "OptoAppClass"}, {Class: "MDIClient"}, "Off")
-					HEXhwnd:= Format("0x{:x}", hMdi)
-					MsgBox, % HEXhwnd
+/*		EXAMPLE(s)			
 
-					hWZ:= FindChildWindow({Class: "OptoAppClass"}, {Title: "Wartezimmer"}, "Off")
-					HEXhwnd:= Format("0x{:x}", hWZ)
-					MsgBox, % HEXhwnd
+		hMdi:= FindChildWindow({Class: "OptoAppClass"}, {Class: "MDIClient"}, "Off")
+		HEXhwnd:= Format("0x{:x}", hMdi)
+		MsgBox, % HEXhwnd
+
+		hWZ:= FindChildWindow({Class: "OptoAppClass"}, {Title: "Wartezimmer"}, "Off")
+		HEXhwnd:= Format("0x{:x}", hWZ)
+		MsgBox, % HEXhwnd
+					
 */
 
 		detect:= A_DetectHiddenWindows
@@ -9715,10 +9681,26 @@ EnumChildWindow(hwnd, lParam) { 																			;-- sub function of FindChild
 } ;</06.04.000027>
 ;<06.04.000028>
 WinGetMinMaxState(hwnd) {																						;-- get state if window ist maximized or minimized
-	;; this function is from AHK-Forum: https://autohotkey.com/board/topic/13020-how-to-maximize-a-childdocument-window/
-	;; it returns z for maximized("zoomed") or i for minimized("iconic")
-	;; it's also work on MDI Windows - use hwnd you can get from FindChildWindow()
-	; Check if maximized
+
+	/*	DESCRIPTION OF FUNCTION: -- WinGetMinMaxState --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	
+	Link              	:	https://autohotkey.com/board/topic/13020-how-to-maximize-a-childdocument-window/
+	Author         	:	
+	Date             	:	
+	AHK-Version	:	
+	License         	:	
+	Syntax          	:	
+	Parameter(s)	:	
+	Return value	:	it returns z for maximized("zoomed") or i for minimized("iconic")
+	Remark(s)    	:	it's also work on MDI Windows - use hwnd you can get from FindChildWindow()
+	Dependencies	:	
+	KeyWords    	:	
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	
+	*/
 	zoomed := DllCall("IsZoomed", "UInt", hwnd)
 	; Check if minimized
 	iconic := DllCall("IsIconic", "UInt", hwnd)
@@ -10356,8 +10338,7 @@ GetMouseTaskButton(ByRef hwnd) {                                                
 ;|   ChooseColor(1)                         	|   GetWindowIcon(2)                     	|   GetStatusBarText(3)                   	|   GetAncestor(4)                        		|
 ;|   MinMaxInfo(5)                           	|	GetMouseTaskButton(6)				|
 
-
-{ ;gui + interacting with elements (46) -- and other functions for gui or windows 											baseID: <06.05>
+{ ;gui - interacting with elements (46) -- and other functions for gui or windows --										baseID: <06.05>
 		
 ;<06.05.000001>
 SureControlClick(CName, WinTitle, WinText="") { 														;--Window Activation + ControlDelay to -1 + checked if control received the click
@@ -12202,7 +12183,7 @@ SetTextAndResize(controlHwnd, newText) {                                        
 ;|	movable(41)                               	|	GuiDisableMove(42)                   	|   WinInsertAfter(43)                      	|   CenterWindow(44)                      	|
 ;|	SetHoverText(45)                      	|   SetTextAndResize(46)               	|
 
-{ ;gui + menu  all types of functions (15) - 																										baseID: <06.06>
+{ ;gui - menu all types of functions (15) - 																										baseID: <06.06>
 ;<06.06.000001>		
 GetMenu(hWnd) {																										;-- returns hMenu handle
 	;; only wraps DllCall(GetMenu)
@@ -12940,7 +12921,7 @@ MenuSub="MenuSub",ReturnMenu="") {
 ;|	GetContextMenuID(09)             	|   GetContextMenuText(10)            	|   Menu_AssignBitmap(11)             	|   InvokeVerb(12)                           	|
 ;|	Menu_Show(13)                        	|   CreateMenu(14)                         	|   CreateDDMenu(15)                   	|
 
-{ ;gui + icon functions (4) - 																																baseID: <06.07>
+{ ;gui - icon functions (4) - 																																baseID: <06.07>
 ;<06.07.00001>
 ExtractIcon(Filename, IconNumber, IconSize=0) {                                            	;-- extract icon from a resource file
 
@@ -14666,10 +14647,9 @@ GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1)
 	, Width := Width + NumGet(TEXTMETRIC, 20, "Int") * 3
 	, Height := Floor((NumGet(TEXTMETRIC, 0, "Int")*c)+(NumGet(TEXTMETRIC,16, "Int")*(Floor(c+0.5)-1))+0.5)+8
 	return true
-}
-{ ;sub of GetFontTextDimension()
+} ;</08.01.00006>
 ;<08.01.00007>
-GetStockObject(nr) {
+GetStockObject(nr) {                                                                                                    	;--subfunction of GetFontTextDimension()
 	
 	/*    	DESCRIPTION of function GetStockObject() ID: 08.01.00007
         	-------------------------------------------------------------------------------------------------------------------
@@ -14689,7 +14669,6 @@ GetStockObject(nr) {
 	*/
 return DllCall( "GetStockObject", UInt, nr)
 } ;</08.01.00007>
-} ;</08.01.00006> 
 ;<08.01.00008>
 FontClone(hFont) {                                                                                                      	;-- backup hFont in memory for further processing
 
@@ -15218,8 +15197,27 @@ Gui, 2: Show, Center
 Return   0
 }
 ;<09.01.000005>
-OnMessage(0x46, "WM_WINDOWPOSCHANGING")
 WM_WINDOWPOSCHANGING(wParam, lParam) {	                        	;-- two different examples of handling a WM_WINDOWPOSCHANGING
+
+	/*	DESCRIPTION OF FUNCTION: -- OnMessage(0x46, "WM_WINDOWPOSCHANGING") --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	two different examples of handling a WM_WINDOWPOSCHANGING
+	Link              	:	
+	Author         	:	
+	Date             	:	
+	AHK-Version	:	
+	License         	:	
+	Syntax          	:	
+	Parameter(s)	:	
+	Return value	:	
+	Remark(s)    	:	
+	Dependencies	:	
+	KeyWords    	:	
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------- -----------
+	OnMessage(0x46, "WM_WINDOWPOSCHANGING")
+	*/
 
     if (A_Gui = 1 && !(NumGet(lParam+24) & 0x2)) ; SWP_NOMOVE=0x2
     {
@@ -15330,7 +15328,6 @@ idObject, idChild, thread, time){
 				WinSetTitle, ahk_id %hwnd%,, %newtitle%
 		}
 }
-;<09.01.000010>
 } 
 ;|   OnMessageEx(1)                        	|   ReceiveData(2)                           	|   HDrop(3)                                  	|   WM_MOVE(4)                            	|
 ;|   WM_WINDOWPOSCHANGING	|   CallNextHookEx(7)	                   	|   WM_DEVICECHANGE(8)           	|   ObjectNameChange(9)               	|
@@ -16411,7 +16408,7 @@ Color_HSVtoRGB( h, s, v, ByRef r, ByRef g, ByRef b ) {						;-- converts beetwee
 	Return
 	
 }
-;{ sub for Color_RGBtoHSV and Color_HSVtoRGB
+;{ subfunction for Color_RGBtoHSV and Color_HSVtoRGB
 MIN(in1="", in2="", in3="", in4="", in5="", in6="", in7="", in8="", in9="", in10="") {
 	Loop, 10
 		If in%A_Index% is number
@@ -16945,7 +16942,7 @@ Traceback(actual:=false) {                                                      
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;String/ Array/Text (50) - 																																baseID: <13>
+{ ;String/Array/Text (50) - 																																baseID: <13>
 ;<Name>String/Array/Text</Name><Description></Description>
 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
@@ -17141,9 +17138,7 @@ QuickSort(Arr, Ascend = True, M*) {												;-- Sort array using QuickSort al
 
 	Return Out
 } ;</000004>
-{ ; sub start - depending functions for QuickSort
-;<13.01.000003.001>
-QuickAux(Arr,Ascend, N, LI, NCol) {
+QuickAux(Arr,Ascend, N, LI, NCol) {                                            	;-- subfunction of Quicksort
 ;=================================================================
 ;                       QuickAux
 ; Auxiliary recursive function to make a Quicksort in a array ou matrix
@@ -17220,9 +17215,8 @@ IF (LI>0) {
 ; BEFORE and AFTER arrays need to be sorted before
 ; N stores the array position to be sorted in the original array
 return Cat(QuickAux(Before,Ascend,N,LI,NCol), Middle, QuickAux(After,Ascend,N,LI+LB+LM,NCol)) ; So Concat the sorted BEFORE, MIDDLE and sorted AFTER arrays
-} ;</13.01.000003.001>
-;<13.01.000003.002>
-Cat(Vet*) {
+}
+Cat(Vet*) {                                                                                    	;-- subfunction of Quicksort
 
 	;*************************************************************
 	;                       Cat
@@ -17236,9 +17230,8 @@ Cat(Vet*) {
 			VRes.InsertAt(L,V*)
 	}
 	Return VRes
-} ;</13.01.000003.002>
-;<13.01.000003.003>
-CatCol(Vet*) {
+}
+CatCol(Vet*) {                                                                              	;-- subfunction of Quicksort
 
 	;***************************************************************************
 	;                       CatCol
@@ -17269,7 +17262,6 @@ CatCol(Vet*) {
 		}
 	}
 	Return VRes
-} ;</13.01.000003.003>
 } ;</13.01.000003>
 ;<13.01.000004>
 sortArray( a, o := "A") {                                                                   	;-- sorts an array (another way)
@@ -17713,17 +17705,15 @@ RegExSplit(ByRef psText, psRegExPattern, piStartPos:=1) {				;-- split a String 
         aRet.Push(sFound)
 	}
 	return aRet
-} ;</13.04..000008>
-{ ; sub start - depending functions for RegExSplit
+} ;</13.04.000008>
 ;<13.04.00009>
-ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {
+ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {                      	;-- subfunction of RegExSplit
 	if (psText != "")
 	{
 		piPosEnd := piPosEnd != "" ? piPosEnd : StrLen(psText)
 		return SubStr(psText, piPosStart, piPosEnd-(piPosStart-1))
 	}
-}
-}  ;</13.04.00009> </13.04.00008>
+} ;</13.04.00009> 
 ;<13.04.00010>
 StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
 
@@ -18660,7 +18650,7 @@ If (A_ComputerName = "Laptop") {
             Hotkeys.Push({"Hotkey":Match1, "Comment":Match2})
         }
     return Hotkeys
-} ;<14.01.00008>
+} ;</14.01.00008>
 ;<14.01.00009>
 BlockKeyboard(block=-1) { 															;-- block keyboard, and unblock it through usage of keyboard
 	
@@ -18688,7 +18678,6 @@ BlockKeyboard(block=-1) { 															;-- block keyboard, and unblock it thro
 		hHook = 0
 		}
 	}
-;{ sub of BlockKeyboard
 BlockKeyboardProc(nCode, wParam, lParam) {
 
 	static count=1, Keys:=["r","F12","LCtrl",".","CapsLock"]   ;password, some keys don't work, beware!
@@ -18703,7 +18692,6 @@ BlockKeyboardProc(nCode, wParam, lParam) {
 		}
 	return 1
 }
-
 GetKeyHex(Key) {
 
 	OldFormat:=A_FormatInteger
@@ -18711,8 +18699,7 @@ GetKeyHex(Key) {
 	Ans:=GetKeySC(Key) + 0
 	SetFormat, Integer, % OldFormat
 	return Ans
-}
-;} end sub  ;</14.01.00009>
+} ;</14.01.00009>
 ;<14.01.00010>
 RapidHotkey(keystroke, times="2", delay=0.2, IsLabel=0) {          	;-- Using this function you can send keystrokes or launch a Label by pressing a key several times.
 	
@@ -18834,7 +18821,6 @@ RapidHotkey(keystroke, times="2", delay=0.2, IsLabel=0) {          	;-- Using th
 		Gosub, %keystr%
 	Return
 }	
-;{ sub
 Morse(timeout = 400) { ;by Laszo -> http://www.autohotkey.com/forum/viewtopic.php?t=16951 (Modified to return: KeyWait %key%, T%tout%)
    tout := timeout/1000
    key := RegExReplace(A_ThisHotKey,"[\*\~\$\#\+\!\^]")
@@ -18859,8 +18845,7 @@ Morse(timeout = 400) { ;by Laszo -> http://www.autohotkey.com/forum/viewtopic.ph
 	else if (ErrorLevel="Max")
 		Return
    }
-}
-;} endsub  ;</14.01.00010>
+} ;</14.01.00010>
 ;<14.01.00011>
 hk(keyboard:=0, mouse:=0, message:="", timeout:=3, displayonce:=0) {                 	;-- Disable all keyboard buttons
 		
@@ -21194,7 +21179,7 @@ ListGlobalVars() {                                                              
     return text
 } ;</16.01.000022>
 ;<16.01.000023>
-TaskList(delim:="|",getArray:=0,sort:=0) {		                                                            	;-- list all running tasks (no use of COM)		
+TaskList(delim:="|", getArray:=0, sort:=0) {		                                                            	;-- list all running tasks (no use of COM)		
 	
 		;https://github.com/Lateralus138/Task-Lister
 		
@@ -22342,11 +22327,11 @@ GetSystemFileCacheSize(ByRef MinimumFileCacheSize := ""	                        
 	
 			Syntax: GetSystemFileCacheSize ([min, in bytes], [max, in bytes], [FILE_CACHE_MAX_HARD_ENABLE = 1 
 			Example: MsgBox % GetSystemFileCacheSize(Min, Max, Flags) "`nMin: " Round(Min/(1024**2), 1) " MB" "`nMax: " Round(Max/(1024**2), 1) " MB" "`nFlags: " Flags
-			
+			Link:  https://msdn.microsoft.com/en-us/library/windows/desktop/aa965224(v=vs.85).aspx
 	*/
 	
 	return DllCall("Kernel32.dll\GetSystemFileCacheSize", "Int64P", MinimumFileCacheSize, "Int64P", MaximumFileCacheSize, "UIntP", Flags)
-} ;</17.01.000007> ;https://msdn.microsoft.com/en-us/library/windows/desktop/aa965224(v=vs.85).aspx
+} ;</17.01.000007>
 ;<17.01.000008>
 Is64bitProcess(pid) {                                                                                                	;-- check if a process is running in 64bit
 
@@ -22740,7 +22725,7 @@ GetEnumIndex(Acc, ChildId=0) {                                                  
 
 { ;Internet Explorer/Chrome/FireFox/HTML (11)  - 																							baseID: <20>
  ;<20.01.000001>
-IEGet(name="") {																							    			;-- AutoHotkey_L
+IEGet(name:="") {																							    			;-- AutoHotkey_L
    IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
    Name := (Name="New Tab - Windows Internet Explorer")? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
    for WB in ComObjCreate("Shell.Application").Windows
@@ -22748,7 +22733,7 @@ IEGet(name="") {																							    			;-- AutoHotkey_L
          return WB
 } ;</20.01.000001>
 ;<20.01.000002>
-IEGet(name="") {																							     			;-- AutoHotkey_Basic
+IEGet(name:="") {																							     			;-- AutoHotkey_Basic
    IfEqual, Name,, WinGetTitle, Name, ahk_class IEFrame ; Get active window if no parameter
    Name := (Name="New Tab - Windows Internet Explorer") ? "about:Tabs":RegExReplace(Name, " - (Windows|Microsoft) Internet Explorer")
    oShell := COM_CreateObject("Shell.Application") ; Contains reference to all explorer windows
@@ -23262,7 +23247,7 @@ If (ch = 0 or ErrorLevel != 0)
 return, -3
 return, 0
 }
-;{ sub for GetCommState
+;{ subfunction for GetCommState
 DecToBin(In_Val) {
 	local bit, bin, dec
 	if In_Val is not integer
