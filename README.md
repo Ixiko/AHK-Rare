@@ -10,7 +10,7 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-*Last modification date*: ***07/28/2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
+*Last modification date*: ***07/29/2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
 
 In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does not work". After trying it with [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey). 
 
@@ -20,7 +20,7 @@ In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does
 
 
 
-## ![Gem](assets/GemSmall.png)[July 28, 2019]: +5 =  638
+## ![Gem](assets/GemSmall.png)[July 29, 2019]: +5 =  638
 
 There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. A search function is not yet programmed, but will be added later.
 With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.

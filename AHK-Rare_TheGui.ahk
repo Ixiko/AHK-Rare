@@ -109,41 +109,34 @@
 
 ;{03. draw primary gui 
 
-	global hArg
-	Gui, ARG: NEW
-	Gui, ARG: +LastFound +HwndhARG +Resize
-	Gui, ARG: Margin, 0, 0
-	Gui, ARG: Add, Progress, % "x0 y0 w" LogoW+10 " h85 c172842 vBGColorLogo" , 100
-	Gui, ARG: Add, Pic, % "x12 y10 BackgroundTrans"  	, % A_ScriptDir "\assets\AHK-Rare-GuiLogo.png" ;(LW//4.37) w" (LW:= 450) " h" (LogoH:= 71) "
-	Gui, ARG: Add, Progress, % "x0 y85 w" (LogoW + 10 ) " h2 vDevider" , 100
-	Gui, ARG: Add, Progress, % "x" LW + 7 " y0 w2 h" 85 , 100
-	Gui, ARG: Font, S10 CDefault, Normal
-	Gui, ARG: Add, Text, % "xs Section vField1", % "  . . . . . create index: "
-	Gui, ARG: Add, Text, % "ys vField2 w400", % "00001"
-	Gui, ARG: Show
-	
-;}
-
-;{04. generate data for gui
-
-		If FileExist(A_ScriptDir . "\AHK-Rare.ahk")
-				ARData:= RarefuncIndexer(A_ScriptDir . "\AHK-Rare.ahk")
-		
-;}
-
-;{05. rebuild gui to show the generated data
-
-	; remove text controls
-		GuiControl, ARG: Hide, Field1
-		GuiControl, ARG: Hide, Field2
-		
-	; add new controls
-		Gui, ARG: Font, S9 CDefault, Normal
+		global hArg, ARG, hSearch, hTabs
+		Gui, ARG: NEW
+		Gui, ARG: +LastFound +HwndhARG +Resize
+		Gui, ARG: Margin, 0, 0
+	;-: Logo and Backgroundcolouring
+		Gui, ARG: Add, Progress, % "x0 y0 w" LogoW+10 " h85 c172842 vBGColorLogo" , 100
+		Gui, ARG: Add, Pic, % "x12 y10 BackgroundTrans"  	, % A_ScriptDir "\assets\AHK-Rare-GuiLogo.png" ;(LW//4.37) w" (LW:= 450) " h" (LogoH:= 71) "
+		Gui, ARG: Add, Progress, % "x0 y85 w" (LogoW + 10 ) " h2 vDevider" , 100
+		Gui, ARG: Add, Progress, % "x" LW + 7 " y0 w2 h" 85 , 100
+	;-: temp. text controls
+		Gui, ARG: Font, S12 CWhite, Normal
+		Gui, ARG: Add, Text	, % "x" (LW + 10) " y10 vField1 BackgroundTrans", % "  . . . . . create index: "
+		GuiControlGet, Field_, ARG: Pos, Field1
+		Gui, ARG: Add, Text	, % "x" (Field_X + Field_W + 3) " y10 w300 vField2 BackgroundTrans ", % "00.00.000001"
+	;-: Edit control for search patterns
+		Gui, ARG: Font, S11 Italic CAAAAAA, Normal
+		Gui, ARG: Add, Edit	, % "x" (LW + 20) " y50 w500 r1 vSearch HWNDhSearch -Theme", % "type your search pattern here"
+		Edit_SetMargins(hSearch, 20, 20)
+		;CTLCOLORS.Attach(hSearch, "677892")
+	;-: Functions Listview
+		Gui, ARG: Font, S9 Normal CDefault, Normal
 		Gui, ARG: Add, Listview, % "xm y" (LogoH + 15) " w" LogoW+5 " r25 HWNDhLVFunc vLVFunc gShowFunction Section", main section|function name|short description|function nr.
 		Gui, ARG: Font, S8 CDefault, Normal
 		GuiControlGet, LV_, ARG: Pos, LVFunc
+	;-: Short description section
 		Gui, ARG: Add, Edit, % "xm y" (LV_Y + LV_H + 10) " w" LogoW//4 " r20 t8 HWNDhShowRoom1 vShowRoom1"
 		GuiControlGet, SR_, ARG: Pos, ShowRoom1
+	;-: Code highlighted RichEdit control
 		Gui, ARG: Add, Tab, % "x" (LogoW//4+5) " y" (LV_Y+LV_H+10) " w" (LogoW//4*3) " h" SR_H " HWNDhTabs vShowRoom2", FUNCTION CODE|EXAMPLE(s)|DESCRIPTION
 		Gui, ARG: Tab, 1
 		RC[1] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H, 0)
@@ -151,16 +144,37 @@
 		RC[2] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H, 0)
 		Gui, ARG: Tab, 3
 		RC[3] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H, 0)
+	;-: Create a ToolTip control
+		TT := New GuiControlTips(HARG)
+		TT.SetDelayTimes(500, 3000, -1)
+		Loop, 3
+			TT.Attach(RC[A_Index].Hwnd, "Press the right`nmouse button`nto copy the text.", True)
+	;-: Show the gui
 		Gui, ARG: Show, AutoSize xCenter yCenter, AHK-Rare 'the search gui'
-
+	;-: Resizing now
+		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth + 1
+		
 		OnMessage(0x200, "OnMouseHover")
 
+
+;}
+
+;{04. generate and fill listview with data
+
+	; indexing AHK-Rare
+		If FileExist(A_ScriptDir . "\AHK-Rare.ahk")
+				ARData:= RarefuncIndexer(A_ScriptDir . "\AHK-Rare.ahk")
+	; remove text controls
+		GuiControl, ARG: Hide, Field1
+		GuiControl, ARG: Hide, Field2			
 	; populate listview with data from AHK-Rare.ahk
 		For i, function in ARData
 			LV_Add("", function.mainsection, function.name, function.short, function.hash)
 		GuiControl, +Default, ARG: LVFunc
-		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth + 1
-		;GuiControl, ARG: +Redraw, LVFunc
+
+;}
+
+;{05. Hotkey(s)
 		
 	; RButton for getting text to clipboard
 		Hotkey, IfWinActive, % "ahk_id " hARG
@@ -168,6 +182,8 @@
 ;}
 
 return
+
+;{ Labels
 
 ShowFunction: ;{
 
@@ -230,6 +246,8 @@ return
 
 ARGGuiSize: ;{
 
+	Critical, Off
+	Critical
 	GuiControl, ARG: Move, Devider, % " w" (A_GuiWidth) 
 	GuiControl, ARG: Move, BGColorLogo, % " w" (A_GuiWidth) 
 	GuiControl, ARG: Move, LVFunc, % " w" (A_GuiWidth) " h"(A_GuiHeight//3)
@@ -240,7 +258,7 @@ ARGGuiSize: ;{
 	GuiControl, ARG: Move, % RC[1].hwnd, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
 	GuiControl, ARG: Move, % RC[2].hwnd, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
 	GuiControl, ARG: Move, % RC[3].hwnd, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
-	
+	Critical, Off
 return
 ;}
 
@@ -263,9 +281,8 @@ CopyTextToClipboard: ;{
 					else if (A_Index > ARData[i].end)
 							break
 			}				
-			MsgBox, % tocopy
 			Clipboard := tocopy
-			ToolTip, % "copied to clipboard...", % mx, % my, 2
+			ToolTip, % "copied to clipboard...", % mx -10, % my + 10, 2
 			SetTimer, TTOff, -4000
 	}
 
@@ -275,6 +292,10 @@ TTOff:
 	ToolTip,,,, 2
 return
 ;}
+
+;}
+
+;{ Functions
 
 RarefuncIndexer(file){													                     			;--list all functions inside AHK-RARE script 
 	
@@ -335,7 +356,7 @@ RarefuncIndexer(file){													                     			;--list all functions
 				ARData[(fI)].mainsectionDescription           	:= mainsectionDescription
 				ARData[(fI)].subsection                                	:= subsection
 								
-				GuiControl, Text, Field2, % fI "," fname
+				GuiControl, Text, Field2, % fI ", " fname "`)"
 				continue
 		}
 		else If RegExMatch(A_LoopField, ";\s*\<\/\d\d\.\d\d\.\d\d\d\d\d")                                                                                                                                                      	; function ends 
@@ -658,12 +679,56 @@ LV_EX_GetColumnWidth(HLV, Column) {                                             
    Return ErrorLevel
 }
 
-OnMouseHover(wparam, lparam, msg, hwnd) {         					
-	;MouseGetPos,, hControlOver, hWinOver
-	;ToolTip, % GetHex(hControlOver) "`n" hWinOver "`n" hArg "`n" GetHex(msg) "`n" GetHex(hwnd)
-	;If hWinOver  = hArg
-	ControlFocus,, % "ahk_id " hwnd
+OnMouseHover(wparam, lparam, msg, hwnd) {                                     	;-- Autofocus for Listview, Edit and RichEdit controls ;{
+	
+	static lastFocusedControl
+	
+	MouseGetPos,mx, my,, hControlOver
+	WinGetClass, cclass, % "ahk_id " hwnd
+	
+	;ToolTip, % hControlOver "`n" hWinOver "`n" GetHex(wparam) "`n" GetHex(lparam) "`n" GetHex(msg) "`n" GetHex(hwnd) "`n" cclass
+	If RegExMatch(hControlOver, "(Edit)|(SysListView32)|(RichEdit)") 
+	{
+			If lastFocusedControl != hControlOver
+			{
+					ControlFocus, % hControlOver 	, % "ahk_id " hARG
+					ControlGetText, SText, Edit1    	, % "ahk_id " hArg
+					If (Trim(SText) = "type your search pattern here") && (hControlOver = "Edit1")
+							gosub NormalEditFont
+					else If (Trim(SText) = "") && (hControlOver <> "Edit1")
+							gosub ItalicEditFont
+			}
+			lastFocusedControl := hControlOver
+	}
+	else if Instr(cclass, "RichEdit") 
+	{
+			If !Instr(lastFocusedControl, cclass)
+			{	
+					ControlFocus,, % "ahk_id " hwnd
+					WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
+					ControlGetPos, tx, ty, tw, th,, % "ahk_id " hTabs
+					ToolTip, % "Press the right`nmouse button`nto copy the text.",% (wx + tx + tw - 195), % (wy + ty + 40), 2
+					SetTimer, TTOff, -4000
+			}
+			
+			ControlGetText, SText, Edit1, % "ahk_id " hArg
+			If Trim(SText) = "" 
+					gosub ItalicEditFont
+			
+			lastFocusedControl := cclass
+	}
+
 }
+NormalEditFont: 
+	Gui, Arg: Font, S11 Normal C000000
+	GuiControl, ARG:Font, Search
+	GuiControl, ARG:, Search, % ""
+return
+ItalicEditFont:
+	Gui, Arg: Font, S11 Italic CAAAAAA
+	GuiControl, ARG: Font, Search
+	GuiControl, ARG:, Search, % "type your search pattern here"
+return ;}
 
 GetHex(hwnd) {
 return Format("0x{:x}", hwnd)
@@ -673,18 +738,81 @@ GetDec(hwnd) {
 return Format("{:u}", hwnd)
 }
 
+Edit_SetFont(hEdit,hFont,p_Redraw=False) {
+	
+	;{------------------------------
+	;
+	; Function: Edit_SetFont
+	;
+	; Description:
+	;
+	;   Sets the font that the Edit control is to use when drawing text.
+	;
+	; Parameters:
+	;
+	;   hEdit - Handle to the Edit control.
+	;
+	;   hFont - Handle to the font (HFONT).  Set to 0 to use the default system
+	;       font.
+	;
+	;   p_Redraw - Specifies whether the control should be redrawn immediately upon
+	;       setting the font.  If set to TRUE, the control redraws itself.
+	;
+	; Remarks:
+	;
+	; * This function can be used to set the font on any control.  Just specify
+	;   the handle to the desired control as the first parameter.
+	;   Ex: Edit_SetFont(hLV,hFont) where "hLV" is the handle to ListView control.
+	;
+	; * The size of the control does not change as a result of receiving this
+	;   message.  To avoid clipping text that does not fit within the boundaries of
+	;   the control, the program should set/correct the size of the control before
+	;   the font is set.
+	;
+	;-------------------------------------------------------------------------------;}
+    Static WM_SETFONT:=0x30
+    SendMessage WM_SETFONT,hFont,p_Redraw,,ahk_id %hEdit%
+    }
+
+Edit_SetMargins(hEdit, p_LeftMargin:="",p_RightMargin:="")  {
+	
+    Static 	 EM_SETMARGINS 	:=0xD3
+		    	,EC_LEFTMARGIN 	:=0x1
+		    	,EC_RIGHTMARGIN	:=0x2
+	    		,EC_USEFONTINFO	:=0xFFFF
+
+    l_Flags  	:= 0
+    l_Margins	:= 0
+	
+    if p_LeftMargin is Integer
+	{
+        l_Flags  	|= EC_LEFTMARGIN
+        l_Margins	|= p_LeftMargin           	;-- LOWORD
+    }
+
+    if p_RightMargin is Integer
+    {
+        l_Flags  	|=EC_RIGHTMARGIN
+        l_Margins	|=p_RightMargin<<16	;-- HIWORD
+    }
+
+    if l_Flags
+        SendMessage EM_SETMARGINS, l_Flags, l_Margins,, % "ahk_id " %hEdit%
+}
+
 TheEnd(ExitReason, ExitCode) {
 	;OnExit("")
 	ExitApp
 }
 
+;}
 
+;{ Include(s)
 
 #Include %A_ScriptDir%\lib\RichCode.ahk
+;#Include %A_ScriptDir%\lib\class_CtlColors.ahk
 
-	;json_str:= JXON_Dump(ARData, "", 3)
-	;FileDelete, % A_ScriptDir "\AHK-RARE.json"
-	;FileAppend, % json_str, % A_ScriptDir "\AHK-RARE.json"
+;}
 
 
 
