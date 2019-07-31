@@ -1,6 +1,6 @@
 ﻿;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;                                                                	Collection of rare or very useful functions
-;                                                             	collected by IXIKO =>    last change: 07/28/2019
+;                                                             	collected by IXIKO =>    last change: 07/31/2019
 ;                                    	for description have a look at README.md (it can be found in the same folder)
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4386,10 +4386,23 @@ Image_TextBox(Text:="", FilePath:="", SavePath:="", Options*) {                 
 HtmlBox(Html, Title="", Timeout=0, Permanent=False,                            				;-- Gui with ActiveX - Internet Explorer - Control
 GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="W400 H300", Margin=10, Hotkey=True) {
 
-    ;AutoHotkey_L 1.1.04+
-    ;Timeout : The seconds to make the HTML window disappear.
-    ;Permanent : if this is True, closing the GUI window does not destroy it but it is hidden.
-    ;Return Value: the handle of the created window(Hwnd).
+	/*	DESCRIPTION OF FUNCTION: -- HtmlBox() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Gui with ActiveX - Internet Explorer - Control
+	Link              	:	-	
+	Author         	:	-
+	Date             	:	-
+	AHK-Version	:	AutoHotkey_L 1.1.04+
+	License         	:	-
+	Syntax          	:	-
+	Parameter(s)	:	Timeout : The seconds to make the HTML window disappear.
+								Permanent : if this is True, closing the GUI window does not destroy it but it is hidden.
+	Return value	:	the handle of the created window(Hwnd)
+	Remark(s)    	:	-
+	Dependencies	:	none
+	KeyWords    	:	gui, activeX, html
+	-------------------------------------------------------------------------------------------------------------------
+	*/
 
     static HtmlBoxInfo := [], WindowHideStack := [] , WB , ExecCmd := { a : "selectall", c : "copy",  p : "print", v : "paste" }
     Gui, New, LabelHtmlBox HWNDHwndHtml %GUIOptions%, % Title     ;v1.1.04+
@@ -4451,79 +4464,68 @@ Return HwndHtml
     HtmlBoxExecCommand:        ;this is called when the user presses one of the hotkeys
         HtmlBoxInfo[WinExist("A")].doc.ExecCommand(ExecCmd[SubStr(A_ThisHotkey, 2)])
     Return
-}
+} ;</06.01.000001>
 ;<06.01.000002>
 EditBox(Text, Title="", Timeout=0, Permanent=False,                             				;-- Displays an edit box with the given text, tile, and options
 GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="VScroll W400 H300", Margin=10) {
 
-    ;AutoHotkey_L 1.1.04+
-    ;Timeout : The seconds to make the edit window disappear.
-    ;Permanent : if this is True, closing the GUI window does not destroy it but it is hidden.
-    ;Return Value: the handle of the created window(Hwnd).
+	/*	DESCRIPTION OF FUNCTION: -- HtmlBox() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Displays an edit box with the given text, tile, and options.
+	Link              	:	-	
+	Author         	:	?A_Samurai?
+	Date             	:	?2011?
+	AHK-Version	:	AutoHotkey_L 1.1.04 or later.  Tested on: Windows 7 64bit, AutoHotkey 32bit Unicode 1.1.05.01.
+	License         	:	Public Domain
+	Syntax          	:	EditBox(Text, Title="", Timeout=0, Permanent=False, GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="VScroll W400 H300", Margin=10)
+	Parameter(s)	:	Text : 					the text strings to display in the edit box.
+	                        	Title : 					the title for the GUI window.
+	                        	Timeout : 			if specified, the edit box will disappear in the given seconds.
+	                        	Permanent : 		if this is TRUE, closing the window does not destroy the window but hide it. 
+								                         	So it can be displayed again with the window handle.
+	                        	GUIOptions : 		the options for the Edit box GUI window.
+	                        	ControlOptions : 	the options for the Edit control.
+	                        	Margin : 				the margin in pixels between the window borders and the control.
+	Return value	:	The window handle (hwnd) of the created GUI window
+	Remark(s)    	:	No global variables are used. However, it uses these label names: EditBoxClose, EditBoxEscape, 
+	                        	EditBoxResize. So the script should avoid using the label names.
+	Dependencies	:	none
+	KeyWords    	:	gui, activeX, html
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	Text =
+	(
+		Copyright 2011 A_Samurai. All rights reserved.
 
-	/*                            				Description
+		Redistribution and use in source and binary forms, with or without modification, are
+		permitted provided that the following conditions are met:
 
-		Displays an edit box with the given text, tile, and options.
+		   1. Redistributions of source code must retain the above copyright notice, this list of
+			  conditions and the following disclaimer.
 
-		Requirements
-		AutoHotkey_L 1.1.04 or later.  Tested on: Windows 7 64bit, AutoHotkey 32bit Unicode 1.1.05.01.
+		   2. Redistributions in binary form must reproduce the above copyright notice, this list
+			  of conditions and the following disclaimer in the documentation and/or other materials
+			  provided with the distribution.
 
-		License
-		Public Domain.
+		THIS SOFTWARE IS PROVIDED BY A_Samurai ''AS IS'' AND ANY EXPRESS OR IMPLIED
+		WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+		FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL A_Samurai OR
+		CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+		CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+		SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+		ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+		NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+		ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-		Format
-		EditBox(Text, Title="", Timeout=0, Permanent=False, GUIOptions="Resize MaximizeBox Minsize420x320", ControlOptions="VScroll W400 H300", Margin=10)
-		Parameters
-		Text : 					the text strings to display in the edit box.
-		Title : 					the title for the GUI window.
-		Timeout : 				if specified, the edit box will disappear in the given seconds.
-		Permanent : 			if this is TRUE, closing the window does not destroy the window but hide it. So it can be displayed again with the window handle.
-		GUIOptions : 		the options for the Edit box GUI window.
-		ControlOptions : 	the options for the Edit control.
-		Margin : 				the margin in pixels between the window borders and the control.
-
-		Return Value
-		The window handle (hwnd) of the created GUI window.
-
-		Remarks
-		No global variables are used. However, it uses these label names: EditBoxClose, EditBoxEscape, EditBoxResize. So the script should avoid using the label names.
-
-	*/
-
-	/*                            					Example
-
-				Text =
-		(
-			Copyright 2011 A_Samurai. All rights reserved.
-
-			Redistribution and use in source and binary forms, with or without modification, are
-			permitted provided that the following conditions are met:
-
-			   1. Redistributions of source code must retain the above copyright notice, this list of
-				  conditions and the following disclaimer.
-
-			   2. Redistributions in binary form must reproduce the above copyright notice, this list
-				  of conditions and the following disclaimer in the documentation and/or other materials
-				  provided with the distribution.
-
-			THIS SOFTWARE IS PROVIDED BY A_Samurai ''AS IS'' AND ANY EXPRESS OR IMPLIED
-			WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-			FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL A_Samurai OR
-			CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-			CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-			SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-			ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-			NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-			ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-			The views and conclusions contained in the software and documentation are those of the
-			authors and should not be interpreted as representing official policies, either expressed
-			or implied, of A_Samurai.
-		)
-		EditBox(Text, "Free BSD Licence")
+		The views and conclusions contained in the software and documentation are those of the
+		authors and should not be interpreted as representing official policies, either expressed
+		or implied, of A_Samurai.
+	)
+	
+	EditBox(Text, "Free BSD Licence")
 
 	*/
-
 
     Static EditBoxInfo := [], WindowHideStack := []
     Gui, New, LabelEditBox HWNDHwndEdit %GUIOptions%, % Title     ;v1.1.04+
@@ -4557,7 +4559,7 @@ Return HwndEdit
         } else
             Gui, %HwndEdit%:Hide
     Return
-}
+} ;</06.01.000002>
 ;<06.01.000003>
 Popup(title, action, close=true, image="", w=197, h=46) {                            	    	;-- Splashtext Gui
 
@@ -4581,7 +4583,7 @@ Popup(title, action, close=true, image="", w=197, h=46) {                       
     }
     return
 
-}
+} ;</06.01.000003>
 ;<06.01.000004>
 PIC_GDI_GUI(GuiName, byref File, GDIx, GDIy , GDIw, GDIh) {                            	;-- a GDI-gui to show a picture
 
@@ -4619,48 +4621,52 @@ PIC_GDI_GUI(GuiName, byref File, GDIx, GDIy , GDIw, GDIh) {                     
 			Gdip_DeleteGraphics(G1)
 
 return [hwnd1, GGhdc]
-}
+} ;</06.01.000004>
 ;<06.01.000005>
 SplitButton(hButton, GlyphSize=16, Menu="", hDontUse="") {                          	;--	drop down button
 
-	;https://autohotkey.com/boards/viewtopic.php?t=22830
-	/*						DESCRIPTION
-
-		SplitButton ( hButton [, GlyphSize, MenuName ] )
-		- hButton = hWnd of button to turn into SplitButton
-		- GlyphSize = size of down arrow glyph (default: 16)
-		- MenuName = name of menu to call when clicked (default: SplitButton_Menu)
-
-		Requirements:
-		- statically saved hwnd of button from first call needs turned into array... for now only one button can be a SplitButton
-		- will conflict with other code using WM_Notify OnMessage()
-		- missing features from API for glyph size, imagelist, styles, etc...
-		- Requires Vista+, unsupported on XP
-
-		;;parameters need to be expanded to cover these options:
-		;;BUTTON_SPLITINFO struct 	 	;INFO mask flags        				;STYLE flags
-		;;  UINT       mask;        				;BCSIF_GLYPH 	:= 0x0001  		;BCSS_NOSPLIT         := 0x0001
-		;;  HIMAGELIST himlGlyph;  		;BCSIF_IMAGE 	:= 0x0002  		;BCSS_STRETCH        	:= 0x0002
-		;;  UINT       uSplitStyle; 			;BCSIF_STYLE 	:= 0x0004  		;BCSS_ALIGNLEFT		:= 0x0004
-		;;  SIZE       size;        				;BCSIF_SIZE  		:= 0x0008  		;BCSS_IMAGE           	:= 0x0008
-
+	/*	DESCRIPTION OF FUNCTION: -- SplitButton() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	proof-of-concept stdlib function for creating split buttons (drop down buttons). 
+	                        	Needs more options built in (changing the glyph, styles, etc) but its a start... Enjoy
+	Link              	:	https://autohotkey.com/boards/viewtopic.php?t=22830	
+	Author         	:	gwarble
+	Date             	:	09 September, 2016
+	AHK-Version	:	AHK_L
+	License         	:	-
+	Syntax          	:	SplitButton ( hButton [, GlyphSize, MenuName, hDontUse ] )
+	Parameter(s)	:	- hButton     	= hWnd of button to turn into SplitButton
+		                     	- GlyphSize  	= size of down arrow glyph (default: 16)
+		                     	- MenuName	= name of menu to call when clicked (default: SplitButton_Menu)
+								parameters need to be expanded to cover these options:
+	                        	BUTTON_SPLITINFO struct     	;INFO mask flags        				;STYLE flags
+								UINT       mask;        			  	;BCSIF_GLYPH 	:= 0x0001  		;BCSS_NOSPLIT	:= 0x0001
+								HIMAGELIST himlGlyph;      	;BCSIF_IMAGE 	:= 0x0002  		;BCSS_STRETCH  	:= 0x0002
+								UINT       uSplitStyle; 		       	;BCSIF_STYLE 	:= 0x0004  		;BCSS_ALIGNLEFT:= 0x0004
+								SIZE       size;        			       	;BCSIF_SIZE  	:= 0x0008  		;BCSS_IMAGE   	:= 0x0008
+	Return value	:	
+	Remark(s)    	:	- statically saved hwnd of button from first call needs turned into array... 
+								 for now only one button can be a SplitButton
+	                         	- will conflict with other code using WM_Notify OnMessage()
+	                         	- missing features from API for glyph size, imagelist, styles, etc...
+	                         	- Requires Vista+, unsupported on XP
+	Dependencies	:	
+	KeyWords    	:	Gui, Control
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	Menu, SplitButton_Menu, Add, First Item, DoNothing
+	Menu, SplitButton_Menu, Add, Second Item, DoNothing
+	Gui, Add, Button, w160 h80 hwndhButton, Button
+	SplitButton(hButton)
+	Gui, Show
+	DoNothing:
+	Return
+	
 	*/
 
-	/*					  SIMPLE EXAMPLE more Example see forum link
-
-		Menu, SplitButton_Menu, Add, First Item, DoNothing
-		Menu, SplitButton_Menu, Add, Second Item, DoNothing
-		Gui, Add, Button, w160 h80 hwndhButton, Button
-		SplitButton(hButton)
-		Gui, Show
-		DoNothing:
-		Return
-
-	*/
-
-
-	Static     _ := OnMessage(0x4E, "SplitButton") ;WM_NOTIFY
-	Static Menu_ := "SplitButton_Menu"
+	Static       	 _  	:= OnMessage(0x4E, "SplitButton") ;WM_NOTIFY
+	Static Menu_	:= "SplitButton_Menu"
 	Static hButton_
 
 
@@ -4691,7 +4697,7 @@ SplitButton(hButton, GlyphSize=16, Menu="", hDontUse="") {                      
 
 	}
 
-}
+} ;</06.01.000005>
 ;<06.01.000006>
 BetterBox(Title := "", Prompt := "", Default := "", Pos := -1) {                              	;--	custom input box allows to choose the position of the text insertion point
 
@@ -4739,7 +4745,7 @@ BetterBox(Title := "", Prompt := "", Default := "", Pos := -1) {                
         Result := "BetterBoxCancel"
         Gui, Destroy
     Return
-}
+} ;</06.01.000006>
 ;<06.01.000007>
 BtnBox(Title := "", Prompt := "", List := "", Seconds := "") {                                 	;--	show a custom MsgBox with arbitrarily named buttons
 ;-------------------------------------------------------------------------------
@@ -4787,7 +4793,7 @@ BtnBox(Title := "", Prompt := "", List := "", Seconds := "") {                  
         Result := "EscapeKey"
         Gui, Destroy
     Return
-}
+} ;</06.01.000007>
 ;<06.01.000008>
 LoginBox(Title := "") {                                                                                          	;-- show a custom input box for credentials, return an object with Username and Password
 	;-------------------------------------------------------------------------------
@@ -4833,7 +4839,7 @@ LoginBox(Title := "") {                                                         
         Result := "EscapeKey"
         Gui, Destroy
     Return
-}
+} ;</06.01.000008>
 ;<06.01.000009>
 MultiBox(Title := "", Prompt := "", Default := "") {                                               	;-- show a multi-line input box, return the entered text
 
@@ -4878,7 +4884,7 @@ MultiBox(Title := "", Prompt := "", Default := "") {                            
         Result := "MultiBoxCancel"
         Gui, Destroy
     Return
-}
+} ;</06.01.000009>
 ;<06.01.000010>
 PassBox(Title := "", Prompt := "") {                                                                      	;-- show a custom input box for a password
 
@@ -4923,7 +4929,7 @@ PassBox(Title := "", Prompt := "") {                                            
         Result := "EscapeKey"
         Gui, Destroy
     Return
-}
+} ;</06.01.000010>
 ;<06.01.000011>
 CreateHotkeyWindow(key) {      	                                                                         	;-- Hotkey Window
 
@@ -4959,94 +4965,99 @@ CreateHotkeyWindow(key) {      	                                                
 		Gui, Destroy
 	return
 
-}
+} ;</06.01.000011>
 ;<06.01.000012>
 GetUserInput(Default="",Text="",Options="",Control="") {                                	;-- allows you to create custom dialogs that can store different values (each value has a different set of controls)
 
 	; http://ahkscript.org/germans/forums/viewtopic.php?t=7505 by Banane 2015
+	/*	DESCRIPTION OF FUNCTION: --  --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	This function allows you to create custom dialogs that can store different values (each 
+	                        	value has a different set of controls).	Either the dialog can be used to type plain text or 
+								a number, or to let the user select a file, all in one dialog, whose texts and Gui options 
+								are freely configurable.
+                        
+	                        	Both option parameters share the same syntax: "Option=Value", separated by commas, 
+								some options can also be specified without a value, if this is intended by the function, 
+								and the options do not have to be written out, since only the first letter of the name 
+								is important.
+                        
+	                        	Optionally you can also specify a "Control Definitions List", this is a command chain 
+								separated by "`n", which serves to add new controls to the dialog, using an AHK-like 
+								syntax: "Command, Parameter1, Parameter2,...", you can also leave	parameters empty 
+								and to write a comma, `, must be used.
+	Link              	:		
+	Author         	:	
+	Date             	:	
+	AHK-Version	:	
+	License         	:	
+	Syntax          	:	
+	Parameter(s)	:	========================================================
+                              	Text - Options Parameter
+                            	========================================================
+                            	Window        	= Window Title
+                            	Description    	= Description
+                            	Ok                	= Text button
+                            	Select           	= File selection dialog
+                            	InvalidText     	= Error / Info Message
+                            	========================================================
+                            	Options - Options Parameter
+                            	========================================================
+                            	Gui                 	= Gui Options
+                            	Value             	= Value Type
+                            	                        	Num: Edit + UpDown Control
+                            	                        	Str: Edit
+                            	                        	File: Edit + Button
+                            	Size                 	= Window Size
+                            	Transparency	= Transparency of the Gui
+                            	Region = Changes the Gui form
+                            	NoEmptyStr = Blank text is invalid
+                            	FileExist = Only existing file is valid
+                            	InputRange = Lowest-Highest Number
+                            	DisableEdit = Disables the input field
+                            	=========================================================
+                            	Control - Can create a Control Definitions list to display the dialog New Controls to add
+                            	            	Available Controls: :
+                            	                	Button, text, position, options, label
+                            	                	GroupBox, Text, Position, Options
+                            	                	Picture, File, Position, Options, Label
+                            	                	Text, Text, Position, Options, Label
+                            	=========================================================
+	Return value	:	
+	Remark(s)    	:	
+	Dependencies	:	
+	KeyWords    	:	
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	;Example 1 - Numerical value
+	;Code:
+	MsgBox % GetUserInput(0,"Window=Numerical Value,Description=Enter a numerical value,Ok=Ok","Value=Num,Size=xCenter yCenter w250 h80")
 
+
+	;Example 2 - File Selection
+	;Code:
+	MsgBox % GetUserInput("Hello World.txt","Window=File-Selection,Select=Select a file:,Ok=Ok","Gui=+ToolWindow,Value=File")
+
+
+	;Example 3 - List of Control Definitions
+	;Code:
+	Definition =
+	(
+	GroupBox,, x5 y45 w330 h75, +BackgroundTrans
+	Button, Help, x10 y55 w100 h20, -Theme, Dialog_Handler
+	)
+
+	MsgBox % GetUserInput("","","Gui=-Theme,Size=xCenter yCenter w340 h150,NoEmptyStr",Definition)
+
+	Dialog_Handler:
+	  MsgBox User pressed "Dialog Button-%A_GuiControl%"
+	  Return
+	
+	*/
 	/*			Description:
 
-		This function allows you to create custom dialogs that can store different values (each value has a different set of controls).
-
-		Either the dialog can be used to type plain text or a number, or to let the user select a file, all in one dialog, whose texts and
-		Gui options are freely configurable.
-
-		Both option parameters share the same syntax: "Option=Value", separated by commas, some options can also be specified
-		without a value, if this is intended by the function, and the options do not have to be written out, since only the first letter
-		of the name is important.
-
-		Optionally you can also specify a "Control Definitions List", this is a command chain separated by "`n", which serves to add
-		new controls to the dialog, using an AHK-like syntax: "Command, Parameter1, Parameter2,...", you can also leave
-		parameters empty and to write a comma, `, must be used.
-
-	*/
-
-	/*			Parameters and available options:
-
-  ==================================================
-  	Text - Options Parameter
-  ==================================================
-  Window = Window Title
-  Description = Description
-  Ok = Text button
-  Select = File selection dialog
-  InvalidText = Error / Info Message
-  ==================================================
-  Options - Options Parameter
-  ==================================================
-  Gui = Gui Options
-  Value = Value Type
-    Num: Edit + UpDown Control
-    Str: Edit
-    File: Edit + Button
-  Size = Window Size
-  Transparency = Transparency of the Gui
-  Region = Changes the Gui form
-  NoEmptyStr = Blank text is invalid
-  FileExist = Only existing file is valid
-  InputRange = Lowest-Highest Number
-  DisableEdit = Disables the input field
-  ==================================================
-  Control - Can create a Control Definitions list
-            to display the dialog New Controls
-            to add
-    Available Controls: :
-    Button, text, position, options, label
-    GroupBox, Text, Position, Options
-    Picture, File, Position, Options, Label
-    Text, Text, Position, Options, Label
-  ==================================================
-
-	*/
-
-	/*			Examples:
-
-			Example 1 - Numerical value
-			Code:
-			MsgBox % GetUserInput(0,"Window=Numerical Value,Description=Enter a numerical value,Ok=Ok","Value=Num,Size=xCenter yCenter w250 h80")
-
-
-			Example 2 - File Selection
-			Code:
-			MsgBox % GetUserInput("Hello World.txt","Window=File-Selection,Select=Select a file:,Ok=Ok","Gui=+ToolWindow,Value=File")
-
-
-			Example 3 - List of Control Definitions
-			Code:
-			Definition =
-			(
-			GroupBox,, x5 y45 w330 h75, +BackgroundTrans
-			Button, Help, x10 y55 w100 h20, -Theme, Dialog_Handler
-			)
-
-			MsgBox % GetUserInput("","","Gui=-Theme,Size=xCenter yCenter w340 h150,NoEmptyStr",Definition)
-
-			Dialog_Handler:
-			  MsgBox User pressed "Dialog Button-%A_GuiControl%"
-			  Return
-
-
+		
 
 	*/
 
@@ -5151,7 +5162,7 @@ GetUserInput(Default="",Text="",Options="",Control="") {                        
     ;--- Destroy the window to finish function
     Gui, 99:Destroy
     Return
-}
+} ;</06.01.000012>
 ;<06.01.000013>
 guiMsgBox(title, text, owner="", isEditable=0, wait=0, w="", h="") {                 	;-- GUI Message Box to allow selection
 		
@@ -5183,7 +5194,7 @@ guiMsgBoxGuiEscape:
 	Gui, guiMsgBox:Destroy
 	GuiEnds := 1
 	return
-}
+} ;</06.01.000013>
 ;<06.01.000014>
 URLPrefGui(p_w, p_l, p_m, p_hw)   {                                                                    	;-- shimanov's workaround for displaying URLs in a gui	
 	/*                              	DESCRIPTION
@@ -5291,7 +5302,7 @@ URLPrefGui(p_w, p_l, p_m, p_hw)   {                                             
               }
           }
       }
-  }
+}  ;</06.01.000014>
 ;<06.01.000015>
 TaskDialog(Instruction, Content := "", Title := "", Buttons := 1,                          	;-- a Task Dialog is a new kind of dialogbox that has been added in Windows Vista and later. They are similar to message boxes, but with much more power.
 IconID := 0, IconRes := "", Owner := 0x10010) { 
@@ -5321,7 +5332,7 @@ IconID := 0, IconRes := "", Owner := 0x10010) {
     }
 
     Return {1: "OK", 2: "Cancel", 4: "Retry", 6: "Yes", 7: "No", 8: "Close"}[Ret]
-}
+} ;</06.01.000015>
 ;<06.01.000016>
 TaskDialogDirect(Instruction, Content := "", Title := "", CustomButtons := "",   		;-- part of TaskDialog ?
 CommonButtons := 0, MainIcon := 0, Flags := 0, Owner := 0x10010, VerificationText := "", ExpandedText := "", FooterText := "", FooterIcon := 0, Width := 0) {
@@ -5362,7 +5373,7 @@ CommonButtons := 0, MainIcon := 0, Flags := 0, Owner := 0x10010, VerificationTex
     } Else {
         Return "ERROR"
     }
-}
+} ;</06.01.000016>
 ;<06.01.000017>
 TaskDialogMsgBox(Main, Extra, Title := "", Buttons := 0, Icon := 0,                    	;-- part of TaskDialog ? 
 Parent := 0, TimeOut := 0) {		
@@ -5402,7 +5413,7 @@ Parent := 0, TimeOut := 0) {
 		return -1
 	return 0
 
-}
+} ;</06.01.000017>
 ;<06.01.000018>
 TaskDialogToUnicode(String, ByRef Var) {                            						     		;-- part of TaskDialog ?
 
@@ -5410,7 +5421,7 @@ TaskDialogToUnicode(String, ByRef Var) {                            						     	
 	StrPut(String, &Var, "UTF-16")
 	return &Var
 
-}
+} ;</06.01.000018>
 ;<06.01.000019>
 TaskDialogCallback(H, N, W, L, D) {                                                        	     			;-- part of TaskDialog ?
 
@@ -5430,7 +5441,7 @@ TaskDialogCallback(H, N, W, L, D) {                                             
 	}
 	return 0
 
-}
+} ;</06.01.000019>
 ;<06.01.000020>
 TT_Console(msg, keys, x="", y="", fontops=""                                                    	;-- Use Tooltip as a User Interface it returns the key which has been pressed
 , fontname="", whichtooltip=1, followMouse=0) {		
@@ -5486,7 +5497,7 @@ TT_Console_Check:
 	what_pressed := A_ThisHotkey
 	is_TTkey_pressed := 1
 	return
-}
+} ;</06.01.000020>
 ;<06.01.000021>
 ToolTipEx(Text:="", X:="", Y:="", WhichToolTip:=1                                             	;-- Display ToolTips with custom fonts and colors
 , HFONT:="", BgColor:="", TxColor:="", HICON:="", CoordMode:="W") {
@@ -5696,7 +5707,7 @@ ToolTipEx(Text:="", X:="", Y:="", WhichToolTip:=1                               
 	DllCall("User32.dll\SendMessage", "Ptr", TTHW, "UInt", TRACKACT, "Ptr", 1, "Ptr", &TI)
 	TT[TTIX].HW := TTHW
 	Return TTHW
-}
+} ;</06.01.000021>
 ;<06.01.000022>
 SafeInput(Title, Prompt, Default = "") {     ;-- makes sure the same window stays active after showing the InputBox. Otherwise you might get the text pasted into another window unexpectedly.
 	
@@ -5704,15 +5715,15 @@ SafeInput(Title, Prompt, Default = "") {     ;-- makes sure the same window stay
    InputBox OutPut, %Title%, %Prompt%,,, 120,,,,, %Default%
    WinActivate ahk_id %ActiveWin%
    Return OutPut
-}
+} ;</06.01.000022>
 ;functions end
 } 
-;|   HtmlBox()                                	|   EditBox()                                  	|   Popup()                                    	|   PIC_GDI_GUI()                          	|
-;|   SplitButton()                            	|   BetterBox()                               	|   BtnBox()                                   	|   LoginBox()                                	|
-;|   MultiBox()                                	|   PassBox()                                 	|   CreateHotkeyWindow()            	|   GetUserInput()                         	|
-;|   guiMsgBox()                             	|   URLPrefGui()                            	|   TaskDialog()                             	|   ITaskDialogDirect()                  	|
-;|   TaskDialogMsgBox()                	|   TaskDialogToUnicode()            	|   TaskDialogCallback()               	|   TT_Console()                             	|
-;|   ToolTipEx()                                	|   SafeInput()                                 	|   DisableCloseButton()               	|
+;|   HtmlBox(01)                               	|   EditBox(02)                                 	|   Popup(03)                                   	|   PIC_GDI_GUI(04)                         	|
+;|   SplitButton(05)                           	|   BetterBox(06)                              	|   BtnBox(07)                                  	|   LoginBox(08)                               	|
+;|   MultiBox(09)                               	|   PassBox(10)                                	|   CreateHotkeyWindow(11)           	|   GetUserInput(12)                        	|
+;|   guiMsgBox(13)                           	|   URLPrefGui(14)                           	|   TaskDialog(15)                            	|   ITaskDialogDirect(16)                 	|
+;|   TaskDialogMsgBox(17)               	|   TaskDialogToUnicode(18)           	|   TaskDialogCallback(19)              	|   TT_Console(20)                           	|
+;|   ToolTipEx(21)                             	|   SafeInput(22)                              	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;gui - to change (21) -- change position, fading, remove -- 																			baseID: <06.02>
