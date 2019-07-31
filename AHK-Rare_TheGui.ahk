@@ -10,7 +10,7 @@
 ;		to combine several terms by logical 'and' and / or logical 'or' (Basic-Mode).
 ;	3. Highlighting the search term(s) in the RichEdit controls
 ;	4. Keywords should be displayed in the description with a larger font
-
+;	5. Tabs without content should be disabled
 
 ;{01. script parameters
 
