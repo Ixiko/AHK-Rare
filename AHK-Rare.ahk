@@ -8394,6 +8394,8 @@ UpdateScrollBars(GuiNum, GuiWidth, GuiHeight) {                                 
 
 }
 }
+
+}
 ;|                                                                                      COMBOBOX CONTROL functions                                                                                  	|
 ;|   GetComboBoxChoice()            	|   LB_GetItemHeight()                  	|   LB_SetItemHeight()                  	|
 ;|                                                                                           EDIT CONTROL functions                                                                                         	|
@@ -8422,6 +8424,7 @@ UpdateScrollBars(GuiNum, GuiWidth, GuiHeight) {                                 
 ;|   TV_Find(1)	                               	|   TV_Load(2)	                            	|   TV_GetItemText(3)                      	|
 ;|                                                      |                                      SCROLLBAR functions          								|	                                                  	|
 ;|   UpdateScrollBars(1)                   	|
+
 
 { ;gui - get informations (81) -- get informations from windows and screens -- 												baseID: <06.04>
 

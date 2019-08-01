@@ -171,7 +171,9 @@ class RichCode {
 		FGColor := this.BGRFromRGB(Settings.FGColor)
 		BGColor := this.BGRFromRGB(Settings.BGColor)
 		
-		Gui, %GuiName%: Add, Custom, ClassRichEdit50W hWndhWnd +0x5031b1c4 +E0x20000 %Options%
+		;Gui, %GuiName%: Add, Custom, ClassRichEdit50W hWndhWnd +0x5031b1c4 -0x200000 +E0x20000 %Options%
+		Gui, %GuiName%: Add, Custom, ClassRichEdit50W hWndhWnd +0x5031b1c4 -0x100000 %Options%
+
 		this.hWnd := hWnd
 
 		; Enable WordWrap in RichEdit control ("WordWrap" : true)

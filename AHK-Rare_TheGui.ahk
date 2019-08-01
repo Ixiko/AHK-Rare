@@ -1,16 +1,16 @@
 ﻿; =====================================================
-; 						*** AHK-RARE_TheGUI ***        	V0.6alpha July 31, 2019 by Ixiko
+; 						*** AHK-RARE_TheGUI ***      	   V0.65 alpha August 01, 2019 by Ixiko
 ; =====================================================
 ; -------------------------------------------------------------------------------------------
 ; 		MISSING THINGS:
 ; -------------------------------------------------------------------------------------------
-;	1. Gui size and position can not be restored yet
-;	2. The search function should have two options, Basic and RegEx
+;	
+;	1. The search function should have two options, Basic and RegEx
 ;		At the moment only RegEx is activated. In future, however, it should be possible 
 ;		to combine several terms by logical 'and' and / or logical 'or' (Basic-Mode).
-;	3. Highlighting the search term(s) in the RichEdit controls
-;	4. Keywords should be displayed in the description with a larger font
-;	5. Tabs without content should be disabled
+;	2. Highlighting the search term(s) in the RichEdit controls
+;	3. Keywords should be displayed in the description with a larger font
+;	4. Tabs without content should be disabled
 
 ;{01. script parameters
 
@@ -27,21 +27,21 @@
 		#KeyHistory 1
 		;ListLines Off
 
-		SetTitleMatchMode, 2		;Fast is default
-		SetTitleMatchMode, Fast		;Fast is default
-		DetectHiddenWindows, Off	;Off is default
-		CoordMode, Mouse, Screen
-		CoordMode, Pixel, Screen
-		CoordMode, ToolTip, Screen
-		CoordMode, Caret, Screen
-		CoordMode, Menu, Screen
-		SetKeyDelay, -1, -1
-		SetBatchLines, -1
-		SetWinDelay, -1
-		SetControlDelay, -1
-		SendMode, Input
-		AutoTrim, On
-		FileEncoding, UTF-8
+		SetTitleMatchMode     	, 2                    
+		SetTitleMatchMode     	, Fast               
+		DetectHiddenWindows	, Off                
+		CoordMode                 	, Mouse, Screen
+		CoordMode                 	, Pixel, Screen
+		CoordMode                 	, ToolTip, Screen
+		CoordMode                 	, Caret, Screen
+		CoordMode                 	, Menu, Screen
+		SetKeyDelay                	, -1, -1
+		SetBatchLines           		, -1
+		SetWinDelay                	, -1
+		SetControlDelay          	, -1
+		SendMode                   	, Input
+		AutoTrim                     	, On
+		FileEncoding                	, UTF-8
 
 		OnExit("TheEnd")
 		;OnError("FehlerProtokoll")
@@ -79,6 +79,7 @@
 				FileRead, AhkRare, % filepattern
 		}
 	
+	; getting last gui size
 		IniRead, GuiOptions, % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
 			GuiOptions:= StrSplit(GuiOptions, "|")
@@ -155,6 +156,8 @@
 		Gui, ARG: Add, Pic               	, % "x12 y10 BackgroundTrans"  	, % A_ScriptDir "\assets\AHK-Rare-GuiLogo.png" ;(LW//4.37) w" (LW:= 450) " h" (LogoH:= 71) "
 		Gui, ARG: Add, Progress        	, % "x0 y85 w" (LogoW + 10 ) " h2 vDevider" , 100
 		Gui, ARG: Add, Progress        	, % "x" (LW + 7) " y0 w2 h85" , 100
+		Gui, ARG: Font, S7 CWhite q5, Normal
+		Gui, ARG: Add, Text	                , % "x" (LW - 300) " y6 w300 Right vStats BackgroundTrans"                                   	, % ""
 	;-: temp. text controls
 		Gui, ARG: Font, S12 CWhite q5, Normal
 		Gui, ARG: Add, Text	                , % "x" (LW + 30) " y20 vField1 BackgroundTrans"                                                 	, % "  . . . . . create index: "
@@ -163,7 +166,7 @@
 	;-: Edit control for search patterns
 		SW:= LW + 20 
 		Gui, ARG: Font, S10 Normal CBlack q5, Normal
-		Gui, ARG: Add, DDL                	, % "x" (SW) " y50 w65 vSearchAlgo HWNDhSAlgo E0x4000"                                    	, Basic|RegEx
+		Gui, ARG: Add, DDL                	, % "x" (SW) " y50 w65 vSearchAlgo HWNDhSAlgo E0x4000"                                   	, Basic|RegEx
 		PostMessage, 0x153, -1, 33,, ahk_id %hSAlgo%  ; Setzt die Höhe des Auswahlfeldes.
 		GuiControl, ChooseString, SearchAlgo, % SearchMode
 		Gui, ARG: Font, S11 Italic CAAAAAA q5, Normal
@@ -184,29 +187,34 @@
 		Gui, ARG: Add, Edit                	, % "xm y" (LV_Y + LV_H + 10) " w" LogoW//4 " r20 t8 HWNDhShowRoom1 vShowRoom1"
 		GuiControlGet, SR_, ARG: Pos, ShowRoom1
 	;-: Code highlighted RichEdit control
-		Gui, ARG: Add, Tab                	, % "x" (LogoW//4+5) " y" (LV_Y+LV_H+10) " w" (LogoW//4*3) " h" SR_H " HWNDhTabs vShowRoom2", FUNCTION CODE|EXAMPLE(s)|DESCRIPTION
+		Gui, ARG: Add, Tab                	, % "x" (LogoW//4+5) " y" (LV_Y+LV_H+10) " w" (LogoW//4*3) " h" SR_H-10 " HWNDhTabs vShowRoom2", FUNCTION CODE|EXAMPLE(s)|DESCRIPTION
 		Gui, ARG: Tab, 1
-		RC[1] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H, 0)
+		RC[1] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
 		Gui, ARG: Tab, 2
-		RC[2] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H, 0)
+		RC[2] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
 		Gui, ARG: Tab, 3
-		RC[3] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H, 0)
+		RC[3] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
+		WinRC := GetWindowInfo(RC[1].Hwnd)
 	;-: Create a ToolTip control
 		TT := New GuiControlTips(HARG)
 		TT.SetDelayTimes(500, 3000, -1)
 		Loop, 3
 			TT.Attach(RC[A_Index].Hwnd, "Press the right`nmouse button`nto copy the text.", True)
 	;-: Show the gui
-		Gui, ARG: Show, AutoSize xCenter yCenter Hide, AHK-Rare 'the search gui'
+		Gui, ARG: Show, AutoSize xCenter yCenter Hide, , AHK-Rare_TheGui
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
-			Gui, ARG: Show, % "x" GuiOptions.1 " y" GuiOptions.2 " w" GuiOptions.3 " h" GuiOptions.4, AHK-Rare 'the search gui'
+		{
+			DPIFactor:= screenDims().DPI / 96
+			Gui, ARG: Show, % "x" GuiOptions.1 " y" GuiOptions.2 " w" (GuiOptions.3 // DPIFactor) " h" (GuiOptions.4 // DPIFactor), AHK-Rare_TheGui
+		}
 		else 
-			Gui, ARG: Show
+			Gui, ARG: Show,, , AHK-Rare_TheGui
 	;-: Resizing now
-		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth + 1
-		
+		;WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 2, % A_GuiHeight -2
+		gosub ARGGuiSize
 		OnMessage(0x200, "OnMouseHover")
-
+		
+		SetTimer, StatsShow, -500
 
 ;}
 
@@ -245,7 +253,7 @@ return
 
 ;--------------------------------------------------------------------------------------------------------------------------------------
 ;{06. Labels
-
+;--------------------------------------------------------------------------------------------------------------
 ShowFunction:                 	;{
 
 	toshow  	 := []
@@ -305,7 +313,7 @@ ShowFunction:                 	;{
 				
 return
 ;}
-
+;--------------------------------------------------------------------------------------------------------------
 GoSearch:                         	;{
 
 		Gui, Arg: Submit, NoHide
@@ -335,7 +343,7 @@ GoSearch:                         	;{
 				GuiControl, Text, Field3, % "Search result: nothing matched"
 		}
 return ;}
-
+;--------------------------------------------------------------------------------------------------------------
 ARGGuiSize:                      	;{
 
 	Critical, Off
@@ -349,23 +357,34 @@ ARGGuiSize:                      	;{
 	GuiControlGet, LV_, ARG: Pos, LVFunc
 	LV_AutoColumSizer(hLVFunc, "16% 15% 60%")
 	GuiControl, ARG: Move, ShowRoom1 	, % "y" (LV_Y+LV_H+10)    " w" (A_GuiWidth//4)  " h" (A_GuiHeight-LV_Y-LV_H-10)
-	GuiControl, ARG: Move, ShowRoom2 	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+10) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
-	GuiControl, ARG: Move, % RC[1].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
-	GuiControl, ARG: Move, % RC[2].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
-	GuiControl, ARG: Move, % RC[3].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3) " h" (A_GuiHeight-LV_Y-LV_H-10)
+	GuiControl, ARG: Move, ShowRoom2 	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+10) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-10)
+	GuiControl, ARG: Move, % RC[1].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
+	GuiControl, ARG: Move, % RC[2].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
+	GuiControl, ARG: Move, % RC[3].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
 	Critical, Off
+	SetTimer, StatsShow, -200
 	
 return ;}
-
+;--------------------------------------------------------------------------------------------------------------
 ARGGuiClose:                  	;{
 ARGEscape:
+
 	Gui, Arg: Submit, NoHide
-	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
+	win := GetWindowInfo(hARG)
+
+	;MsgBox, % wx ", " wy ", " ww ", "wh, % "ahk_id " hARG
 	IniWrite, % SearchAlgo, % A_ScriptDir "\" A_ScriptName, Properties, SearchMode
-	;IniWrite, % wx "|" wy "|" ww "|" wh , % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
+	IniWrite, % wx "|" wy "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
 	
 ExitApp ;}
+;--------------------------------------------------------------------------------------------------------------
+StatsShow:                       	;{
 
+	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
+	GuiControl, ARG:, Stats, % "x" wx "  y" wy "  w" ww "  h" wh
+	
+return ;}
+;--------------------------------------------------------------------------------------------------------------
 CopyTextToClipboard:     	;{
 
 	toCopy := ""
@@ -390,14 +409,16 @@ return
 TTOff:
 	ToolTip,,,, 2
 return ;}
-
+;--------------------------------------------------------------------------------------------------------------
 FocusSearchField:            	;{
 	GuiControl, ARG: Focus, LVExpression
 return ;}
-
+;--------------------------------------------------------------------------------------------------------------
 ListViewUp:
 ListViewDown:                 	;{
 
+	If !WinActive("AHK-Rare_TheGui ahk_class AutoHotkeyGUI")
+			return
 	If Instr(A_ThisLabel, "ListViewUp")
 	{
 			Send, {Up}
@@ -409,7 +430,7 @@ ListViewDown:                 	;{
 	gosub ShowFunctionsOnUpDown
 	
 return ;}
-
+;--------------------------------------------------------------------------------------------------------------
 
 ;}
 
@@ -949,6 +970,40 @@ Edit_SetMargins(hEdit, p_LeftMargin:="",p_RightMargin:="")  {
         SendMessage EM_SETMARGINS, l_Flags, l_Margins,, % "ahk_id " %hEdit%
 }
 
+screenDims() {								                       						        			;--returns a key:value pair of width screen dimensions (only for primary monitor)
+
+	W := A_ScreenWidth
+	H := A_ScreenHeight
+	DPI := A_ScreenDPI
+	Orient := (W>H)?"L":"P"
+	yEdge := DllCall("GetSystemMetrics", "Int", SM_CYEDGE)
+	yBorder := DllCall("GetSystemMetrics", "Int", SM_CYBORDER)
+
+ return {W:W, H:H, DPI:DPI, OR:Orient, yEdge:yEdge, yBorder:yBorder}
+}
+
+GetWindowInfo(hWnd) {                                                      					 	;-- returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)
+    NumPut(VarSetCapacity(WINDOWINFO, 60, 0), WINDOWINFO)
+    DllCall("GetWindowInfo", "Ptr", hWnd, "Ptr", &WINDOWINFO)
+    wi := Object()
+    wi.WindowX 	:= NumGet(WINDOWINFO, 4	, "Int")
+    wi.WindowY		:= NumGet(WINDOWINFO, 8	, "Int")
+    wi.WindowW 	:= NumGet(WINDOWINFO, 12, "Int") 	- wi.WindowX
+    wi.WindowH 	:= NumGet(WINDOWINFO, 16, "Int") 	- wi.WindowY
+    wi.ClientX 		:= NumGet(WINDOWINFO, 20, "Int")
+    wi.ClientY 		:= NumGet(WINDOWINFO, 24, "Int")
+    wi.ClientW   	:= NumGet(WINDOWINFO, 28, "Int") 	- wi.ClientX
+    wi.ClientH    	:= NumGet(WINDOWINFO, 32, "Int") 	- wi.ClientY
+    wi.Style   	    	:= NumGet(WINDOWINFO, 36, "UInt")
+    wi.ExStyle 		:= NumGet(WINDOWINFO, 40, "UInt")
+    wi.Active  		:= NumGet(WINDOWINFO, 44, "UInt")
+    wi.BorderW  	:= NumGet(WINDOWINFO, 48, "UInt")
+    wi.BorderH   	:= NumGet(WINDOWINFO, 52, "UInt")
+    wi.Atom        	:= NumGet(WINDOWINFO, 56, "UShort")
+    wi.Version    	:= NumGet(WINDOWINFO, 58, "UShort")
+    Return wi
+}
+
 TheEnd(ExitReason, ExitCode) {
 	;OnExit("")
 	ExitApp
@@ -966,7 +1021,8 @@ TheEnd(ExitReason, ExitCode) {
 /*		INI SECTION
 [Properties]
 SearchMode=RegEx
-GuiOptions=
+GuiOptions=4072|205|2004|1580
+GuiOptions1= 4072|205|2003|1761
 
 
 */
