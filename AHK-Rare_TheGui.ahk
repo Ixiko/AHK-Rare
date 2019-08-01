@@ -82,7 +82,10 @@
 	; getting last gui size
 		IniRead, GuiOptions, % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
-			GuiOptions:= StrSplit(GuiOptions, "|")
+		{
+			GuiOptions	:= StrSplit(GuiOptions, "|")
+			LogoW     	:= GuiOptions.3 
+		}
 		
 		IniRead, SearchMode, % A_ScriptDir "\" A_ScriptName, Properties, SearchMode
 			If Instr(SearchMode, "Error") || (SearchMode = "")
@@ -210,8 +213,9 @@
 		else 
 			Gui, ARG: Show,, , AHK-Rare_TheGui
 	;-: Resizing now
-		;WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 2, % A_GuiHeight -2
+		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 1, % A_GuiHeight -1
 		gosub ARGGuiSize
+		WinSet, Redraw,, % "ahk_id " hArg
 		OnMessage(0x200, "OnMouseHover")
 		
 		SetTimer, StatsShow, -500
@@ -371,8 +375,6 @@ ARGEscape:
 
 	Gui, Arg: Submit, NoHide
 	win := GetWindowInfo(hARG)
-
-	;MsgBox, % wx ", " wy ", " ww ", "wh, % "ahk_id " hARG
 	IniWrite, % SearchAlgo, % A_ScriptDir "\" A_ScriptName, Properties, SearchMode
 	IniWrite, % wx "|" wy "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
 	
@@ -1021,8 +1023,11 @@ TheEnd(ExitReason, ExitCode) {
 /*		INI SECTION
 [Properties]
 SearchMode=RegEx
-GuiOptions=4072|205|2004|1580
+GuiOptions=1348|411|1908|1412
 GuiOptions1= 4072|205|2003|1761
 
 
 */
+
+
+
