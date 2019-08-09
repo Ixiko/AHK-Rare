@@ -6,24 +6,21 @@
 
 This is a collection of functions I found at Autohotkey-Forum or inside Autohotkey Scripts. Sometimes you will find one of it an official Autohotkey-Library. Approximately 90-95% of the functions can not be found in any of the 2500 libraries that I have also put together here at Github.
 
-Some of the collected function seems to be multiple in this collection, because they sometimes use very different methods. This is a crucial difference. You wan’t find “THE ONLY ONE” good function here. Take what is the better right now! From that I build up a script individual library.
+Some of the collected function seems to be multiple in this collection, because they sometimes use very different methods. This is a crucial difference. You dont wan’t find “THE ONLY ONE” good function here. Take what is the better! From that I build up a script individual library.
 
 ----
 
-*Last modification date*: ***08/01/2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very different.
-
-In the [AHK forum](https://autohotkey.com/boards/) I read that "Codefolding does not work". After trying it with [Sublime Text Editor](https://www.sublimetext.com) I noticed that Sublime does not natively support codefolding via the syntax **;{** , **;}**. Maybe that's the problem. The collection was created with [Scite4Autohotkey](https://github.com/fincs/SciTE4AutoHotkey). 
+*Last modification date*: ***August 9, 2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very difficult.
 
 ------
 
-![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
+## AHK-Rare_the GUI ++ SEARCH COMFORTABLE ++![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
 
 
 
-## ![Gem](assets/GemSmall.png)[August 01, 2019]: +5 =  638
+## ![Gem](assets/GemSmall.png)[August 09, 2019]: +5 =  638
 
-There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. A search function is not yet programmed, but will be added later.
-With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.
+There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.
 
 | **Nr** | FUNCTION                       | DESCRIPTION                                                  |
 | :----: | ------------------------------ | ------------------------------------------------------------ |
@@ -32,6 +29,7 @@ With a right click on the displayed code or the detailed description, the functi
 |   03   | **ScaleToFit()**               | returns the dimensions of the scaled source rectangle that fits within the destination rectangle |
 |   04   | **gcd()**                      | MCode GCD - Find the greatest common divisor (GCD) of two numbers |
 |   05   | **LVM_CalculateSize()**        | calculate the width and height required to display a given number of rows of a ListView control |
+|   06   | **LV_RemoveSelBorder()**       | to remove the listview’s selection border                    |
 
 
 

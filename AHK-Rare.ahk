@@ -6260,7 +6260,7 @@ SetGuiClassStyle(HGUI, Style) {                                                 
 ;   GetGuiClassStyle(21)                  	|   SetGuiClassStyle(22)                  	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;gui - control type (57) -- specialized functions for controls -- 																		baseID: <06.03>
+{ ;gui - control type (58) -- specialized functions for controls -- 																		baseID: <06.03>
 
 { ;<06.03.01>: ComboBox 		(1)
 	
@@ -6466,7 +6466,7 @@ Edit_VCenter(HEDIT) {																						;-- Vertically Align Text for edit co
 
 } 
 
-{ ;<06.03.05>: Listview 			(38)
+{ ;<06.03.05>: Listview 			(39)
 	
 ;<06.03.05.000001>
 LV_GetCount(hLV) {																											;-- get current count of notes in from any listview 
@@ -7885,6 +7885,41 @@ LVM_CalculateSize(hLV,p_NumberOfRows:=-1,ByRef r_Width:="",ByRef r_Height:="") {
     r_Height:=(ErrorLevel>>16)+4    ;-- HIWORD
     Return r_Height<<16|r_Width
 } ;</06.03.05.000038>
+;<06.03.05.000039>
+LV_RemoveSelBorder(HLV, a*) {                                                                                     	;-- to remove the listview's selection border
+	
+	/*	DESCRIPTION OF FUNCTION: -- to remove the listview's selection border --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	remove the listview's selection border
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?p=49507#p49507
+	                         	http://stackoverflow.com/questions/2691 ... stviewitem
+	Author         	:	tmplinshi
+	Date             	:	July 17, 2015
+	AHK-Version	:	AHK_L
+	License         	:	-
+	Syntax          	:	-
+	Parameter(s)	:	HLV: Listview handle
+	Return value	:	none
+	Remark(s)    	:	-
+	Dependencies	:	non
+	KeyWords    	:	gui, Listview
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	
+	*/
+	
+	Static WM_CHANGEUISTATE	:= 0x127
+	        , WM_UPDATEUISTATE	:= 0x128
+	        , UIS_SET                      	:= 1
+			, UISF_HIDEFOCUS       	:= 0x1
+			, wParam := (UIS_SET << 16) | (UISF_HIDEFOCUS & 0xffff) ; MakeLong
+			, _ := OnMessage(WM_UPDATEUISTATE, "LV_RemoveSelBorder")
+	If (a.2 = WM_UPDATEUISTATE)
+		Return 0 ; Prevent alt key from restoring the selection border
+	PostMessage, WM_CHANGEUISTATE, wParam, 0,, % "ahk_id " . HLV
+} ;</06.03.05.000039>
+
 }
 
 { ;<06.03.06>: TabControl		(2)
@@ -8417,7 +8452,7 @@ UpdateScrollBars(GuiNum, GuiWidth, GuiHeight) {                                 
 ;|   LV_SetIconSpacing()                	|   LV_GetIconSpacing()                	|   LV_GetItemPos()                       	|   LV_SetItemPos()                       	|
 ;|   LV_MouseGetCellPos()             	|   LV_GetColOrderLocal()             	|   LV_GetColOrder()                     	|   LV_SetColOrderLocal()             	|   
 ;|   LV_GetCheckedItems(34)            	|   LV_ClickRow(35)                         	|   LV_HeaderFontSet(36)               	|   LV_SetSI(37)                             	|
-;|   LVM_CalculateSize(38)            	|
+;|   LVM_CalculateSize(38)            	|   LV_RemoveSelBorder(39)           	|
 ;|                                                                                            TABCONTROL functions                                                                                           	|
 ;|   TabCtrl_GetCurSel()                	|   TabCtrl_GetItemText()              	|
 ;|                                                                                               TREEVIEW functions          								|	                                                  	|
@@ -14636,7 +14671,7 @@ SelectFolder() {																											;-- the Common File Dialog lets you a
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;Font things (12) - 																																			baseID: <08>
-;<08.01.00001>
+;<08.01.000001>
 CreateFont(pFont="") {                                                                                                 	;-- creates font in memory which can be used with any API function accepting font handles
 	
 	/*    	DESCRIPTION of function CreateFont() ID: 08.01.00001
@@ -14689,7 +14724,7 @@ CreateFont(pFont="") {                                                          
 
 	return hFont
 } ;</08.01.00001>
-;<08.01.00002>
+;<08.01.000002>
 GetHFONT(Options := "", Name := "") {                                                                      	;-- gets a handle to a font used in a AHK gui for example
    
    ; source: https://github.com/aviaryan/Clipjump/blob/master/lib/anticj_func_labels.ahk
@@ -14702,7 +14737,7 @@ GetHFONT(Options := "", Name := "") {                                           
    Gui, Destroy
    Return HFONT
 } ;</08.01.00002>
-;<08.01.00003>
+;<08.01.000003>
 MsgBoxFont(Fontstring, title, msg) {                                                                           	;-- style your MsgBox with with your prefered font
 ; https://autohotkey.com/board/topic/21003-function-createfont/
 hFont := CreateFont("s14 italic, Courier New")
@@ -14716,7 +14751,7 @@ OnTimer:
 	SendMessage, 0x30, %hFont%, 1,, ahk_id %h%  ;WM_SETFONT = 0x30 
 return
 } ;</08.01.00003>
-;<08.01.00004>
+;<08.01.000004>
 GetFontProperties(HFONT) {                                                                                       	;-- to get the current font's width and height
 	
 	/* 	DESCRIPTION of function GetFontProperties() ID: 08.01.00004
@@ -14762,7 +14797,7 @@ GetFontProperties(HFONT) {                                                      
    Font.FaceName := StrGet(&LF + 28, 32)
    Return Font
 } ;</08.01.00004>
-;<08.01.00005>
+;<08.01.000005>
 FontEnum(lfCharSet := 1, FontName := "") {                                                               	;-- enumerates all uniquely-named fonts in the system that match the font characteristics specified by the LOGFONT structure
 	
 	/*    	DESCRIPTION of function FontEnum() ID: 08.01.00005
@@ -14802,7 +14837,7 @@ FontEnum(lfCharSet := 1, FontName := "") {                                      
 		Data.List.Push(FontName)
 	return true
 } ;</08.01.00005>
-;<08.01.00006>
+;<08.01.000006>
 GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1) {  	;-- calculate the height and width of the text in the specified font 
 
 	/*    	DESCRIPTION of function GetFontTextDimension() ID: 08.01.00006
@@ -14834,7 +14869,7 @@ GetFontTextDimension(hFont, Text, ByRef Width := "", ByRef Height := "", c := 1)
 	, Height := Floor((NumGet(TEXTMETRIC, 0, "Int")*c)+(NumGet(TEXTMETRIC,16, "Int")*(Floor(c+0.5)-1))+0.5)+8
 	return true
 } ;</08.01.00006>
-;<08.01.00007>
+;<08.01.000007>
 GetStockObject(nr) {                                                                                                    	;--subfunction of GetFontTextDimension()
 	
 	/*    	DESCRIPTION of function GetStockObject() ID: 08.01.00007
@@ -14855,7 +14890,7 @@ GetStockObject(nr) {                                                            
 	*/
 return DllCall( "GetStockObject", UInt, nr)
 } ;</08.01.00007>
-;<08.01.00008>
+;<08.01.000008>
 FontClone(hFont) {                                                                                                      	;-- backup hFont in memory for further processing
 
 	/*    	DESCRIPTION of function FontClone() ID: 08.01.00008
@@ -14897,7 +14932,7 @@ FontClone(hFont) {                                                              
 	DllCall("gdi32\GetObject", Ptr,hFont, Int,vSize, Ptr,&LOGFONT)
 	return DllCall("CreateFontIndirect", Ptr,&LOGFONT, Ptr)
 } ;</08.01.00008>
-;<08.01.00009>
+;<08.01.000009>
 GuiDefaultFont() {                                                                                                        	;-- returns the default Fontname & Fontsize
 	
 	/*    	DESCRIPTION of function GuiDefaultFont() 08.01.00009
@@ -14933,7 +14968,7 @@ GuiDefaultFont() {                                                              
 	 DllCall( "ReleaseDC", Int,0, UInt,hDC ), S := Round( ( -NumGet( LF,0,"Int" )*72 ) / DPI )
 Return DllCall( "MulDiv",Int,&LF+28, Int,1,Int,1, Str ), DllCall( "SetLastError", UInt,S )
 } ;</08.01.00009>
-;<08.01.00010>
+;<08.01.000010>
 StrGetDimAvgCharWidth(hFont) {                                                                               	;-- average width of a character in pixels
 	
 	/*    	DESCRIPTION of function StrGetDimAvgCharWidth() ID: 08.01.00010
@@ -14976,7 +15011,7 @@ StrGetDimAvgCharWidth(hFont) {                                                  
 	vTextW2 := Floor((vTextW1/26+1)/2)
 	return vTextW2
 }  ;</00010>
-;<08.01.00011>
+;<08.01.000011>
 CreateFont(nHeight, nWidth, nEscapement, nOrientation, fnWeight,                        	;-- creates HFont for use with GDI
 fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision,
 fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace) {
@@ -15007,7 +15042,7 @@ HFONT CreateFont(
 				, "UInt", fdwOutputPrecision, "UInt", fdwClipPrecision, "UInt", fdwQuality
 				, "UInt", fdwPitchAndFamily , "Str" , lpszFace)
 } ;</08.01.00011>
-;<08.01.00012>
+;<08.01.000012>
 MeasureText(Str, FontOpts = "", FontName = "") {                                                      	;--  Measures the single-line width and height of the passed text
 	
 		/*    	DESCRIPTION of function MeasureText() ID: 08.01.00012
@@ -15665,7 +15700,6 @@ GetClipFormatNames( FmtArr ) {													            	;--
 
     Return FmtNmArr
 }
-	;------------------------------
 ;<10.01.000010>
 GoogleTranslate(phrase,LangIn,LangOut) {							            				;--
 
@@ -16137,8 +16171,7 @@ HostToIp(NodeName) {								            										;-- gets the IP address for th
 	return IPs
 } 
 ;{ sub
-ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4)
-{ 
+ExtractInteger(ByRef pSource, pOffset = 0, pIsSigned = false, pSize = 4) { 
 	Loop %pSize% 
 	  result += *(&pSource+pOffset+A_Index-1) << 8*A_Index-8 
 	Return result 
@@ -16386,15 +16419,15 @@ DNSQuery(AddrOrName, ByRef ResultArray := "", ByRef CNAME := "") {		;-- retrieve
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;Math/Converting (23) - 																																baseID: <11>
-;<11.01.00001>	
+;<11.01.000001>	
 Min(x, y) {																						;-- returns the smaller of 2 numbers
   return x < y ? x : y
 }
-;<11.01.00002>
+;<11.01.000002>
 Max(x, y) {																						;-- determines the larger number
   return x > y ? x : y
 }
-;<11.01.00003>
+;<11.01.000003>
 Mean(List) {																						;-- returns Average values in comma delimited list
 
 	;https://autohotkey.com/board/topic/4858-mean-median-mode-functions/
@@ -16408,7 +16441,7 @@ Mean(List) {																						;-- returns Average values in comma delimited 
 
 	Return R
 }
-;<11.01.00004>
+;<11.01.000004>
 Median(List) {																					;-- returns Median in a set of numbers from a list
 
 	;https://autohotkey.com/board/topic/4858-mean-median-mode-functions/
@@ -16435,7 +16468,7 @@ Median(List) {																					;-- returns Median in a set of numbers from a
 
 	Return Med
 }
-;<11.01.00005>
+;<11.01.000005>
 Mode(List) {																						;-- returns the mode from a list of numbers
 
 	;https://autohotkey.com/board/topic/4858-mean-median-mode-functions/
@@ -16464,23 +16497,23 @@ Mode(List) {																						;-- returns the mode from a list of numbers
 	Return Mode
 
 }
-;<11.01.00006>
+;<11.01.000006>
 Dec2Base( _Number, _Base = 16 ) {         										 ;-- Base to Decimal and
     Loop % _BaseLen := _Base<10 ? Ceil( ( 10/_Base ) * Strlen( _Number ) ) : Strlen( _Number )
         _D := Floor( _Number/( T := _Base**( _BaseLen-A_index ) ) ), _B .= !_D ? 0: ( _D>9 ? Chr( _D + 87 ) : _D ), _Number := _Number - _D * T
     return Ltrim( _B, "0" )
 }
-;<11.01.00007>
+;<11.01.000007>
 Base2Dec( _Number, _Base = 16 ) {           										;-- Decimal to Base conversion
     Loop, Parse, _Number
         _N += ( ( A_LoopField * 1 = "" ) ? Asc( A_LoopField ) - 87 : A_LoopField ) * _Base**( Strlen( _Number ) - A_index )
     return _N
 }
-;<11.01.00008>
+;<11.01.000008>
 HexToFloat(value) {																			;-- Hexadecimal to Float conversion
     Return, (1 - 2 * (value >> 31)) * (2 ** ((value >> 23 & 255) - 150)) * (0x800000 | value & 0x7FFFFF)
 }
-;<11.01.00009>
+;<11.01.000009>
 FloatToHex(value) {																			;-- Float to Hexadecimal conversion
 
    format := A_FormatInteger
@@ -16787,7 +16820,7 @@ FormatByteSize(Bytes) {                                                         
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;Objects (7) -- handle objects -- 																													baseID: <12>
-;<12.01.00001>
+;<12.01.000001>
 ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
 
     If !IsObject(OrigObj) || !IsObject(MergingObj)
@@ -16802,7 +16835,7 @@ ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
     }
     Return True
 } ;</12.01.00001>
-;<12.01.00002>
+;<12.01.000002>
 evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
 
 	/*											Example
@@ -16840,14 +16873,14 @@ evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
 	return r
 } ;</12.01.00002>
 ;{ sub of evalRPN()
-;<12.01.00003>
+;<12.01.000003>
 StackShow(stack){																			;--
 	for each, value in stack
 		out .= A_Space value
 	return subStr(out, 2)
 } ;</12.01.00003>
 ;}
-;<12.01.00004>
+;<12.01.000004>
 ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print object function
 , Equal="  =  ", Indent="`t", CurIndent="") {	
 	 
@@ -16903,7 +16936,7 @@ ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print
     }
 	return RTrim(ToReturn, NewRow)
 } ;</12.01.00004>
-;<12.01.00005>
+;<12.01.000005>
 KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
 , IncludeKeys:="", KeyREx:="", IncludeValues:="", ValueREx:="") {
 
@@ -16970,7 +17003,7 @@ KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two
 
 return merged
 } ;</12.01.00005>
-;<12.01.00006>
+;<12.01.000006>
 GetCallStack(Report := 0) {                                                                                        	;-- retrieves the current callstack
 	
 		/*    	DESCRIPTION of function 
@@ -17044,7 +17077,7 @@ GetCallStack(Report := 0) {                                                     
          OutputDebug, %  "`r`n" . E.Called . " called by " . E.Caller . " at line " . E.Line . " of " . E.File
    Return Stack
 } ;</12.01.00006>
-;<12.01.00007>
+;<12.01.000007>
 Traceback(actual:=false) {                                                                                          	;-- get stack trace
 	
 		/*    	DESCRIPTION of function 
@@ -17530,7 +17563,7 @@ sortArray( a, o := "A") {                                                       
 
 ; ---------------------------------------------------------------  #encoding/decoding#  ---------------------------------------------------------------
 { ;<13.02> (9)
-;<13.02.00001>
+;<13.02.000001>
 StringMD5( ByRef V, L = 0 ) {               											;-- String MD5 Hashing
 
     VarSetCapacity( MD5_CTX, 104, 0 ), DllCall( "advapi32\MD5Init", Str, MD5_CTX )
@@ -17540,7 +17573,7 @@ StringMD5( ByRef V, L = 0 ) {               											;-- String MD5 Hashing
         N := NumGet( MD5_CTX, 87+A_Index, "Char" ), MD5 .= SubStr( Hex, N>>4, 1 ) . SubStr( Hex, N&15, 1 )
 return MD5
 } ;</00001>
-;<13.02.00002>
+;<13.02.000002>
 uriEncode(str) { 																				;-- a function to escape characters like & for use in URLs.
 
     f = %A_FormatInteger%
@@ -17555,7 +17588,7 @@ uriEncode(str) { 																				;-- a function to escape characters like & 
     SetFormat, Integer, %f%
     Return, pr . str
 } ;</00002>
-;<13.02.00003>
+;<13.02.000003>
 Ansi2Unicode(ByRef sString, ByRef wString, CP = 0) {					;-- easy convertion from Ansi to Unicode, you can set prefered codepage 
      nSize := DllCall("MultiByteToWideChar"
       , "Uint", CP
@@ -17575,7 +17608,7 @@ Ansi2Unicode(ByRef sString, ByRef wString, CP = 0) {					;-- easy convertion fro
       , "Uint", &wString
       , "int",  nSize)
 } ;</00003>
-;<13.02.00004>
+;<13.02.000004>
 Unicode2Ansi(ByRef wString, ByRef sString, CP = 0) {					;-- easy convertion from Unicode to Ansi, you can set prefered codepage
      nSize := DllCall("WideCharToMultiByte"
       , "Uint", CP
@@ -17599,31 +17632,31 @@ Unicode2Ansi(ByRef wString, ByRef sString, CP = 0) {					;-- easy convertion fro
       , "Uint", 0
       , "Uint", 0)
 } ;</00004>
-;<13.02.00005>
+;<13.02.000005>
 Ansi2Oem(sString) {																		;-- using Ansi2Unicode and Unicode2Ansi functions
 	Ansi2Unicode(sString, wString, 0)
 	Unicode2Ansi(wString, zString, 1)
 	Return zString
 } ;</00005>
-;<13.02.00006>
+;<13.02.000006>
 Oem2Ansi(zString) {                                                                    	;-- using Ansi2Unicode and Unicode2Ansi functions
 	Ansi2Unicode(zString, wString, 1)
 	Unicode2Ansi(wString, sString, 0)
 	Return sString
 } ;</00006>
-;<13.02.00007>
+;<13.02.000007>
 Ansi2UTF8(sString) {                                                                    	;-- using Ansi2Unicode and Unicode2Ansi functions
 	Ansi2Unicode(sString, wString, 0)
 	Unicode2Ansi(wString, zString, 65001)
 	Return zString
 } ;</00007>
-;<13.02.00008>
+;<13.02.000008>
 UTF82Ansi(zString) {                                                                    	;-- using Ansi2Unicode and Unicode2Ansi functions
 	Ansi2Unicode(zString, wString, 65001)
 	Unicode2Ansi(wString, sString, 0)
 	Return sString
 } ;</00008>
-;<13.02.00009>
+;<13.02.000009>
 CRC32(ByRef Buffer, Bytes=0, Start=-1) {	                            		;-- CRC32 function, uses MCode
    Static f
    If f =
@@ -17781,7 +17814,7 @@ sXMLget( xml, node, attr = "" ) {														;-- simple solution to get inform
 
 ; ----------------------------------------------------------------  #String handling#  ------------------------------------------------------------------
 { ;<13.04> (18)
-;<13.04.00001>
+;<13.04.000001>
 cleanlines(ByRef txt) {																		;-- removes all empty lines
 
 	Loop, Parse, txt, `n, `r
@@ -17794,7 +17827,7 @@ cleanlines(ByRef txt) {																		;-- removes all empty lines
 	}
 	return newtxt
 } ;</13.04.00001>
-;<13.04.00002>
+;<13.04.000002>
 cleancolon(txt) {																				;-- what for? removes on ':' at beginning of a string
 
 	if substr(txt,1,1)=":" {
@@ -17804,7 +17837,7 @@ cleancolon(txt) {																				;-- what for? removes on ':' at beginning o
 	return txt
 
 } ;</13.04.00002>
-;<13.04.00003>
+;<13.04.000003>
 cleanspace(ByRef txt) {																	;-- removes all Space chars
 
 	StringReplace txt,txt,`n`n,%A_Space%, All
@@ -17817,7 +17850,7 @@ cleanspace(ByRef txt) {																	;-- removes all Space chars
 	}
 	return txt
 } ;</13.04.00003>
-;<13.04.00004>
+;<13.04.000004>
 SplitLine(str, Byref key, ByRef val) {                                              	;-- split string to key and value
 	
 	If (p := InStr(str, "=")) {
@@ -17827,7 +17860,7 @@ SplitLine(str, Byref key, ByRef val) {                                          
 	}
 	Return False
 } ;</13.04.00004>
-;<13.04.00005>
+;<13.04.000005>
 EnsureEndsWith(string, char) {  														;-- Ensure that the string given ends with a given char
 
    if ( StringRight(string, strlen(char)) <> char )
@@ -17835,14 +17868,14 @@ EnsureEndsWith(string, char) {  														;-- Ensure that the string given e
 
    return string
 } ;</13.04.00005>
-;<13.04.00006>
+;<13.04.000006>
 EnsureStartsWith(string, char) { 														;-- Ensure that the string given starts with a given char
    if ( StringLeft(string, strlen(char)) <> char )
       string := char . string
 
    return string
 } ;</13.04.00006>
-;<13.04.00007>
+;<13.04.000007>
 StrPutVar(string, ByRef var, encoding) {    										;-- Convert the data to some Enc, like UTF-8, UTF-16, CP1200 and so on
    { ;-------------------------------------------------------------------------------
     ;
@@ -17867,7 +17900,7 @@ StrPutVar(string, ByRef var, encoding) {    										;-- Convert the data to so
         * ((encoding="cp1252"||encoding="utf-16") ? 2 : 1) )
     return StrPut(string, &var, encoding)
 } ;</00007>
-;<13.04.00008>
+;<13.04.000008>
 RegExSplit(ByRef psText, psRegExPattern, piStartPos:=1) {				;-- split a String by a regular expressin pattern and you will receive an array as a result
 
 	;https://autohotkey.com/board/topic/123708-useful-functions-collection/ - ObiWanKenobi
@@ -17892,7 +17925,7 @@ RegExSplit(ByRef psText, psRegExPattern, piStartPos:=1) {				;-- split a String 
 	}
 	return aRet
 } ;</13.04.000008>
-;<13.04.00009>
+;<13.04.000009>
 ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {                      	;-- subfunction of RegExSplit
 	if (psText != "")
 	{
@@ -17900,7 +17933,7 @@ ExtractSE(ByRef psText, piPosStart, piPosEnd:="") {                      	;-- su
 		return SubStr(psText, piPosStart, piPosEnd-(piPosStart-1))
 	}
 } ;</13.04.00009> 
-;<13.04.00010>
+;<13.04.000010>
 StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String manipulation with many options is using RegExReplace  (bloat, drop, Flip, Only, Pattern, Repeat, Replace, Scramble, Split)
 
     if ( _Option = "Bloat" )
@@ -17940,14 +17973,14 @@ StringM( _String, _Option, _Param1 = "", _Param2 = "" ) {          	 ;--  String
     return _NewString
 
 } ;</13.04.00010>
-;<13.04.00011>
+;<13.04.000011>
 StrCount(Haystack,Needle) {															;-- a very handy function to count a needle in a Haystack
 	
 	; https://github.com/joedf/AEI.ahk/blob/master/AEI.ahk
 	StringReplace, Haystack, Haystack, %Needle%, %Needle%, UseErrorLevel
 	return ErrorLevel
 } ;</13.04.00011>
-;<13.04.00012>
+;<13.04.000012>
 SuperInstr(Hay, Needles, return_min=true, Case=false,               	;-- Returns min/max position for a | separated values of Needle(s)
 Startpoint=1, Occurrence=1)	{					
 	
@@ -17976,7 +18009,7 @@ Startpoint=1, Occurrence=1)	{
 	}
 	return pos
 } ;</13.04.00012>
-;<13.04.00013>
+;<13.04.000013>
 LineDelete(V, L, R := "", O := "", ByRef M := "") {                            	;-- deletes a specific line or a range of lines from a variable containing one or more lines of text. No use of any loop!
 	
 	/*    	DESCRIPTION of function 
@@ -18052,7 +18085,7 @@ LineDelete(V, L, R := "", O := "", ByRef M := "") {                            	
 	
 Return X
 } ;</13.04.00013>
-;<13.04.00014>
+;<13.04.000014>
 GetWordsNumbered(string, conditions) {										;-- gives back an array of words from a string, you can specify the position of the words you want to keep
 
 	/*                              	DESCRIPTION
@@ -18084,7 +18117,7 @@ GetWordsNumbered(string, conditions) {										;-- gives back an array of words
 
 return word
 } ;</13.04.00014>
-;<13.04.00015>
+;<13.04.000015>
 AddTrailingBackslash(ptext) {															;-- adds a backslash to the beginning of a string if there is none
 
 	if (SubStr(ptext, 0, 1) <> "\")
@@ -18092,7 +18125,7 @@ AddTrailingBackslash(ptext) {															;-- adds a backslash to the beginnin
 	return, ptext
 
 } ;</13.04.00015>
-;<13.04.00016>
+;<13.04.000016>
 CheckQuotes(Path) {																		;--
 
    if (InStr(Path, A_Space, false) <> 0)
@@ -18101,7 +18134,7 @@ CheckQuotes(Path) {																		;--
    }
    return, Path
 } ;</13.04.00016>
-;<13.04.00017>
+;<13.04.000017>
 ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {							;-- hopefully working, not tested function, it uses RegExReplace
 
    Replace_RegEx := "im)[\/:*?""<>|]*"
@@ -18113,7 +18146,7 @@ ReplaceForbiddenChars(S_IN, ReplaceByStr = "") {							;-- hopefully working, no
       return, S_OUT
 
 } ;</13.04.00017>
-;<13.04.00018>
+;<13.04.000018>
 WrapText(Text, LineLength) {                                                        	;-- basic function to wrap a text-string to a given length
 	
 	/*    	DESCRIPTION of function WrapText() 13.04.00018
@@ -18636,7 +18669,7 @@ RandomString(length, special := false) {                                     	;-
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 { ;Keys/Hotkeys/Hotstring (11) - 																														baseID: <14>
-;<14.01.00001>
+;<14.01.000001>
 DelaySend(Key, Interval=200, SendMethod="Send") { 					;-- Send keystrokes delayed
 
 	/*
@@ -18682,12 +18715,12 @@ DelaySend(Key, Interval=200, SendMethod="Send") { 					;-- Send keystrokes delay
         }
     Return
 } ;</14.01.00001>
-;<14.01.00002>
+;<14.01.000002>
 SetLayout(layout, winid) {																;-- set a keyboard layout
     Result := (DllCall("LoadKeyboardLayout", "Str", layout, "UInt", "257"))
     DllCall("SendMessage", "UInt", winid, "UInt", "80", "UInt", "1", "UInt", Result)
 } ;</14.01.00002>
-;<14.01.00003>
+;<14.01.000003>
 GetAllInputChars() {																			;-- Returns a string with input characters
 
     Loop 256
@@ -18697,7 +18730,7 @@ GetAllInputChars() {																			;-- Returns a string with input character
 
     Return ChrStr
 } ;</14.01.00003>
-;<14.01.00004>
+;<14.01.000004>
 ReleaseModifiers(Beep = 1, CheckIfUserPerformingAction = 0,    ;-- helps to solve the Hotkey stuck problem
 AdditionalKeys = ""	, timeout := "") {
 	
@@ -18744,7 +18777,7 @@ AdditionalKeys = ""	, timeout := "") {
 	}
 	return
 } ;</14.01.00004>
-;<14.01.00005>
+;<14.01.000005>
 isaKeyPhysicallyDown(Keys) {															;-- belongs to ReleaseModifiers() function
 	
   if isobject(Keys)
@@ -18757,7 +18790,7 @@ isaKeyPhysicallyDown(Keys) {															;-- belongs to ReleaseModifiers() fun
   	return Keys ;keys!
   return 0
 } ;</14.01.00005>
-;<14.01.00006>
+;<14.01.000006>
 GetText(ByRef MyText = "") {                                                       	;-- copies the selected text to a variable while preserving the clipboard.(Ctrl+C method)
 	
    SavedClip := ClipboardAll
@@ -18774,7 +18807,7 @@ GetText(ByRef MyText = "") {                                                    
    Clipboard := SavedClip
    Return MyText
 } ;</14.01.00006>
-;<14.01.00007>
+;<14.01.000007>
 PutText(MyText) {                                       	                                	;-- Pastes text from a variable while preserving the clipboard. (Ctrl+v method)
 	
    SavedClip := ClipboardAll 
@@ -18786,7 +18819,7 @@ PutText(MyText) {                                       	                       
    Clipboard := SavedClip
    Return
 } ;</14.01.00007>
-;<14.01.00008>
+;<14.01.000008>
 Hotkeys(ByRef Hotkeys) {																;-- a handy function to show all used hotkeys in script
 
 	/*                              	DESCRIPTION
@@ -18837,7 +18870,7 @@ If (A_ComputerName = "Laptop") {
         }
     return Hotkeys
 } ;</14.01.00008>
-;<14.01.00009>
+;<14.01.000009>
 BlockKeyboard(block=-1) { 															;-- block keyboard, and unblock it through usage of keyboard
 	
 	;Thanks to Lexikos
@@ -18886,7 +18919,7 @@ GetKeyHex(Key) {
 	SetFormat, Integer, % OldFormat
 	return Ans
 } ;</14.01.00009>
-;<14.01.00010>
+;<14.01.000010>
 RapidHotkey(keystroke, times="2", delay=0.2, IsLabel=0) {          	;-- Using this function you can send keystrokes or launch a Label by pressing a key several times.
 	
 	;https://autohotkey.com/board/topic/35566-rapidhotkey/
@@ -19032,7 +19065,7 @@ Morse(timeout = 400) { ;by Laszo -> http://www.autohotkey.com/forum/viewtopic.ph
 		Return
    }
 } ;</14.01.00010>
-;<14.01.00011>
+;<14.01.000011>
 hk(keyboard:=0, mouse:=0, message:="", timeout:=3, displayonce:=0) {                 	;-- Disable all keyboard buttons
 		
 	/*	DESCRIPTION OF FUNCTION: - hk()- Disable all keyboard buttons --
@@ -20326,7 +20359,7 @@ AddToolTip(hControl,p_Text) {																							;-- this is a function from 
 
 
 }  ;</15.01.000006>
-;|   ShowTrayBalloon()                  	|   ColoredTooltip()                       	|   AddToolTip() x 4                       	|
+;|   ShowTrayBalloon(01)                 	|   ColoredTooltip(02)                      	|   AddToolTip(03-06) x 4                	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -22710,8 +22743,8 @@ MouseGetText(x := "", y := "", Encoding := "UTF-16") {                          
 } ;</18.01.000005> ;http://www.autohotkey.com/board/topic/94619-ahk-l-screen-reader-a-tool-to-get-text-anywhere/
 
 } 
-;|   CreatePropertyCondition()      	|   CreatePropertyCondition()       	|   CreatePropertyConditionEx()    	|   getControlNameByHwnd()       	|
-;|   MouseGetText()                       	|
+;|   CreatePropertyCondition(01)     	|   CreatePropertyCondition(02)     	|   CreatePropertyConditionEx(03)  	|   getControlNameByHwnd(04)      	|
+;|   MouseGetText(05)                      	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -23572,7 +23605,7 @@ WM_SETCURSOR(wParam, lParam) { 																			;-- Prevent "sizing arrow" cur
 		return true ; prevent further processing
 	}
 } ;</23.01.000005>
-;<23.01.00006>
+;<23.01.000006>
 FoxitInvoke(command, FoxitID:="") {		                                                         			;-- wm_command wrapper for FoxitReader Version:  9.1
 	/*    	DESCRIPTION of function FoxitInvoke() ID: 23.01.00006
         	-------------------------------------------------------------------------------------------------------------------
@@ -23816,7 +23849,7 @@ FoxitInvoke(command, FoxitID:="") {		                                           
 	}
 	
 } ;</23.01.000006>
-;<23.01.00007>
+;<23.01.000007>
 MoveMouse_Spiral(cx, cy, r, s, a) { 															        			;-- move mouse in a spiral
 	
 	/*    	DESCRIPTION
@@ -23865,7 +23898,7 @@ MoveMouse_Spiral(cx, cy, r, s, a) { 															        			;-- move mouse in 
             Sleep 1 ; ms
             
 } ;</23.01.000007>
-;<23.01.00008>
+;<23.01.000008>
 ScaleToFit(width_max, height_max, width_actual, height_actual) {                         	;-- returns the dimensions of the scaled source rectangle that fits within the destination rectangle
 	
 	/*	DESCRIPTION OF FUNCTION: -- ScaleToFit --

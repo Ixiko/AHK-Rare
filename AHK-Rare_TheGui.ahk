@@ -1,5 +1,5 @@
 ﻿; =====================================================
-; 						*** AHK-RARE_TheGUI ***      	   V0.65 alpha August 01, 2019 by Ixiko
+; 						*** AHK-RARE_TheGUI ***      	   V0.66 alpha August 09, 2019 by Ixiko
 ; =====================================================
 ; -------------------------------------------------------------------------------------------
 ; 		MISSING THINGS:
@@ -63,35 +63,43 @@
 		LW       	:= 450
 		LogoH   	:= 71
 		
-	; loading AHK-Rare.ahk
+	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	;	loading AHK-Rare.ahk
+	; ------------------------------------------------------------------------------------------------------------------------------------------------------------;{
 		If FileExist(A_ScriptDir . "\AHK-Rare.ahk")
 			FileRead, AhkRare, % A_ScriptDir "\AHK-Rare.ahk"
 		else
 		{
-				IniRead, filepattern, % A_ScriptDir "\" A_ScriptName, Properties, RareFolder
+				IniRead, filepattern, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, RareFolder
 				If Instr(filepattern, "ERROR")
 				{
 						FileSelectFile, filepattern,, % A_ScriptDir, % "Please enter the location of the AHK-Rare.ahk file here!", % "AHK-Rare.ahk"
 						If (filepattern = "") || !FileExist(filepattern)
 								ExitApp
-						IniWrite, % filepattern, % A_ScriptDir "\" A_ScriptName, Properties, RareFolder
+						IniWrite, % filepattern, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, RareFolder
 				}
 				FileRead, AhkRare, % filepattern
 		}
-	
-	; getting last gui size
-		IniRead, GuiOptions, % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
+	;}
+		
+	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	;	get the last gui size
+	; ------------------------------------------------------------------------------------------------------------------------------------------------------------;{
+		IniRead, GuiOptions, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, GuiOptions
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
 		{
 			GuiOptions	:= StrSplit(GuiOptions, "|")
 			LogoW     	:= GuiOptions.3 
 		}
 		
-		IniRead, SearchMode, % A_ScriptDir "\" A_ScriptName, Properties, SearchMode
+		IniRead, SearchMode, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, SearchMode
 			If Instr(SearchMode, "Error") || (SearchMode = "")
 				SearchMode:= "Basic"
-			
-	; Settings array for the RichCode control (code & examples)
+	;}
+	
+	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	;	Settings array for the RichCode control (code & examples)
+	; ------------------------------------------------------------------------------------------------------------------------------------------------------------;{
 		Settings :=
 		( LTrim Join Comments
 		{
@@ -144,7 +152,7 @@
 			}
 		}
 		)
-
+;}
 ;}
 
 ;{03. draw primary gui 
@@ -154,19 +162,25 @@
 		Gui, ARG: +LastFound +HwndhARG +Resize 
 		Gui, ARG: Margin, 0, 0
 		;Gui, ARG: Color, 172842
+	;-: --------------------------------------
 	;-: Logo and Backgroundcolouring
+	;-: --------------------------------------
 		Gui, ARG: Add, Progress        	, % "x0 y0   w" (LogoW + 10) " h85 c172842 Disabled vBGColorLogo" , 100
 		Gui, ARG: Add, Pic               	, % "x12 y10 BackgroundTrans"  	, % A_ScriptDir "\assets\AHK-Rare-GuiLogo.png" ;(LW//4.37) w" (LW:= 450) " h" (LogoH:= 71) "
 		Gui, ARG: Add, Progress        	, % "x0 y85 w" (LogoW + 10 ) " h2 vDevider" , 100
 		Gui, ARG: Add, Progress        	, % "x" (LW + 7) " y0 w2 h85" , 100
 		Gui, ARG: Font, S7 CWhite q5, Normal
 		Gui, ARG: Add, Text	                , % "x" (LW - 300) " y6 w300 Right vStats BackgroundTrans"                                   	, % ""
+	;-: --------------------------------------
 	;-: temp. text controls
+	;-: --------------------------------------
 		Gui, ARG: Font, S12 CWhite q5, Normal
 		Gui, ARG: Add, Text	                , % "x" (LW + 30) " y20 vField1 BackgroundTrans"                                                 	, % "  . . . . . create index: "
 		GuiControlGet, Field_, ARG: Pos, Field1
 		Gui, ARG: Add, Text              	, % "x" (Field_X + Field_W + 3) " y20 w300 vField2 Center BackgroundTrans "        	, % "00.00.000001"
+	;-: --------------------------------------
 	;-: Edit control for search patterns
+	;-: --------------------------------------
 		SW:= LW + 20 
 		Gui, ARG: Font, S10 Normal CBlack q5, Normal
 		Gui, ARG: Add, DDL                	, % "x" (SW) " y50 w65 vSearchAlgo HWNDhSAlgo E0x4000"                                   	, Basic|RegEx
@@ -181,15 +195,21 @@
 		Edit_SetMargins(hField3, 40, 20)
 		Edit_SetMargins(hSearch, 20, 20)
 		;CTLCOLORS.Attach(hSAlgo, "677892")
+	;-: --------------------------------------
 	;-: Functions Listview
+	;-: --------------------------------------
 		Gui, ARG: Font, S9 Normal CDefault q5, Normal
 		Gui, ARG: Add, Listview        	, % "xm y" (LogoH + 15) " w" LogoW+5 " r25 HWNDhLVFunc vLVFunc gShowFunction AltSubmit Section", main section|function name|short description|function nr.
 		Gui, ARG: Font, S8 CDefault q5, Normal
 		GuiControlGet, LV_, ARG: Pos, LVFunc
+	;-: --------------------------------------
 	;-: Short description section
+	;-: --------------------------------------
 		Gui, ARG: Add, Edit                	, % "xm y" (LV_Y + LV_H + 10) " w" LogoW//4 " r20 t8 HWNDhShowRoom1 vShowRoom1"
 		GuiControlGet, SR_, ARG: Pos, ShowRoom1
+	;-: --------------------------------------
 	;-: Code highlighted RichEdit control
+	;-: --------------------------------------
 		Gui, ARG: Add, Tab                	, % "x" (LogoW//4+5) " y" (LV_Y+LV_H+10) " w" (LogoW//4*3) " h" SR_H-10 " HWNDhTabs vShowRoom2", FUNCTION CODE|EXAMPLE(s)|DESCRIPTION
 		Gui, ARG: Tab, 1
 		RC[1] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
@@ -198,12 +218,16 @@
 		Gui, ARG: Tab, 3
 		RC[3] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
 		WinRC := GetWindowInfo(RC[1].Hwnd)
+	;-: --------------------------------------
 	;-: Create a ToolTip control
+	;-: --------------------------------------
 		TT := New GuiControlTips(HARG)
 		TT.SetDelayTimes(500, 3000, -1)
 		Loop, 3
 			TT.Attach(RC[A_Index].Hwnd, "Press the right`nmouse button`nto copy the text.", True)
+	;-: --------------------------------------
 	;-: Show the gui
+	;-: --------------------------------------
 		Gui, ARG: Show, AutoSize xCenter yCenter Hide, , AHK-Rare_TheGui
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
 		{
@@ -212,13 +236,15 @@
 		}
 		else 
 			Gui, ARG: Show,, , AHK-Rare_TheGui
+	;-: --------------------------------------
 	;-: Resizing now
+	;-: --------------------------------------
 		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 1, % A_GuiHeight -1
 		gosub ARGGuiSize
 		WinSet, Redraw,, % "ahk_id " hArg
 		OnMessage(0x200, "OnMouseHover")
-		
-		SetTimer, StatsShow, -500
+		OnMessage(0x03, "ChangeStats")
+		SetTimer, ShowStats, -500
 
 ;}
 
@@ -366,7 +392,7 @@ ARGGuiSize:                      	;{
 	GuiControl, ARG: Move, % RC[2].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
 	GuiControl, ARG: Move, % RC[3].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
 	Critical, Off
-	SetTimer, StatsShow, -200
+	SetTimer, ShowStats, -200
 	
 return ;}
 ;--------------------------------------------------------------------------------------------------------------
@@ -375,17 +401,24 @@ ARGEscape:
 
 	Gui, Arg: Submit, NoHide
 	win := GetWindowInfo(hARG)
-	IniWrite, % SearchAlgo, % A_ScriptDir "\" A_ScriptName, Properties, SearchMode
-	IniWrite, % wx "|" wy "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\" A_ScriptName, Properties, GuiOptions
+	IniWrite, % SearchAlgo, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, SearchMode
+	IniWrite, % win.WindowX "|" win.WindowY "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, GuiOptions
 	
 ExitApp ;}
 ;--------------------------------------------------------------------------------------------------------------
-StatsShow:                       	;{
+ShowStats:                       	;{
 
 	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
 	GuiControl, ARG:, Stats, % "x" wx "  y" wy "  w" ww "  h" wh
 	
-return ;}
+return
+ChangeStats() {
+	
+	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
+	GuiControl, ARG:, Stats, % "x" wx "  y" wy "  w" ww "  h" wh
+	
+}
+;}
 ;--------------------------------------------------------------------------------------------------------------
 CopyTextToClipboard:     	;{
 
@@ -1019,15 +1052,6 @@ TheEnd(ExitReason, ExitCode) {
 
 ;}
 
-
-/*		INI SECTION
-[Properties]
-SearchMode=RegEx
-GuiOptions=1348|411|1908|1412
-GuiOptions1= 4072|205|2003|1761
-
-
-*/
 
 
 
