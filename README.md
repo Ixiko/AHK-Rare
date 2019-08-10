@@ -37,10 +37,10 @@ There are only a few new functions this time, as I have created a script (alpha 
 
 | Nr                | **FUNCTION**                  | **DESCRIPTION**                                              |
 | :---------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 01 | **GetProcessMemoryInfo()** | get informations about memory consumption of a process |
-| 02 | **SetTimerEx()** | Similar to SetTimer, but calls a function, optionally with one or more parameters |
-| 03 | **get_png_image_info()** | Getting PNG image info |
-| 04 | **RapidHotkey()** | Using this function you can send keystrokes or launch a Label by pressing a key several times. |
+| 01 | **GetProcessMemoryInfo()**	| get informations about memory consumption of a process |
+| 02 | **SetTimerEx()**                   	| Similar to SetTimer, but calls a function, optionally with one or more parameters |
+| 03 | **get_png_image_info()**     	| Getting PNG image info |
+| 04 | **RapidHotkey()**                 	| Using this function you can send keystrokes or launch a Label by pressing a key several times. |
 | 05 | **hk()** | Disable all keyboard buttons |
 | 06 | **ScriptExist()** | true oder false if script is running or not |
 | 07 | **GetStartupWindowState()** | to check, if script exe was launched by windows’s shortcut with MAXIMIZE |
