@@ -240,7 +240,8 @@
 	;-: --------------------------------------
 	;-: Resizing now
 	;-: --------------------------------------
-		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 1, % A_GuiHeight -1
+		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 1, % A_GuiHeight - 1
+		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth + 1, % A_GuiHeight + 1
 		gosub ARGGuiSize
 		WinSet, Redraw,, % "ahk_id " hArg
 		OnMessage(0x200, "OnMouseHover")

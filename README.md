@@ -22,14 +22,17 @@ Some of the collected function seems to be multiple in this collection, because 
 
 There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.
 
-| **Nr** | FUNCTION                       | DESCRIPTION                                                  |
-| :----: | ------------------------------ | ------------------------------------------------------------ |
-|   01   | **GetClassNN()**               | missing subfunction of FindChildWindow                       |
-|   02   | **GetClassNN_EnumChildProc()** | missing subfunction of FindChildWindow                       |
-|   03   | **ScaleToFit()**               | returns the dimensions of the scaled source rectangle that fits within the destination rectangle |
-|   04   | **gcd()**                      | MCode GCD - Find the greatest common divisor (GCD) of two numbers |
-|   05   | **LVM_CalculateSize()**        | calculate the width and height required to display a given number of rows of a ListView control |
-|   06   | **LV_RemoveSelBorder()**       | to remove the listview’s selection border                    |
+| **Nr** | FUNCTION                         | DESCRIPTION                                                  |
+| :----: | -------------------------------- | ------------------------------------------------------------ |
+|   01   | **GetClassNN()**                 | missing subfunction of FindChildWindow                       |
+|   02   | **GetClassNN_EnumChildProc()**   | missing subfunction of FindChildWindow                       |
+|   03   | **ScaleToFit()**                 | returns the dimensions of the scaled source rectangle that fits within the destination rectangle |
+|   04   | **gcd()**                        | MCode GCD - Find the greatest common divisor (GCD) of two numbers |
+|   05   | **LVM_CalculateSize()**          | calculate the width and height required to display a given number of rows of a ListView control |
+|   06   | **LV_RemoveSelBorder()**         | to remove the listview’s selection border                    |
+|   07   | **LockCursorToPrimaryMonitor()** | prevents the cursor from leaving the primary monitor         |
+|   08   | **DisableFadeEffect()**          | Disabling fade effect on gui animations                      |
+|   09   | **RestartNetwork()**             | Restart “Local area connection” without admin privileges     |
 
 
 

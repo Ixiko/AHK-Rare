@@ -15555,7 +15555,7 @@ idObject, idChild, thread, time){
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Internet/Network (24) - 																																baseID: <10>
+{ ;Internet/Network (25) - 																																baseID: <10>
 ;<10.01.000001>
 DownloadFile(url, file, info="") {											            				;--
     static vt
@@ -16405,6 +16405,70 @@ DNSQuery(AddrOrName, ByRef ResultArray := "", ByRef CNAME := "") {		;-- retrieve
    ErrorLevel := Error
    Return ResultArray[1]
 }
+;<10.01.000025>
+RestartNetwork(ConnectionName := "") {                                                   	;-- Restart "Local area connection" without admin privileges
+
+	/*	DESCRIPTION OF FUNCTION: -- RestartNetwork --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Restart "Local area connection" without admin privileges
+	Link              	:	https://gist.github.com/tmplinshi/431bc80dbbbf93715f4bd3fb704d8eec
+	                          	https://www.autohotkey.com/boards/viewtopic.php?f=6&t=65822
+	Author         	:	tmplinshi
+	Date             	:	June 29, 2019
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	--
+	Remark(s)    	:	If ConnectionName is omited, the adapter name that contains "Realtek PCIe" will be selected.
+	Dependencies	:	none
+	KeyWords    	:	Lan, network, COM, connection
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	RestartNetwork("Local area connection")
+	*/
+
+	oShell := ComObjCreate("Shell.Application")
+	oShell.Open("::{7007ACC7-3202-11D1-AAD2-00805FC1270E}") ; Open Network Connections
+	FolderName := oShell.Namespace(0x31).Title
+
+	; Find "Network Connections" window
+	Loop
+	{
+		Sleep, 200
+
+		for oWin in oShell.Windows
+		{
+			if ( oWin.LocationName = FolderName )
+			&& ( oWin.LocationURL = "" )
+			&& ( InStr(oWin.FullName, "\Explorer.EXE") )
+				Break, 2
+		}
+	}
+
+	oFolder := oWin.Document.Folder
+
+	for item in oFolder.Items
+	{
+		devName := oFolder.GetDetailsOf(item, 2)
+
+		if (item.name = ConnectionName)
+		|| (ConnectionName = "" && InStr(devName, "Realtek PCIe"))
+		{
+			if InStr(item.Verbs.Item(0).Name, "&B")
+			{
+				item.InvokeVerb("disable")
+				Sleep, 1000
+			}
+
+			item.InvokeVerb("enable")
+			break
+		}
+	}
+	
+	oWin.Quit
+} ;</10.01.000025>
 
 
 } 
@@ -16414,7 +16478,7 @@ DNSQuery(AddrOrName, ByRef ResultArray := "", ByRef CNAME := "") {		;-- retrieve
 ;|   getTextById()                            	|   getHtmlByTagName()              	|   getTextByTagName()               	|   DNS_QueryName()                  	|
 ;|   CreateGist()	                            	|   GetAllResponseHeaders()	        	|   NetStat()                                  	|   ExtractTableData()                   	|
 ;|   IsConnected()                          	|   HostToIp()                                	|   LocalIps()                                  	|   GetAdaptersInfo()                     	|
-;|   DNSQuery()                            	|
+;|   DNSQuery()                            	|   RestartNetwork(25)                  	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -20363,7 +20427,7 @@ AddToolTip(hControl,p_Text) {																							;-- this is a function from 
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;System functions/Binary handling (60) -  																										baseID: <16>
+{ ;System functions/Binary handling (61) -  																										baseID: <16>
 ;<16.01.000001>
 CreateNamedPipe(Name, OpenMode=3, PipeMode=0, MaxInstances=255) {          	;-- creates an instance of a named pipe and returns a handle for subsequent pipe operations
     return DllCall("CreateNamedPipe","str","\\.\pipe\" Name,"uint",OpenMode
@@ -22404,6 +22468,40 @@ Timer_Stop(timer) {
     timer.next_run := 0
 }
 ;} ;</16.01.00060>
+;<16.01.000061>
+DisableFadeEffect() {                                                                                                   	;-- Disabling fade effect on gui animations
+	; SPI_GETCLIENTAREAANIMATION = 0x1042
+	/*	DESCRIPTION OF FUNCTION: -- DisableFadeEffect --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Disabling fade effect on gui animations
+	Link              	:	https://gist.github.com/tmplinshi/70a8f7879d94b20a42a9d94ca12c1a82
+	                         	https://www.autohotkey.com/boards/viewtopic.php?t=27743
+	Author         	:	tmplinshi
+	Date             	:	February 04, 2017
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	--
+	Remark(s)    	:	--
+	Dependencies	:	none
+	KeyWords    	:	gui
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	
+	*/
+	DllCall("SystemParametersInfo", "UInt", 0x1042, "UInt", 0, "UInt*", isEnabled, "UInt", 0)
+
+	if isEnabled {
+		; SPI_SETCLIENTAREAANIMATION = 0x1043
+		DllCall("SystemParametersInfo", "UInt", 0x1043, "UInt", 0, "UInt", 0, "UInt", 0)
+		Progress, 10:P100 Hide
+		Progress, 10:Off
+		DllCall("SystemParametersInfo", "UInt", 0x1043, "UInt", 0, "UInt", 1, "UInt", 0)
+	}
+} ;</16.01.000061>
+
 
 }
 ;|   CreateNamedPipe()                 	|   RestoreCursors()                       	|   SetSystemCursor()                    	|   SystemCursor()                         	|
@@ -22421,6 +22519,7 @@ Timer_Stop(timer) {
 ;|   GlobalLock()                            	|   LocalFree()                                	|   CreateStreamOnHGlobal()       	|   CoTaskMemFree()                     	|
 ;|   CoTaskMemRealloc()               	|   VarAdjustCapacity()                 	|   DllListExports()                         	|   RtlUlongByteSwap64() x2         	|
 ;|   PIDfromAnyID(56)                   	|   processPriority(57)                    	|   GetProcessMemoryInfo(58)       	|   SetTimerEx(59)                          	|
+;|   DisableFadeEffect(61)              	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -23396,7 +23495,7 @@ gcd(a, b) {                                                                    	
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Other (8)  -- various not categorized functions --																							baseID: <23>
+{ ;Other (9)  -- various not categorized functions --																							baseID: <23>
 ;<23.01.000001>
 GetCommState(ComPort) {																							;-- this function retrieves the configuration settings of a given serial port
 
@@ -23953,10 +24052,59 @@ ScaleToFit(width_max, height_max, width_actual, height_actual) {                
     return {width:new_width, height:height_max, x:(width_max-new_width)//2, y:0}
   }
 } ;</23.01.00008>
+;<23.01.000009>
+LockCursorToPrimaryMonitor(lock = true) {                                                           	;-- prevents the cursor from leaving the primary monitor
+
+	/*	DESCRIPTION OF FUNCTION: -- LockCursorToPrimaryMonitor --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	prevents the cursor from leaving the primary monitor
+	Link              	:	https://gist.github.com/tmplinshi/889a14874ac943a2fe8245338feaca37
+	Author         	:	tmplinshi
+	Date             	:	--	
+	AHK-Version	:	AHK_L	
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	--
+	Remark(s)    	:	--
+	Dependencies	:	none
+	KeyWords    	:	cursor
+	-------------------------------------------------------------------------------------------------------------------
+	<	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	; Holding down left Control key to lock, release to unlock.
+	~LControl::
+		LockCursorToPrimaryMonitor(true)
+		KeyWait, LControl
+		LockCursorToPrimaryMonitor(false)
+	return
+	*/
+
+	; Get mouse position on screen
+	VarSetCapacity( pt, 8, 0 )
+	DllCall("GetCursorPos", "Ptr", &pt)
+	x := NumGet(pt, 0, "Int")
+	
+	; If the cursor already on the second monitor, then leave it there.
+	if (x > A_ScreenWidth) {
+		return
+	}
+
+	; ClipCursor -- https://msdn.microsoft.com/en-us/library/windows/desktop/ms648383(v=vs.85).aspx
+	if (lock) {
+		VarSetCapacity(rect, 16, 0)
+		NumPut(A_ScreenWidth, rect, 8)
+		NumPut(A_ScreenHeight, rect, 12)
+		DllCall("ClipCursor", "ptr", &rect)
+	} else {
+		DllCall("ClipCursor", "ptr", 0)
+	}
+} ;</23.01.000009>
 
 } 
 ;|   pauseSuspendScript(01)             	|   GetCommState(02)                     	|   RtlGetVersion(03)                        	|   PostMessageUnderMouse(04)     	|
 ;|   WM_SETCURSOR(05)                 	|   FoxitInvoke(06)                           	|   MoveMouse_Spiral(07)             	|   ScaleToFit(08)                           	|
+;|   LockCursorToPrimaryMonitor(9)	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
