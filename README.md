@@ -10,10 +10,6 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-*Last modification date*: ***August 9, 2019***, *Changes are below!* *At the end*: complete list of all functions. The functions are sorted by topic as shown in the picture. *Remark*: I didn’t tested all functions and sorting is very difficult.
-
-------
-
 ## AHK-Rare_the GUI ++ SEARCH COMFORTABLE ++![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
 
 
