@@ -1,5 +1,5 @@
 ﻿; =====================================================
-; 						*** AHK-RARE_TheGUI ***      	   V0.66 alpha August 09, 2019 by Ixiko
+; 						*** AHK-RARE_TheGUI ***      	   V0.68 alpha August 09, 2019 by Ixiko
 ; =====================================================
 ; -------------------------------------------------------------------------------------------
 ; 		MISSING THINGS:
@@ -166,7 +166,6 @@
 	;-: Logo and Backgroundcolouring
 	;-: --------------------------------------
 		Gui, ARG: Add, Progress        	, % "x0 y0   w" (LogoW + 10) " h85 c172842 Disabled vBGColorLogo" , 100
-		;Gui, ARG: Add, Pic               	, % "x12 y10 BackgroundTrans"  	, % A_ScriptDir "\assets\AHK-Rare-GuiLogo.png" ;(LW//4.37) w" (LW:= 450) " h" (LogoH:= 71) "
 		Gui, ARG: Add, Pic               	, % "x12 y10 BackgroundTrans"  	, % "HBITMAP: " Create_AHKRareGuiLogo_png(true)
 		Gui, ARG: Add, Progress        	, % "x0 y85 w" (LogoW + 10 ) " h2 vDevider" , 100
 		Gui, ARG: Add, Progress        	, % "x" (LW + 7) " y0 w2 h85" , 100
@@ -229,21 +228,14 @@
 	;-: --------------------------------------
 	;-: Show the gui
 	;-: --------------------------------------
-		Gui, ARG: Show, AutoSize xCenter yCenter Hide, , AHK-Rare_TheGui
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
 		{
 			DPIFactor:= screenDims().DPI / 96
 			Gui, ARG: Show, % "x" GuiOptions.1 " y" GuiOptions.2 " w" (GuiOptions.3 // DPIFactor) " h" (GuiOptions.4 // DPIFactor), AHK-Rare_TheGui
 		}
 		else 
-			Gui, ARG: Show,, , AHK-Rare_TheGui
-	;-: --------------------------------------
-	;-: Resizing now
-	;-: --------------------------------------
-		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth - 1, % A_GuiHeight - 1
-		WinMove, % "ahk_id " hARG,,,, % A_GuiWidth + 1, % A_GuiHeight + 1
-		gosub ARGGuiSize
-		WinSet, Redraw,, % "ahk_id " hArg
+			Gui, ARG: Show, AutoSize xCenter yCenter, AHK-Rare_TheGui
+
 		OnMessage(0x200, "OnMouseHover")
 		OnMessage(0x03, "ChangeStats")
 		SetTimer, ShowStats, -500
