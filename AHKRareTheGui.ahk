@@ -1,5 +1,5 @@
 ﻿; =====================================================
-; 						*** AHK-RARE_TheGUI ***      	   V0.68 alpha August 09, 2019 by Ixiko
+; 						*** AHK-RARE_TheGUI ***      	   V0.69 alpha August 21, 2019 by Ixiko
 ; =====================================================
 ; -------------------------------------------------------------------------------------------
 ; 		MISSING THINGS:
@@ -418,8 +418,8 @@ CopyTextToClipboard:     	;{
 
 	toCopy := ""
 	MouseGetPos, mx, my,, hControlOver, 2
-	
-	If Instr(hControlOver, hTabs)
+	RichEditControls:= RC.1 "," RC.2 "," RC.3
+	If Instr(hControlOver, hTabs) || hControlOver in %RichtEditControls% 
 	{
 			Loop, Parse, AhkRare, `n, `r
 			{

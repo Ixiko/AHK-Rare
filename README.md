@@ -14,7 +14,7 @@ Some of the collected function seems to be multiple in this collection, because 
 
 
 
-## ![Gem](assets/GemSmall.png)[August 14, 2019]: +9 =  642
+## ![Gem](assets/GemSmall.png)[August 21, 2019]: +9 =  642
 
 There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.
 

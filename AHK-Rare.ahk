@@ -2436,27 +2436,27 @@ DrawFrameAroundControl(ControlID, WindowUniqueID, frame_t) {                  	;
 ;<05.01.000017>
 Highlight(reg, delay=1500) {                                                                                	;-- Show a red rectangle outline to highlight specified region, it's useful to debug
 
-    { ;-------------------------------------------------------------------------------
-    ;
-    ; Function: Highlight
-    ; Description:
-    ;		Show a red rectangle outline to highlight specified region, it's useful to debug
-    ; Syntax: Highlight(region [, delay = 1500])
-    ; Parameters:
-    ;		reg - The region for highlight
-    ;		delay - Show time (milliseconds)
-    ; Return Value:
-    ;		 Real string without variable(s) - "this string has real variable"
-    ; Related:
-    ;		SendSpiCall, SendWapiCall
-    ; Remarks:
-    ;		#Include, Gdip.ahk
-    ; Example:
-    ;		Highlight("100,200,300,400")
-    ;		Highlight("100,200,300,400", 1000)
-    ;
-    ;-------------------------------------------------------------------------------
-    } 
+	/*	DESCRIPTION OF FUNCTION: -- Highlight --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Show a red rectangle outline to highlight specified region, it's useful to debug
+	Link              	:	-
+	Author         	:	-
+	Date             	:	-
+	AHK-Version	:	AHK_L
+	License         	:	-
+	Syntax          	:	Highlight(region [, delay = 1500])
+	Parameter(s)	:	reg    	- The region for highlight
+	                        	delay	- Show time (milliseconds)
+	Return value	:	Real string without variable(s) - "this string has real variable"
+	Remark(s)    	:	SendSpiCall, SendWapiCall
+	Dependencies	:	Gdip.ahk
+	KeyWords    	:	Gdip, Rectangle, Gui
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	Highlight("100,200,300,400")
+    Highlight("100,200,300,400", 1000)
+	*/
 
     global @reg_global
 ; Start gdi+
