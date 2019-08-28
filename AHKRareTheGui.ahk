@@ -483,7 +483,7 @@ RareSearch(LVExpression, ARData, file, mode:="RegEx") {
 return results
 }
 
-RarefuncIndexer(file) {												                     			;-- list all functions inside AHK-RARE script 
+RarefuncIndexer(file) {												                          			;-- list all functions inside AHK-RARE script 
 	
 	ARData:= Object(), ARData.DescriptionKeys := Object()
 	s:=fI:=descFlag:=descKeyFlag:=descKeyFlagO :=0
@@ -605,7 +605,7 @@ RarefuncIndexer(file) {												                     			;-- list all function
 return ARData
 }
 
-ControlIsFocused(ControlID) { ;-- true or false if specified gui control is active or not
+ControlIsFocused(ControlID) {                                                                 	;-- true or false if specified gui control is active or not
 
 	GuiControlGet, FControlID, ARG:FocusV
 	If ControlID = FControlID
@@ -1033,6 +1033,84 @@ GetWindowInfo(hWnd) {                                                      					
     Return wi
 }
 
+bcrypt_sha512(string) {                                                                             	;-- used to compare versions of files
+    static BCRYPT_SHA512_ALGORITHM := "SHA512"
+    static BCRYPT_OBJECT_LENGTH    := "ObjectLength"
+    static BCRYPT_HASH_LENGTH      := "HashDigestLength"
+
+    if !(hBCRYPT := DllCall("LoadLibrary", "str", "bcrypt.dll", "ptr"))
+        throw Exception("Failed to load bcrypt.dll", -1)
+
+    if (NT_STATUS := DllCall("bcrypt\BCryptOpenAlgorithmProvider", "ptr*", hAlgo, "ptr", &BCRYPT_SHA512_ALGORITHM, "ptr", 0, "uint", 0) != 0)
+        throw Exception("BCryptOpenAlgorithmProvider: " NT_STATUS, -1)
+
+    if (NT_STATUS := DllCall("bcrypt\BCryptGetProperty", "ptr", hAlgo, "ptr", &BCRYPT_OBJECT_LENGTH, "uint*", cbHashObject, "uint", 4, "uint*", cbResult, "uint", 0) != 0)
+        throw Exception("BCryptGetProperty: " NT_STATUS, -1)
+
+    if (NT_STATUS := DllCall("bcrypt\BCryptGetProperty", "ptr", hAlgo, "ptr", &BCRYPT_HASH_LENGTH, "uint*", cbHash, "uint", 4, "uint*", cbResult, "uint", 0) != 0)
+        throw Exception("BCryptGetProperty: " NT_STATUS, -1)
+
+    VarSetCapacity(pbHashObject, cbHashObject, 0)
+    if (NT_STATUS := DllCall("bcrypt\BCryptCreateHash", "ptr", hAlgo, "ptr*", hHash, "ptr", &pbHashObject, "uint", cbHashObject, "ptr", 0, "uint", 0, "uint", 0) != 0)
+        throw Exception("BCryptCreateHash: " NT_STATUS, -1)
+
+    VarSetCapacity(pbInput, StrPut(string, "UTF-8"), 0) && cbInput := StrPut(string, &pbInput, "UTF-8") - 1
+    if (NT_STATUS := DllCall("bcrypt\BCryptHashData", "ptr", hHash, "ptr", &pbInput, "uint", cbInput, "uint", 0) != 0)
+        throw Exception("BCryptHashData: " NT_STATUS, -1)
+
+    VarSetCapacity(pbHash, cbHash, 0)
+    if (NT_STATUS := DllCall("bcrypt\BCryptFinishHash", "ptr", hHash, "ptr", &pbHash, "uint", cbHash, "uint", 0) != 0)
+        throw Exception("BCryptFinishHash: " NT_STATUS, -1)
+
+    loop % cbHash
+        hash .= Format("{:02x}", NumGet(pbHash, A_Index - 1, "uchar"))
+
+    DllCall("bcrypt\BCryptDestroyHash", "ptr", hHash)
+    DllCall("bcrypt\BCryptCloseAlgorithmProvider", "ptr", hAlgo, "uint", 0)
+    DllCall("FreeLibrary", "ptr", hBCRYPT)
+
+    return hash
+}
+
+UpdateAHKRare() {
+
+	hash := []
+	FileRead, file, % A_ScriptDir "\..\AHK-Rare.ahk"
+	hash[1]:= bcrypt_sha512(file)
+	FileRead, file, % A_ScriptDir "\..\AHKRareTheGui.ahk"
+	hash[2] := bcrypt_sha512(file)
+	
+	;Download(versions, "")
+}
+
+Download(ByRef Result,URL) {
+ UserAgent := "" ;User agent for the request
+ Headers := "" ;Headers to append to the request
+
+ hModule := DllCall("LoadLibrary","Str","wininet.dll"), hInternet := DllCall("wininet\InternetOpenA","UInt",&UserAgent,"UInt",0,"UInt",0,"UInt",0,"UInt",0), hURL := DllCall("wininet\InternetOpenUrlA","UInt",hInternet,"UInt",&URL,"UInt",&Headers,"UInt",-1,"UInt",0x80000000,"UInt",0)
+ If Not hURL
+ {
+  DllCall("FreeLibrary","UInt",hModule)
+  Return, 0
+ }
+ VarSetCapacity(Buffer,512,0), TotalRead := 0
+ Loop
+ {
+  DllCall("wininet\InternetReadFile","UInt",hURL,"UInt",&Buffer,"UInt",512,"UInt*",ReadAmount)
+  If Not ReadAmount
+   Break
+  Temp1 := DllCall("LocalAlloc","UInt",0,"UInt",ReadAmount), DllCall("RtlMoveMemory","UInt",Temp1,"UInt",&Buffer,"UInt",ReadAmount), BufferList .= Temp1 . "|" . ReadAmount . "`n", TotalRead += ReadAmount
+ }
+ BufferList := SubStr(BufferList,1,-1), TotalRead -= 2, VarSetCapacity(Result,TotalRead,122), pResult := &Result
+ Loop, Parse, BufferList, `n
+ {
+  StringSplit, Temp, A_LoopField, |
+  DllCall("RtlMoveMemory","UInt",pResult,"UInt",Temp1,"UInt",Temp2), DllCall("LocalFree","UInt",Temp1), pResult += Temp2
+ }
+ DllCall("wininet\InternetCloseHandle","UInt",hURL), DllCall("wininet\InternetCloseHandle","UInt",hInternet), DllCall("FreeLibrary","UInt",hModule)
+ Return, TotalRead
+}
+
 TheEnd(ExitReason, ExitCode) {
 	;OnExit("")
 	ExitApp
@@ -1116,6 +1194,7 @@ Return hBitmap
 }
 
 #Include %A_ScriptDir%\lib\RichCode.ahk
+#Include %A_ScriptDir%\lib\class_bcrypt.ahk
 
 ;}
 

@@ -1,6 +1,6 @@
 ﻿;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;                                                                	Collection of rare or very useful functions
-;                                                             	collected by IXIKO =>    last change: 07/31/2019
+;                                                             	collected by IXIKO =>    last change: 21.08.2019
 ;                                    	for description have a look at README.md (it can be found in the same folder)
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1691,7 +1691,7 @@ GetStartupWindowState() {                                                       
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;graphic (61) - 																																				baseID: <05>
+{ ;graphic (62) - 																																				baseID: <05>
 ;<05.01.000001>
 LoadPicture(aFilespec, aWidth:=0, aHeight:=0, ByRef aImageType:="",       		;-- Loads a picture and returns an HBITMAP or HICON to the caller
 aIconNumber:=0, aUseGDIPlusIfAvailable:=1) {
@@ -14670,7 +14670,7 @@ SelectFolder() {																											;-- the Common File Dialog lets you a
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Font things (12) - 																																			baseID: <08>
+{ ;Font things (13) - 																																			baseID: <08>
 ;<08.01.000001>
 CreateFont(pFont="") {                                                                                                 	;-- creates font in memory which can be used with any API function accepting font handles
 	
@@ -15089,11 +15089,150 @@ MeasureText(Str, FontOpts = "", FontName = "") {                                
 	Size.H := NumGet(RECT, 12, "Int")
 	Return Size
 } ;</08.01.00012>
+;<08.01.000013>
+GetFontNamesFromFile(FontFilePath) {                                                                      	;-- get's the name of a font from a .ttf-FontFile 
+
+   /*	DESCRIPTION OF FUNCTION: -- GetFontNamesFromFile --
+   -------------------------------------------------------------------------------------------------------------------
+   Description   	:	get's the name of a font from a .ttf-FontFile
+   Link               	:	https://www.autohotkey.com/boards/viewtopic.php?p=85114#p85114
+   Author          	:	just me
+   Date              	:	May 07, 2016
+   AHK-Version 	:	AHK_L
+   License          	:	--
+   Syntax           	:	--
+   Parameter(s) 	:	--
+   Return value 	:	--
+   Remark(s)     	:	only tested for .ttf files as yet
+								www.microsoft.com/en-us/Typography/SpecificationsOverview.aspx
+								.otf -> www.microsoft.com/typography/otspec/otff.htm
+								Platform ID: 0: Apple Unicode, 1: Macintosh, 2: ISO, 3: Microsoft}
+								Name ID: 1: family name, 2: subfamily name (style), 4: full name}
+   Dependencies	:	ReadUShortBE(), ReadULongBE(), ReadUTF16BE
+   KeyWords     	:	font
+   -------------------------------------------------------------------------------------------------------------------
+   |	EXAMPLE(s)
+   -------------------------------------------------------------------------------------------------------------------
+   #NoEnv
+	Gui, Add, ListView, w800 r30, File|Family|Style|FullName
+	Loop, Files, %A_WinDir%\Fonts\*.ttf
+	{
+	   If !IsObject(FontName := GetFontNamesFromFile(A_LoopFileLongPath))
+		  MsgBox, 16, Error!, Couldn't retrieve font names form file %A_LoopFileName%!
+	   Else
+		  LV_Add("", A_LoopFileName, FontName.Family, FontName.Style, FontName.FullName)
+	}
+	Loop, 4
+	   LV_ModifyCol(A_Index, "AutoHdr")
+	Gui, Show, , % "Font names from files (" . LV_GetCount() . ")"
+	Return
+	GuiCLose:
+	ExitApp
+   */
+   
+   If !(Font := FileOpen(FontFilePath, "r")) {
+      MSgBox, 16, %A_ThisFunc%, Error: %A_LastError%`n`nCould not open the file`n%FontFilePath%!
+      Return ""
+   }
+   ; Get the number of tables ------------------------------------------------------------------------------------------------------
+   Font.Pos += 4
+   NumTables := ReadUShortBE(Font)
+   ; Search for the 'name' table ---------------------------------------------------------------------------------------------------
+   NameTableOffset := 0
+   Font.Pos := 12 ; start of table entries
+   NextTableEntry := Font.Pos
+   Loop, %NumTables% {
+      Font.Pos := NextTableEntry
+      NextTableEntry += 16 ; size of a table entry
+      Font.RawRead(TableName, 4)
+      Name := StrGet(&TableName, 4, "CP0")
+      If (Name <> "name")
+         Continue
+      Font.Pos += 4 ; skip the checkSum field
+      NameTableOffset := ReadULongBE(Font)
+   } Until (NameTableOffset <> 0)
+   If (NameTableOffset = 0) { ; should not happen because the 'name' table is required
+      MsgBox, 16, %A_ThisFunc%, Error:`n`nDidn't find the 'name' table entry!
+      Return ""
+   }
+   ; Search for the font family name in the 'name' table entries -------------------------------------------------------------------
+   Font.Pos := NameTableOffset
+   If (ReadUShortBE(Font) <> 0) { ; format selector must be 0
+      MsgBox, 16, %A_ThisFunc%, Error:`n`nInvalid 'name' table!
+      Return ""
+   }
+   NumOfEntries := ReadUShortBE(Font)
+   StorageOffset := ReadUShortBE(Font)
+   Names := []
+   LCSub := []
+   LCFull := []
+   LCID := 0
+   SysLanguage := "0x" . A_Language
+   NextTableEntry := Font.pos
+   Loop, %NumOfEntries% {
+      Font.Pos := NextTableEntry
+      NextTableEntry += 12 ; length of a name table entry
+      PlatformID := ReadUShortBE(Font)
+      If (PlatformID <> 3)
+         Continue
+      EncodingID := ReadUShortBE(Font)
+      LanguageID := ReadUShortBE(Font)
+      NameID := ReadUShortBE(Font)
+      If NameID In 1,2,4
+      {
+         StrLength := ReadUShortBE(Font)
+         If (StrLength = 0)
+            Continue
+         StrOffset := ReadUShortBE(Font)
+         Font.Pos := NameTableOffset + StorageOffset + StrOffset
+         Name := ReadUTF16BE(Font, StrLength // 2)
+         If (NameID = 1) && ((LanguageID = SysLanguage) || (LanguageID = 1033)) {
+            LCID := LanguageID
+            Names["Family"] := Name
+         }
+         Else If (NameID = 4)
+            LCFull[LanguageID] := Name
+         Else
+            LCSub[LanguageID] := Name
+      }
+   }
+   ; Done --------------------------------------------------------------------------------------------------------------------------
+   Font.Close()
+   If (LCID) {
+      If (Name := LCSub[SysLanguage])
+         Names["Style"] := Name
+      Else
+         Names["Style"] := LCSub[LCID]
+      If (Name := LCFull[SysLanguage])
+         Names["FullName"] := Name
+      Else
+         Names["FullName"] := LCFull[LCID]
+   }
+   Return Names.HasKey("Family") ? Names : ""
+}
+; Auxiliary functions used because .ttf files are encoded in Motorola (big endian) format 
+{
+ReadUShortBE(Handle) {
+   Return (Handle.ReadUChar() << 8) | Handle.ReadUchar()
+}
+ReadULongBE(Handle) {
+   Return (Handle.ReadUChar() << 24) | (Handle.ReadUChar() << 16) | (Handle.ReadUChar() << 8) | Handle.ReadUChar()
+}
+ReadUTF16BE(Handle, Characters) { ; Characters - the maximum number of characters to read
+   Bytes := Characters * 2
+   VarSetCapacity(UTF16, Bytes, 0)
+   Addr := &UTF16
+   MaxAddr := Addr + Bytes
+   While (Addr < MaxAddr)
+      Addr := NumPut(ReadUShortBE(Handle), Addr + 0, "UShort")
+   Return StrGet(&UTF16, Characters, "UTF-16")
+} ;</08.01.000012> 
+}
 
 } ;<\08>
 ;|   CreateFont()                            	|   GetHFONT()                             	|   MsgBoxFont()                           	|   GetFontProperties()                  	|
 ;|   FontEnum()                             	|   GetFontTextDimension()          	|   FontClone()                              	|   GuiDefaultFont()                      	|
-;|   StrGetDimAvgCharWidth()      	|   CreateFont()                             	|   MeasureText(12)                        	|
+;|   StrGetDimAvgCharWidth()      	|   CreateFont()                             	|   MeasureText(12)                        	|   GetFontNamesFromFile(13)      	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -15555,7 +15694,7 @@ idObject, idChild, thread, time){
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Internet/Network (25) - 																																baseID: <10>
+{ ;Internet/Network (26) - 																																baseID: <10>
 ;<10.01.000001>
 DownloadFile(url, file, info="") {											            				;--
     static vt
@@ -16469,7 +16608,97 @@ RestartNetwork(ConnectionName := "") {                                          
 	
 	oWin.Quit
 } ;</10.01.000025>
+;<10.01.000026>                                                                                        		
+GetAllResponseHeaders(Url, RequestHeaders := ""                                    	;-- Returns a string that contains all response headers
+, NO_AUTO_REDIRECT := false, NO_COOKIES := false) {
+	
+	/*	DESCRIPTION OF FUNCTION: --  --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Returns a string that contains all response headers
+								The response headers contain information about the server and the retrieved content 
+								('Content-Length', 'Content-Type', ...). To get the value of a specific response header, 
+								use the getResponseHeader method.
+	Link              	:	https://gist.github.com/tmplinshi/ccd11fae4953a27b9d04db6ef10bc3de
+	Author         	:	tmplinshi	
+	Date             	:	23 Dec 2016
+	AHK-Version	:	AHK_L	
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	--
+	Remark(s)    	:	--
+	Dependencies	:	none
+	KeyWords    	:	internet, html
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	
+	*/
+	
+	static INTERNET_OPEN_TYPE_DIRECT := 1
+	     , INTERNET_SERVICE_HTTP := 3
+	     , HTTP_QUERY_RAW_HEADERS_CRLF := 22
+	     , CP_UTF8 := 65001
+	     , Default_UserAgent := "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"
 
+	hModule := DllCall("LoadLibrary", "str", "wininet.dll", "ptr")
+
+	if !hInternet := DllCall("wininet\InternetOpen", "ptr", &Default_UserAgent, "uint", INTERNET_OPEN_TYPE_DIRECT
+		, "str", "", "str", "", "uint", 0)
+		return
+	; -----------------------------------------------------------------------------------
+	if !InStr(Url, "://")
+		Url := "http://" Trim(Url)
+
+	regex := "(?P<protocol>\w+)://((?P<user>\w+):(?P<pwd>\w+)@)?(?P<host>[\w.]+)(:(?P<port>\d+))?(?P<path>.*)"
+	RegExMatch(Url, regex, v_)
+
+	if (v_protocol = "ftp") {
+		throw, "ftp is not supported."
+	}
+	if (v_port = "") {
+		v_port := (v_protocol = "https") ? 443 : 80
+	}
+	; -----------------------------------------------------------------------------------
+	Internet_Flags := 0
+	                | 0x400000   ; INTERNET_FLAG_KEEP_CONNECTION
+	                | 0x80000000 ; INTERNET_FLAG_RELOAD
+	                | 0x20000000 ; INTERNET_FLAG_NO_CACHE_WRITE
+	if (v_protocol = "https") {
+		Internet_Flags |= 0x1000  ; INTERNET_FLAG_IGNORE_CERT_CN_INVALID
+		               | 0x2000   ; INTERNET_FLAG_IGNORE_CERT_DATE_INVALID
+		               | 0x800000 ; INTERNET_FLAG_SECURE ; Technically, this is redundant for https
+	}
+	if NO_AUTO_REDIRECT
+		Internet_Flags |= 0x00200000 ; INTERNET_FLAG_NO_AUTO_REDIRECT
+	if NO_COOKIES
+		Internet_Flags |= 0x00080000 ; INTERNET_FLAG_NO_COOKIES
+	; -----------------------------------------------------------------------------------
+	hConnect := DllCall("wininet\InternetConnect", "ptr", hInternet, "ptr", &v_host, "uint", v_port
+		, "ptr", &v_user, "ptr", &v_pwd, "uint", INTERNET_SERVICE_HTTP, "uint", Internet_Flags, "uint", 0, "ptr")
+
+	hRequest := DllCall("wininet\HttpOpenRequest", "ptr", hConnect, "str", "HEAD", "ptr", &v_path
+		, "str", "HTTP/1.1", "ptr", 0, "ptr", 0, "uint", Internet_Flags, "ptr", 0, "ptr")
+
+	nRet := DllCall("wininet\HttpSendRequest", "ptr", hRequest, "ptr", &RequestHeaders, "int", -1
+		, "ptr", 0, "uint", 0)
+
+	Loop, 2 {
+		DllCall("wininet\HttpQueryInfoA", "ptr", hRequest, "uint", HTTP_QUERY_RAW_HEADERS_CRLF
+			, "ptr", &pBuffer, "uint*", bufferLen, "uint", 0)
+		if (A_Index = 1)
+			VarSetCapacity(pBuffer, bufferLen, 0)
+	}
+	; -----------------------------------------------------------------------------------
+	output := StrGet(&pBuffer, "UTF-8")
+	; -----------------------------------------------------------------------------------
+	DllCall("wininet\InternetCloseHandle", "ptr", hRequest)
+	DllCall("wininet\InternetCloseHandle", "ptr", hConnect)
+	DllCall("wininet\InternetCloseHandle", "ptr", hInternet)
+	DllCall("FreeLibrary", "Ptr", hModule)
+
+	return output
+} ;</10.01.000026>         
 
 } 
 ;|   DownloadFile()                        	|   NewLinkMsg()                          	|   TimeGap()                                	|   GetSourceURL()                        	|
@@ -16478,7 +16707,7 @@ RestartNetwork(ConnectionName := "") {                                          
 ;|   getTextById()                            	|   getHtmlByTagName()              	|   getTextByTagName()               	|   DNS_QueryName()                  	|
 ;|   CreateGist()	                            	|   GetAllResponseHeaders()	        	|   NetStat()                                  	|   ExtractTableData()                   	|
 ;|   IsConnected()                          	|   HostToIp()                                	|   LocalIps()                                  	|   GetAdaptersInfo()                     	|
-;|   DNSQuery()                            	|   RestartNetwork(25)                  	|
+;|   DNSQuery()                            	|   RestartNetwork(25)                  	|   GetAllResponseHeaders(26)      	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -17225,7 +17454,7 @@ Traceback(actual:=false) {                                                      
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;String/Array/Text (50) - 																																baseID: <13>
+{ ;String/Array/Text (51) - 																																baseID: <13>
 ;<Name>String/Array/Text</Name><Description></Description>
 
 ; -----------------------------------------------------------------  #Sort functions#  -------------------------------------------------------------------
@@ -18246,7 +18475,7 @@ WrapText(Text, LineLength) {                                                    
 }
 
 ; ----------------------------------------------------------------------  #others#  ---------------------------------------------------------------------- 
-{ ;<13.05> (12)
+{ ;<13.05> (13)
 	
 ;<13.05.000001>
 ExtractFuncTOuserAHK(data) {                                                     	;-- extract user function and helps to write it to userAhk.api
@@ -18705,6 +18934,166 @@ RandomString(length, special := false) {                                     	;-
 	? Chr(Random(97, 122)) : SubStr("-_?!&:", r := Random(1, 6), 1)
 	return % str
 } ;</13.05.000012>
+;<13.05.000013>
+PrintStr(Str,FontName:="Arial",FontSize:=10,FontOpts:="") {        	;-- Prints the passed string on the default printer
+	
+	/*	DESCRIPTION OF FUNCTION: -- PrintStr --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Prints the passed string on the default printer
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?p=78205#p78205
+	Author         	:	justme, *Lexikos
+	Date             	:	29.03.2016
+	AHK-Version	:	AHK_L
+	License         	:	-
+	Syntax          	:	-
+	Parameter(s)	:	Str            	-  string to print
+                            	FontName 	-  name of the font to be used for printing like the FontName parameter of the 'Gui, Font' command
+												    	Default: Arial
+                               	FontSize 		-  size of the font in points
+                               			             	Default: 10
+                               	FontOpts 	-  other font options like the Options parameter of the 'Gui, Font' command
+                               			            	Default: s10
+	Return value	:	On success: True
+								On failure: False
+								Errorlevel contains one of the following values:
+                        			 1 - the specified font is not available
+                        			 2 - error when calling the PrintDlg API function
+                        			 3 - couldn't retrieve a valid DC for the printer
+                        			 4 - an error occured while trying to print
+	Remark(s)    	:	Based on the code published by Lexikos at autohotkey.com/board/topic/20468-detecting-printer-printing-text/page-2#entry146062
+	Dependencies	:	none
+	KeyWords    	:	Gui, Edit, Print,
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	#NoEnv
+	SetBatchLines -1
+	Lorem =
+	(Join
+	Lorem ipsum dolor sit amet consectetuer nulla vitae et felis nonummy. Tempor quis volutpat risus consectetuer Phasellus et quam
+	 congue nec est. Volutpat Sed Vestibulum ridiculus montes tincidunt ac Pellentesque tempor leo Duis. Amet wisi at pretium et
+	 faucibus semper at Curabitur pretium at. Et Morbi Nullam tincidunt condimentum at nunc egestas Maecenas leo et. Dolor eros montes
+	 In Morbi dignissim consequat lacinia amet ut Duis. Et leo eros.
+	`r`n`r`n
+	Turpis volutpat sodales feugiat odio quis id netus facilisis ac a. Cursus congue dolor urna urna pellentesque tellus nascetur
+	 facilisis Sed laoreet. Sem lacus porta id wisi consectetuer id Donec elit at.
+	`r`n`r`n
+	Cursus vel non feugiat at Aenean interdum nec tellus Ut Donec. Tortor Aliquam sit dui Vivamus nec dui dapibus metus amet feugiat.
+	 Ac ridiculus Donec ipsum et et Curabitur leo mollis sagittis vitae. Facilisis Nam nec tellus velit tincidunt dapibus ac adipiscing.
+	`r`n`r`n
+	Penatibus In netus tristique egestas tincidunt risus risus malesuada convallis tellus. Facilisi Sed Maecenas ultrices sem auctor
+	 netus scelerisque accumsan ac egestas. Neque vel elit a enim euismod ac vitae tincidunt porttitor laoreet. Interdum urna nibh at
+	 nunc aliquet Fusce hac semper lacinia elit. Tellus tortor Ut sapien interdum orci vel enim sed Nam arcu. Nam id justo mauris nunc
+	 Donec justo id pede Lorem lacinia. Eget parturient turpis Donec consequat tempus lobortis tortor id Suspendisse Nam. Justo amet.
+	)
+	EditText := Lorem
+	Loop, 3
+	   EditText .= "`r`n`r`n" . Lorem
+	; ----------------------------------------------------------------------------------------------------------------------------------
+	Gui, Margin, 10, 10
+	Gui, Font, s10, Arial
+	Gui, Add, Edit, xm ym w600 r20 hwndHED, %EditText%
+	Gui, Add, Button, gPrint vBtnPrint Default, Print
+	GuiControl, Focus, BtnPrint
+	Gui, Show, , Print Edit
+	Return
+	; ----------------------------------------------------------------------------------------------------------------------------------
+	GuiClose:
+	GuiEscape:
+	ExitApp
+	; ----------------------------------------------------------------------------------------------------------------------------------
+	Print:
+	ControlGetText, Str, , ahk_id %HED% ; it's important to use ControlGetText if you read the text from an Edit control
+	If (Str) {
+	   If !PrintStr(Str)
+		  MsgBox, 0, PrintStr, An error occurred!`nErrorLevel = %ErrorLevel%
+	}
+	Return
+	
+	*/
+	
+   Static DISize := A_PtrSize * 5 ; size of DOCINFO structure
+   Static DPSize := 20 ; size of DRAWTEXTPARAMS structure
+   Static LFSize := A_IsUnicode ? 60 : 92 ; size of LOGFONT structure
+   Static PDSize := A_PtrSize = 8 ? (A_PtrSize * 13) + 16 : 66 ; size of PRINTDLG structure
+   Static Margins := 20 ; left, top, right, and bottom margins in millimeters
+   Static DocName := "PrintStr" ; document name
+   ; Get a HFONT handle and the LOGFONT structure for the passed font (lazy method)
+   Gui, PrintStrGUI: Font, %FontOpts% q2 s%FontSize%, %FontName%
+   Gui, PrintStrGUI: Add, Text, hwndHTX, Dummy!
+   HFONT := DllCall("SendMessage", "Ptr", HTX, "UInt", 0x0031, "Ptr", 0, "ptr", 0, "UPtr") ; WM_GETFONT
+   Gui, PrintStrGUI: Destroy
+   VarSetCapacity(LOGFONT, LFSize, 0) ; LOGFONT
+   DllCall("GetObject", "Ptr", HFONT, "Int", LFSize, "Ptr", &LOGFONT)
+   If (FontName <> StrGet(&LOGFONT + 28))
+      Return (ErrorLevel := 1) & 0
+   ; Get a device context of the default printer
+   VarSetCapacity(PRINTDLG, PDSize, 0) ; PRINTDLG
+   NumPut(PDSize, PRINTDLG, 0, "UInt")
+   NumPut(0x0100 | 0x0400, PRINTDLG, A_PtrSize * 5, "UInt")
+   If !(DllCall("Comdlg32.dll\PrintDlg", "Ptr", &PRINTDLG, "Int"))
+      Return (ErrorLevel := 2) & 0
+   DllCall("GlobalFree", "Ptr", NumGet(PRINTDLG, A_PtrSize * 2, "UPtr"))
+   DllCall("GlobalFree", "Ptr", NumGet(PRINTDLG, A_PtrSize * 3, "UPtr"))
+   If !(HDC := NumGet(PRINTDLG, A_PtrSize * 4, "UPtr"))
+      Return (ErrorLevel := 3) & 0
+   ; Get the device specific values
+   DPIX := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x58)     ; LOGPIXELSX (horizontal resolution)
+   , DPIY := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x5A)   ; LOGPIXELSY (vertical resolution)
+   , PageW := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x08)  ; HORZRES (width of the printable area)
+   , PageH := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x0A)  ; VERTRES (height of the printable area)
+   , PhysW := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x6E)  ; PHYSICALWIDTH (physical width in device units)
+   , PhysH := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x6F)  ; PHYSICALHEIGHT (physical height in device units)
+   , OffsL := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x70)  ; PHYSICALOFFSETX (physical printable area x margin)
+   , OffsT := DllCall("GetDeviceCaps", "Ptr", HDC, "Int", 0x71)  ; PHYSICALOFFSETY (physical printable area y margin)
+   , OffsR := PhysW - PageW - OffsL                              ; physical printable area right offset
+   , OffsB := PhysH - PageH - OffsT                              ; physical printable area bottom offset
+   , HorzM := Round((DPIX / 25.4) * Margins)                     ; horizontal margins (~ 20 mm)
+   , VertM := Round((DPIY / 25.4) * Margins)                     ; vertical margins (~ 20 mm)
+   ; Set the printing rectangle
+   RectL := HorzM - OffsL ; left
+   , RectT := VertM - OffsT ; top
+   , RectR := PageW - HorzM + OffsR ; right
+   , RectB := PageH - VertM + OffsB ; bottom
+   ; Scale the font height according to the vertical resolution of the printer
+   FontH := NumGet(LOGFONT, 0, "Int") ; lfHeight
+   , NumPut(Round(-FontSize * DPIY / 72), LOGFONT, 0, "Int")
+   , NumPut(0, LOGFONT, 4, "Int") ; lfWidth
+   , HFONT := DllCall("CreateFontIndirect", "Ptr", &LOGFONT, "UPtr")
+   ; Select the scaled font
+   DllCall("SelectObject", "Ptr", HDC, "Ptr", HFONT)
+   ; Prepare for printing
+   VarSetCapacity(DOCINFO, DISize, 0) ; DOCINFO
+   , NumPut(DISize, DOCINFO, "UInt")
+   , NumPut(&DocName, DOCINFO, A_PtrSize, "UPtr")
+   VarSetCapacity(DTPARAMS, DPSize, 0) ; DRAWTEXTPARAMS
+   , NumPut(DPSize, DTPARAMS, "UInt")
+   VarSetCapacity(RECT, 16, 0)
+   , NumPut(RectL, RECT, 0, "Int")
+   , NumPut(RectT, RECT, 4, "Int")
+   , NumPut(RectR, RECT, 8, "Int")
+   , NumPut(RectB, RECT, 12, "Int")
+   RC := 0
+   ; Print
+   If DllCall("StartDoc", "Ptr", HDC, "Ptr", &DOCINFO, "UInt") {
+      Loop {
+         Len := StrLen(Str)
+         If DllCall("StartPage", "Ptr", HDC, "Int") {
+            RC := DllCall("DrawTextEx", "Ptr", HDC, "Ptr", &Str, "Int", Len, "Ptr", &RECT, "UInt", 0x2250, "Ptr", &DTPARAMS, "Int")
+            DllCall("EndPage", "Ptr", HDC, "Int")
+         }
+         If (RC) {
+            LD := NumGet(DTPARAMS, 16, "UInt") ; uiLengthDrawn
+            Str := LD < Len ? SubStr(Str, LD + 1) : ""
+         }
+      } Until (RC = 0) || (Str = "")
+      DllCall("EndDoc", "Ptr", HDC)
+   }
+   DllCall("DeleteDC", "Ptr", HDC)
+   If (HFONT)
+      DllCall("DeleteObject", "Ptr", HFONT)
+   Return (RC ? 1 : (ErrorLevel := 4) & 0)
+} ;</13.05.000012>
 
 } ;</13.05>
 
@@ -18729,6 +19118,7 @@ RandomString(length, special := false) {                                     	;-
 ;|   ExtractFuncTOuserAHK(1)          	|   PdfToText(2)                               	|   PdfPageCounter(3)                     	|   PasteWithIndent(4)                     	|
 ;|   Ask_and_SetbackFocus(5)           	|   CleanLine(6)                               	|   StrTrim(7)                                   	|   StrDiff(8)                                     	|
 ;|   PrintArr(9)                                 	|   List2Array(10)                           	|   Array_Gui(11)                             	|   RandomString(12)                    	|
+;|   PrintStr(13)                               	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -22504,8 +22894,8 @@ DisableFadeEffect() {                                                           
 
 
 }
-;|   CreateNamedPipe()                 	|   RestoreCursors()                       	|   SetSystemCursor()                    	|   SystemCursor()                         	|
-;|   ToggleSystemCursor()             	|   SetTimerF()                              	|   IGlobalVarsScript()                   	|   patternScan()                           	|
+;|   CreateNamedPipe(01)                	|   RestoreCursors(02)                      	|   SetSystemCursor(03)                   	|   SystemCursor(04)                        	|
+;|   ToggleSystemCursor(05)            	|   SetTimerF(06)                             	|   IGlobalVarsScript(07)                  	|   patternScan(08)                          	|
 ;|   scanInBuf()                              	|   hexToBinaryBuffer()	                	|   GetDllBase()                             	|   getProcBaseFromModules()      	|
 ;|   RegRead64()                            	|   RegWrite64()                            	|   LoadScriptResource()                	|
 ;|   HIconFromBuffer()                   	|   hBMPFromPNGBuffer()            	|   SaveSetColours()                        	|   ChangeMacAdress()                    	|
@@ -23035,8 +23425,8 @@ GetEnumIndex(Acc, ChildId=0) {                                                  
 
 
 } 
-;|   Acc_Get()	                                	|   Acc_Error()                                	|   Acc_ChildrenByRole()                	|   listAccChildProperty()                	|
-;|   GetInfoUnderCursor()              	|   GetAccPath()                            	|   GetEnumIndex()                       	|
+;|   Acc_Get(01)	                               	|   Acc_Error(02)                              	|   Acc_ChildrenByRole(03)              	|   listAccChildProperty(04)              	|
+;|   GetInfoUnderCursor(05)             	|   GetAccPath(06)                           	|   GetEnumIndex(07)                      	|
 ;|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23212,9 +23602,9 @@ TabActivate(TabName, WinTitle="") {																			;-- a different approach t
 
 
 } 
-;|   IEGet()                                     	|   WBGet()                                   	|   IE_TabActivateByName()          	|   IE_TabActivateByHandle()        	|
-;|   IE_TabWinID()                          	|   ReadProxy()                             	|   IE_getURL()                              	|   ACCTabActivate()                      	|
-;|   TabActivate()                           	|
+;|   IEGet(01)                                    	|   WBGet(02)                                  	|   IE_TabActivateByName(03)         	|   IE_TabActivateByHandle(04)       	|
+;|   IE_TabWinID(05)                        	|   ReadProxy(06)                            	|   IE_getURL(07)                             	|   ACCTabActivate(08)                    	|
+;|   TabActivate(09)                          	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------       
     
@@ -23495,7 +23885,7 @@ gcd(a, b) {                                                                    	
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Other (9)  -- various not categorized functions --																							baseID: <23>
+{ ;Other (10) -- various not categorized functions --																						baseID: <23>
 ;<23.01.000001>
 GetCommState(ComPort) {																							;-- this function retrieves the configuration settings of a given serial port
 
@@ -24100,11 +24490,63 @@ LockCursorToPrimaryMonitor(lock = true) {                                       
 		DllCall("ClipCursor", "ptr", 0)
 	}
 } ;</23.01.000009>
+;<23.01.000010>
+GetCaretPos(ByRef x, ByRef y) {                                                                                	;-- Alternative to A_CaretX & A_CaretY (maybe not better)
+	
+	/*	DESCRIPTION OF FUNCTION: -- https://www.autohotkey.com/boards/viewtopic.php?t=64101&p=274740 --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	alternative to A_CaretX & A_CaretY - but maybe not better
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?t=64101&p=274740
+	Author         	:	feiyue
+	Date             	:	29-Apr-2019
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	--
+	Remark(s)    	:	--
+	Dependencies	:	none
+	KeyWords    	:	Caret, input, gui, position
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	F1::
+	CoordMode, Caret, Screen
+	GetCaretPos(x, y)
+	MsgBox, % "MY :`t" x ", " y "`nAHK:`t" A_CaretX ", " A_CaretY 
+	return
+	-------------------------------------------------------------------------------------------------------------------
+	*/
+	
+	/* typedef struct tagGUITHREADINFO {
+	  DWORD cbSize;        //4
+	  DWORD flags;         //4
+	  HWND  hwndActive;    //A_PtrSize
+	  HWND  hwndFocus;     //A_PtrSize
+	  HWND  hwndCapture;   //A_PtrSize
+	  HWND  hwndMenuOwner; //A_PtrSize
+	  HWND  hwndMoveSize;  //A_PtrSize
+	  HWND  hwndCaret;     //A_PtrSize
+	  RECT  rcCaret;       //16
+	} GUITHREADINFO
+	*/
+	
+  static Size:=8+(A_PtrSize*6)+16, hwndCaret:=8+A_PtrSize*5
+  Static CaretX:=8+(A_PtrSize*6), CaretY:=CaretX+4
+  VarSetCapacity(Info, Size, 0), NumPut(Size, Info, "Int")
+  DllCall("GetGUIThreadInfo", "UInt", 0, "Ptr", &Info), x:=y:=""
+  if !(HWND:=NumGet(Info, hwndCaret, "Ptr"))
+    return, 0
+  x:=NumGet(Info, CaretX, "Int"), y:=NumGet(Info, CaretY, "Int")
+  VarSetCapacity(pt, 8), NumPut(y, NumPut(x, pt, "Int"), "Int")
+  DllCall("ClientToScreen", "Ptr", HWND, "Ptr", &pt)
+  x:=NumGet(pt, 0, "Int"), y:=NumGet(pt, 4, "Int")
+  return, 1
+} ;</23.01.000010>
 
 } 
 ;|   pauseSuspendScript(01)             	|   GetCommState(02)                     	|   RtlGetVersion(03)                        	|   PostMessageUnderMouse(04)     	|
 ;|   WM_SETCURSOR(05)                 	|   FoxitInvoke(06)                           	|   MoveMouse_Spiral(07)             	|   ScaleToFit(08)                           	|
-;|   LockCursorToPrimaryMonitor(9)	|
+;|   LockCursorToPrimaryMonitor(9)	|   GetCaretPos(10)                        	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -1,20 +1,15 @@
+#NoEnv
+SetBatchLines, -1
 
 
-
-Directory1 = C:\Program Files\AutoHotkey\lib
-Directory2 = D:\Eigene Dateien\Eigene Dokumente\AutoIt Scripte\GitHub\AHK-Rare
-;FileSelectFile, file,, %Directory1%
-;FileDelete, files.txt
-;Directory = file
-funclist:= listfunc2MD(A_ScriptDir . "\AHK-Rare.ahk")
+funclist:= listfunc2MD(A_ScriptDir . "\..\AHK-Rare.ahk")
 
 today:= A_DD "-" A_MM "-" A_YYYY
 file = %A_ScriptDir%\%today%_MDTable.md
 
-If FileExist(file)
-	FileDelete, %file%
-
-FileAppend, %funclist%, %file%
+file:= FileOpen(A_ScriptDir "\" file, "w", "UTF8")
+file.Write(funclist)
+flie.Close()
 
 
 ;Reads files.txt , and opens file by file - it search for function - store them into functions object + store the containing script

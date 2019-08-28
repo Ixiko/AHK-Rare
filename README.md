@@ -10,11 +10,11 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-## AHK-Rare_the GUI ++ SEARCH COMFORTABLE ++![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
+## AHK-Rare GUI ++ SEARCH COMFORTABLE ++![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
 
 
 
-## ![Gem](assets/GemSmall.png)[August 21, 2019]: +9 =  642
+## ![Gem](assets/GemSmall.png)[August 28, 2019]: +13 =  646
 
 There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.
 
@@ -29,6 +29,10 @@ There are only a few new functions this time, as I have created a script (alpha 
 |   07   | **LockCursorToPrimaryMonitor()** | prevents the cursor from leaving the primary monitor         |
 |   08   | **DisableFadeEffect()**          | Disabling fade effect on gui animations                      |
 |   09   | **RestartNetwork()**             | Restart “Local area connection” without admin privileges     |
+|   10   | **PrintStr()**                   | Prints the passed string on the default printer              |
+|   11   | **GetAllResponseHeaders()**      | Returns a string that contains all response headers          |
+|   12   | **GetCaretPos()**                | Alternative to A_CaretX & A_CaretY (maybe not better)        |
+|   13   | **GetFontNamesFromFile()**       | get’s the name of a font from a .ttf-FontFile                |
 
 
 
