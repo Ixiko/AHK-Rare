@@ -824,16 +824,12 @@ LV_AutoColumSizer(hLV, Sizes, Options:="") {                                    
 			hHeader:= LV_EX_GetHeader(hLV), hLVO:= hLV
 	If SizesO <> Sizes
 	{
+			pos := 1
 			If !Instr(Sizes, "AutoColumnWidth")
-			{
-					pos := 1
 					While pos:= RegExMatch(Sizes, "\d+", num, StrLen(num)+pos)
 							LVP[A_Index] := num
-			}
 			else
-			{
-					nin:=1
-			}
+				nin:=1
 			
 			LVP_Last := 100
 			
@@ -853,7 +849,6 @@ LV_AutoColumSizer(hLV, Sizes, Options:="") {                                    
 	
 	Loop, % LVP.MaxIndex()
 		DllCall("SendMessage", "uint", hLV, "uint", 4126, "uint", A_Index-1, "int", Ceil(LV_Width * LVP[A_Index])) 	;sets the column width
-
 }
 
 LV_EX_GetHeader(HLV) {                                                                            	;-- Retrieves the handle of the header control used by the list-view control.
