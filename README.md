@@ -12,7 +12,14 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ## AHK-Rare GUI ++ SEARCH COMFORTABLE ++![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
 
+## ![Gem](../../../../../Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/assets/GemSmall.png)[September 03, 2019]: +1 =  647
 
+
+
+| **Nr** | FUNCTION              | DESCRIPTION                                                  |
+| :----: | --------------------- | ------------------------------------------------------------ |
+|   01   | **LVM_GetItemText()** | gets the text of a ListView item or subitem *(newer function for all AHK versions including 64bit - from jballi)* |
+|   02   |                       |                                                              |
 
 ## ![Gem](assets/GemSmall.png)[August 28, 2019]: +13 =  646
 
