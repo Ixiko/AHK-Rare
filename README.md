@@ -6,24 +6,31 @@
 
 This is a collection of functions I found at Autohotkey-Forum or inside Autohotkey Scripts. Sometimes you will find one of it an official Autohotkey-Library. Approximately 90-95% of the functions can not be found in any of the 2500 libraries that I have also put together here at Github.
 
-Some of the collected function seems to be multiple in this collection, because they sometimes use very different methods. This is a crucial difference. You dont wan’t find “THE ONLY ONE” good function here. Take what is the better! From that I build up a script individual library.
+Some of the collected function seems to be multiple in this collection, because they sometimes use very different methods. This is a crucial difference. You dont wan’t find “THE ONLY ONE” good function here. Take what is the better! 
 
 ----
 
 ## AHK-Rare GUI ++ SEARCH COMFORTABLE ++![New Gui](assets/AHK-Rare-TheGui_Screenshot.png)
 
-## ![Gem](../../../../../Eigene%20Dateien/Eigene%20Dokumente/AutoIt%20Scripte/GitHub/AHK-Rare/assets/GemSmall.png)[September 03, 2019]: +1 =  647
+----
 
 
+## ![Gem](assets/GemSmall.png)[September 08, 2019]: +1 =  647
+
+==**THIS IS AN INTERMEDIATE RELEASE DUE TO ERRORS EXISTING IN PARSING ALGORITHM BEFORE**==
+
+Fixed many issue’s in the parsing algorithm. Small changes to gui layout. The ***EXAMPLE(s)*** and ***DESCRIPTION*** tabs will be highlighted if they have content. Basic search is working. The output in the **DESCRIPTION** tab is clearer now. Unfortunately, I still have not got any differently colored description keys.
 
 | **Nr** | FUNCTION              | DESCRIPTION                                                  |
 | :----: | --------------------- | ------------------------------------------------------------ |
 |   01   | **LVM_GetItemText()** | gets the text of a ListView item or subitem *(newer function for all AHK versions including 64bit - from jballi)* |
 |   02   |                       |                                                              |
 
+
+
 ## ![Gem](assets/GemSmall.png)[August 28, 2019]: +13 =  646
 
-There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. With a right click on the displayed code or the detailed description, the function will be transferred to the clipboard.
+There are only a few new functions this time, as I have created a script (alpha release) for a more comfortable presentation of the function collection (AHK-Rare_TheGui.ahk). The gui is divided into 2 areas. In the upper area, all functions are displayed for selection. In the lower area you will find more information after selecting a function. With a right click on the displayed code or the detailed description, the function will be copied to the clipboard.
 
 | **Nr** | FUNCTION                         | DESCRIPTION                                                  |
 | :----: | -------------------------------- | ------------------------------------------------------------ |

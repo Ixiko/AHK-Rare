@@ -1,20 +1,18 @@
-﻿; =====================================================
-; 						*** AHK-RARE_TheGUI ***      	   V0.69 alpha August 21, 2019 by Ixiko
-; =====================================================
-; -------------------------------------------------------------------------------------------
+﻿; ===============================================================
+; 	*** AHK-RARE the GUI *** -- !SEARCH COMFORTABLE! --         V0.75 September 08, 2019 by Ixiko
+; ===============================================================
+; ------------------------------------------------------------------------------------------------------------
 ; 		MISSING THINGS:
-; -------------------------------------------------------------------------------------------
-;	
+; ------------------------------------------------------------------------------------------------------------
+;
 ;	1. The search function should have two options, Basic and RegEx
-;		At the moment only RegEx is activated. In future, however, it should be possible 
+;		At the moment only RegEx is activated. In future, however, it should be possible
 ;		to combine several terms by logical 'and' and / or logical 'or' (Basic-Mode).
 ;	2. Highlighting the search term(s) in the RichEdit controls
 ;	3. Keywords should be displayed in the description with a larger font
-;	4. Tabs without content should be disabled
+; ------------------------------------------------------------------------------------------------------------
 
 ;{01. script parameters
-
-		debug:=0
 
 		#NoEnv
 		#Persistent
@@ -27,9 +25,9 @@
 		#KeyHistory 1
 		;ListLines Off
 
-		SetTitleMatchMode     	, 2                    
-		SetTitleMatchMode     	, Fast               
-		DetectHiddenWindows	, Off                
+		SetTitleMatchMode     	, 2
+		SetTitleMatchMode     	, Fast
+		DetectHiddenWindows	, Off
 		CoordMode                 	, Mouse, Screen
 		CoordMode                 	, Pixel, Screen
 		CoordMode                 	, ToolTip, Screen
@@ -44,30 +42,33 @@
 		FileEncoding                	, UTF-8
 
 		OnExit("TheEnd")
-		;OnError("FehlerProtokoll")
 
-		hIBitmap:= Create_GemSmall_png(true)
-		Menu, Tray, Icon				, % "hIcon: " hIBitmap
+		Menu, Tray, Icon				, % "hIcon: " Create_GemSmall_png(true)
 	;---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	; Script Prozess ID feststellen
+	; Script Prozess ID
 	;---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		scriptPID:= DllCall("GetCurrentProcessId")
 
 ;}
 
-;{02. declaring variables
+;{02. variables
 
-		ARData	:= Object()
-		RC			:= Object()
-		LogoW 	:= 1200
-		LW       	:= 450
-		LogoH   	:= 71
-		
+		ARData    	:= Object()
+		ARFile      	:= Array()
+		RC		    	:= Object()
+		LogoW     	:= 1200
+		LW           	:= 450
+		LogoH         	:= 71
+		SR1Width	:= 250
+		highlight   	:= false
+
+		global  FoundIndex:= 0 ; a flag
+
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	;	loading AHK-Rare.ahk
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------;{
 		If FileExist(A_ScriptDir . "\AHK-Rare.ahk")
-			FileRead, AhkRare, % A_ScriptDir "\AHK-Rare.ahk"
+			ARFile:= RareLoad(A_ScriptDir "\AHK-Rare.ahk")
 		else
 		{
 				IniRead, filepattern, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, RareFolder
@@ -78,42 +79,42 @@
 								ExitApp
 						IniWrite, % filepattern, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, RareFolder
 				}
-				FileRead, AhkRare, % filepattern
+
+				ARFile:= RareLoad(filepattern)
 		}
 	;}
-		
+
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	;	get the last gui size
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------;{
-		IniRead, GuiOptions, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, GuiOptions
+		IniRead, GuiOptions, % A_ScriptDir "\AHK-Rare.ini", Properties, GuiOptions
 		If !Instr(GuiOptions, "Error") && !(GuiOptions = "")
 		{
 			GuiOptions	:= StrSplit(GuiOptions, "|")
-			LogoW     	:= GuiOptions.3 
+			LogoW     	:= GuiOptions.3
 		}
-		
-		IniRead, SearchMode, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, SearchMode
+
+		IniRead, SearchMode, % A_ScriptDir "\AHK-Rare.ini", Properties, SearchMode
 			If Instr(SearchMode, "Error") || (SearchMode = "")
 				SearchMode:= "Basic"
 	;}
-	
+
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	;	Settings array for the RichCode control (code & examples)
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------;{
 		Settings :=
 		( LTrim Join Comments
 		{
-		"TabSize"         	: 2,
+		"TabSize"         	: 4,
 		"Indent"           	: "`t",
 		"FGColor"         	: 0xEDEDCD,
-		"BGColor"        	: 0x3F3F3F,
 		"BGColor"        	: 0x172842,
-		"Font"              	: {"Typeface": "Arial", "Size": 10},
+		"Font"              	: {"Typeface": "Bitstream Vera Sans Mono", "Size": 10},
 		"WordWrap"    	: False,
-		
+
 		"UseHighlighter"	: True,
 		"HighlightDelay"	: 200,
-		
+
 		"Colors": {
 			"Comments"	:	0x7F9F7F,
 			"Functions"  	:	0x7CC8CF,
@@ -122,31 +123,31 @@
 			"Numbers"   	:	0xF79B57,
 			"Punctuation"	:	0x97C0EB,
 			"Strings"      	:	0xCC9893,
-			
+
 			; AHK
 			"A_Builtins"   	:	0xF79B57,
 			"Commands"	:	0xCDBFA3,
 			"Directives"  	:	0x7CC8CF,
 			"Flow"          	:	0xE4EDED,
 			"KeyNames"	:	0xCB8DD9,
-			"Description"	:	0x47B856,
+			"Descriptions"	:	0xF0DD82,
 			"Link"           	:	0x47B856,
-			
+
 			; CSS
 			"ColorCodes"	:   0x7CC8CF,
 			"Properties" 	:   0xCDBFA3,
 			"Selectors"   	:	0xE4EDED,
-			
+
 			; HTML
 			"Attributes"  	:   0x7CC8CF,
 			"Entities"      	:	0xF79B57,
 			"Tags"          	:	0xCDBFA3,
-			
+
 			; JS
 			"Builtins"      	:	0xE4EDED,
 			"Constants"   	:	0xF79B57,
 			"Declarations"	:	0xCDBFA3,
-			
+
 			; PLAIN-TEXT
 			"PlainText"		:	0x7F9F7F
 			}
@@ -155,11 +156,11 @@
 ;}
 ;}
 
-;{03. draw primary gui 
+;{03. draw primary gui
 
 		global hArg, ARG, hSearch, hTabs
 		Gui, ARG: NEW
-		Gui, ARG: +LastFound +HwndhARG +Resize 
+		Gui, ARG: +LastFound +HwndhARG +Resize
 		Gui, ARG: Margin, 0, 0
 		;Gui, ARG: Color, 172842
 	;-: --------------------------------------
@@ -170,7 +171,9 @@
 		Gui, ARG: Add, Progress        	, % "x0 y85 w" (LogoW + 10 ) " h2 vDevider" , 100
 		Gui, ARG: Add, Progress        	, % "x" (LW + 7) " y0 w2 h85" , 100
 		Gui, ARG: Font, S7 CWhite q5, Normal
-		Gui, ARG: Add, Text	                , % "x" (LW - 300) " y6 w300 Right vStats BackgroundTrans"                                   	, % ""
+		Gui, ARG: Add, Text	                , % "x" (LW - 197) " y3 w200 Right vStats2 BackgroundTrans"                                 	, % ""
+		Gui, ARG: Font, S7 c9090FF q5, Normal
+		Gui, ARG: Add, Text	                , % "x" (LW - 197) " y+0 w200 Right vStats1 BackgroundTrans"                             	, % ""
 	;-: --------------------------------------
 	;-: temp. text controls
 	;-: --------------------------------------
@@ -181,14 +184,14 @@
 	;-: --------------------------------------
 	;-: Edit control for search patterns
 	;-: --------------------------------------
-		SW:= LW + 20 
+		SW:= LW + 20
 		Gui, ARG: Font, S10 Normal CBlack q5, Normal
-		Gui, ARG: Add, DDL                	, % "x" (SW) " y50 w65 vSearchAlgo HWNDhSAlgo E0x4000"                                   	, Basic|RegEx
+		Gui, ARG: Add, DDL                	, % "x" (SW) " y50 w65 vSMode HWNDhSAlgo E0x4000"                                       	, % "Basic|RegEx"
 		PostMessage, 0x153, -1, 33,, ahk_id %hSAlgo%  ; Setzt die Höhe des Auswahlfeldes.
-		GuiControl, ChooseString, SearchAlgo, % SearchMode
+		GuiControl, ChooseString, SMode, % SearchMode
 		Gui, ARG: Font, S11 Italic CAAAAAA q5, Normal
-		GuiControlGet, SA_, ARG: Pos, SearchAlgo
-		Gui, ARG: Add, Edit              	, % "x" (SW+SA_W+1) " y50 w500 r1 vLVExpression HWNDhSearch -Theme"            	, % "type your search pattern here"
+		GuiControlGet, SA_, ARG: Pos, SMode
+		Gui, ARG: Add, Edit              	, % "x" (SW+SA_W+1) " y50 w500 r1 vLVExpression HWNDhSearch -Theme"          	, % "type your search pattern here"
 		Gui, ARG: Font, S16 Normal CWhite q5, Normal
 		Gui, ARG: Add, Text             	, % "x" (SW) " y5   w300 h40 vGB1    HWNDhGB1 Border BackgroundTrans"        	, % ""
 		Gui, ARG: Add, Text             	, % "x" (SW + 10) " y12 w300 h30 vField3 HWNDhField3 -Wrap BackgroundTrans"	, % ""
@@ -199,24 +202,24 @@
 	;-: Functions Listview
 	;-: --------------------------------------
 		Gui, ARG: Font, S9 Normal CDefault q5, Normal
-		Gui, ARG: Add, Listview        	, % "xm y" (LogoH + 15) " w" LogoW+5 " r25 HWNDhLVFunc vLVFunc gShowFunction AltSubmit Section", main section|function name|short description|function nr.
+		Gui, ARG: Add, Listview        	, % "xm y" (LogoH + 15) " w" LogoW+5 " r15 HWNDhLVFunc vLVFunc gShowFunction AltSubmit Section", main section|function name|short description|function nr.
 		Gui, ARG: Font, S8 CDefault q5, Normal
 		GuiControlGet, LV_, ARG: Pos, LVFunc
 	;-: --------------------------------------
 	;-: Short description section
 	;-: --------------------------------------
-		Gui, ARG: Add, Edit                	, % "xm y" (LV_Y + LV_H + 10) " w" LogoW//4 " r20 t8 HWNDhShowRoom1 vShowRoom1"
+		Gui, ARG: Add, Edit                	, % "xm y" (LV_Y + LV_H + 10) " w" SR1Width " r20 t8 HWNDhShowRoom1 vShowRoom1"
 		GuiControlGet, SR_, ARG: Pos, ShowRoom1
 	;-: --------------------------------------
 	;-: Code highlighted RichEdit control
 	;-: --------------------------------------
-		Gui, ARG: Add, Tab                	, % "x" (LogoW//4+5) " y" (LV_Y+LV_H+10) " w" (LogoW//4*3) " h" SR_H-10 " HWNDhTabs vShowRoom2", FUNCTION CODE|EXAMPLE(s)|DESCRIPTION
+		Gui, ARG: Add, Tab                         	  , % "x" (SR1Width+5) " y" (LV_Y+LV_H+10) " w" (LogoW-SR1Width-5) " h" SR_H-10 " HWNDhTabs vShowRoom2", FUNCTION CODE|EXAMPLE(s)|DESCRIPTION
 		Gui, ARG: Tab, 1
-		RC[1] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
+		RC[1] := new RichCode(Settings, "ARG", "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (LogoW-SR1Width-5) " h" SR_H-30, 0)
 		Gui, ARG: Tab, 2
-		RC[2] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
+		RC[2] := new RichCode(Settings, "ARG", "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (LogoW-SR1Width-5) " h" SR_H-30, 0)
 		Gui, ARG: Tab, 3
-		RC[3] := new RichCode(Settings, "ARG", "x" (LogoW//4+5) " y" (LV_Y+LV_H+30) " w" (LogoW//4*3) " h" SR_H-30, 0)
+		RC[3] := new RichCode(Settings, "ARG", "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (LogoW-SR1Width-5) " h" SR_H-30, 0)
 		WinRC := GetWindowInfo(RC[1].Hwnd)
 	;-: --------------------------------------
 	;-: Create a ToolTip control
@@ -233,7 +236,7 @@
 			DPIFactor:= screenDims().DPI / 96
 			Gui, ARG: Show, % "x" GuiOptions.1 " y" GuiOptions.2 " w" (GuiOptions.3 // DPIFactor) " h" (GuiOptions.4 // DPIFactor), AHK-Rare_TheGui
 		}
-		else 
+		else
 			Gui, ARG: Show, AutoSize xCenter yCenter, AHK-Rare_TheGui
 
 		OnMessage(0x200, "OnMouseHover")
@@ -245,96 +248,127 @@
 ;{04. generate and fill listview with data
 
 	; indexing AHK-Rare
-		ARData:= RarefuncIndexer(AHKRare)
+		ARData:= RareIndexer(ARFile)
 	; remove text controls
 		GuiControl, ARG: Hide 	, Field1
-		GuiControl, ARG: Hide 	, Field2			
-		GuiControl, ARG: Show	, Field3			
+		GuiControl, ARG: Hide 	, Field2
+		GuiControl, ARG: Show	, Field3
 	; populate listview with data from AHK-Rare.ahk
 		GuiControl, +Default, ARG: LVFunc
 		For i, function in ARData
-			LV_Add("", function.mainsection, function.name, function.short, function.FnIndex), fc:= A_Index
+			LV_Add("", function.mainsection, function.name, function.short, function.FnHash), fc:= A_Index
 	; show's the sum of functions
 		GuiControl, Text, Field3, % "displayed functions: " fc
+
 ;}
 
 ;{05. Hotkey(s)
-		
+
+
 	; RButton for getting text to clipboard
 		Hotkey, IfWinActive, % "ahk_id " hARG
 		Hotkey, ~RButton	, CopyTextToClipboard
 		Hotkey, ^f           	, FocusSearchField
 		Hotkey, ^s           	, FocusSearchField
-		
+
 	; Listview Hotkey's
-		CisF:= Func("ControlIsFocused").Bind("LVExpression")
-		Hotkey, If             	, % CiF
+		ListviewIsFocused:= Func("ControlIsFocused").Bind("SysListview321")
+		Hotkey, If             	, % ListviewIsFocused
 		Hotkey, ~Up           	, ListViewUp
 		Hotkey, ~Down      	, ListViewDown
+
+	; Edit Hotkey's
+		SearchIsFocused:= Func("ControlIsFocused").Bind("Edit1")
+		Hotkey, If             	, % SearchIsFocused
 		Hotkey, ~Enter    	, GoSearch
+		Hotkey, If
+
+		Hotkey, ^#!r        	, ReloadScript
+
 return
 ;}
 
-;--------------------------------------------------------------------------------------------------------------------------------------
-;{06. Labels
+;--------------------------------------------------------------------------------------------------------------
+
+;{06. Gui-Labels
 ;--------------------------------------------------------------------------------------------------------------
 ShowFunction:                 	;{
 
 	toshow  	 := []
-	toshow[1] := ""
-	toshow[2] := ""
-	
 	selRow:= LV_GetNext(0)
+
 	ShowFunctionsOnUpDown:
 	LV_GetText(fnr, selRow , 4)
-	
+
 	For i, function in ARData
-		If Instr(function.FnIndex, fnr)
+		If Instr(function.FnHash, fnr)
 				break
-		
+
 	; adding informations to Edit-Control (ShowRoom1)
-		toshow[1]:= "FUNCTION:`n"                    	ARData[i].name 
+		toshow[1]:= "FUNCTION:`n"                    	ARData[i].name
 		toshow[1].= "`n-----------------------------------------------------------------`n"
-		toshow[1].= "SHORT DESCRIPTION:`n"    	ARData[i].short 
+		toshow[1].= "SHORT DESCRIPTION:`n"    	ARData[i].short
 		toshow[1].= "`n-----------------------------------------------------------------`n"
-		toshow[1].= "MAIN SECTION:`n"            	ARData[i].mainsection 
+		toshow[1].= "MAIN SECTION:`n"            	ARData[i].mainsection
 		toshow[1].= "`n-----------------------------------------------------------------`n"
-		toshow[1].= "MAIN SECTION DESC.:`n"  	ARData[i].mainsectionDescription 
+		toshow[1].= "MAIN SECTION DESC.:`n"  	ARData[i].mainsectionDescription
 		toshow[1].= "`n-----------------------------------------------------------------`n"
-		toshow[1].= "SUB SECTION:`n"                	ARData[i].subsection 
+		toshow[1].= "SUB SECTION:`n"                	ARData[i].subsection
 		toshow[1].= "`n-----------------------------------------------------------------`n"
 		GuiControl, ARG:, ShowRoom1, % toshow[1]
-	
+
 	; populate function code tab and examples  tab
-		RC[1].Settings.Highlighter := "HighlightAHK"	
+		RC[1].Settings.Highlighter := "HighlightAHK"
 		RC[1].Value := ARData[i].code
-		RC[2].Settings.Highlighter := "HighlightAHK"	
-		RC[2].Value := ARData[i].examples
-		
+		If StrLen(ARData[i].examples) > 0
+		{
+				HighlightTab(hTabs, 1, 1)
+				RC[2].Settings.Highlighter := "HighlightAHK"
+				RC[2].Value := ARData[i].examples
+		}
+		else
+		{
+				HighlightTab(hTabs, 1, 0)
+				RC[2].Value := ""
+		}
+
 	; reading data from the function included description section
 		toshow[2]:=""
 		If IsObject(ARData[i]["Description"])
 		{
-				 For descKey, Text in ARData[i]["Description"] 
+				 For descKey, Text in ARData[i]["Description"]
 				{
 						If descKey
-							toshow[2].= "-*" Format("{:U}", Trim(descKey)) "*-`n-----------------------------------------------------------------`n" 
+							toshow[2].= Format("{:U}", Trim(descKey)) ":`n"
 						else
 							continue
 						Text:= StrReplace(Text, "`n`r`n`r", "`n")
 						Text:= StrReplace(Text, "`r`n`r`n", "`n")
-						Loop, 4
+						Loop, 5
 							Text	:= StrReplace(Text, SubStr("`t`t`t`t`t`t`t`t", 7 - A_Index) , A_Tab)
-						Loop, Parse, Text, `n 
+						Loop, Parse, Text, `n
 							toshow[2].= Rtrim(A_LoopField, ",") "`n"
-				}	
+						;toshow[2].= "-----------------------------------------------------------------`n`n"
+				}
+				If StrLen(toshow[2])> 0
+				{
+						HighlightTab(hTabs, 2, 1)
+					; populate the description Tab
+						RC[3].Value := toshow[2]
+						RC[3].Settings.Highlighter := "HighlightAHK"
+				}
+				else
+				{
+						HighlightTab(hTabs, 2, 0)
+						RC[3].Value := ""
+				}
 		}
 
-	
-	; populate the description Tab
-		RC[3].Settings.Highlighter := "HighlightAHK"	
-		RC[3].Value := toshow[2]
-				
+	; highlight search terms
+		If highlight
+		{
+				RE_FindTextAndSelect(RC[1].Hwnd, LVExpression, {1:"Down"})
+		}
 return
 ;}
 ;--------------------------------------------------------------------------------------------------------------
@@ -343,14 +377,15 @@ GoSearch:                         	;{
 		Gui, Arg: Submit, NoHide
 		If StrLen(LVExpression) = 0
 				return
-				
+
 		foundIndex:= 0
 		GuiControl, ARG:Focus, LVFunc
-		
-		results:= RareSearch(LVExpression, ARData, AHKRare, SearchAlgo)
+
+		results:= RareSearch(LVExpression, ARData, ARFile, SMode)
 		If results.MaxIndex() > 0
 		{
 			; fill listview with collection
+				highlight:= true				; flag to highlight searchtearms in RichEdit code
 				Gui, ARG: Default
 				LV_Delete()
 				GuiControl, ARG: -Redraw, LVFunc
@@ -358,36 +393,40 @@ GoSearch:                         	;{
 				{
 					foundIndex:= Results[A_Index]
 					For i, function in ARData
-						If Instr(function.FnIndex, foundIndex)
-							LV_Add("", function.mainsection, function.name, function.short, function.FnIndex)
+						If Instr(function.FnHash, foundIndex)
+							LV_Add("", function.mainsection, function.name, function.short, function.FnHash)
 				}
 				GuiControl, ARG: +Redraw, LVFunc
 				GuiControl, Text, Field3, % "Search result: " results.MaxIndex() " functions"
-		} else {
+		}
+		else
+		{
+				highlight:= false
 				GuiControl, Text, Field3, % "Search result: nothing matched"
 		}
+
 return ;}
 ;--------------------------------------------------------------------------------------------------------------
 ARGGuiSize:                      	;{
 
 	Critical, Off
 	Critical
-	GuiControl, ARG: Move, Devider        	, % "w" (A_GuiWidth) 
-	GuiControl, ARG: Move, BGColorLogo, % "w" (A_GuiWidth) 
+	GuiControl, ARG: Move, Devider        	, % "w" (A_GuiWidth)
+	GuiControl, ARG: Move, BGColorLogo, % "w" (A_GuiWidth)
 	GuiControl, ARG: Move, LVExpression, % "w" (A_GuiWidth - LW - 32 - SA_W)
 	GuiControl, ARG: Move, GB1           	, % "w" (A_GuiWidth - LW - 30) " h40 y5"
 	GuiControl, ARG: Move, Field3           	, % "w" (A_GuiWidth - LW - 40) " h30"
-	GuiControl, ARG: Move, LVFunc         	, % "w" (A_GuiWidth) " h"(A_GuiHeight//3)
+	GuiControl, ARG: Move, LVFunc         	, % "w" (A_GuiWidth) ;" h"(A_GuiHeight//3)
 	GuiControlGet, LV_, ARG: Pos, LVFunc
 	LV_AutoColumSizer(hLVFunc, "16% 15% 60%")
-	GuiControl, ARG: Move, ShowRoom1 	, % "y" (LV_Y+LV_H+10)    " w" (A_GuiWidth//4)  " h" (A_GuiHeight-LV_Y-LV_H-10)
-	GuiControl, ARG: Move, ShowRoom2 	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+10) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-10)
-	GuiControl, ARG: Move, % RC[1].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
-	GuiControl, ARG: Move, % RC[2].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
-	GuiControl, ARG: Move, % RC[3].hwnd	, % "x" (A_GuiWidth//4+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth//4*3-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
+	GuiControl, ARG: Move, ShowRoom1 	, % "y" (LV_Y+LV_H+10)                                                                                 " h" (A_GuiHeight-LV_Y-LV_H-10)
+	GuiControl, ARG: Move, ShowRoom2 	, % "x" (SR1Width+5) " y" (LV_Y+LV_H+10) " w" (A_GuiWidth-SR1Width-5) " h" (A_GuiHeight-LV_Y-LV_H-10)
+	GuiControl, ARG: Move, % RC[1].hwnd	, % "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth-SR1Width-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
+	GuiControl, ARG: Move, % RC[2].hwnd	, % "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth-SR1Width-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
+	GuiControl, ARG: Move, % RC[3].hwnd	, % "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth-SR1Width-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
 	Critical, Off
 	SetTimer, ShowStats, -200
-	
+
 return ;}
 ;--------------------------------------------------------------------------------------------------------------
 ARGGuiClose:                  	;{
@@ -395,22 +434,22 @@ ARGEscape:
 
 	Gui, Arg: Submit, NoHide
 	win := GetWindowInfo(hARG)
-	IniWrite, % SearchAlgo, % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, SearchMode
-	IniWrite, % win.WindowX "|" win.WindowY "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\AHK-Rare_TheGui.ini", Properties, GuiOptions
-	
+	IniWrite, % SMode, % A_ScriptDir "\AHK-Rare.ini", Properties, SearchMode
+	IniWrite, % win.WindowX "|" win.WindowY "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\AHK-Rare.ini", Properties, GuiOptions
+
 ExitApp ;}
 ;--------------------------------------------------------------------------------------------------------------
 ShowStats:                       	;{
 
 	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
-	GuiControl, ARG:, Stats, % "x" wx "  y" wy "  w" ww "  h" wh
-	
+	GuiControl, ARG:, Stats2, % "x" wx "  y" wy "  w" ww "  h" wh
+
 return
 ChangeStats() {
-	
+
 	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
-	GuiControl, ARG:, Stats, % "x" wx "  y" wy "  w" ww "  h" wh
-	
+	GuiControl, ARG:, Stats2, % "x" wx "  y" wy "  w" ww "  h" wh
+
 }
 ;}
 ;--------------------------------------------------------------------------------------------------------------
@@ -419,7 +458,7 @@ CopyTextToClipboard:     	;{
 	toCopy := ""
 	MouseGetPos, mx, my,, hControlOver, 2
 	RichEditControls:= RC.1 "," RC.2 "," RC.3
-	If Instr(hControlOver, hTabs) || hControlOver in %RichtEditControls% 
+	If Instr(hControlOver, hTabs) || hControlOver in %RichtEditControls%
 	{
 			Loop, Parse, AhkRare, `n, `r
 			{
@@ -427,7 +466,7 @@ CopyTextToClipboard:     	;{
 							tocopy .= A_LoopField "`n"
 					else if (A_Index > ARData[i].end)
 							break
-			}				
+			}
 			Clipboard := tocopy
 			ToolTip, % "copied to clipboard...", % mx -10, % my + 10, 2
 			SetTimer, TTOff, -4000
@@ -449,181 +488,298 @@ ListViewDown:                 	;{
 	If !WinActive("AHK-Rare_TheGui ahk_class AutoHotkeyGUI")
 			return
 	If Instr(A_ThisLabel, "ListViewUp")
-	{
 			Send, {Up}
-	} else {
+	else
 			Send, {Down}
-	}
 
 	selRow:= LV_GetNext("F")
 	gosub ShowFunctionsOnUpDown
-	
+
 return ;}
 ;--------------------------------------------------------------------------------------------------------------
+ReloadScript:                   	;{	only for reloading the script after hotkey press (development purposes)
+	Reload
+return ;}
 
 ;}
 
-;{07. Functions
+;{07. AHK Rare Gui Functions
 
-RareSearch(LVExpression, ARData, file, mode:="RegEx") {
+RareSearch(LVExpression, ARData, ARFile, mode:="RegEx") {            	;-- search all AHK Rare functions
 
 		results:= Array()
-		 
-	; collecting all results first
-		Loop, Parse, file, `n, `r
-		{
-				If RegExMatch(A_LoopField, "(;\s*\<\d\d\.\d\d\.\d\d\d\d\d)|(;\s*\<\d\d\.\d\d\.\d\d.\d\d\d\d\d)")
-						RegExMatch(A_LoopField, "[\d\.]+", FnIndex), found:= 0, continue
-						
-				If (found = 0) && RegExMatch(A_LoopField, LVExpression) 
-						results.Push(FnIndex), found:= 1
-						
-		}
-		
+
+	; collecting all results
+	Loop, % ARFile.MaxIndex()
+	{
+			If RegExMatch(ARFile[A_Index], "(;\s*\<\d\d\.\d\d\.\d\d\d\d\d)|(;\s*\<\d\d\.\d\d\.\d\d.\d\d\d\d\d)")
+			{
+					RegExMatch(ARFile[A_Index], "[\d\.]+", FnHash)
+					found:= 0
+					continue
+			}
+
+			If (found = 0)
+				If Instr(mode, "RegEx") && RegExMatch(ARFile[A_Index], LVExpression)
+					results.Push(FnHash), found:= 1
+				else if Instr(mode, "Basic") && Instr(ARFile[A_Index], LVExpression)
+					results.Push(FnHash), found:= 1
+	}
+
 return results
 }
 
-RarefuncIndexer(file) {												                          			;-- list all functions inside AHK-RARE script 
-	
-	ARData:= Object(), ARData.DescriptionKeys := Object()
-	s:=fI:=descFlag:=descKeyFlag:=descKeyFlagO :=0
-		
-	Loop, Parse, file, `n, `r
-	{
-			If RegExMatch(A_LoopField, "(?<=\{\s;)[\w\s-\+\/\(\)]+(?=\(\d+\))")                                                                                                                                                    	; recognize name of mainsection
+RareLoad(FileFullPath) {                                                                       	;-- loads AHK Rare as an indexed array
+
+	ARFile:= Array()
+
+	FileRead, filestring, % FileFullPath
+	Loop, Parse, filestring, `n, `r
+		ARFile[A_Index]:= A_LoopField, i:= A_Index
+
+	ARFile[i+1]:= FileFullPath
+
+return ARFile
+}
+
+RareSave(ARFile) {                                                                               	;-- save back changes to AHK Rare
+
+	filepath:= ARFile[ARFile.MaxIndex()]
+	;SplitPath, filepath, fn, dir, ext, fnext
+	;filepath:= dir "\_" fn
+
+	File:= FileOpen(filepath, "w")
+
+	Loop, % ARFile.MaxIndex() - 1
+		File.WriteLine(ARFile[A_Index])
+
+	File.Close()
+
+return Errorlevel
+}
+
+RareIndexer(ARFile) {                                                                           	;-- list all functions inside AHK RARE script
+
+	; defining some variables
+		ARData:= Object(), ARData.DescriptionKeys := Object()
+		s:=fI:=descFlag:=descKeyFlag:=descKeyFlagO :=0
+		Brackets             	:= 0                                                         	; counter to find the end of a function
+		DoBracketCount	:= 0                                                        	; flag
+		FirstBracket      	:= 0                                                        	; flag
+		originchange    	:= 0                                                         ; counter for changed lines in AHKRare.ahk - Autosyntax correcting functionality
+
+	; parsing algorithm for AHK-Rare
+		Loop, % ARFile.MaxIndex() - 1
+		{
+			line:= ARFile[A_Index]
+			If (DoBracketCount = 1) && !descflag && !exampleFlag                                                                                                                                              	; to find the last bracket of a function
 			{
-						RegExMatch(A_LoopField, "(?<=\{\s;)[\w\s-\+\/\(\)]+(?=\(\d+\))", mainsection)
+					Brackets += BracketCount(line)
+					If (Brackets > 0) && (FirstBracket = 0)
+						FirstBracket:= 1
+			}
+
+			If RegExMatch(line, "(?<=\{\s;)[\w\s-\+\/\(\)]+(?=\(\d+\))")                                                                                                                                         	; name of mainsection
+			{
+						RegExMatch(line, "(?<=\{\s;)[\w\s-\+\/\(\)]+(?=\(\d+\))", mainsection)
 						mainsection	:= Trim(mainsection)
 						subsection	:= ""
-						RegExMatch(A_LoopField, "(?<=--\s)[\w\s]+(?=\s--)", MainSectionDescription)
-						descFlag:=descKeyFlag:=descKeyFlagO := 0
-						TrailingSpacesO:= TrailingSpaces 	:= 0
+						RegExMatch(line, "(?<=--\s)[\w\s]+(?=\s--)", MainSectionDescription)
+						descFlag:=descKeyFlag:=descKeyFlagO:=TrailingSpacesO:=TrailingSpaces := 0
 						continue
 			}
-			else If RegExMatch(A_LoopField, "(?<=\{\s;)\<\d\d\.\d\d[\d\.]*\>:\s[\w\-\_\+\/\(\)]+")                                                                                                                        	; recognize name of subsection
+			else If RegExMatch(line, "(?<=\{\s;)\<\d\d\.\d\d[\d\.]*\>\:\s[\w\-\_\+\/\(\)]+")                                                                                                              	; name of subsection
 			{
-						RegExMatch(A_LoopField, "(?<=\>:\s)[\w\-\_\s\+\/]+", subsection)
+						RegExMatch(line, "(?<=\>\:\s)[\w\-\_\s\+\/]+", subsection)
 						subsection:= Trim(subsection)
 						continue
 			}
-			else If RegExMatch(A_LoopField, "(;\s*\<\d\d\.\d\d\.\d\d\d\d\d)|(;\s*\<\d\d\.\d\d\.\d\d.\d\d\d\d\d)")                                                                                                 	; recognizes new function nr.
+			else If RegExMatch(line, "(;\s*\<\d\d\.\d\d\.\d\d\d\d\d)|(;\s*\<\d\d\.\d\d\.\d\d.\d\d\d\d\d\d)")                                                                                 	; new function
 			{
-					If ARData[(fI)].end = ""                                                                        	; if function boundaries are not proper set
-							ARData[(fI)].end := A_Index - 1
-					
-					ARData[(fI)].code     	:= RTrim(ARData[(fI)].code, "}`n`r") "`n}"            	; closes a function to be safe with syntax
-					ARData[(fI)].code     	:=   Trim(ARData[(fI)].code, "`n`r")                   	; deletes the first and last linefeed's
-					ARData[(fI)].examples :=    Trim(ARData[(fI)].examples, "`n`r")             	
-					
+				; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+				; last data from previous function will be stored
+				; --------------------------------------------------------------------------------------------------------------------------------------------------------- ;{
+
+				; if function boundaries are not set proper, e.g. missing function index at the end of a function or mispellings between start index and end index
+				/*
+					If (ARData[(fI)].end = "")
+					{
+							i:= A_Index
+							While, (i > 0)
+								If RegExMatch(ARFile[i:= i - 1], "^\s*\}")
+								{
+										ARData[(fI)].end := i
+										RegExMatch(ARFile[i], "^\s*\}", prepend)
+										RegExMatch(ARFile[i], "\s*\}\s*[;<\d./>]*\s*(.*)", append)
+										ARFile[i] := prepend " `;<`/" ARData[(fI)].FnHash ">" (StrLen(append1) > 0 ? " " append1 : "")
+										originchange ++
+										break
+								}
+					}
+				*/
+
+					RegExmatch(ARFile[(ARData[(fI)].start)-1],"[\d\.]+", startIndex)
+					RegExmatch(ARFile[(ARData[(fI)].end)], "[\d\.]+", endIndex)
+					If (startIndex <> endIndex)
+					{
+							i:= ARData[(fI)].end
+							RegExMatch(ARFile[i], "^\s*\}", prepend)
+							RegExMatch(ARFile[i], "\s*\}\s*[;<\d./>]*\s*(.*)", append)
+							ARFile[i] := prepend " `;<`/" ARData[(fI)].FnHash ">" (StrLen(append1) > 0 ? " " append1 : "")
+							originchange ++
+							origin .= i "(" A_Index "), "
+					}
+
+				; close the last function code to have a right syntax
+					ARData[(fI)].code     	:=   Trim(ARData[(fI)].code, "`n")
+					ARData[(fI)].code     	:=   Trim(ARData[(fI)].code, "`r")
+					If !RegExMatch(ARData[(fI)].code, "m)\}\s*\;\<\/[\d\.]+\>\s*") && !RegExMatch(ARData[(fI)].code, "m)\n\s*\}\s*$")
+							ARData[(fI)].code     	.= "`n}"
+
+				; shorten example code
+					ARData[(fI)].examples :=    Trim(ARData[(fI)].examples, "`n`r")
 					Loop, 5                                                                                                 	; deletes up 2 empty lines
 					{
 							ARData[(fI)].examples 	:= StrReplace(ARData[(fI)].examples	, SubStr("`n`n`n`n`n`n`n`n`n", 1, 8 - A_Index), "`n")
 							ARData[(fI)].code      	:= StrReplace(ARData[(fI)].code       	, SubStr("`n`n`n`n`n`n`n`n`n", 1, 8 - A_Index), "`n")
 					}
-					
 					ARData[(fi)]["description"][(descKey)] := RTrim(ARData[(fi)]["description"][(descKey)], "`n")
-					
-					descFlag:= descKeyFlag:= descKeyFlagO   	:= 0                                 	; re-initialize flags
-					TrailingSpacesO:= TrailingSpaces               	:= 0
-					NoCode                                                       	:= 0
-					
-					fi ++                                                                                                    	; enumerator
-					RegExMatch(A_LoopField, "[\d\.]+", FnIndex)                                   	; reads the functions numbers (e.g. 04.01.00011)
+
+				;}
+
+				; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+				; data collecting for a new function starts here
+				; --------------------------------------------------------------------------------------------------------------------------------------------------------- ;{
+					FirstBracket:= descFlag:=descKeyFlag:=descKeyFlagO:=TrailingSpacesO:=TrailingSpaces:=NoCode:= 0       	; re-initialize flags
+					RegExMatch(line, "[\d\.]+", FnHash)                                                                                                                 	; gets the function hash
+					fi ++                                                                                                                                                                   	; function index (fi) enumerator
 					ARData[(fI)]                                                   	:= Object()
 					ARData[(fi)].description                                	:= Object()
-					ARData[(fI)].FnIndex                                       	:= FnIndex
+					ARData[(fI)].FnHash                                       	:= FnHash
 					ARData[(fI)].start                                          	:= A_Index+1
 					ARData[(fI)].mainsection                              	:= mainsection
 					ARData[(fI)].mainsectionDescription           	:= mainsectionDescription
 					ARData[(fI)].subsection                                	:= subsection
-									
+
 					GuiControl, Text, Field2, % fI ", " fname "`)"
 					continue
+				;}
 			}
-			else If RegExMatch(A_LoopField, ";\s*\<\/\d\d\.\d\d\.\d\d\d\d\d")                                                                                                                                                      	; function ends 
+			else If RegExMatch(line, "^\s*\}\s*\;\s*\<\/") || ((DoBracketCount = 1) && (FirstBracket = 1) && (Brackets = 0))                                                        	; function end
 			{
 					ARData[(fI)].end  := A_Index
 					descFlag           	:= 0
 					NoCode           	:= 1
+					Brackets				:= 0
+					FirstBracket			:= 0
+					DoBracketCount	:= 0
 			}
-			else If RegExMatch(A_LoopField, "[\w\_-]+\([\w\d\s\,\=\.\*#-|\:\""""]*\)\s*\{\s+;--.*") or RegExMatch(A_LoopField, "[\w\_-]+\([\w\d\s\,\=\.\*#-|\:\""""]*\s*;--.*")         	; find function
+			else If RegExMatch(line, "[\w\_-]+\([\w\d\s\,\=\.\*#-|\:\""""]*\)\s*\{\s+;--.*") || RegExMatch(line, "[\w\_-]+\([\w\d\s\,\=\.\*#-|\:\""""]*\s*;--.*")          	; find function
 			{
-					RegExMatch(A_LoopField, "[\w\_-\d]+\(", fname)
-					RegExMatch(A_LoopField, "(?<=;--).*", fshort)
+					;TrailingSpaces:= countTrailingSpaces(line)
+					RegExMatch(line, "^\s*", trailing)
+					RegExMatch(line, "[\w\_-\d]+\(", fname)
+					RegExMatch(line, "(?<=;--).*", fshort)
 					ARData[(fI)].name         	:= Trim(fname) "`)"
 					ARData[(fI)].short         	:= Trim(fshort)
 					ARData[(fI)].subsection	:= subsection
-					ARData[(fI)].code         	:= A_LoopField "`n"
+					ARData[(fI)].code         	:= RegExReplace(line, "^" trailing) "`n"
+					Brackets                       	:= BracketCount(line)
+					DoBracketCount          	:= 1
 			}
-			else if RegExMatch(A_LoopField, "i)\/\*\s*DESCRIPTION")                                                                                                                                                                     	; description section detected
-					exampleFlag:= 0, descFlag:= 1, descKey:= Text:= "", continue
-			else if RegExMatch(A_LoopField, "i)\/\*\s*EXAMPLE")                                                                                                                                                                           	; example section detected
-					exampleFlag:= 1, descFlag:= 0, descKey:= Text:= "", continue
-			else if ( descFlag = 1 || exampleFlag = 1) && (Instr(A_LoopField, "--------------") || Instr(A_LoopField, "========================"))                              	; ignores specific internal layout lines 
-					continue
-			else if ( descFlag = 1 || exampleFlag = 1) && RegExMatch(A_LoopField, "\*\/")                                                                                                                                    	; end of descriptions or examples section
-					exampleFlag:= descFlag:= descKeyFlag:= exampleIndent := 0, descKey:="", continue
-			else if (descFlag = 1) && RegExMatch( A_LoopField, "^\s+[\w\(\)-\s]+(?=\s*:\s*)" )                                                                                                                           	; description key is found 
+			else if RegExMatch(line, "i).*DESCRIPTION\s")                                                                                                                                                             	; description section
 			{
+					exampleFlag:= 0
+					descFlag:= 1
+					descKey:= Text:= ""
+					continue
+			}
+			else if RegExMatch(line, ".*(EXAMPLE\(s\))|(EXAMPLES)|(\/\*\s*Example)")                                                                                                                    	; example section
+			{
+					exampleFlag:= 1
+					descFlag:= 0
+					descKey:= Text:= ""
+					continue
+			}
+			else if ( descFlag = 1 || exampleFlag = 1) && (Instr(line, "--------------") || Instr(line, "========================"))                                 	; ignores specific internal layout lines
+					continue
+			else if ( descFlag = 1 || exampleFlag = 1) && RegExMatch(line, "\*\/")                                                                                                                          	; end of descriptions or examples section
+			{
+					exampleFlag:= descFlag:= descKeyFlag:= exampleIndent := 0
+					descKey:=""
+					continue
+			}
+			else if (descFlag = 1) && RegExMatch( line, "^\s+[\w\(\)-\s]+(?=\s+\:\s+|\N)" )                                                                                                           	; description key is found
+			{
+				; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 				; the formatting of the AHK-Rare.ahk file creates difficulties in distinguishing the description key from the associated text
-					TrailingSpaces:=  countTrailingSpaces(A_LoopField)
+				; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+					TrailingSpaces:=  countTrailingSpaces(line)
 					If TrailingSpacesO && (TrailingSpaces >= (TrailingSpacesO + 1))
-							ARData[(fi)]["description"][(descKey)] .= Trim(A_LoopField) "`n", continue
-					
-					descKeyFlagO := descKeyFlag, descKeyFlag ++
-					
-				; determines the description key
-					RegExMatch(A_LoopField, "^\s+[\w\(\)-\s]+(?=\s*:\s*)", descKey)
+					{
+							ARData[(fi)]["description"][(descKey)] .= LTrim(line) "`n"
+							continue
+					}
+
+					descKeyFlagO := descKeyFlag
+					descKeyFlag ++
+
+					RegExMatch(line, "^\s+[\w\(\)-\s]+(?=\s+:\s+)", descKey)                                                                               	  ; determines the description key
 					descKey:= Trim(descKey)
-				
-				; collecting available keys for search function
-					If !ARData.DescriptionKeys.HasKey(descKey)
-							ARData.DescriptionKeys[(descKey)].Push(FnIndex "|")   
-				
-				; determines the corresponding text of the description
-					RegExMatch(A_LoopField, "(?<=\:).*", Text)
-					ARData[(fi)]["description"][(descKey)] := RTrim(Trim(Text), "`n`r") "`n" 
-			
+
+					If !ARData.DescriptionKeys.HasKey(descKey)                                                                          	  ; collecting available keys for search function
+							ARData.DescriptionKeys[(descKey)].Push(FnHash "|")
+
+					RegExMatch(line, "(?<=\:).*", Text)                                                                                  	 ; determines the corresponding text of the description
+					ARData[(fi)]["description"][(descKey)] := LTrim(Trim(Text), "`n`r") "`n"
+
 					TrailingSpacesO := TrailingSpaces
 			}
-			else if (descFlag = 1) && (descKeyFlag > descKeyFlagO)
-					ARData[(fi)]["description"][(descKey)] .= Trim(A_LoopField) "`n"
-			else if (exampleFlag = 1)                                                                                                                                                                                                                     	; parsing example section
+			else if (descFlag = 1) && (descKeyFlag > descKeyFlagO)                                                                                                                                              	; adding descriptions
+					ARData[(fi)]["description"][(descKey)] .= LTrim(line) "`n"
+			else if (exampleFlag = 1)                                                                                                                                                                                               	; parsing example section
 			{
-					If !exampleIndent && StrLen(A_LoopField) >= 2
-							exampleIndent := countTrailingSpaces(A_LoopField)
-					If ((StrLen(A_LoopField) <= 2) && (StrLen(ARData[(fI)].examples) <= 2)) || (StrLen(A_LoopField) >= 2)
-							ARData[(fI)].examples 	.= SubStr(A_LoopField, exampleIndent +1, StrLen(A_LoopField) - exampleIndent) "`n"
-			}						
-			else                                                                                                                                                                                                                                                       	; if nothing fits then the line is program code
+					If !exampleIndent && StrLen(line) >= 2
+							exampleIndent := countTrailingSpaces(line)
+					If (StrLen(line) <= 2 && StrLen(ARData[(fI)].examples) <= 2) || (StrLen(line) >= 2)
+							ARData[(fI)].examples 	.= SubStr(line, exampleIndent +1, StrLen(line) - exampleIndent) "`n"
+			}
+			else  if (NoCode = 0)                                                                                                                                                                                                      	; if nothing fits it is program code
 			{
-					If NoCode = 0
-							ARData[(fI)].code	.= A_LoopField "`n"
+					ARData[(fI)].code	.= RegExReplace(line, "^" trailing) "`n"
 			}
 	}
+
+	; this function save's correction made to AHK-Rare code from parsing algorithm before
+		If (originchange > 0)
+		{
+				GuiControl, ARG:, Stats1, % originchange " lines of code corrected"
+				RareSave(ARFile)
+		}
 
 return ARData
 }
 
-ControlIsFocused(ControlID) {                                                                 	;-- true or false if specified gui control is active or not
-
-	GuiControlGet, FControlID, ARG:FocusV
-	If ControlID = FControlID
-			return 1
-	
-return 0
+BracketCount(str, brackets:="{}") {                                                       	;-- helps to find the last bracket of a function
+	RegExReplace(str, SubStr(brackets, 1, 1), "", open)
+	RegExReplace(str, SubStr(brackets, 2, 1), "", closed)
+return open - closed
 }
 
-countTrailingSpaces(str) {
-	
+countTrailingSpaces(str) {                                                                    	;-- counts all leading spaces of a string
+
 	Loop, % StrLen(str)
 		If Instr(A_Space "`t", SubStr(str, A_Index, 1))
 				TrailingSpaces ++
 		else
 				Break
-	
+
 return TrailingSpaces
 }
+
+;}
+
+;{08. all the  other functions
 
 HighlightAHK(Settings, ByRef Code) {
 	static Flow := "break|byref|catch|class|continue|else|exit|exitapp|finally|for|global|gosub|goto|if|ifequal|ifexist|ifgreater|ifgreaterorequal|ifinstring|ifless|iflessorequal|ifmsgbox|ifnotequal|ifnotexist|ifnotinstring|ifwinactive|ifwinexist|ifwinnotactive|ifwinnotexist|local|loop|onexit|pause|return|settimer|sleep|static|suspend|throw|try|until|var|while"
@@ -632,34 +788,35 @@ HighlightAHK(Settings, ByRef Code) {
 	, Keynames := "alt|altdown|altup|appskey|backspace|blind|browser_back|browser_favorites|browser_forward|browser_home|browser_refresh|browser_search|browser_stop|bs|capslock|click|control|ctrl|ctrlbreak|ctrldown|ctrlup|del|delete|down|end|enter|esc|escape|f1|f10|f11|f12|f13|f14|f15|f16|f17|f18|f19|f2|f20|f21|f22|f23|f24|f3|f4|f5|f6|f7|f8|f9|home|ins|insert|joy1|joy10|joy11|joy12|joy13|joy14|joy15|joy16|joy17|joy18|joy19|joy2|joy20|joy21|joy22|joy23|joy24|joy25|joy26|joy27|joy28|joy29|joy3|joy30|joy31|joy32|joy4|joy5|joy6|joy7|joy8|joy9|joyaxes|joybuttons|joyinfo|joyname|joypov|joyr|joyu|joyv|joyx|joyy|joyz|lalt|launch_app1|launch_app2|launch_mail|launch_media|lbutton|lcontrol|lctrl|left|lshift|lwin|lwindown|lwinup|mbutton|media_next|media_play_pause|media_prev|media_stop|numlock|numpad0|numpad1|numpad2|numpad3|numpad4|numpad5|numpad6|numpad7|numpad8|numpad9|numpadadd|numpadclear|numpaddel|numpaddiv|numpaddot|numpaddown|numpadend|numpadenter|numpadhome|numpadins|numpadleft|numpadmult|numpadpgdn|numpadpgup|numpadright|numpadsub|numpadup|pause|pgdn|pgup|printscreen|ralt|raw|rbutton|rcontrol|rctrl|right|rshift|rwin|rwindown|rwinup|scrolllock|shift|shiftdown|shiftup|space|tab|up|volume_down|volume_mute|volume_up|wheeldown|wheelleft|wheelright|wheelup|xbutton1|xbutton2"
 	, Builtins := "base|clipboard|clipboardall|comspec|errorlevel|false|programfiles|true"
 	, Keywords := "abort|abovenormal|activex|add|ahk_class|ahk_exe|ahk_group|ahk_id|ahk_pid|all|alnum|alpha|altsubmit|alttab|alttabandmenu|alttabmenu|alttabmenudismiss|alwaysontop|and|autosize|background|backgroundtrans|base|belownormal|between|bitand|bitnot|bitor|bitshiftleft|bitshiftright|bitxor|bold|border|bottom|button|buttons|cancel|capacity|caption|center|check|check3|checkbox|checked|checkedgray|choose|choosestring|click|clone|close|color|combobox|contains|controllist|controllisthwnd|count|custom|date|datetime|days|ddl|default|delete|deleteall|delimiter|deref|destroy|digit|disable|disabled|dpiscale|dropdownlist|edit|eject|enable|enabled|error|exit|expand|exstyle|extends|filesystem|first|flash|float|floatfast|focus|font|force|fromcodepage|getaddress|getcapacity|grid|group|groupbox|guiclose|guicontextmenu|guidropfiles|guiescape|guisize|haskey|hdr|hidden|hide|high|hkcc|hkcr|hkcu|hkey_classes_root|hkey_current_config|hkey_current_user|hkey_local_machine|hkey_users|hklm|hku|hotkey|hours|hscroll|hwnd|icon|iconsmall|id|idlast|ignore|imagelist|in|insert|integer|integerfast|interrupt|is|italic|join|label|lastfound|lastfoundexist|left|limit|lines|link|list|listbox|listview|localsameasglobal|lock|logoff|low|lower|lowercase|ltrim|mainwindow|margin|maximize|maximizebox|maxindex|menu|minimize|minimizebox|minmax|minutes|monitorcount|monitorname|monitorprimary|monitorworkarea|monthcal|mouse|mousemove|mousemoveoff|move|multi|na|new|no|noactivate|nodefault|nohide|noicon|nomainwindow|norm|normal|nosort|nosorthdr|nostandard|not|notab|notimers|number|off|ok|on|or|owndialogs|owner|parse|password|pic|picture|pid|pixel|pos|pow|priority|processname|processpath|progress|radio|range|rawread|rawwrite|read|readchar|readdouble|readfloat|readint|readint64|readline|readnum|readonly|readshort|readuchar|readuint|readushort|realtime|redraw|regex|region|reg_binary|reg_dword|reg_dword_big_endian|reg_expand_sz|reg_full_resource_descriptor|reg_link|reg_multi_sz|reg_qword|reg_resource_list|reg_resource_requirements_list|reg_sz|relative|reload|remove|rename|report|resize|restore|retry|rgb|right|rtrim|screen|seconds|section|seek|send|sendandmouse|serial|setcapacity|setlabel|shiftalttab|show|shutdown|single|slider|sortdesc|standard|status|statusbar|statuscd|strike|style|submit|sysmenu|tab|tab2|tabstop|tell|text|theme|this|tile|time|tip|tocodepage|togglecheck|toggleenable|toolwindow|top|topmost|transcolor|transparent|tray|treeview|type|uncheck|underline|unicode|unlock|updown|upper|uppercase|useenv|useerrorlevel|useunsetglobal|useunsetlocal|vis|visfirst|visible|vscroll|waitclose|wantctrla|wantf2|wantreturn|wanttab|wrap|write|writechar|writedouble|writefloat|writeint|writeint64|writeline|writenum|writeshort|writeuchar|writeuint|writeushort|xdigit|xm|xp|xs|yes|ym|yp|ys|__call|__delete|__get|__handle|__new|__set"
-	, Needle := "
-	( LTrim Join Comments
+	, Needle :="
+	(LTrim Join Comments
 		ODims)
 		((?:^|\s);[^\n]+)                	; Comments
-		|(^\s*\/\*.+?\n\s*\*\/)       	; Multiline comments
-		|((?:^|\s)#[^ \t\r\n,]+)       	; Directives
+		|(^\s*\/\*.+?\n\s*\*\/)      	; Multiline comments
+		|((?:^|\s)#[^ \t\r\n,]+)      	; Directives
 		|([+*!~&\/\\<>^|=?:
 			,().```%{}\[\]\-]+)           	; Punctuation
-		|\b(0x[0-9a-fA-F]+|[0-9]+) 	; Numbers
+		|\b(0x[0-9a-fA-F]+|[0-9]+)	; Numbers
 		|(""[^""\r\n]*"")                	; Strings
-		|\b(A_\w*|" Builtins ")\b    	; A_Builtins
+		|\b(A_\w*|" Builtins ")\b   	; A_Builtins
 		|\b(" Flow ")\b                  	; Flow
-		|\b(" Commands ")\b        	; Commands
+		|\b(" Commands ")\b       	; Commands
 		|\b(" Functions ")\b          	; Functions (builtin)
 		|\b(" Keynames ")\b         	; Keynames
 		|\b(" Keywords ")\b          	; Other keywords
 		|(([a-zA-Z_$]+)(?=\())       	; Functions
+		|(^\s*[A-Z()-\s]+\:\N)        	; Descriptions
 	)"
-	
+
 	GenHighlighterCache(Settings)
 	Map := Settings.Cache.ColorMap
-	
+
 	Pos := 1
-	while (FoundPos := RegExMatch(Code, Needle, Match, Pos)) 
+	while (FoundPos := RegExMatch(Code, Needle, Match, Pos))
 	{
 		RTF .= "\cf" Map.Plain " "
 		RTF .= EscapeRTF(SubStr(Code, Pos, FoundPos-Pos))
-		
+
 		; Flat block of if statements for performance
 		if (Match.Value(1) != "")
 			RTF .= "\cf" Map.Comments
@@ -687,46 +844,48 @@ HighlightAHK(Settings, ByRef Code) {
 			RTF .= "\cf" Map.Keywords
 		else if (Match.Value(13) != "")
 			RTF .= "\cf" Map.Functions
+		else If (Match.Value(14) != "")
+			RTF .= "\cf" Map.Descriptions
 		else
 			RTF .= "\cf" Map.Plain
-		
+
 		RTF .= " " EscapeRTF(Match.Value())
 		Pos := FoundPos + Match.Len()
 	}
-	
+
 	return Settings.Cache.RTFHeader . RTF . "\cf" Map.Plain " " EscapeRTF(SubStr(Code, Pos)) "\`n}"
 }
 
 GenHighlighterCache(Settings) {
-	
+
 	if Settings.HasKey("Cache")
 		return
 	Cache := Settings.Cache := {}
-	
-	
+
+
 	; --- Process Colors ---
 	Cache.Colors := Settings.Colors.Clone()
-	
+
 	; Inherit from the Settings array's base
 	BaseSettings := Settings
 	while (BaseSettings := BaseSettings.Base)
 		for Name, Color in BaseSettings.Colors
 			if !Cache.Colors.HasKey(Name)
 				Cache.Colors[Name] := Color
-	
+
 	; Include the color of plain text
 	if !Cache.Colors.HasKey("Plain")
 		Cache.Colors.Plain := Settings.FGColor
-	
+
 	; Create a Name->Index map of the colors
 	Cache.ColorMap := {}
 	for Name, Color in Cache.Colors
 		Cache.ColorMap[Name] := A_Index
-	
-	
+
+
 	; --- Generate the RTF headers ---
 	RTF := "{\urtf"
-	
+
 	; Color Table
 	RTF .= "{\colortbl;"
 	for Name, Color in Cache.Colors
@@ -736,7 +895,7 @@ GenHighlighterCache(Settings) {
 		RTF .= "\blue"  Color     & 0xFF ";"
 	}
 	RTF .= "}"
-	
+
 	; Font Table
 	if Settings.Font
 	{
@@ -747,24 +906,24 @@ GenHighlighterCache(Settings) {
 		if Settings.Font.Bold
 			RTF .= "\b"
 	}
-	
+
 	; Tab size (twips)
 	RTF .= "\deftab" GetCharWidthTwips(Settings.Font) * Settings.TabSize
-	
+
 	Cache.RTFHeader := RTF
 }
 
 GetCharWidthTwips(Font) {
 	static Cache := {}
-	
+
 	if Cache.HasKey(Font.Typeface "_" Font.Size "_" Font.Bold)
 		return Cache[Font.Typeface "_" font.Size "_" Font.Bold]
-	
+
 	; Calculate parameters of CreateFont
 	Height := -Round(Font.Size*A_ScreenDPI/72)
 	Weight := 400+300*(!!Font.Bold)
 	Face := Font.Typeface
-	
+
 	; Get the width of "x"
 	hDC := DllCall("GetDC", "UPtr", 0)
 	hFont := DllCall("CreateFont"
@@ -789,7 +948,7 @@ GetCharWidthTwips(Font) {
 	DllCall("SelectObject", "UPtr", hDC, "UPtr", hObj, "UPtr")
 	DllCall("DeleteObject", "UPtr", hFont)
 	DllCall("ReleaseDC", "UPtr", 0, "UPtr", hDC)
-	
+
 	; Convert to twpis
 	Twips := Round(NumGet(SIZE, 0, "UInt")*1440/A_ScreenDPI)
 	Cache[Font.Typeface "_" Font.Size "_" Font.Bold] := Twips
@@ -802,24 +961,33 @@ EscapeRTF(Code) {
 	return StrReplace(StrReplace(Code, "`t", "\tab "), "`r")
 }
 
-LV_AutoColumSizer(hLV, Sizes, Options:="") {                                         	;-- computes and changes the pixel width of the columns across the full width of a listview   
-	
+ControlIsFocused(ControlID) {                                                                  	;-- true or false if specified gui control is active or not
+
+	GuiControlGet, FControlID, ARG:Focus
+	If Instr(FControlID, ControlID)
+			return true
+
+return false
+}
+
+LV_AutoColumSizer(hLV, Sizes, Options:="") {                                         	;-- computes and changes the pixel width of the columns across the full width of a listview
+
 	; PARAMETERS:
-	; ----------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	; ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	; Sizes   	- 	this example is for a 4 column listview, for a better understanding it is possible to use a different syntax
 	;               	Sizes:= "15%, 18%, 60%" or "15, 18, 60" or "15,18,60" or "15|18|60" or "15% 18% 60%"
-	;               	It does not matter which characters or strings you use for subdivision, the little RegEx algorithm recognizes the dividers  
+	;               	It does not matter which characters or strings you use for subdivision, the little RegEx algorithm recognizes the dividers
 	;               	REMARK: !avoid specifying the last column width, this size will be computed!
-	;                 	    *		*		*		*		*		*		*		*		*		*		*		*		*		*		* 
+	;                 	    *		*		*		*		*		*		*		*		*		*		*		*		*		*		*
 	; ** todo **	there is also an automatic mode which calculates the column width of the listview over the maximum pixel width of the content of the columns
 	;                	you have to use Sizes:= "AutoColumnWidth"
 	;
 	; ** todo ** Options 	-	can be passed to limit the maximum column width to the maximum pixel width of the column contents
 	;                  	or to prevent undersizing of columns
-	
+
 	static hHeader, LVP, hLVO, SizesO
 	w:= LVP:= []
-	
+
 	If hLVO <> hLV
 			hHeader:= LV_EX_GetHeader(hLV), hLVO:= hLV
 	If SizesO <> Sizes
@@ -830,9 +998,9 @@ LV_AutoColumSizer(hLV, Sizes, Options:="") {                                    
 							LVP[A_Index] := num
 			else
 				nin:=1
-			
+
 			LVP_Last := 100
-			
+
 			Loop, % LVP.MaxIndex()
 			{
 					LVP[A_Index]	:= 	"0" . LVP[A_Index]
@@ -846,69 +1014,74 @@ LV_AutoColumSizer(hLV, Sizes, Options:="") {                                    
 
 	ControlGetPos,,, LV_Width,,, % "ahk_id " hLV
 	LV_Width -= DllCall("GetScrollPos", "UInt", hLV, "Int", 1)	;subtracts the width of the vertical scrollbar to get the client size of the listview
-	
+
 	Loop, % LVP.MaxIndex()
 		DllCall("SendMessage", "uint", hLV, "uint", 4126, "uint", A_Index-1, "int", Ceil(LV_Width * LVP[A_Index])) 	;sets the column width
 }
 
-LV_EX_GetHeader(HLV) {                                                                            	;-- Retrieves the handle of the header control used by the list-view control.
+LV_EX_GetHeader(HLV) {                                                                         	;-- Retrieves the handle of the header control used by the list-view control.
    ; LVM_GETHEADER = 0x101F -> http://msdn.microsoft.com/en-us/library/bb774937(v=vs.85).aspx
    SendMessage, 0x101F, 0, 0, , % "ahk_id " . HLV
    Return ErrorLevel
 }
 
-LV_EX_GetColumnWidth(HLV, Column) {                                                   	;-- gets the width of a column in report or list view.
+LV_EX_GetColumnWidth(HLV, Column) {                                                	;-- gets the width of a column in report or list view.
    ; LVM_GETCOLUMNWIDTH = 0x101D -> http://msdn.microsoft.com/en-us/library/bb774915(v=vs.85).aspx
    SendMessage, 0x101D, % (Column - 1), 0, , % "ahk_id " . HLV
    Return ErrorLevel
 }
 
 OnMouseHover(wparam, lparam, msg, hwnd) {                                     	;-- Autofocus for Listview, Edit and RichEdit controls ;{
-	
+
 	static lastFocusedControl
-	
+
 	MouseGetPos,mx, my,, hControlOver
 	WinGetClass, cclass, % "ahk_id " hwnd
-	
+
 	;ToolTip, % hControlOver "`n" hWinOver "`n" GetHex(wparam) "`n" GetHex(lparam) "`n" GetHex(msg) "`n" GetHex(hwnd) "`n" cclass
-	If RegExMatch(hControlOver, "(Edit)|(SysListView32)|(RichEdit)|(ComboBox)") 
+	If RegExMatch(hControlOver, "(Edit)|(SysListView32)|(SysListviewHeader)|(RichEdit)|(ComboBox)")
 	{
-			If lastFocusedControl != hControlOver
+			If (lastFocusedControl != hControlOver)
 			{
-					ControlFocus, % hControlOver 	, % "ahk_id " hARG
-					ControlGetText, SText, Edit1    	, % "ahk_id " hArg
+					If !Instr(hControlOver, "SysListView32")
+						ControlFocus, % hControlOver 	, % "ahk_id " hARG
+					ControlGetText, SText, Edit1    	, % "ahk_id " hARG
 					If (Trim(SText) = "type your search pattern here") && (hControlOver = "Edit1")
-							gosub NormalEditFont
+							NormalEditFont()
 					else If (Trim(SText) = "") && (hControlOver <> "Edit1")
-							gosub ItalicEditFont
+							ItalicEditFont()
 			}
 			lastFocusedControl := hControlOver
 	}
-	else if Instr(cclass, "RichEdit") 
+	else if Instr(cclass, "RichEdit")
 	{
 			If !Instr(lastFocusedControl, cclass)
-			{	
+			{
 					ControlFocus,, % "ahk_id " hwnd
 					WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
 					ControlGetPos, tx, ty, tw, th,, % "ahk_id " hTabs
 					ToolTip, % "Press the right`nmouse button`nto copy the text.",% (wx + tx + tw - 195), % (wy + ty + 40), 2
 					SetTimer, TTOff, -4000
 			}
-			
+
 			ControlGetText, SText, Edit1, % "ahk_id " hArg
-			If Trim(SText) = "" 
-					gosub ItalicEditFont
-			
+			If Trim(SText) = ""
+					ItalicEditFont()
+
 			lastFocusedControl := cclass
 	}
 
 }
-NormalEditFont: 
+
+NormalEditFont() {
 	Gui, Arg: Font, S11 Normal C000000
 	GuiControl, ARG:Font	, Edit1
 	GuiControl, ARG:     	, Edit1, % ""
 return
-ItalicEditFont:
+}
+
+ItalicEditFont() {
+
 	Gui, Arg: Font, S11 Italic CAAAAAA
 	GuiControl, ARG:Font	, Edit1
 	GuiControl, ARG:     	, Edit1, % "type your search pattern here"
@@ -917,23 +1090,24 @@ ItalicEditFont:
 	{
 			LV_Delete()
 			For i, function in ARData
-					LV_Add("", function.mainsection, function.name, function.short, function.FnIndex)
+					LV_Add("", function.mainsection, function.name, function.short, function.FnHash)
 			GuiControl, Text, Field3, % "displayed functions: " fc
 			foundIndex:= 0
 	}
-	
-return ;}
 
-GetHex(hwnd) {
+return
+} ;}
+
+GetHex(hwnd) {                                                                                       	;-- integer to hex
 return Format("0x{:x}", hwnd)
 }
 
-GetDec(hwnd) {
+GetDec(hwnd) {                                                                                       	;-- hex to integer
 return Format("{:u}", hwnd)
 }
 
 Edit_SetFont(hEdit,hFont,p_Redraw=False) {
-	
+
 	;{------------------------------
 	;
 	; Function: Edit_SetFont
@@ -969,7 +1143,7 @@ Edit_SetFont(hEdit,hFont,p_Redraw=False) {
     }
 
 Edit_SetMargins(hEdit, p_LeftMargin:="",p_RightMargin:="")  {
-	
+
     Static 	 EM_SETMARGINS 	:=0xD3
 		    	,EC_LEFTMARGIN 	:=0x1
 		    	,EC_RIGHTMARGIN	:=0x2
@@ -977,7 +1151,7 @@ Edit_SetMargins(hEdit, p_LeftMargin:="",p_RightMargin:="")  {
 
     l_Flags  	:= 0
     l_Margins	:= 0
-	
+
     if p_LeftMargin is Integer
 	{
         l_Flags  	|= EC_LEFTMARGIN
@@ -994,7 +1168,66 @@ Edit_SetMargins(hEdit, p_LeftMargin:="",p_RightMargin:="")  {
         SendMessage EM_SETMARGINS, l_Flags, l_Margins,, % "ahk_id " %hEdit%
 }
 
-screenDims() {								                       						        			;--returns a key:value pair of width screen dimensions (only for primary monitor)
+RE_FindTextAndSelect(hRichEdit, Text, Mode) {
+
+	; from Class_RichEdit modified to be a function without class
+
+	Static FR:= {DOWN: 1, WHOLEWORD: 2, MATCHCASE: 4}
+      Flags := 0
+      For Each, Value In Mode
+         If FR.HasKey(Value)
+            Flags |= FR[Value]
+
+	  Sel := RE_GetSel(hRichEdit)
+      Min := (Flags & FR.DOWN) ? Sel.E : Sel.S
+      Max := (Flags & FR.DOWN) ? -1 : 0
+
+	VarSetCapacity(FT, 16 + A_PtrSize, 0)
+	NumPut(CpMin,	FT, 0, "Int")
+	NumPut(CpMax,	FT, 4, "Int")
+	NumPut(&Text,	FT, 8, "Ptr")
+
+	SendMessage, 0x047C, % hFlags, &FT, , % "ahk_id " hRichEdit
+	S := NumGet(FT, 8 + A_PtrSize	, "Int")
+	E := NumGet(FT, 12 + A_PtrSize	, "Int")
+	 If (S = -1) && (E = -1)
+         Return False
+
+Return RE_SetSel(S, E, hRichEdit)
+}
+
+RE_GetSel(hRichEdit) { ; Retrieves the starting and ending character positions of the selection in a rich edit control.
+      ; Returns an object containing the keys S (start of selection) and E (end of selection)).
+      ; EM_EXGETSEL = 0x0434
+      VarSetCapacity(CR, 8, 0)
+      SendMessage, 0x0434, 0, &CR, , % "ahk_id " hRichEdit
+      Return {S: NumGet(CR, 0, "Int"), E: NumGet(CR, 4, "Int")}
+}
+
+RE_SetSel(Start, End, hRichEdit) { ; Selects a range of characters.
+      ; Start : zero-based start index
+      ; End   : zero-based end index (-1 = end of text))
+      ; EM_EXSETSEL = 0x0437
+      VarSetCapacity(CR, 8, 0)
+      NumPut(Start, CR, 0, "Int")
+      NumPut(End,   CR, 4, "Int")
+      SendMessage, 0x0437, 0, &CR, , % "ahk_id " hRichEdit
+      Return ErrorLevel
+}
+
+RE_GetTextLen(hRichEdit) { ; Calculates text length in various ways.
+      ; EM_GETTEXTLENGTHEX = 0x045F
+      VarSetCapacity(GTL, 8, 0)     ; GETTEXTLENGTHEX structure
+      NumPut(1200, GTL, 4, "UInt")  ; codepage = Unicode
+      SendMessage, 0x045F, &GTL, 0, , % "ahk_id " hRichEdit
+      Return ErrorLevel
+}
+
+HighlightTab(hTab, TabNr, status) {
+	SendMessage, 0x1333, % TabNr, % status,, %  "ahk_id " hTab ; TCM_HIGHLIGHTITEM
+}
+
+screenDims() {                                                                                         	;--returns a key:value pair of width screen dimensions (only for primary monitor)
 
 	W := A_ScreenWidth
 	H := A_ScreenHeight
@@ -1006,7 +1239,7 @@ screenDims() {								                       						        			;--returns a key:v
  return {W:W, H:H, DPI:DPI, OR:Orient, yEdge:yEdge, yBorder:yBorder}
 }
 
-GetWindowInfo(hWnd) {                                                      					 	;-- returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)
+GetWindowInfo(hWnd) {                                                                         	;-- returns an Key:Val Object with the most informations about a window (Pos, Client Size, Style, ExStyle, Border size...)
     NumPut(VarSetCapacity(WINDOWINFO, 60, 0), WINDOWINFO)
     DllCall("GetWindowInfo", "Ptr", hWnd, "Ptr", &WINDOWINFO)
     wi := Object()
@@ -1028,7 +1261,7 @@ GetWindowInfo(hWnd) {                                                      					
     Return wi
 }
 
-bcrypt_sha512(string) {                                                                             	;-- used to compare versions of files
+bcrypt_sha512(string) {                                                                            	;-- used to compare versions of files
     static BCRYPT_SHA512_ALGORITHM := "SHA512"
     static BCRYPT_OBJECT_LENGTH    := "ObjectLength"
     static BCRYPT_HASH_LENGTH      := "HashDigestLength"
@@ -1074,7 +1307,7 @@ UpdateAHKRare() {
 	hash[1]:= bcrypt_sha512(file)
 	FileRead, file, % A_ScriptDir "\..\AHKRareTheGui.ahk"
 	hash[2] := bcrypt_sha512(file)
-	
+
 	;Download(versions, "")
 }
 
@@ -1190,7 +1423,6 @@ Return hBitmap
 
 #Include %A_ScriptDir%\lib\RichCode.ahk
 #Include %A_ScriptDir%\lib\class_bcrypt.ahk
-
 ;}
 
 
