@@ -1,15 +1,17 @@
 #NoEnv
 SetBatchLines, -1
+FileEncoding, UTF-8
 
-
-funclist:= listfunc2MD(A_ScriptDir . "\..\AHK-Rare.ahk")
+funclist:= listfunc2MD(A_ScriptDir "\AHK-Rare.ahk")
 
 today:= A_DD "-" A_MM "-" A_YYYY
-file = %A_ScriptDir%\%today%_MDTable.md
+file := A_ScriptDir "\" today "_MDTable.md"
 
-file:= FileOpen(A_ScriptDir "\" file, "w", "UTF8")
+MsgBox, % funclist
+
+file:= FileOpen(file, "w", "UTF-8")
 file.Write(funclist)
-flie.Close()
+file.Close()
 
 
 ;Reads files.txt , and opens file by file - it search for function - store them into functions object + store the containing script
@@ -44,38 +46,38 @@ exitApp
 Listfunc2MD(file){																;--list all functions inside a ahk script and write MarkDown Table
 
 	f:=0, s:=0, i:=0
-	lst=
-(
-| FNr | Line | name of function and description |
-|:--: | :--: |`n
-)
+	lst =
+			(LTrim
+			| FNr | Line | name of function and description |
+			|:--: | :--: | :--: |`n
+			)
 
 	fileread, z, % file
-	StringReplace, z, z, `r, , All			; important
 
-	Loop, Parse, z, `n
+	Loop, Parse, z, `n, `r
 	{
 		i++
 		ALF:= A_LoopField
 		If RegExMatch(ALF, ";\s?<")
 			s:=0
-		else If RegExMatch(ALF, ";\s?sub") ;or RegExMatch(Alf
+		else If RegExMatch(ALF, ";\s?sub")
 			s:=1
-				
-		If (s=1) 
+
+		If s = 1
 			continue
 
 		fnp1:= Instr(ALF, "`(")
 		fnp2:= Instr(ALF, "`{")
 		cmt:= Instr(ALF, ";--")+3
-		If ((fnp1 > 0) AND (cmt > 0) AND (fnp1<cmt)) {
+		If (fnp1 > 0) && (cmt > 0) && (fnp1<cmt)
+		{
 				f++
 				dsc:= Trim(SubStr(ALF, cmt, StrLen(ALF)-cmt+1))
 				If !(dsc="")
 						dsc:= " - *" . dsc . "*"
 				lst.= "| " . SubStr("00000", 1, 3-StrLen(f)) . f . " | " . SubStr("00000", 1, 5-StrLen(i)) . i . " | **" . Trim(SubStr(ALF, 1, fnp1)) . "`)**" . dsc . " |`n"
 		}
-		
+
 
 	}
 

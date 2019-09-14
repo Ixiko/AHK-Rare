@@ -5,11 +5,8 @@
 ; 		MISSING THINGS:
 ; ------------------------------------------------------------------------------------------------------------
 ;
-;	1. The search function should have two options, Basic and RegEx
-;		At the moment only RegEx is activated. In future, however, it should be possible
-;		to combine several terms by logical 'and' and / or logical 'or' (Basic-Mode).
-;	2. Highlighting the search term(s) in the RichEdit controls
-;	3. Keywords should be displayed in the description with a larger font
+;	1. Highlighting the search term(s) in the RichEdit controls
+;	2. Keywords should be displayed in the description with a larger font
 ; ------------------------------------------------------------------------------------------------------------
 
 ;{01. script parameters
@@ -53,14 +50,14 @@
 
 ;{02. variables
 
-		ARData    	:= Object()
-		ARFile      	:= Array()
+		ARData    	:= Object()	; contains data from AHKRare.ahk
+		ARFile      	:= Array() 	; indexed array of AHKRare.ahk file, index is corresponding to line number
 		RC		    	:= Object()
-		LogoW     	:= 1200
+		LogoW     	:= 1200    	; base width of gui on first start
 		LW           	:= 450
-		LogoH         	:= 71
+		LogoH         	:= 71	    	; height of AHKRare Logo
 		SR1Width	:= 250
-		highlight   	:= false
+		highlight   	:= false     	; flag to highlight search results
 
 		global  FoundIndex:= 0 ; a flag
 
@@ -133,26 +130,12 @@
 			"Descriptions"	:	0xF0DD82,
 			"Link"           	:	0x47B856,
 
-			; CSS
-			"ColorCodes"	:   0x7CC8CF,
-			"Properties" 	:   0xCDBFA3,
-			"Selectors"   	:	0xE4EDED,
-
-			; HTML
-			"Attributes"  	:   0x7CC8CF,
-			"Entities"      	:	0xF79B57,
-			"Tags"          	:	0xCDBFA3,
-
-			; JS
-			"Builtins"      	:	0xE4EDED,
-			"Constants"   	:	0xF79B57,
-			"Declarations"	:	0xCDBFA3,
-
 			; PLAIN-TEXT
 			"PlainText"		:	0x7F9F7F
 			}
 		}
 		)
+
 ;}
 ;}
 
@@ -418,7 +401,7 @@ ARGGuiSize:                      	;{
 	GuiControl, ARG: Move, Field3           	, % "w" (A_GuiWidth - LW - 40) " h30"
 	GuiControl, ARG: Move, LVFunc         	, % "w" (A_GuiWidth) ;" h"(A_GuiHeight//3)
 	GuiControlGet, LV_, ARG: Pos, LVFunc
-	LV_AutoColumSizer(hLVFunc, "16% 15% 60%")
+	LV_AutoColumSizer(hLVFunc, "10% 15% 60%")
 	GuiControl, ARG: Move, ShowRoom1 	, % "y" (LV_Y+LV_H+10)                                                                                 " h" (A_GuiHeight-LV_Y-LV_H-10)
 	GuiControl, ARG: Move, ShowRoom2 	, % "x" (SR1Width+5) " y" (LV_Y+LV_H+10) " w" (A_GuiWidth-SR1Width-5) " h" (A_GuiHeight-LV_Y-LV_H-10)
 	GuiControl, ARG: Move, % RC[1].hwnd	, % "x" (SR1Width+5) " y" (LV_Y+LV_H+30) " w" (A_GuiWidth-SR1Width-5) " h" (A_GuiHeight-LV_Y-LV_H-30)
@@ -890,9 +873,9 @@ GenHighlighterCache(Settings) {
 	RTF .= "{\colortbl;"
 	for Name, Color in Cache.Colors
 	{
-		RTF .= "\red"   Color>>16 & 0xFF
-		RTF .= "\green" Color>>8  & 0xFF
-		RTF .= "\blue"  Color     & 0xFF ";"
+		RTF .= "\red"    	Color>>16	& 0xFF
+		RTF .= "\green"	Color>>8 	& 0xFF
+		RTF .= "\blue"  	Color        	& 0xFF ";"
 	}
 	RTF .= "}"
 
@@ -914,34 +897,35 @@ GenHighlighterCache(Settings) {
 }
 
 GetCharWidthTwips(Font) {
+
 	static Cache := {}
 
 	if Cache.HasKey(Font.Typeface "_" Font.Size "_" Font.Bold)
 		return Cache[Font.Typeface "_" font.Size "_" Font.Bold]
 
 	; Calculate parameters of CreateFont
-	Height := -Round(Font.Size*A_ScreenDPI/72)
-	Weight := 400+300*(!!Font.Bold)
-	Face := Font.Typeface
+	Height	:= -Round(Font.Size*A_ScreenDPI/72)
+	Weight	:= 400+300*(!!Font.Bold)
+	Face 	:= Font.Typeface
 
 	; Get the width of "x"
-	hDC := DllCall("GetDC", "UPtr", 0)
-	hFont := DllCall("CreateFont"
-	, "Int", Height ; _In_ int     nHeight,
-	, "Int", 0      ; _In_ int     nWidth,
-	, "Int", 0      ; _In_ int     nEscapement,
-	, "Int", 0      ; _In_ int     nOrientation,
-	, "Int", Weight ; _In_ int     fnWeight,
-	, "UInt", 0     ; _In_ DWORD   fdwItalic,
-	, "UInt", 0     ; _In_ DWORD   fdwUnderline,
-	, "UInt", 0     ; _In_ DWORD   fdwStrikeOut,
-	, "UInt", 0     ; _In_ DWORD   fdwCharSet, (ANSI_CHARSET)
-	, "UInt", 0     ; _In_ DWORD   fdwOutputPrecision, (OUT_DEFAULT_PRECIS)
-	, "UInt", 0     ; _In_ DWORD   fdwClipPrecision, (CLIP_DEFAULT_PRECIS)
-	, "UInt", 0     ; _In_ DWORD   fdwQuality, (DEFAULT_QUALITY)
-	, "UInt", 0     ; _In_ DWORD   fdwPitchAndFamily, (FF_DONTCARE|DEFAULT_PITCH)
-	, "Str", Face   ; _In_ LPCTSTR lpszFace
-	, "UPtr")
+	hDC 	:= DllCall("GetDC", "UPtr", 0)
+	hFont 	:= DllCall("CreateFont"
+					, "Int", Height 	; _In_ int       	  nHeight,
+					, "Int", 0         	; _In_ int       	  nWidth,
+					, "Int", 0        	; _In_ int       	  nEscapement,
+					, "Int", 0        	; _In_ int       	  nOrientation,
+					, "Int", Weight ; _In_ int        	  fnWeight,
+					, "UInt", 0     	; _In_ DWORD   fdwItalic,
+					, "UInt", 0     	; _In_ DWORD   fdwUnderline,
+					, "UInt", 0     	; _In_ DWORD   fdwStrikeOut,
+					, "UInt", 0     	; _In_ DWORD   fdwCharSet, (ANSI_CHARSET)
+					, "UInt", 0     	; _In_ DWORD   fdwOutputPrecision, (OUT_DEFAULT_PRECIS)
+					, "UInt", 0     	; _In_ DWORD   fdwClipPrecision, (CLIP_DEFAULT_PRECIS)
+					, "UInt", 0     	; _In_ DWORD   fdwQuality, (DEFAULT_QUALITY)
+					, "UInt", 0     	; _In_ DWORD   fdwPitchAndFamily, (FF_DONTCARE|DEFAULT_PITCH)
+					, "Str", Face   	; _In_ LPCTSTR  lpszFace
+					, "UPtr")
 	hObj := DllCall("SelectObject", "UPtr", hDC, "UPtr", hFont, "UPtr")
 	VarSetCapacity(SIZE, 8, 0)
 	DllCall("GetTextExtentPoint32", "UPtr", hDC, "Str", "x", "Int", 1, "UPtr", &SIZE)
@@ -990,6 +974,7 @@ LV_AutoColumSizer(hLV, Sizes, Options:="") {                                    
 
 	If hLVO <> hLV
 			hHeader:= LV_EX_GetHeader(hLV), hLVO:= hLV
+
 	If SizesO <> Sizes
 	{
 			pos := 1
@@ -1016,7 +1001,7 @@ LV_AutoColumSizer(hLV, Sizes, Options:="") {                                    
 	LV_Width -= DllCall("GetScrollPos", "UInt", hLV, "Int", 1)	;subtracts the width of the vertical scrollbar to get the client size of the listview
 
 	Loop, % LVP.MaxIndex()
-		DllCall("SendMessage", "uint", hLV, "uint", 4126, "uint", A_Index-1, "int", Ceil(LV_Width * LVP[A_Index])) 	;sets the column width
+		DllCall("SendMessage", "uint", hLV, "uint", 4126, "uint", A_Index-1, "int", Floor(LV_Width * LVP[A_Index])) 	;sets the column width
 }
 
 LV_EX_GetHeader(HLV) {                                                                         	;-- Retrieves the handle of the header control used by the list-view control.
@@ -1045,6 +1030,7 @@ OnMouseHover(wparam, lparam, msg, hwnd) {                                     	;
 			{
 					If !Instr(hControlOver, "SysListView32")
 						ControlFocus, % hControlOver 	, % "ahk_id " hARG
+
 					ControlGetText, SText, Edit1    	, % "ahk_id " hARG
 					If (Trim(SText) = "type your search pattern here") && (hControlOver = "Edit1")
 							NormalEditFont()
@@ -1065,7 +1051,7 @@ OnMouseHover(wparam, lparam, msg, hwnd) {                                     	;
 			}
 
 			ControlGetText, SText, Edit1, % "ahk_id " hArg
-			If Trim(SText) = ""
+			If (Trim(SText) = "")
 					ItalicEditFont()
 
 			lastFocusedControl := cclass
@@ -1196,7 +1182,7 @@ RE_FindTextAndSelect(hRichEdit, Text, Mode) {
 Return RE_SetSel(S, E, hRichEdit)
 }
 
-RE_GetSel(hRichEdit) { ; Retrieves the starting and ending character positions of the selection in a rich edit control.
+RE_GetSel(hRichEdit) {                                                                             	; Retrieves the starting and ending character positions of the selection in a rich edit control.
       ; Returns an object containing the keys S (start of selection) and E (end of selection)).
       ; EM_EXGETSEL = 0x0434
       VarSetCapacity(CR, 8, 0)
@@ -1204,7 +1190,7 @@ RE_GetSel(hRichEdit) { ; Retrieves the starting and ending character positions o
       Return {S: NumGet(CR, 0, "Int"), E: NumGet(CR, 4, "Int")}
 }
 
-RE_SetSel(Start, End, hRichEdit) { ; Selects a range of characters.
+RE_SetSel(Start, End, hRichEdit) {                                                            	; Selects a range of characters.
       ; Start : zero-based start index
       ; End   : zero-based end index (-1 = end of text))
       ; EM_EXSETSEL = 0x0437
@@ -1215,7 +1201,7 @@ RE_SetSel(Start, End, hRichEdit) { ; Selects a range of characters.
       Return ErrorLevel
 }
 
-RE_GetTextLen(hRichEdit) { ; Calculates text length in various ways.
+RE_GetTextLen(hRichEdit) {                                                                     	; Calculates text length in various ways.
       ; EM_GETTEXTLENGTHEX = 0x045F
       VarSetCapacity(GTL, 8, 0)     ; GETTEXTLENGTHEX structure
       NumPut(1200, GTL, 4, "UInt")  ; codepage = Unicode
@@ -1424,7 +1410,6 @@ Return hBitmap
 #Include %A_ScriptDir%\lib\RichCode.ahk
 #Include %A_ScriptDir%\lib\class_bcrypt.ahk
 ;}
-
 
 
 
