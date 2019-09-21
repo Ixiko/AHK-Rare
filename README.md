@@ -14,6 +14,13 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
+## ![Gem](assets/GemSmall.png)[September 21, 2019]: 
+**<u>AHK-Rare GUI:</u>** Fixed a problem with screen resolution. Now the gui detects if the script it's running on 2k or 4k Monitor (only if it's the primary monitor). It is taken care that the Gui is created within the visible range of the monitor. 
+The AHK-Rare logo has a width of 660 pixels. This looks good on a 4k monitor. For 2k monitors, the image is scaled to half the size.
+AHK-Rare.ahk was renamed AHK-Rare.txt because it caused too much confusion.
+
+
+
 ## ![Gem](assets/GemSmall.png)[September 14, 2019]: + 14 =  660
 
 **<u>AHK-Rare GUI:</u>** Fixed many issue’s in the parsing algorithm. Small changes to gui layout. The ***EXAMPLE(s)*** and ***DESCRIPTION*** tabs will be highlighted if they have content. Basic search is working. The output in the ***DESCRIPTION*** tab is clearer now. Unfortunately, I still have not got any differently colored description keys.
