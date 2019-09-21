@@ -15,9 +15,13 @@ Some of the collected function seems to be multiple in this collection, because 
 ----
 
 ## ![Gem](assets/GemSmall.png)[September 21, 2019]: 
-**<u>AHK-Rare GUI:</u>** Fixed a problem with screen resolution. Now the gui detects if the script it's running on 2k or 4k Monitor (only if it's the primary monitor). It is taken care that the Gui is created within the visible range of the monitor. 
-The AHK-Rare logo has a width of 660 pixels. This looks good on a 4k monitor. For 2k monitors, the image is scaled to half the size.
-AHK-Rare.ahk was renamed AHK-Rare.txt because it caused too much confusion.
+**<u>AHK-Rare GUI (V0.79):</u>** 
+
+- Fixed a problem with screen resolution. Now the gui detects if the script it's running on 2k or 4k Monitor (only if it's the primary monitor). It is taken care that the Gui is created within the visible range of the monitor. 
+- The AHK-Rare logo has a width of 660 pixels. This looks good on a 4k monitor. For 2k monitors, the image is scaled to half the size.
+- AHK-Rare.ahk was renamed AHK-Rare.txt because it caused too much confusion.
+- added a statusbar to the gui, because the GUI looks strange under Win 10. The status bar then shows if the clipboard is empty, contains anything other than a function from AHK-Rare, or if there is an AHK-Rare function that can be inserted into an editor.
+- What should work then, of course, is the copy function. And this works again now.
 
 
 

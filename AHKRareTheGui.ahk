@@ -1,5 +1,5 @@
 ﻿; ===============================================================
-; 	*** AHK-RARE the GUI *** -- !SEARCH COMFORTABLE! --         V0.75 September 08, 2019 by Ixiko
+; 	*** AHK-RARE the GUI *** -- !SEARCH COMFORTABLE! --         V0.79 September 08, 2019 by Ixiko
 ; ===============================================================
 ; ------------------------------------------------------------------------------------------------------------
 ; 		MISSING THINGS:
@@ -50,14 +50,15 @@
 
 ;{02. variables
 
-		ARData    	:= Object()	; contains data from AHKRare.ahk
-		ARFile      	:= Array() 	; indexed array of AHKRare.ahk file, index is corresponding to line number
-		RC		    	:= Object()
-		GuiW       	:= 1200    	; base width of gui on first start
-		SR1Width	:= 250
-		highlight  	:= false     	; flag to highlight search results
+		ARFile                      	:= Array()    	; indexed array of AHKRare.ahk file, index is corresponding to line number
+		RC		                    	:= Object()
+		GuiW                       	:= 1200       	; base width of gui on first start
+		SR1Width                	:= 250
+		highlight                  	:= false        	; flag to highlight search results
 
-		global  FoundIndex:= 0 ; a flag
+		global ARData         	:= Object()	; contains data from AHKRare.ahk
+		global FoundIndex   	:= 0          	; a flag
+		global currentFuncNr                  	; contains the currently selected function nr
 
 	; ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	;	loading AHK-Rare.txt
@@ -208,7 +209,7 @@
 	;-: --------------------------------------
 	;-: Create a Statusbar - on Win 10 this Gui looks weird without a border
 	;-: --------------------------------------
-		Gui, ARG: Add, StatusBar, % "x0 y" WinRC.WindowY + 2 " vSB",
+		Gui, ARG: Add, StatusBar, % "x0 y" WinRC.WindowY + 2 " vSB", % "clipboard is empty or does not contain a function"
 		GuiControlGet, SB_, ARG: Pos, SB
 	;-: --------------------------------------
 	;-: Create a ToolTip control
@@ -234,6 +235,7 @@
 
 		OnMessage(0x200, "OnMouseHover")
 		OnMessage(0x03, "ChangeStats")
+		OnClipboardChange("RareClipChanged")
 		SetTimer, ShowStats, -500
 
 ;}
@@ -287,15 +289,17 @@ return
 ;--------------------------------------------------------------------------------------------------------------
 ShowFunction:                 	;{
 
-	toshow  	 := []
-	selRow:= LV_GetNext(0)
+		toshow  	 := []
+		selRow:= LV_GetNext(0)
 
-	ShowFunctionsOnUpDown:
-	LV_GetText(fnr, selRow , 4)
+		ShowFunctionsOnUpDown:
+		LV_GetText(fnr, selRow , 4)
 
-	For i, function in ARData
-		If Instr(function.FnHash, fnr)
-				break
+		For i, function in ARData
+			If Instr(function.FnHash, fnr)
+					break
+
+		currentFuncNr:= i
 
 	; adding informations to Edit-Control (ShowRoom1)
 		toshow[1]:= "FUNCTION:`n"                    	ARData[i].name
@@ -449,20 +453,17 @@ ChangeStats() {
 CopyTextToClipboard:     	;{
 
 	toCopy := ""
+
 	MouseGetPos, mx, my,, hControlOver, 2
-	RichEditControls:= RC.1 "," RC.2 "," RC.3
+
+	RichEditControls:= RC.1.hwnd "," RC.2.hwnd "," RC.3.hwnd
 	If Instr(hControlOver, hTabs) || hControlOver in %RichtEditControls%
 	{
-			Loop, Parse, AhkRare, `n, `r
-			{
-					If (A_Index >= ARData[i].start) && (A_Index <= ARData[i].end)
-							tocopy .= A_LoopField "`n"
-					else if (A_Index > ARData[i].end)
-							break
-			}
+			Loop, % (ARData[currentFuncNr].end - ARData[currentFuncNr].start) + 1
+					tocopy .= ARFile[ARData[currentFuncNr].start + A_Index - 1] "`n"
 			Clipboard := tocopy
 			ToolTip, % "copied to clipboard...", % mx -10, % my + 10, 2
-			SetTimer, TTOff, -4000
+			SetTimer, TTOff, -2000
 	}
 
 return
@@ -491,7 +492,13 @@ ListViewDown:                 	;{
 return ;}
 ;--------------------------------------------------------------------------------------------------------------
 ReloadScript:                   	;{	only for reloading the script after hotkey press (development purposes)
+
+	Gui, Arg: Submit, NoHide
+	win := GetWindowInfo(hARG)
+	IniWrite, % SMode, % A_ScriptDir "\AHK-Rare.ini", Properties, SearchMode
+	IniWrite, % win.WindowX "|" win.WindowY "|" (win.ClientW) "|" (win.ClientH), % A_ScriptDir "\AHK-Rare.ini", Properties, GuiOptions
 	Reload
+
 return ;}
 
 ;}
@@ -746,6 +753,35 @@ RareIndexer(ARFile) {                                                           
 		}
 
 return ARData
+}
+
+RareGetFunctionObject(hash) {                                                           	;-- returns the data object to one function
+
+	For i, function in ARData
+		If Instr(function.FnHash, fnr)
+				break
+
+return ARData[i]
+}
+
+RareClipChanged(Type) {
+
+	Gui, ARG: Default
+
+	If Type = 0
+			SB_SetText("clipboard is empty" )
+	else If Type = 1
+	{
+			clip:= Clipboard
+			ToolTip, % "funcNr: " currentFuncNR "`nType: " Type "`nfName: " StrReplace(ARData[currentFuncNr].name, "()") "`nFunc in clipboard?: " Instr(clip, StrReplace(ARData[currentFuncNr].name, "()"))
+			If Instr(clip, StrReplace(ARData[currentFuncNr].name, "()"))
+					SB_SetText("clipboard contains " ARData[currentFuncNr].name " to clipboard" )
+			else
+					SB_SetText("clipboard contains something that is not from AHK-Rare" )
+	}
+	else if Type = 2
+		SB_SetText("clipboard contains something that is not from AHK-Rare" )
+
 }
 
 BracketCount(str, brackets:="{}") {                                                       	;-- helps to find the last bracket of a function
