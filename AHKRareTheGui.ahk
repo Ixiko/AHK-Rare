@@ -435,7 +435,7 @@ ExitApp ;}
 ShowStats:                       	;{
 
 	WinGetPos, wx, wy, ww, wh, % "ahk_id " hARG
-	GuiControl, ARG:, Stats2, % "x" wx "  y" wy "  w" ww "  h" wh " (Logo: w" Logo.width "  h" Logo.height ")"
+	GuiControl, ARG:, Stats2, % "x" wx "  y" wy "  w" ww "  h" wh
 
 return
 ChangeStats() {
