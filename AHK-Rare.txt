@@ -1,6 +1,6 @@
 ﻿;---------------------------------------------------------------------------------------------------------------------------------------------------------
+;                                                             	collected by IXIKO =>    last change: 11.10.2019
 ;                                                                	Collection of rare or very useful functions
-;                                                             	collected by IXIKO =>    last change: 14.09.2019
 ;                                    	for description have a look at README.md (it can be found in the same folder)
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -5850,7 +5850,7 @@ SafeInput(Title, Prompt, Default = "") {     ;-- makes sure the same window stay
 ;|   ToolTipEx(21)                          	|   SafeInput(22)                           	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;gui - to change (22) -- change position, fading, remove --                                                                       	baseID: <06.02>
+{ ;gui - to change (23) -- change position, fading, remove --                                                                       	baseID: <06.02>
 ;<06.02.000001>
 FadeGui(guihwnd, fading_time, inout) {                                                                    	;-- used DllCall to Animate (Fade in/out) a window
 
@@ -6375,16 +6375,55 @@ GetGuiClassStyle() {                                                            
 SetGuiClassStyle(HGUI, Style) {                                                                               	;-- sets the class style of a Autohotkey-Gui
 	Return DllCall("SetClassLong" . (A_PtrSize = 8 ? "Ptr" : ""), "Ptr", HGUI, "Int", -26, "Ptr", Style, "UInt")
 } ;</06.02.000022>
+;<06.02.000023>
+HideFocusBorder(wParam, lParam := "", uMsg := "", hWnd := "") {                         	;-- Hide the dotted focus border
 
+	/*	DESCRIPTION OF FUNCTION: -- HideFocusBorder() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Hides the focus border for the given GUI control or GUI and all of its children
+                            	Call the function passing only the HWND of the control / GUI in wParam as only parameter.
+								WM_UPDATEUISTATE  -> msdn.microsoft.com/en-us/library/ms646361(v=vs.85).aspx
+								The Old New Thing -> blogs.msdn.com/b/oldnewthing/archive/2013/05/16/10419105.aspx
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?t=9919
+	Author         	:	just me
+	Date             	:	23 Oct 2015
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:
+	Return value	:
+	Remark(s)    	:
+	Dependencies	:	none
+	KeyWords    	:	gui, focus, border
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+
+	*/
+
+   ; WM_UPDATEUISTATE = 0x0128
+	Static Affected := [] ; affected controls / GUIs
+        , HideFocus := 0x00010001 ; UIS_SET << 16 | UISF_HIDEFOCUS
+	     , OnMsg := OnMessage(0x0128, Func("HideFocusBorder"))
+	If (uMsg = 0x0128) { ; called by OnMessage()
+      If (wParam = HideFocus)
+         Affected[hWnd] := True
+      Else If Affected[hWnd]
+         PostMessage, 0x0128, %HideFocus%, 0, , ahk_id %hWnd%
+   }
+   Else If DllCall("IsWindow", "Ptr", wParam, "UInt")
+	  PostMessage, 0x0128, %HideFocus%, 0, , ahk_id %wParam%
+
+} ;</06.02.000023>
 }
 ;|   FadeGui()                                	|   WinFadeToggle()                      	|   ShadowBorder()                       	|   FrameShadow() - 2 versions     	|
 ;|   RemoveWindowFromTaskbar()	|   ToggleTitleMenuBar()               	|   ToggleFakeFullscreen()             	|   ListView_HeaderFontSet()         	|
 ;|   CreateFont()                            	|   FullScreenToggleUnderMouse()	|   SetTaskbarProgress() x 2          	|   WinSetPlacement()                  	|
 ;|   AttachToolWindow()               	|   DeAttachToolWindow()            	|   ControlSetTextAndResize()       	|   DropShadow(20)                      	|
-;   GetGuiClassStyle(21)                	|   SetGuiClassStyle(22)                	|
+;   GetGuiClassStyle(21)                	|   SetGuiClassStyle(22)                	|   HideFocusBorder(23)                 	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;gui - control type (60) -- specialized functions for controls --                                                                   	baseID: <06.03>
+{ ;gui - control type (61) -- specialized functions for controls --                                                                   	baseID: <06.03>
 
 { ;<06.03.01>: ComboBox 		(1)
 
@@ -6590,7 +6629,7 @@ Edit_VCenter(HEDIT) {																						;-- Vertically Align Text for edit co
 
 }
 
-{ ;<06.03.05>: Listview 			(40)
+{ ;<06.03.05>: Listview 			(41)
 
 ;<06.03.05.000001>
 LV_GetCount(hLV) {																											;-- get current count of notes in from any listview
@@ -8104,6 +8143,62 @@ LVM_GetSizeOfLVITEM() {	;-- sub of LV_GetItemText (06.03.05.000040)
         sizeofLVITEM:=(A_PtrSize=8) ? 72:60
 Return sizeofLVITEM
 } ;</06.03.05.000040>
+;<06.03.05.000041>
+LV_EX_SetTileViewLines(HLV, Lines, tileX := "", tileY := "") {                                        	;-- sets the maximum number of additional text lines in each tile, not counting the title
+
+	/*	DESCRIPTION OF FUNCTION: -- LV_EX_SetTileViewLines() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	sets the maximum number of additional text lines in each tile, not counting the title
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?f=6&t=28792
+	Author         	:	kczx3
+	Date             	:	03 Mar 2017
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	Lines - 	Maximum number of text lines in each item label, not counting the title
+	                                    	One line is added internally because the item might be wrapped to two lines!;<04.01.000001>
+	Return value	:
+	Remark(s)    	:
+	Dependencies	:	none
+	KeyWords    	:	gui, listview
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+
+	*/
+
+	; LVM_GETTILEVIEWINFO = 0x10A3 -> http://msdn.microsoft.com/en-us/library/bb761083(v=vs.85).aspx
+	; LVM_SETTILEVIEWINFO = 0x10A2 -> http://msdn.microsoft.com/en-us/library/bb761212(v=vs.85).aspx
+
+	Static SizeLVTVI := 40
+	Static offSize := 12
+	Static OffLines := 20
+	Static LVTVIM_TILESIZE := 0x1
+	Static LVTVIM_COLUMNS := 0x2
+	Static LVTVIF_AUTOSIZE := 0x0, LVTVIF_FIXEDWIDTH := 0x1, LVTVIF_FIXEDHEIGHT := 0x2, LVTVIF_FIXEDSIZE := 0x3
+	Mask := LVTVIM_COLUMNS | (tileX || tileY ? LVTVIM_TILESIZE : 0)
+	If (tileX && tileY)
+		flag := LVTVIF_FIXEDSIZE
+	Else If (tileX && !tileY)
+		flag := LVTVIF_FIXEDWIDTH
+	Else If (!tileX && tileY)
+		flag := LVTVIF_FIXEDHEIGHT
+	Else
+		flag := LVTVIF_AUTOSIZE
+	; If (Lines > 0)
+	; Lines++
+	VarSetCapacity(LVTVI, SizeLVTVI, 0)     ; LVTILEVIEWINFO
+	NumPut(SizeLVTVI, LVTVI, 0, "UInt")     ; cbSize
+	NumPut(Mask, LVTVI, 4, "UInt")    ; dwMask = LVTVIM_TILESIZE | LVTVIM_COLUMNS
+	NumPut(flag, LVTVI, 8, "UInt")       ; dwMask
+	if (tileX)
+		NumPut(tileX, LVTVI, 12, "Int")       ; sizeTile.cx
+	if (tileY)
+		NumPut(tileY, LVTVI, 16, "Int")       ; sizeTile.cx
+	NumPut(Lines, LVTVI, OffLines, "Int") ; c_lines: max lines below first line
+	SendMessage, 0x10A2, 0, % &LVTVI, , % "ahk_id " . HLV ; LVM_SETTILEVIEWINFO
+	Return ErrorLevel
+} ;</04.01.000001>
 
 }
 
@@ -8640,7 +8735,7 @@ UpdateScrollBars(GuiNum, GuiWidth, GuiHeight) {                                 
 ;|   LV_SetIconSpacing(25)            	|   LV_GetIconSpacing(26)            	|   LV_GetItemPos(27)                   	|   LV_SetItemPos(28)                   	|
 ;|   LV_MouseGetCellPos(29)         	|   LV_GetColOrderLocal(30)         	|   LV_GetColOrder(31)                 	|   LV_SetColOrderLocal(32)         	|
 ;|   LV_GetCheckedItems(34)         	|   LV_ClickRow(35)                      	|   LV_HeaderFontSet(36)              	|   LV_SetSI(37)                             	|
-;|   LVM_CalculateSize(38)            	|   LV_RemoveSelBorder(39)         	|   LVM_GetItemText(40)               	|
+;|   LVM_CalculateSize(38)            	|   LV_RemoveSelBorder(39)         	|   LVM_GetItemText(40)               	|   LV_EX_SetTileViewLines(41)      	|
 ;|                                                                                            TABCONTROL functions                                                                                        	|
 ;|   TabCtrl_GetCurSel(01)             	|   TabCtrl_GetItemText(02)          	|
 ;|                                                                                               TREEVIEW functions                                    	|	                                                	|
@@ -17100,7 +17195,7 @@ GetAllResponseHeaders(Url, RequestHeaders := ""                                 
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Math/Converting (23) -                                                                                                                            	baseID: <11>
+{ ;Math/Converting (24) -                                                                                                                            	baseID: <11>
 ;<11.01.000001>
 Min(x, y) {																						;-- returns the smaller of 2 numbers
   return x < y ? x : y
@@ -17464,7 +17559,7 @@ FormatByteSize(Bytes) {                                                         
 ;<11.01.000023>
 FormatByteSize(Bytes) {                                                              		;-- give's back the given bytes in KB, MB, GB ....(for AHK_V2)
 
-		/*    	DESCRIPTION of function FormatByteSize()
+	/*    	DESCRIPTION of function FormatByteSize()
         	-------------------------------------------------------------------------------------------------------------------
 			Description  	:		/*    	DESCRIPTION of function FormatByteSize()
         	-------------------------------------------------------------------------------------------------------------------
@@ -17489,6 +17584,39 @@ FormatByteSize(Bytes) {                                                         
     else if bytes:=RTrim(SubStr(bytes,1,4),".") " " A_LoopField,break
   return bytes
 } ;</11.01.000023>
+;<11.01.000024>
+RGBEuclidianDistance( c1, c2 ) {                                                  	;-- find the distance between 2 colors
+
+	/*	DESCRIPTION OF FUNCTION: -- RGBEuclidianDistance() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:
+	Link              	:
+	Author         	:	VxE
+	Date             	:
+	AHK-Version	:
+	License         	:
+	Syntax          	:
+	Parameter(s)	:
+	Return value	:	value range = [0, 441.67295593006372]
+                            	that just means that any two colors will have a distance less than 442
+	Remark(s)    	:
+	Dependencies	:
+	KeyWords    	:
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+
+	*/
+
+   r1 := c1 >> 16
+   g1 := c1 >> 8 & 255
+   b1 := c1 & 255
+   r2 := c2 >> 16
+   g2 := c2 >> 8 & 255
+   b2 := c2 & 255
+
+return Sqrt( (r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2 )
+} ;</11.01.000024>
 
 
 } ;end
@@ -17497,13 +17625,13 @@ FormatByteSize(Bytes) {                                                         
 ;|   FloatToHex(09)                        	|   CalculateDistance(10)	            	|   IsInRange(11)                           	|   FormatFileSize(12)                   	|
 ;|   Color_RGBtoHSV(13)               	|   Color_HSVtoRGB(14)                	|   JEE_HexToBinData(15)             	|   JEE_BinDataToHex(16)             	|
 ;|   JEE_BinDataToHex2(17)          	|   RadianToDegree(18)                	|   DegreeToRadian(19)                	|   RGBToARGB(20)                      	|
-;|   ARGBToRGB(21)                      	|   FormatByteSize_AHK1(22)       	|   FormatByteSize_AHK2(23)       	|
+;|   ARGBToRGB(21)                      	|   FormatByteSize_AHK1(22)       	|   FormatByteSize_AHK2(23)       	|   RGBEuclidianDistance(24)        	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Objects (7) -- handle objects --                                                                                                                 	baseID: <12>
+{ ;Objects (8) -- handle objects --                                                                                                                 	baseID: <12>
 ;<12.01.000001>
-ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
+ObjMerge(OrigObj, MergingObj, MergeBase=True) {                    	;-- merge two objects
 
     If !IsObject(OrigObj) || !IsObject(MergingObj)
         Return False
@@ -17518,7 +17646,7 @@ ObjMerge(OrigObj, MergingObj, MergeBase=True) {					;-- merge two objects
     Return True
 } ;</12.01.000001>
 ;<12.01.000002>
-evalRPN(s) { 																					;-- Parsing/RPN calculator algorithm
+evalRPN(s) {                                                                                     	;-- Parsing/RPN calculator algorithm
 
 	/*											Example
 
@@ -17563,7 +17691,7 @@ StackShow(stack){																			;--
 } ;</12.01.000003>
 ;}
 ;<12.01.000004>
-ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print object function
+ExploreObj(Obj, Depth=12, NewRow="`n"                                     	;-- print object function
 , Equal="  =  ", Indent="`t", CurIndent="") {
 
 	/*    	DESCRIPTION of function ExploreObj() ID: 12.01.00003
@@ -17619,7 +17747,7 @@ ExploreObj(Obj, Depth=12, NewRow="`n"                                 	;-- print
 	return RTrim(ToReturn, NewRow)
 } ;</12.01.000004>
 ;<12.01.000005>
-KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
+KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"          	;-- merge two lists into one key-value object, useful for 2 two lists you retreave from WinGet
 , IncludeKeys:="", KeyREx:="", IncludeValues:="", ValueREx:="") {
 
 	/*    	DESCRIPTION of function KeyValueObjectFromLists() ID: 12.01.00004
@@ -17686,7 +17814,7 @@ KeyValueObjectFromLists(keyList, valueList, delimiter:="`n"       	;-- merge two
 return merged
 } ;</12.01.000005>
 ;<12.01.000006>
-GetCallStack(Report := 0) {                                                                                        	;-- retrieves the current callstack
+GetCallStack(Report := 0) {                                                                 	;-- retrieves the current callstack
 
 		/*    	DESCRIPTION of function
         	-------------------------------------------------------------------------------------------------------------------
@@ -17760,7 +17888,7 @@ GetCallStack(Report := 0) {                                                     
    Return Stack
 } ;</12.01.000006>
 ;<12.01.000007>
-Traceback(actual:=false) {                                                                                          	;-- get stack trace
+Traceback(actual:=false) {                                                                  	;-- get stack trace
 
 		/*    	DESCRIPTION of function
         	-------------------------------------------------------------------------------------------------------------------
@@ -17836,10 +17964,76 @@ Traceback(actual:=false) {                                                      
 	}
 	return r
 } ;</12.01.000007>
+;<12.01.000008>
+ObjGetNumOfKeys(ByRef Obj, KeyType := "") {                                	;-- gets the current number of key-value pairs stored in the passed AHK 'basic object'
+
+	/*	DESCRIPTION OF FUNCTION: -- ObjGetNumOfKeys --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Gets the current number of key-value pairs stored in the passed AHK 'basic object'
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?f=6&t=36284
+	Author         	:	just me
+	Date             	:	25.08.2017
+	AHK-Version	:	AHK_L
+	License         	:	---
+	Syntax          	:	---
+	Parameter(s)	:	Obj                  	-  An AHK basic object.
+			                	KeyType           	-  One of the following values:
+				            	Empty/omitted  	-  return the total number of keys.
+				            	I                          	-  return the number of integer keys.
+				            	O                       	-  return the number of object keys.
+				            	S                      	-  return the number of string keys.
+	Return value	:	On success the function returns the number of the specified keys.
+	                        	Otherwise (e.g. if the passed value isn't an AHK basic object) the function returns an empty string.
+	Remark(s)    	:	Based on the current (2017-08-26) AHK object layout defined in script_object.h (all fields are pointer-sized):
+		                    	vTbl pointer
+		                    	RefCount
+		                    	mFields                	-  Array of pointers to the object's keys.
+		                    	mFieldCount        	-  Current number of key-value pairs.
+		                    	mFieldCountMax  	-  Current capacity of the object as returned by Obj.GetCapacity().
+		                    	mKeyOffsetObject  	-  Index of the first possible object key in mFields.
+		                    					                	This is equal to the current number of integer keys.
+		                    	mKeyOffsetString  	-  Index of the first possible string key in mFields.
+		                    					                	The current number of object keys is: mKeyOffsetString - mKeyOffsetObject.
+		                    					                	The current number of string keys is: mFieldCount - mKeyOffsetString.
+	Dependencies	:	none
+	KeyWords    	:	object,keys
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	#NoEnv
+	; --------------------------------------------------------------------------------------------------------------------------------
+	Obj1 := {1: 1, 8: 8, 16: 16}
+	Obj2 := {Str1: "String1", Str2: String2, Str3: String3}
+	Obj3 := {1: 1, 8: 8, 16: 16, Str1: "String1", Str2: String2, Str3: String3}
+	Obj4 := New Dummy
+	; --------------------------------------------------------------------------------------------------------------------------------
+	GetNumOfKeys(Obj1)
+	GetNumOfKeys(Obj2)
+	GetNumOfKeys(Obj3)
+	GetNumOfKeys(Obj4)
+	; --------------------------------------------------------------------------------------------------------------------------------
+	ExitApp
+	*/
+
+   Static TestObj := {1: "", {}: "", S: ""}
+   Static TestCnt := ObjGetNumOfKeys(TestObj, "I") + ObjGetNumOfKeys(TestObj, "O") + ObjGetNumOfKeys(TestObj, "S")
+   Static CheckFn := ObjGetNumOfKeys(TestObj, "*")
+   If (KeyType = "*") {
+      If (TestCnt <> 3)
+         Throw Exception(A_ThisFunc . "()`nThe object layout has been changed!`nThis function won't work properly!")
+      Return ""
+   }
+   If IsObject(Obj) && (NumGet(&Obj, "UPtr") = NumGet(&TestObj, "UPtr")) ; it's an AHK basic object
+      Return (KeyType = "")  ? NumGet(&Obj + (A_PtrSize * 4), "UPtr")
+           : (KeyType = "I") ? NumGet(&Obj + (A_PtrSize * 6), "UPtr")
+           : (KeyType = "O") ? NumGet(&Obj + (A_PtrSize * 7), "UPtr") - NumGet(&Obj + (A_PtrSize * 6), "UPtr")
+           : (KeyType = "S") ? NumGet(&Obj + (A_PtrSize * 4), "UPtr") - NumGet(&Obj + (A_PtrSize * 7), "UPtr")
+           : ""
+} ;</12.01.000008>
 
 }
 ;|   ObjMerge(01)                          	|   evalRPN(02)                         	|   StackShow(03)                             	|   ExploreObj(04)                         	|
-;|   KeyValueObjectFromLists(05)  	|   GetCallStack(06)                  	|   Traceback(07)                              	|
+;|   KeyValueObjectFromLists(05)  	|   GetCallStack(06)                  	|   Traceback(07)                              	|   ObjGetNumOfKeys(08)            	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -17850,7 +18044,7 @@ Traceback(actual:=false) {                                                      
 { ;<13.01> (4)
 ;<Name>array sort functions</Name><Description>functions to sort arrays</Description>
 ;<13.01.000001>
-Sort2DArray(Byref TDArray, KeyName, Order=1) {							;-- a two dimensional TDArray
+Sort2DArray(Byref TDArray, KeyName, Order=1) {                     	;-- a two dimensional TDArray
 
    ;TDArray : a two dimensional TDArray
    ;KeyName : the key name to be sorted
@@ -19715,26 +19909,26 @@ Return Pre . SubStr(SE "000", 1, 3)
 ;|   Oem2Ansi()                             	|   Ansi2UTF8()                             	|   UTF82Ansi()                             	|   StringMD5()					             	|
 ;|   CRC32(9)                                 	|
 ; ---------------------------------------------------------------------  #parsing#  ----------------------------------------------------------------------
-;|   ParseJsonStrToArr()	                	|    parseJSON()                            	|   GetNestedTag()                        	|   GetHTMLbyID()							|
+;|   ParseJsonStrToArr()	                	|    parseJSON()                            	|   GetNestedTag()                        	|   GetHTMLbyID()                        	|
 ;|   GetHTMLbyTag()                     	|   GetXmlElement()                      	|   sXMLget()                                 	|
 ; --------------------------------------------------------------  #String / lists handling#  --------------------------------------------------------------
-;|   cleanlines(1)								|   cleancolon(2)								|   cleanspace(3)								|   SplitLine(4)                                  	|
-;|   EnsureEndsWith(5)						|   EnsureStartsWith(6)						|   StrPutVar(7)									|
-;|   RegExSplit(8)                             	|   StringM(10)									|   StrCount(11)                               	|   SuperInstr(12)                             	|
-;|   LineDelete(13)                            	|   GetWordsNumbered(14)            	|   AddTrailingBackslash(15)		    	|   CheckQuotes(16)	    					|
-;|   ReplaceForbiddenChars(17)		|   WrapText(18)                             	|
+;|   cleanlines(1)                            	|   cleancolon(2)                            	|   cleanspace(3)                            	|   SplitLine(4)                                  	|
+;|   EnsureEndsWith(5)                  	|   EnsureStartsWith(6)                  	|   StrPutVar(7)                            		|
+;|   RegExSplit(8)                           	|   StringM(10)                              	|   StrCount(11)                            	|   SuperInstr(12)                          	|
+;|   LineDelete(13)                         	|   GetWordsNumbered(14)            	|   AddTrailingBackslash(15)		    	|   CheckQuotes(16)                     	|
+;|   ReplaceForbiddenChars(17)    	|   WrapText(18)                             	|
 ; ----------------------------------------------------------------------  #others#  ----------------------------------------------------------------------
-;|   ExtractFuncTOuserAHK(1)          	|   PdfToText(2)                               	|   PdfPageCounter(3)                     	|   PasteWithIndent(4)                     	|
-;|   Ask_and_SetbackFocus(5)           	|   CleanLine(6)                               	|   StrTrim(7)                                   	|   StrDiff(8)                                     	|
-;|   PrintArr(9)                                 	|   List2Array(10)                           	|   Array_Gui(11)                             	|   RandomString(12)                    	|
-;|   PrintStr(13)                               	|   NumStr(14)                               	|   SetWidth(15)                              	|   Replicate(16)                            	|
+;|   ExtractFuncTOuserAHK(1)          	|   PdfToText(2)                             	|   PdfPageCounter(3)                  	|   PasteWithIndent(4)                  	|
+;|   Ask_and_SetbackFocus(5)           	|   CleanLine(6)                             	|   StrTrim(7)                                	|   StrDiff(8)                                  	|
+;|   PrintArr(9)                                 	|   List2Array(10)                           	|   Array_Gui(11)                          	|   RandomString(12)                    	|
+;|   PrintStr(13)                               	|   NumStr(14)                               	|   SetWidth(15)                            	|   Replicate(16)                            	|
 ;|   Space(17)                                 	|   SoundExC(18)                           	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;Keys/Hotkeys/Hotstring (11) - 																														baseID: <14>
+{ ;Keys/Hotkeys/Hotstring (11) -                                                                                                                  	baseID: <14>
 ;<14.01.000001>
-DelaySend(Key, Interval=200, SendMethod="Send") { 					;-- Send keystrokes delayed
+DelaySend(Key, Interval=200, SendMethod="Send") {                       	;-- Send keystrokes delayed
 
 	/*
 	Sends keystrokes with a specified delay. It will be useful for an application which does not accept key presses sent too quickly.
@@ -19785,7 +19979,7 @@ SetLayout(layout, winid) {																;-- set a keyboard layout
     DllCall("SendMessage", "UInt", winid, "UInt", "80", "UInt", "1", "UInt", Result)
 } ;</14.01.000002>
 ;<14.01.000003>
-GetAllInputChars() {																			;-- Returns a string with input characters
+GetAllInputChars() {                                                        					;-- Returns a string with input characters
 
     Loop 256
         ChrStr .= Chr( a_index ) " "
@@ -19826,7 +20020,7 @@ AdditionalKeys = ""	, timeout := "") {
 		if (timeout && A_Tickcount - startTime >= timeout)
 			return 1 ; was taking too long
 		if (count = 1 && Beep) && !isPerformingAction && !ExtraKeysDown && firstRun = 1	;wont beep if casting or burrow AKA 'extra key' is down
-				nothing=	   ;placeholder i dont want to play songs right now										;~ SoundPlay, %A_Temp%\ModifierDown.wav
+				nothing=	   ;placeholder i dont want to play songs right now                            			;~ SoundPlay, %A_Temp%\ModifierDown.wav
 		if ExtraKeysDown
 			LastExtraKeyHeldDown := ExtraKeysDown ; as ExtraKeysDown will get blanked in the loop preventing detection in the below if
 		else LastExtraKeyHeldDown := ""
@@ -19842,7 +20036,7 @@ AdditionalKeys = ""	, timeout := "") {
 	return
 } ;</14.01.000004>
 ;<14.01.000005>
-isaKeyPhysicallyDown(Keys) {															;-- belongs to ReleaseModifiers() function
+isaKeyPhysicallyDown(Keys) {                                                        	;-- belongs to ReleaseModifiers() function
 
   if isobject(Keys)
   {
@@ -19884,7 +20078,7 @@ PutText(MyText) {                                       	                       
    Return
 } ;</14.01.000007>
 ;<14.01.000008>
-Hotkeys(ByRef Hotkeys) {																;-- a handy function to show all used hotkeys in script
+Hotkeys(ByRef Hotkeys) {                                                        		;-- a handy function to show all used hotkeys in script
 
 	/*                              	DESCRIPTION
 
@@ -19935,7 +20129,7 @@ If (A_ComputerName = "Laptop") {
     return Hotkeys
 } ;</14.01.000008>
 ;<14.01.000009>
-BlockKeyboard(block=-1) { 															;-- block keyboard, and unblock it through usage of keyboard
+BlockKeyboard(block=-1) {                                                         	;-- block keyboard, and unblock it through usage of keyboard
 
 	;Thanks to Lexikos
 	 ; -1, true or false.
@@ -19997,21 +20191,21 @@ RapidHotkey(keystroke, times="2", delay=0.2, IsLabel=0) {          	;-- Using th
 	AHK-Version	:	AHK_L
 	License         	:	?
 	Syntax          	:	Key::RapidHotkey("keystrokes" ;Enter keystrokes here. E.g.: "^o"
-											   , times          ;optional. The number of times the key must be pressed to execute.  E.g.: 3
-											   , delay          ;optional. How quick the key must be pressed to execute. E.g.: 0.2
-											   , IsLabel)        ;optional. specify 1 to indicate that parameter 1 is a label.
-								E.g.
-								~o::RapidHotkey("^o") open file dialog if o pressed twice
+                            				   , times          ;optional. The number of times the key must be pressed to execute.  E.g.: 3
+                            				   , delay          ;optional. How quick the key must be pressed to execute. E.g.: 0.2
+                            				   , IsLabel)        ;optional. specify 1 to indicate that parameter 1 is a label.
+                            	E.g.
+                            	~o::RapidHotkey("^o") open file dialog if o pressed twice
 
-								To specify several actions , use " as separator and leave times parameter empty.
-								If press times parameter is omitted, first action would be triggered on 2 presses.
+                            	To specify several actions , use " as separator and leave times parameter empty.
+                            	If press times parameter is omitted, first action would be triggered on 2 presses.
 
-								~e::RapidHotkey("#r""#e""#f")  #r if pressed twice, #e 3 times and so on
-								You can specify also one (can be also 1) or separated value for times
-								~s::RapidHotkey("^s""{F12}""^+s", 5) so pressing 5 times = ^s, 6 times = {F12} and so on
-								You can also specify separated times value
-								$x::RapidHotkey("x""#r""#e", "1""5""3")
-								use same separator for delay and islabel parameter
+                            	~e::RapidHotkey("#r""#e""#f")  #r if pressed twice, #e 3 times and so on
+                            	You can specify also one (can be also 1) or separated value for times
+                            	~s::RapidHotkey("^s""{F12}""^+s", 5) so pressing 5 times = ^s, 6 times = {F12} and so on
+                            	You can also specify separated times value
+                            	$x::RapidHotkey("x""#r""#e", "1""5""3")
+                            	use same separator for delay and islabel parameter
 	Parameter(s)	:
 	Return value	:
 	Remark(s)    	:
@@ -20135,8 +20329,8 @@ hk(keyboard:=0, mouse:=0, message:="", timeout:=3, displayonce:=0) {            
 	/*	DESCRIPTION OF FUNCTION: - hk()- Disable all keyboard buttons --
 	-------------------------------------------------------------------------------------------------------------------
 	Description  	:	So I tweaked the function and added an option (displayonce=) to display the message only
-								once or more and also the possiblity to disable the right mouse button only (mouse=2). :dance:
-								everything works fine now the only thing is that the code need to be cleaned up :?
+                            	once or more and also the possiblity to disable the right mouse button only (mouse=2). :dance:
+                            	everything works fine now the only thing is that the code need to be cleaned up :?
 	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?t=33925
 	Author         	:	SpeedMaster
 	Date             	:	06 Jul 2017, 18:19
@@ -20224,7 +20418,7 @@ hk(keyboard:=0, mouse:=0, message:="", timeout:=3, displayonce:=0) {            
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-{ ;ToolTips (6) - 																																				baseID: <15>
+{ ;ToolTips (6) -                                                                                                                                             	baseID: <15>
 ;<15.01.000001>
 ShowTrayBalloon(TipTitle = "", TipText = "", ShowTime = 5000, TipType = 1) {					;--
 
@@ -20252,7 +20446,7 @@ ShowTrayBalloon(TipTitle = "", TipText = "", ShowTime = 5000, TipType = 1) {				
    return
 } ;</15.01.000001>
 ;<15.01.000002>
-ColoredTooltip(sTooltipTxt,seconds=5,bg=0xFFFFE7,fg=0x0,x=-1,y=-1) {							;-- show a tooltip for a given time with a custom color in rgb format (fore and background is supported). This function shows how to obtain the hWnd of the tooltip.
+ColoredTooltip(sTooltipTxt,seconds=5,bg=0xFFFFE7,fg=0x0,x=-1,y=-1) {                            ;-- show a tooltip for a given time with a custom color in rgb format (fore and background is supported). This function shows how to obtain the hWnd of the tooltip.
 	/*                              	DESCRIPTION
 
 			OriginalName: ColoredToolTip by derRaphael
@@ -20299,7 +20493,7 @@ ColoredTooltip(sTooltipTxt,seconds=5,bg=0xFFFFE7,fg=0x0,x=-1,y=-1) {							;-- s
 	ToolTip
 } ;</15.01.000002>
  ;<15.01.000003>
-AddToolTip(_CtrlHwnd, _TipText, _Modify = 0) {																	;-- very easy to use function to add a tooltip to a control
+AddToolTip(_CtrlHwnd, _TipText, _Modify = 0) {                                                        			;-- very easy to use function to add a tooltip to a control
 
 	/*                              	DESCRIPTION
 
@@ -20315,19 +20509,19 @@ AddToolTip(_CtrlHwnd, _TipText, _Modify = 0) {																	;-- very easy to 
 					   * blank/0/false:                                	Create/update the tool tip.
 					   * -1:                                           		Delete the tool tip.
 					   * any other value:                             Update an existing tool tip - same as blank/0/false
-																				but skips unnecessary work if the tool tip already
-																				exists - silently fails if it doesn't exist.
+                                                        						but skips unnecessary work if the tool tip already
+                                                        						exists - silently fails if it doesn't exist.
 			   * Added clean-up methods:
 					   * AddToolTip(YourGuiHwnd, "Destroy", -1):       		Cleans up and erases the cached tool tip data created
-																										for that GUI. Meant to be used in conjunction with
-																										GUI, Destroy.
+                                                                                    					for that GUI. Meant to be used in conjunction with
+                                                                                    					GUI, Destroy.
 					   * AddToolTip(YourGuiHwnd, "Remove All", -1):	   	Removes all tool tips from every control in the GUI.
-																										Has the same effect as "Destroy" but first removes
-																										every tool tip from every control. This is only used
-																										when you want to remove every tool tip but not destroy
-																										the entire GUI afterwords.
+                                                                                    					Has the same effect as "Destroy" but first removes
+                                                                                    					every tool tip from every control. This is only used
+                                                                                    					when you want to remove every tool tip but not destroy
+                                                                                    					the entire GUI afterwords.
 					   * NOTE: Neither of the above are required if
-								your script is closing.
+                            	your script is closing.
 
 			 - 'Text' and 'Picture' Controls requires a g-label to be defined.
 			 - 'ComboBox' = Drop-Down button + Edit (Get hWnd of the 'Edit'   control using "ControlGet" command).
@@ -20570,7 +20764,7 @@ AddToolTip(_CtrlHwnd, _TipText, _Modify = 0) {																	;-- very easy to 
 	Return
 } ;</15.01.000003>
  ;<15.01.000004>
-AddToolTip(ID="",TEXT="",TITLE="",OPTIONS="") {															;-- add ToolTips to controls - Advanced ToolTip features + Unicode
+AddToolTip(ID="",TEXT="",TITLE="",OPTIONS="") {                                                        	;-- add ToolTips to controls - Advanced ToolTip features + Unicode
 	/*					DESCRIPTION
 ToolTip() by HotKeyIt http://www.autohotkey.com/forum/viewtopic.php?t=40165
 
@@ -21165,7 +21359,7 @@ Return
 }
 ;}  ;</15.01.000004>
 ;<15.01.000005>
-AddToolTip(con,text,Modify = 0) {																						;-- just a simple add on to allow tooltips to be added to controls without having to monitor the wm_mousemove messages
+AddToolTip(con,text,Modify = 0) {                                                                                    	;-- just a simple add on to allow tooltips to be added to controls without having to monitor the wm_mousemove messages
 	/*                              	EXAMPLE(s)
 
 			Gui,Add,Button,hwndbutton1 Gbut1,Test Button 1
@@ -21236,7 +21430,7 @@ CreateTooltipControl(hwind) {
 }
 ;} ;</15.01.000005>
 ;<15.01.000006>
-AddToolTip(hControl,p_Text) {																							;-- this is a function from jballi -
+AddToolTip(hControl,p_Text) {                                                                                    		;-- this is a function from jballi -
 
 		/*                              	DESCRIPTION
 
@@ -23313,7 +23507,7 @@ PIDfromAnyID( anyID="" ) {                                                      
   SetTitleMatchMode,   % SubStr( ( ATMM := A_TitleMatchMode )   . "RegEx", -4 )
 
   WinGet, PID, PID, ahk_id %anyID%
-  If (!PID)															;IfEqual, PID,, WinGet, PID, PID, %anyID% 	;<-comment line is the original: it uses an old syntax, not recommend for newer scripts
+  If (!PID)                                                        	;IfEqual, PID,, WinGet, PID, PID, %anyID% 	;<-comment line is the original: it uses an old syntax, not recommend for newer scripts
 		WinGet, PID, PID, %anyID%
 
   DetectHiddenWindows, %ADHW%
@@ -23683,6 +23877,93 @@ ProcessOwner(PID) {                                                             
 	 DllCall( "LocalFree", UInt,pSid )
 Return sName
 } ;</16.01.000064>
+;<16.01.000065>
+ProcessPriority(PID:="", PS:="") {                                                                                  	;-- Useful inside a library function to save/set/reset script's Process priority
+
+	/*	 DESCRIPTION OF FUNCTION: -- ProcessPriority() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Useful inside a library function to save/set/reset script's Process priority
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?f=6&t=68471&sid=a9e2447ccaf812e44e8c29ba845fb263
+	Author         	:	By SKAN on D2A1 @ bit.ly/2mIlZRy
+	Date             	:	01.10.2019
+	AHK-Version	:	AHK_L
+	License         	:	-
+	Syntax          	:	-
+	Parameter(s)	:	-
+	Return value	:	string
+	Remark(s)    	:	--
+	Dependencies	:	none
+	KeyWords    	:	System,runtime,process
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	OldPP := ProcessPriority("","High")
+	; Do things
+	ProcessPriority("",OldPP)
+	*/
+
+	Local hProc, PG:=0, PROCESS_QUERY_INFORMATION:=0x0400
+	  Process, Exist, %PID%
+	  If ! ( Errorlevel := ! (PID:=ErrorLevel) )
+		{
+			hProc := DllCall("OpenProcess", "UInt",PROCESS_QUERY_INFORMATION, "UInt",0, "Ptr",PID, "Ptr")
+			PG := DllCall("GetPriorityClass", "Ptr",hProc, "UInt")
+			DllCall("CloseHandle", "Ptr",hProc)
+
+			If InStr("|Low|BelowNormal|Normal|AboveNormal|High|Realtime|", "|" . PS . "|")
+			  {
+				Process, Priority, %PID%, %PS%
+				ErrorLevel := ! (ErrorLevel=PID)
+			  }
+		}
+
+Return {0x40:"Low",0x4000:"BelowNormal",0x20:"Normal",0x8000:"AboveNormal",0x80:"High",0x100:"Realtime"}[PG]
+} ;</16.01.000065>
+;<16.01.000066>
+PIDfromAnyID( anyID="" ) {                                                                                        	;-- get PID from any ID
+
+	/*	DESCRIPTION OF FUNCTION: -- PIDfromAnyID() --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	Get PID from any ID
+	Link              	:	http://ahkscript.org/boards/viewtopic.php?p=17974#p17974
+	Author         	:	SKAN
+	Date             	:	10-MAy-2014
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	ProcessID
+	Remark(s)    	:	--
+	Dependencies	:	none
+	KeyWords    	:	process,system
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	MsgBox % PIDfromAnyID()                                                             	; Own PID
+	MsgBox % PIDfromAnyID( "winlogon.exe" )                                       ; process name
+	MsgBox % PIDfromAnyID( 4 )                                                         	; validating raw PID
+
+	MsgBox % PIDfromAnyID( "MyScript.ahk" )                                    	; PID of a running script
+	MsgBox % PIDfromAnyID( "MyScript.ahk ahk_class AutoHotkey" )  	; precise than above
+	MsgBox % PIDfromAnyID( "Torrent" )                                             	; part of window title
+
+	MsgBox % PIDfromAnyID( A_ScripthWnd )                                    	; Own PID
+
+	MouseGetPos,,, OutputVarWin
+	MsgBox % PIDfromAnyID( OutputVarWin )                                    	; PID of Window under mouse
+	*/
+
+	  Process, Exist, %anyID%
+	  IfGreater, ErrorLevel, 0, Return ErrorLevel
+	  DetectHiddenWindows, % SubStr( ( ADHW := A_DetectHiddenWindows ) . "On", -1 )
+	  SetTitleMatchMode,   % SubStr( ( ATMM := A_TitleMatchMode )   . "RegEx", -4 )
+	  WinGet, PID, PID, ahk_id %anyID%
+	  IfEqual, PID,, WinGet, PID, PID, %anyID%
+	  DetectHiddenWindows, %ADHW%
+	  SetTitleMatchMode, %ATMM%
+
+Return PID ? PID : 0
+} ;</16.01.000066>
 
 }
 ;|   CreateNamedPipe(01)             	|   RestoreCursors(02)                   	|   SetSystemCursor(03)                	|   SystemCursor(04)                     	|
@@ -23701,6 +23982,7 @@ Return sName
 ;|   CoTaskMemRealloc()               	|   VarAdjustCapacity()                 	|   DllListExports()                         	|   RtlUlongByteSwap64() x2         	|
 ;|   PIDfromAnyID(56)                   	|   processPriority(57)                   	|   GetProcessMemoryInfo(58)      	|   SetTimerEx(59)                         	|
 ;|   DisableFadeEffect(61)              	|   GetPriority(62)                         	|   ProcessCreationTime(63)         	|   ProcessOwner(64)                    	|
+;|   ProcessPriority(65)                   	|   PIDfromAnyID(66)                    	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25340,11 +25622,48 @@ GetCaretPos(ByRef x, ByRef y) {                                                 
   x:=NumGet(pt, 0, "Int"), y:=NumGet(pt, 4, "Int")
   return, 1
 } ;</23.01.000010>
+;<23.01.000011>
+StdErr_Write(LineNumber, text, spec = "") {                                                            	;-- write directly to stderr for custom error messages
+
+	/*	DESCRIPTION OF FUNCTION: -- StdErr_Write_ --
+	-------------------------------------------------------------------------------------------------------------------
+	Description  	:	this can be used to write own error messages to stderr
+	Link              	:	https://www.autohotkey.com/boards/viewtopic.php?f=6&t=978
+	Author         	:	"Lexikos" (edited by Holle: "Use the same format like the other error messages" ...testet with SciTE4AutoHotkey Version 3.0.04)
+                                 Original thread: http://www.autohotkey.com/board/topic/50306-can-a-script-write-to-stderr/?hl=errorstdout#entry314658
+	Date             	:	2013 / 12 / 12
+	AHK-Version	:	AHK_L
+	License         	:	--
+	Syntax          	:	--
+	Parameter(s)	:	--
+	Return value	:	---
+	Remark(s)    	:	testet with SciTE4Autohotkey Version 3.0.04
+	Dependencies	:	StdErr_Write_
+	KeyWords    	:	stderr, debug
+	-------------------------------------------------------------------------------------------------------------------
+	|	EXAMPLE(s)
+	-------------------------------------------------------------------------------------------------------------------
+	StdErr_Write(A_LineNumber,"This function needs pairs of parameter.","odd number")
+    month<1 || month>12 ? StdErr_Write(A_LineNumber,"The variable month must have a value between 1 and 12.","month := " month)
+	*/
+
+	text := A_ScriptFullPath " (" LineNumber ") : ==>  " . text
+	text .= spec?"`n     Specifically: " spec "`n":
+    if A_IsUnicode
+        return StdErr_Write_("astr", text, StrLen(text))
+    return StdErr_Write_("uint", &text, StrLen(text))
+}
+StdErr_Write_(type, data, size) {
+    static STD_ERROR_HANDLE := -12
+    if (hstderr := DllCall("GetStdHandle", "uint", STD_ERROR_HANDLE)) = -1
+        return false
+    return DllCall("WriteFile", "uint", hstderr, type, data, "uint", size, "uint", 0, "uint", 0)
+} ;</23.01.000011>
 
 }
 ;|   pauseSuspendScript(01)          	|   GetCommState(02)                  	|   RtlGetVersion(03)                     	|   PostMessageUnderMouse(04)  	|
 ;|   WM_SETCURSOR(05)              	|   FoxitInvoke(06)                        	|   MoveMouse_Spiral(07)             	|   ScaleToFit(08)                          	|
-;|   LockCursorToPrimaryMonitor(9)	|   GetCaretPos(10)                       	|
+;|   LockCursorToPrimaryMonitor(9)	|   GetCaretPos(10)                       	|   StdErr_Write(11)                       	|
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 ;---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25418,6 +25737,27 @@ GetCaretPos(ByRef x, ByRef y) {                                                 
 	*/
 
 ;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

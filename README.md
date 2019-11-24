@@ -4,7 +4,7 @@
 
 **AHK-Rare** - *collection of rare or very useful single functions* 
 
-This is a collection of functions I found at Autohotkey-Forum or inside Autohotkey Scripts. Sometimes you will find one of it an official Autohotkey-Library. Approximately 90-95% of the functions can not be found in any of the 2500 libraries that I have also put together here at Github.
+This is a collection of functions I found at Autohotkey-Forum or inside Autohotkey Scripts. Sometimes you will find one of it an official Autohotkey-Library. Approximately 90-95% of the functions can not be found in any of the [2600 libraries](https://github.com/Ixiko/AHK-libs-and-classes-collection) that I have also put together here at Github.
 
 Some of the collected function seems to be multiple in this collection, because they sometimes use very different methods. This is a crucial difference. You dont wan’t find “THE ONLY ONE” good function here. Take what is the better! 
 
@@ -14,7 +14,26 @@ Some of the collected function seems to be multiple in this collection, because 
 
 ----
 
-## ![Gem](assets/GemSmall.png)[September 21, 2019]: 
+## ![Gem](assets/GemSmall.png)[November 24, 2019]: + 7 =  667
+
+**<u>AHK-Rare GUI (V0.80):</u>** 
+
+- bumpy correction of the GUI display for display on 2k monitors
+
+| **NR** | **FUNCTION**                 | **DESCRIPTION**                                              |
+| ------ | ---------------------------- | ------------------------------------------------------------ |
+| 01     | **ProcessPriority()**        | Useful inside a library function to save/set/reset script’s Process priority |
+| 02     | **PIDfromAnyID()**           | get PID from any ID                                          |
+| 03     | **StdErr_Write()**           | write directly to stderr for custom error messages           |
+| 04     | **ObjGetNumOfKeys()**        | gets the current number of key-value pairs stored in the passed AHK ‘basic object’ |
+| 05     | **RGBEuclidianDistance()**   | find the distance between 2 colors                           |
+| 06     | **LV_EX_SetTileViewLines()** | sets the maximum number of additional text lines in each tile, not counting the title |
+| 07     | **HideFocusBorder()**        | Hide the dotted focus border                                 |
+
+
+
+## ![Gem](assets/GemSmall.png)[September 21, 2019]:
+
 **<u>AHK-Rare GUI (V0.79):</u>** 
 
 - Fixed a problem with screen resolution. Now the gui detects if the script it's running on 2k or 4k Monitor (only if it's the primary monitor). It is taken care that the Gui is created within the visible range of the monitor. 
