@@ -1,8 +1,8 @@
-![AHK - Rare Logo](assets/AHK-Rare-Logo.png)
+
 
 ------
 
-**AHK-Rare** - *collection of rare or very useful single functions* 
+**AHK-Rare** - *v2 conversion* 
 Creator: https://github.com/Ixiko/AHK-Rare
 Converter: https://github.com/mmikeww/AHK-v2-script-converter
 
