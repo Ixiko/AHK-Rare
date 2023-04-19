@@ -2,9 +2,9 @@
 
 ------
 
-**AHK-Rare** - *v2 conversion* 
+**AHK_Rare_v2** - *with small mods for v2 conversion* 
 
-Creator: https://github.com/Ixiko/AHK-Rare
+Original Creator: https://github.com/Ixiko/AHK-Rare
 
 Converter: https://github.com/mmikeww/AHK-v2-script-converter
 
