@@ -1,0 +1,586 @@
+﻿FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+Gdip_ImageToClipboard()
+-----------------------------------------
+SHORT DESCRIPTION:
+Copies image data from file to the clipboard. (second approach)
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ConsoleSend()
+-----------------------------------------
+SHORT DESCRIPTION:
+Sends text to a console's input stream
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ConsoleSend()
+-----------------------------------------
+SHORT DESCRIPTION:
+Sends text to a console's input stream
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ConsoleSend()
+-----------------------------------------
+SHORT DESCRIPTION:
+Sends text to a console's input stream
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ConsoleSend()
+-----------------------------------------
+SHORT DESCRIPTION:
+Sends text to a console's input stream
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ConsoleSend()
+-----------------------------------------
+SHORT DESCRIPTION:
+Sends text to a console's input stream
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ConsoleSend()
+-----------------------------------------
+SHORT DESCRIPTION:
+Sends text to a console's input stream
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ClipboardGetDropEffect()
+-----------------------------------------
+SHORT DESCRIPTION:
+Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ClipboardGetDropEffect()
+-----------------------------------------
+SHORT DESCRIPTION:
+Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ClipboardGetDropEffect()
+-----------------------------------------
+SHORT DESCRIPTION:
+Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ClipboardGetDropEffect()
+-----------------------------------------
+SHORT DESCRIPTION:
+Clipboard function. Retrieves if files in clipboard comes from an explorer cut or copy operation.
+-----------------------------------------
+MAIN SECTION:
+Clipboard
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ScanCode()
+-----------------------------------------
+SHORT DESCRIPTION:
+subfunction for ConsoleSend
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ScanCode()
+-----------------------------------------
+SHORT DESCRIPTION:
+subfunction for ConsoleSend
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+FUNCTION:
+ScanCode()
+-----------------------------------------
+SHORT DESCRIPTION:
+subfunction for ConsoleSend
+-----------------------------------------
+MAIN SECTION:
+Command line
+-----------------------------------------
+MAIN SECTION DESC.:
+
+-----------------------------------------
+SUB SECTION:
+
+-----------------------------------------
+ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+
+   Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
+   Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
+   Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Count files and total string length
+   TotalLength := 0
+   FileArray := []
+   Loop, Parse, FilesToSet, `n, `r
+   {
+      If (Length := StrLen(A_LoopField))
+         FileArray.Push({Path: A_LoopField, Len: Length + 1})
+      TotalLength += Length
+   }
+   FileCount := FileArray.Length()
+   If !(FileCount && TotalLength)
+      Return
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Add files to the clipboard
+   If DllCall("OpenClipboard", "Ptr", A_ScriptHwnd) && DllCall("EmptyClipboard") {
+      ; HDROP format ---------------------------------------------------------------------------------------------------
+      ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+      hPath := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 20 + (TotalLength + FileCount + 1) * TCS, "UPtr")
+      pPath := DllCall("GlobalLock", "Ptr" , hPath)
+      Offset := 20
+      NumPut(Offset, pPath + 0, "UInt")         ; DROPFILES.pFiles = offset of file list
+      NumPut(!!A_IsUnicode, pPath + 16, "UInt") ; DROPFILES.fWide = 0 --> ANSI, fWide = 1 --> Unicode
+      For Each, File In FileArray
+         Offset += StrPut(File.Path, pPath + Offset, File.Len) * TCS
+      DllCall("GlobalUnlock", "Ptr", hPath)
+      DllCall("SetClipboardData","UInt", 0x0F, "UPtr", hPath) ; 0x0F = CF_HDROP
+      ; Preferred DropEffect format ------------------------------------------------------------------------------------
+      If (DropEffect := DropEffects[DropEffect]) {
+         ; Write Preferred DropEffect structure to clipboard to switch between copy/cut operations
+         ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+         hMem := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 4, "UPtr")
+         pMem := DllCall("GlobalLock", "Ptr", hMem)
+         NumPut(DropEffect, pMem + 0, "UChar")
+         DllCall("GlobalUnlock", "Ptr", hMem)
+         DllCall("SetClipboardData", "UInt", PreferredDropEffect, "Ptr", hMem)
+      }
+      DllCall("CloseClipboard")
+   }
+   Return
+}ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+
+   Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
+   Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
+   Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Count files and total string length
+   TotalLength := 0
+   FileArray := []
+   Loop, Parse, FilesToSet, `n, `r
+   {
+      If (Length := StrLen(A_LoopField))
+         FileArray.Push({Path: A_LoopField, Len: Length + 1})
+      TotalLength += Length
+   }
+   FileCount := FileArray.Length()
+   If !(FileCount && TotalLength)
+      Return
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Add files to the clipboard
+   If DllCall("OpenClipboard", "Ptr", A_ScriptHwnd) && DllCall("EmptyClipboard") {
+      ; HDROP format ---------------------------------------------------------------------------------------------------
+      ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+      hPath := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 20 + (TotalLength + FileCount + 1) * TCS, "UPtr")
+      pPath := DllCall("GlobalLock", "Ptr" , hPath)
+      Offset := 20
+      NumPut(Offset, pPath + 0, "UInt")         ; DROPFILES.pFiles = offset of file list
+      NumPut(!!A_IsUnicode, pPath + 16, "UInt") ; DROPFILES.fWide = 0 --> ANSI, fWide = 1 --> Unicode
+      For Each, File In FileArray
+         Offset += StrPut(File.Path, pPath + Offset, File.Len) * TCS
+      DllCall("GlobalUnlock", "Ptr", hPath)
+      DllCall("SetClipboardData","UInt", 0x0F, "UPtr", hPath) ; 0x0F = CF_HDROP
+      ; Preferred DropEffect format ------------------------------------------------------------------------------------
+      If (DropEffect := DropEffects[DropEffect]) {
+         ; Write Preferred DropEffect structure to clipboard to switch between copy/cut operations
+         ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+         hMem := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 4, "UPtr")
+         pMem := DllCall("GlobalLock", "Ptr", hMem)
+         NumPut(DropEffect, pMem + 0, "UChar")
+         DllCall("GlobalUnlock", "Ptr", hMem)
+         DllCall("SetClipboardData", "UInt", PreferredDropEffect, "Ptr", hMem)
+      }
+      DllCall("CloseClipboard")
+   }
+   Return
+}ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+
+   Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
+   Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
+   Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Count files and total string length
+   TotalLength := 0
+   FileArray := []
+   Loop, Parse, FilesToSet, `n, `r
+   {
+      If (Length := StrLen(A_LoopField))
+         FileArray.Push({Path: A_LoopField, Len: Length + 1})
+      TotalLength += Length
+   }
+   FileCount := FileArray.Length()
+   If !(FileCount && TotalLength)
+      Return
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Add files to the clipboard
+   If DllCall("OpenClipboard", "Ptr", A_ScriptHwnd) && DllCall("EmptyClipboard") {
+      ; HDROP format ---------------------------------------------------------------------------------------------------
+      ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+      hPath := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 20 + (TotalLength + FileCount + 1) * TCS, "UPtr")
+      pPath := DllCall("GlobalLock", "Ptr" , hPath)
+      Offset := 20
+      NumPut(Offset, pPath + 0, "UInt")         ; DROPFILES.pFiles = offset of file list
+      NumPut(!!A_IsUnicode, pPath + 16, "UInt") ; DROPFILES.fWide = 0 --> ANSI, fWide = 1 --> Unicode
+      For Each, File In FileArray
+         Offset += StrPut(File.Path, pPath + Offset, File.Len) * TCS
+      DllCall("GlobalUnlock", "Ptr", hPath)
+      DllCall("SetClipboardData","UInt", 0x0F, "UPtr", hPath) ; 0x0F = CF_HDROP
+      ; Preferred DropEffect format ------------------------------------------------------------------------------------
+      If (DropEffect := DropEffects[DropEffect]) {
+         ; Write Preferred DropEffect structure to clipboard to switch between copy/cut operations
+         ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+         hMem := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 4, "UPtr")
+         pMem := DllCall("GlobalLock", "Ptr", hMem)
+         NumPut(DropEffect, pMem + 0, "UChar")
+         DllCall("GlobalUnlock", "Ptr", hMem)
+         DllCall("SetClipboardData", "UInt", PreferredDropEffect, "Ptr", hMem)
+      }
+      DllCall("CloseClipboard")
+   }
+   Return
+}ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+
+   Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
+   Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
+   Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Count files and total string length
+   TotalLength := 0
+   FileArray := []
+   Loop, Parse, FilesToSet, `n, `r
+   {
+      If (Length := StrLen(A_LoopField))
+         FileArray.Push({Path: A_LoopField, Len: Length + 1})
+      TotalLength += Length
+   }
+   FileCount := FileArray.Length()
+   If !(FileCount && TotalLength)
+      Return
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Add files to the clipboard
+   If DllCall("OpenClipboard", "Ptr", A_ScriptHwnd) && DllCall("EmptyClipboard") {
+      ; HDROP format ---------------------------------------------------------------------------------------------------
+      ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+      hPath := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 20 + (TotalLength + FileCount + 1) * TCS, "UPtr")
+      pPath := DllCall("GlobalLock", "Ptr" , hPath)
+      Offset := 20
+      NumPut(Offset, pPath + 0, "UInt")         ; DROPFILES.pFiles = offset of file list
+      NumPut(!!A_IsUnicode, pPath + 16, "UInt") ; DROPFILES.fWide = 0 --> ANSI, fWide = 1 --> Unicode
+      For Each, File In FileArray
+         Offset += StrPut(File.Path, pPath + Offset, File.Len) * TCS
+      DllCall("GlobalUnlock", "Ptr", hPath)
+      DllCall("SetClipboardData","UInt", 0x0F, "UPtr", hPath) ; 0x0F = CF_HDROP
+      ; Preferred DropEffect format ------------------------------------------------------------------------------------
+      If (DropEffect := DropEffects[DropEffect]) {
+         ; Write Preferred DropEffect structure to clipboard to switch between copy/cut operations
+         ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+         hMem := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 4, "UPtr")
+         pMem := DllCall("GlobalLock", "Ptr", hMem)
+         NumPut(DropEffect, pMem + 0, "UChar")
+         DllCall("GlobalUnlock", "Ptr", hMem)
+         DllCall("SetClipboardData", "UInt", PreferredDropEffect, "Ptr", hMem)
+      }
+      DllCall("CloseClipboard")
+   }
+   Return
+}ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+
+   Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
+   Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
+   Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Count files and total string length
+   TotalLength := 0
+   FileArray := []
+   Loop, Parse, FilesToSet, `n, `r
+   {
+      If (Length := StrLen(A_LoopField))
+         FileArray.Push({Path: A_LoopField, Len: Length + 1})
+      TotalLength += Length
+   }
+   FileCount := FileArray.Length()
+   If !(FileCount && TotalLength)
+      Return
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Add files to the clipboard
+   If DllCall("OpenClipboard", "Ptr", A_ScriptHwnd) && DllCall("EmptyClipboard") {
+      ; HDROP format ---------------------------------------------------------------------------------------------------
+      ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+      hPath := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 20 + (TotalLength + FileCount + 1) * TCS, "UPtr")
+      pPath := DllCall("GlobalLock", "Ptr" , hPath)
+      Offset := 20
+      NumPut(Offset, pPath + 0, "UInt")         ; DROPFILES.pFiles = offset of file list
+      NumPut(!!A_IsUnicode, pPath + 16, "UInt") ; DROPFILES.fWide = 0 --> ANSI, fWide = 1 --> Unicode
+      For Each, File In FileArray
+         Offset += StrPut(File.Path, pPath + Offset, File.Len) * TCS
+      DllCall("GlobalUnlock", "Ptr", hPath)
+      DllCall("SetClipboardData","UInt", 0x0F, "UPtr", hPath) ; 0x0F = CF_HDROP
+      ; Preferred DropEffect format ------------------------------------------------------------------------------------
+      If (DropEffect := DropEffects[DropEffect]) {
+         ; Write Preferred DropEffect structure to clipboard to switch between copy/cut operations
+         ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+         hMem := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 4, "UPtr")
+         pMem := DllCall("GlobalLock", "Ptr", hMem)
+         NumPut(DropEffect, pMem + 0, "UChar")
+         DllCall("GlobalUnlock", "Ptr", hMem)
+         DllCall("SetClipboardData", "UInt", PreferredDropEffect, "Ptr", hMem)
+      }
+      DllCall("CloseClipboard")
+   }
+   Return
+}ClipboardSetFiles(FilesToSet, DropEffect := "Copy") {										;-- Explorer function for Drag&Drop and Pasting. Enables the explorer paste context menu option.
+
+   Static TCS := A_IsUnicode ? 2 : 1 ; size of a TCHAR
+   Static PreferredDropEffect := DllCall("RegisterClipboardFormat", "Str", "Preferred DropEffect")
+   Static DropEffects := {1: 1, 2: 2, Copy: 1, Move: 2}
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Count files and total string length
+   TotalLength := 0
+   FileArray := []
+   Loop, Parse, FilesToSet, `n, `r
+   {
+      If (Length := StrLen(A_LoopField))
+         FileArray.Push({Path: A_LoopField, Len: Length + 1})
+      TotalLength += Length
+   }
+   FileCount := FileArray.Length()
+   If !(FileCount && TotalLength)
+      Return
+   ; -------------------------------------------------------------------------------------------------------------------
+   ; Add files to the clipboard
+   If DllCall("OpenClipboard", "Ptr", A_ScriptHwnd) && DllCall("EmptyClipboard") {
+      ; HDROP format ---------------------------------------------------------------------------------------------------
+      ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+      hPath := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 20 + (TotalLength + FileCount + 1) * TCS, "UPtr")
+      pPath := DllCall("GlobalLock", "Ptr" , hPath)
+      Offset := 20
+      NumPut(Offset, pPath + 0, "UInt")         ; DROPFILES.pFiles = offset of file list
+      NumPut(!!A_IsUnicode, pPath + 16, "UInt") ; DROPFILES.fWide = 0 --> ANSI, fWide = 1 --> Unicode
+      For Each, File In FileArray
+         Offset += StrPut(File.Path, pPath + Offset, File.Len) * TCS
+      DllCall("GlobalUnlock", "Ptr", hPath)
+      DllCall("SetClipboardData","UInt", 0x0F, "UPtr", hPath) ; 0x0F = CF_HDROP
+      ; Preferred DropEffect format ------------------------------------------------------------------------------------
+      If (DropEffect := DropEffects[DropEffect]) {
+         ; Write Preferred DropEffect structure to clipboard to switch between copy/cut operations
+         ; 0x42 = GMEM_MOVEABLE (0x02) | GMEM_ZEROINIT (0x40)
+         hMem := DllCall("GlobalAlloc", "UInt", 0x42, "UInt", 4, "UPtr")
+         pMem := DllCall("GlobalLock", "Ptr", hMem)
+         NumPut(DropEffect, pMem + 0, "UChar")
+         DllCall("GlobalUnlock", "Ptr", hMem)
+         DllCall("SetClipboardData", "UInt", PreferredDropEffect, "Ptr", hMem)
+      }
+      DllCall("CloseClipboard")
+   }
+   Return
+}

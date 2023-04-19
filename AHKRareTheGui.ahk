@@ -312,7 +312,6 @@ ShowFunction:                 	;{
 					break
 
 		currentFuncNr:= i
-
 	; adding informations to Edit-Control (ShowRoom1)
 		toshow[1]:= "FUNCTION:`n"                    	ARData[i].name
 		toshow[1].= "`n-----------------------------------------`n"
@@ -324,11 +323,57 @@ ShowFunction:                 	;{
 		toshow[1].= "`n-----------------------------------------`n"
 		toshow[1].= "SUB SECTION:`n"                	ARData[i].subsection
 		toshow[1].= "`n-----------------------------------------`n"
-		GuiControl, ARG:, ShowRoom1, % toshow[1]
+		GuiControl, ARG:, ShowRoom1, % toshow[1] 
 
 	; populate function code tab and examples  tab
 		RC[1].Settings.Highlighter := "HighlightAHK"
-		RC[1].Value := ARData[i].code
+		
+		/*
+		code_modifications_samfisherirl
+		*/
+
+		ret :=  A_ScriptDir "\output_newV2.ahk"
+		out :=  A_ScriptDir "\output.ahk"
+
+		/*
+		code_modifications_samfisherirl
+		*/
+		if FileExist(out){
+			filemove, %out%, %A_ScriptDir%\tash.txt, 1
+		}
+		if FileExist(ret){
+			filemove, %ret%, %A_ScriptDir%\tash.txt, 1
+		}
+		fileappend, % ARData[i].code, %out%
+
+
+		/*
+		code_modifications_samfisherirl
+		*/
+
+
+
+		q := """"
+		exe := q . A_ScriptDir . "\converter\AutoHotKey Exe\AutoHotkeyV2.exe" . q . " "
+		runner := q . A_ScriptDir . "\converter\v2converter.ahk" . q . " "
+		script := q . A_ScriptDir . "\output.ahk" . q 
+		com := exe . runner . script
+		Run, %com%, %A_ScriptDir%
+		while not FileExist(ret) {
+			sleep,100 
+			if (A_Index > 50) {
+				msgbox, breakpoint!
+			}
+		}	
+		FileRead, y, %ret%
+		RC[1].Value := y
+
+		/*
+		code_modifications_samfisherirl
+		*/
+
+
+
 		If StrLen(ARData[i].examples) > 0
 		{
 				HighlightTab(hTabs, 1, 1)
@@ -341,6 +386,12 @@ ShowFunction:                 	;{
 				RC[2].Value := ""
 		}
 
+		if FileExist(ret){
+			filemove, %ret%, %A_ScriptDir%\tash.txt, 1
+		}
+		if FileExist(out){
+			filemove, %out%, %A_ScriptDir%\tash.txt, 1
+		}
 	; reading data from the function included description section
 		toshow[2]:=""
 		If IsObject(ARData[i]["Description"])
@@ -1409,7 +1460,7 @@ UpdateAHKRare() {
 	hash[1]:= bcrypt_sha512(file)
 	FileRead, file, % A_ScriptDir "\..\AHKRareTheGui.ahk"
 	hash[2] := bcrypt_sha512(file)
-
+    
 	;Download(versions, "")
 }
 
